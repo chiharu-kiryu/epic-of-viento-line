@@ -6,13 +6,17 @@ const heroDocRoot = path.join(root, "design-data", "design-heros");
 const heroImageRoot = path.join(root, "assets", "images", "heros");
 const videoRoot = path.join(root, "assets", "videos");
 
-const sectionHeaders = [
+const sectionHeaders = new Set([
   "天生技能：",
   "技能1：",
   "技能2：",
   "技能3：",
   "技能4：",
-];
+]);
+
+function normalizeHeader(text) {
+  return text.trim().replaceAll(":", "：");
+}
 
 function walkHeroDocs() {
   const heroes = [];
@@ -36,8 +40,8 @@ function readLines(file) {
 function parseExpectedImageNames(lines) {
   const expected = ["原画.png"];
   for (let i = 0; i < lines.length; i += 1) {
-    const line = lines[i].trim();
-    if (!sectionHeaders.includes(line)) continue;
+    const line = normalizeHeader(lines[i]);
+    if (!sectionHeaders.has(line)) continue;
     const next = lines.slice(i + 1).map((x) => x.trim()).find(Boolean);
     if (!next) continue;
     let imageName = next
