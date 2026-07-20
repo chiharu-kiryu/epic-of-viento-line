@@ -81,6 +81,35 @@ pre {
   gap: 8px;
 }
 
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tab-btn {
+  border: 1px solid rgba(122, 169, 255, 0.32);
+  border-radius: 999px;
+  background: rgba(14, 24, 52, 0.78);
+  color: #d7e4ff;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.tab-btn:hover,
+.tab-btn:focus-visible {
+  border-color: rgba(137, 183, 255, 0.7);
+  outline: none;
+  background: rgba(122, 169, 255, 0.18);
+}
+
+.tab-btn.is-active {
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(92, 200, 255, 0.42), rgba(122, 169, 255, 0.38));
+  border-color: rgba(170, 213, 255, 0.8);
+}
+
 #searchInput {
   width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.2);

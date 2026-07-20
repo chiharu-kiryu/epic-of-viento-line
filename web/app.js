@@ -1,6 +1,7 @@
 const statusEl = document.getElementById('status');
 const listEl = document.getElementById('docList');
 const searchInput = document.getElementById('searchInput');
+const categoryTabsEl = document.getElementById('categoryTabs');
 const titleEl = document.getElementById('docTitle');
 const pathEl = document.getElementById('docPath');
 const bannerEl = document.getElementById('heroBanner');
@@ -15,6 +16,15 @@ const ASSET_BASE_URL = new URL('../', PAGE_BASE).href;
 
 let docs = [];
 let activePath = '';
+let activeTab = 'all';
+let generatedStatus = '';
+
+const TAB_DEFINITIONS = [
+  { id: 'all', label: '全部' },
+  { id: 'hero', label: '英雄' },
+  { id: 'item', label: '物品' },
+  { id: 'other', label: '其他' },
+];
 
 const CATEGORY_LABELS = {
   hero: '英雄',
@@ -57,6 +67,175 @@ const CATEGORY_ORDER = [
   'root',
   'other',
 ];
+
+function getDisplayCategory(doc) {
+  const category = doc?.category || 'other';
+  if (category === 'backstory') {
+    return 'hero';
+  }
+  return category;
+}
+
+function docMatchesTab(doc, tabId) {
+  if (tabId === 'all') {
+    return true;
+  }
+
+  if (tabId === 'hero') {
+    const category = doc?.category || 'other';
+    return category === 'hero' || category === 'backstory';
+  }
+
+  if (tabId === 'item') {
+    return (doc.category || 'other') === 'item';
+  }
+
+  if (tabId === 'other') {
+    const category = getDisplayCategory(doc);
+    return category !== 'hero' && category !== 'item';
+  }
+
+  return true;
+}
+
+function getVisibleDocs(rawDocs = docs) {
+  const keyword = searchInput.value.trim().toLowerCase();
+  return rawDocs.filter((doc) => {
+    const matchesSearch = keyword ? (doc._searchText || '').includes(keyword) : true;
+    return matchesSearch && docMatchesTab(doc, activeTab);
+  });
+}
+
+function getHeroDisplayKey(doc) {
+  const rawName = normalizeValue(doc?.name);
+  if (rawName) {
+    return rawName;
+  }
+  return normalizeValue(doc?.path);
+}
+
+function resolveHeroBackstory(doc) {
+  if (!doc || doc.category !== 'hero') {
+    return null;
+  }
+
+  if (doc._linkedBackstory) {
+    return doc._linkedBackstory;
+  }
+
+  const heroKey = getHeroDisplayKey(doc);
+  return docs.find((item) => item?.category === 'backstory' && getHeroDisplayKey(item) === heroKey) || null;
+}
+
+function getHeroDisplayDocs(rawDocs = []) {
+  if (activeTab !== 'hero' && activeTab !== 'all') {
+    return rawDocs;
+  }
+
+  const mergedDocs = [];
+  const mergedKeys = new Set();
+  const heroDocs = new Map();
+  const backstoryDocs = new Map();
+
+  for (const doc of rawDocs) {
+    const displayCategory = getDisplayCategory(doc);
+    if (displayCategory !== 'hero') {
+      continue;
+    }
+
+    const key = getHeroDisplayKey(doc);
+    if (doc?.category === 'backstory') {
+      if (!backstoryDocs.has(key)) {
+        backstoryDocs.set(key, doc);
+      }
+    } else if (!heroDocs.has(key)) {
+      heroDocs.set(key, doc);
+    }
+  }
+
+  for (const doc of rawDocs) {
+    const displayCategory = getDisplayCategory(doc);
+    if (displayCategory !== 'hero') {
+      mergedDocs.push(doc);
+      continue;
+    }
+
+    const key = getHeroDisplayKey(doc);
+    if (mergedKeys.has(key)) {
+      continue;
+    }
+
+    if (doc.category === 'hero') {
+      mergedKeys.add(key);
+      mergedDocs.push({
+        ...doc,
+        _linkedBackstory: backstoryDocs.get(key) || null,
+      });
+      continue;
+    }
+
+    if (!heroDocs.has(key)) {
+      mergedKeys.add(key);
+      mergedDocs.push(doc);
+    }
+  }
+
+  return mergedDocs;
+}
+
+function getHeroCount(sourceDocs = docs) {
+  const unique = new Set();
+  for (const doc of sourceDocs) {
+    if (docMatchesTab(doc, 'hero')) {
+      unique.add(getHeroDisplayKey(doc));
+    }
+  }
+  return unique.size;
+}
+
+function getTabCounts() {
+  const source = docs;
+  return {
+    all: source.length,
+    hero: getHeroCount(source),
+    item: source.filter((doc) => docMatchesTab(doc, 'item')).length,
+    other: source.filter((doc) => docMatchesTab(doc, 'other')).length,
+  };
+}
+
+function renderTabs() {
+  if (!categoryTabsEl) {
+    return;
+  }
+
+  const counts = getTabCounts();
+  categoryTabsEl.innerHTML = '';
+
+  for (const tab of TAB_DEFINITIONS) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `tab-btn ${tab.id === activeTab ? 'is-active' : ''}`;
+    button.textContent = `${tab.label}（${counts[tab.id] || 0}）`;
+    button.setAttribute('role', 'tab');
+    button.setAttribute('aria-selected', String(tab.id === activeTab));
+
+    if (tab.id === activeTab) {
+      button.setAttribute('tabindex', '0');
+    } else {
+      button.setAttribute('tabindex', '-1');
+    }
+
+    button.addEventListener('click', () => {
+      if (activeTab === tab.id) {
+        return;
+      }
+      activeTab = tab.id;
+      renderFilteredDocs();
+    });
+
+    categoryTabsEl.appendChild(button);
+  }
+}
 
 function normalizeValue(value) {
   return (value || '').toString().trim();
@@ -318,7 +497,7 @@ function groupDocs(filtered) {
 
   const groups = new Map();
   for (const doc of filtered) {
-    const category = doc.category || 'other';
+    const category = getDisplayCategory(doc);
     const rawGroup = doc.group || '其他';
     const group = getPurposeGroup(
       { category, group: rawGroup, meta: doc.meta, path: doc.path },
@@ -335,13 +514,20 @@ function groupDocs(filtered) {
 }
 
 function getPurposeGroup(doc, itemPairCounts = new Map(), overrideFields = null) {
-  const category = doc.category || 'other';
+  const category = getDisplayCategory(doc);
+  const rawCategory = doc.category || 'other';
   const rawGroup = doc.group || '其他';
   const meta = doc.meta || {};
   const fields = overrideFields || doc.fields || {};
 
+  if (rawCategory === 'backstory') {
+    const match = rawGroup.match(/^[^\/]+\s*\/\s*([^\/]+)\/?/);
+    const attr = match ? match[1].trim() : '其他';
+    return `${attr} / 背景故事`;
+  }
+
   const roleOverride = detectItemRole(fields);
-  if (category !== 'item' && meta.purpose) {
+  if (rawCategory !== 'backstory' && category !== 'item' && meta.purpose) {
     return meta.purpose;
   }
 
@@ -349,29 +535,29 @@ function getPurposeGroup(doc, itemPairCounts = new Map(), overrideFields = null)
     const rawAttackType = normalizeValue(fields['攻击类型'] || fields.类型 || '');
     const attackType = normalizeValue(rawAttackType.split(/[,，]/)[0] || fields.攻击类型 || '未标注');
     const attr = normalizeValue(meta.attribute) || normalizeValue(fields.主属性) || '其他属性';
-    return `英雄 / ${attr} / ${attackType || '全部'}`;
+    return `${attr} / ${attackType || '全部'}`;
   }
 
   if (category === 'item') {
     const parts = splitItemGroup(rawGroup);
     if (parts.subType === '价格表') {
-      return `物品 / ${parts.type} / 通用`;
+      return `${parts.type} / 通用`;
     }
     const role = roleOverride || '通用';
     const roleLabel = role === '属性型' ? '通用' : role;
     if (parts.type === '消耗品' || parts.type === '特殊') {
-      return `物品 / ${parts.type} / ${roleLabel}`;
+      return `${parts.type} / ${roleLabel}`;
     }
     if (parts.subType && itemPairCounts.get(`${parts.type}/${parts.subType}`) > 1) {
-      return `物品 / ${parts.type} / ${parts.subType} / ${roleLabel}`;
+      return `${parts.type} / ${parts.subType} / ${roleLabel}`;
     }
     if (parts.type && parts.subType) {
-      return `物品 / ${parts.type} / ${roleLabel}`;
+      return `${parts.type} / ${roleLabel}`;
     }
-    return `物品 / ${parts.type} / ${roleLabel}`;
+    return `${parts.type} / ${roleLabel}`;
   }
 
-  if (category === 'unit' || category === 'building' || category === 'skill' || category === 'backstory' || category === 'scene' || category === 'rule') {
+  if (category === 'unit' || category === 'building' || category === 'skill' || category === 'scene' || category === 'rule') {
     const match = rawGroup.match(/^[^\/]+\s*\/\s*([^\/]+)\/?/);
     if (!match) {
       return rawGroup;
@@ -612,7 +798,7 @@ function collectRemainingPairs(fields, used = new Set()) {
 
 function renderHeroBanner(doc) {
   bannerEl.innerHTML = '';
-  const category = doc.category || 'other';
+  const category = getDisplayCategory(doc);
   const title = doc.meta?.title || doc.meta?.hero || doc.title || doc.name || doc.path;
   const fields = doc.fields || {};
   const categoryLabel = CATEGORY_LABELS[category] || '文档';
@@ -681,11 +867,12 @@ function buildCommonCards(doc) {
   const parser = doc.parser || {};
   const parserStats = doc.parserStats || {};
   const fields = doc.fields || {};
+  const category = getDisplayCategory(doc);
 
   const metaPairs = [
     ['标题', doc.meta?.title || doc.title || doc.name],
     ['路径', doc.path],
-    ['分类', CATEGORY_LABELS[doc.category] || doc.category || 'other'],
+    ['分类', CATEGORY_LABELS[category] || category || 'other'],
     ['分组', doc.group || '其他'],
     ['文件类型', doc.type || 'txt'],
     ['标准版本', doc.schemaVersion || doc.meta?.schemaVersion || 'standard-doc-v2'],
@@ -1006,8 +1193,14 @@ function renderFallbackTemplate(doc) {
 
 function getHeroCardsByCategory(doc) {
   switch (doc.category) {
-    case 'hero':
-      return renderHeroTemplate(doc);
+    case 'hero': {
+      const cards = renderHeroTemplate(doc);
+      const linkedBackstory = resolveHeroBackstory(doc);
+      if (linkedBackstory) {
+        cards.push(...renderBackstoryTemplate(linkedBackstory));
+      }
+      return cards;
+    }
     case 'item':
       return renderItemTemplate(doc);
     case 'unit':
@@ -1202,21 +1395,22 @@ function renderGallery(images) {
 
 function renderMeta(doc) {
   metaEl.innerHTML = '';
+  const category = getDisplayCategory(doc);
   titleEl.textContent = doc.meta?.title || doc.title || doc.name;
   pathEl.textContent = `${doc.path} · ${doc.type || 'txt'}`;
 
   const title = doc.meta?.title || doc.name || '未命名';
-  const bannerText = doc.category === 'hero'
+  const bannerText = category === 'hero'
     ? `${title}`
-    : `${CATEGORY_LABELS[doc.category] || '文档'} · ${title}`;
+    : `${CATEGORY_LABELS[category] || '文档'} · ${title}`;
 
   const bannerTitle = document.createElement('h2');
   bannerTitle.className = 'hero-title';
   bannerTitle.textContent = bannerText;
   const tags = document.createElement('div');
   const tag = document.createElement('span');
-  tag.className = `hero-tag ${CATEGORY_TAG[doc.category] || 'other'}`;
-  tag.textContent = `类型：${CATEGORY_LABELS[doc.category] || '其他'}`;
+  tag.className = `hero-tag ${CATEGORY_TAG[category] || 'other'}`;
+  tag.textContent = `类型：${CATEGORY_LABELS[category] || '其他'}`;
   tags.appendChild(tag);
   metaEl.appendChild(bannerTitle);
   metaEl.appendChild(tags);
@@ -1239,7 +1433,8 @@ function renderContent(doc) {
 function renderList(filteredDocs) {
   listEl.innerHTML = '';
   if (!filteredDocs.length) {
-    listEl.innerHTML = '<div class="doc-group">未匹配到文档</div>';
+    const msg = searchInput.value.trim() ? '未匹配到文档' : '当前标签暂无文档';
+    listEl.innerHTML = `<div class="doc-group">${msg}</div>`;
     return;
   }
 
@@ -1272,6 +1467,34 @@ function renderList(filteredDocs) {
   }
 
   markActiveItem();
+}
+
+function renderFilteredDocs() {
+  const filtered = getHeroDisplayDocs(getVisibleDocs());
+  renderList(filtered);
+
+  if (!filtered.length) {
+    const hasKeyword = searchInput.value.trim();
+    statusEl.textContent = `${hasKeyword ? '未匹配到文档' : '当前标签暂无文档'} ${generatedStatus}`;
+    if (categoryTabsEl) {
+      renderTabs();
+    }
+    return;
+  }
+
+  const displayText = `当前显示 ${filtered.length} 个文档（共 ${docs.length} 个）`;
+  const tabText = searchInput.value.trim() ? '（已按关键词筛选）' : '';
+  statusEl.textContent = `${displayText} ${tabText} ${generatedStatus}`;
+
+  if (!filtered.some((doc) => doc.path === activePath)) {
+    selectDoc(filtered[0].path);
+  } else {
+    selectDoc(activePath);
+  }
+
+  if (categoryTabsEl) {
+    renderTabs();
+  }
 }
 
 function selectDoc(pathValue) {
@@ -1325,11 +1548,9 @@ async function loadData() {
       doc.heroImages = doc.heroImages || [];
     });
 
-    statusEl.textContent = `共 ${docs.length} 个文档（静态生成 ${formatTime(payload.generatedAt)}）`;
-    renderList(docs);
-    if (docs.length > 0) {
-      selectDoc(docs[0].path);
-    }
+    generatedStatus = `（静态生成 ${formatTime(payload.generatedAt)}）`;
+    renderTabs();
+    renderFilteredDocs();
   } catch (error) {
     statusEl.textContent = `加载失败：${error.message}`;
     listEl.textContent = '请先执行静态生成脚本：node scripts/build-static-doc-site.mjs';
@@ -1337,18 +1558,7 @@ async function loadData() {
 }
 
 searchInput.addEventListener('input', () => {
-  const keyword = searchInput.value.trim().toLowerCase();
-  if (!keyword) {
-    renderList(docs);
-    return;
-  }
-
-  const filtered = docs.filter((doc) => {
-    const searchText = doc._searchText || '';
-    return searchText.includes(keyword);
-  });
-
-  renderList(filtered);
+  renderFilteredDocs();
 });
 
 loadData();
