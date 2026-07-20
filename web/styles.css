@@ -182,14 +182,17 @@ pre {
 }
 
 .doc-item {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
   width: 100%;
   text-align: left;
   border: none;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   background: transparent;
   color: #dae5ff;
-  padding: 10px 12px;
+  padding: 9px 12px;
   cursor: pointer;
 }
 
@@ -200,6 +203,26 @@ pre {
 .doc-item.active {
   background: rgba(125, 190, 255, 0.2);
   color: #fff;
+}
+
+.doc-item-main {
+  width: 100%;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doc-item-sub {
+  width: 100%;
+  font-size: 12px;
+  color: var(--c-muted);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .doc-meta {

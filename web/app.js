@@ -195,8 +195,9 @@ function getHeroCount(sourceDocs = docs) {
 
 function getTabCounts() {
   const source = docs;
+  const allDisplayDocs = getHeroDisplayDocs(source);
   return {
-    all: source.length,
+    all: allDisplayDocs.length,
     hero: getHeroCount(source),
     item: source.filter((doc) => docMatchesTab(doc, 'item')).length,
     other: source.filter((doc) => docMatchesTab(doc, 'other')).length,
@@ -451,10 +452,32 @@ function collectAbilitySegmentsFromSections(sections = []) {
 }
 
 function createDocButton(doc) {
+  const category = getDisplayCategory(doc);
+  const categoryLabel = CATEGORY_LABELS[category] || category || '其他';
+  const groupText = doc.group ? `${doc.group}` : '';
+  const sourceText = normalizeValue(doc.path).replace(/^design-data\//, '');
+
   const button = document.createElement('button');
   button.className = 'doc-item';
   button.type = 'button';
-  button.textContent = doc.name;
+
+  const titleText = document.createElement('div');
+  titleText.className = 'doc-item-main';
+  titleText.textContent = doc.name;
+
+  const subText = document.createElement('div');
+  subText.className = 'doc-item-sub';
+  const pieces = [categoryLabel];
+  if (groupText) {
+    pieces.push(groupText);
+  }
+  if (sourceText) {
+    pieces.push(sourceText);
+  }
+  subText.textContent = pieces.join(' · ');
+
+  button.appendChild(titleText);
+  button.appendChild(subText);
   button.title = doc.path;
   button.dataset.path = doc.path;
   button.addEventListener('click', () => selectDoc(doc.path));
