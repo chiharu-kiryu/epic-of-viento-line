@@ -73,9 +73,9 @@ fi
 
 SERVER_CMD=""
 if command -v python3 >/dev/null 2>&1; then
-  SERVER_CMD=(python3 -m http.server "$PORT" --bind 127.0.0.1 -d web)
+  SERVER_CMD=(python3 -m http.server "$PORT" --bind 127.0.0.1)
 elif command -v python >/dev/null 2>&1; then
-  SERVER_CMD=(python -m http.server "$PORT" --bind 127.0.0.1 -d web)
+  SERVER_CMD=(python -m http.server "$PORT" --bind 127.0.0.1)
 else
   echo "Need python3 or python installed" >&2
   exit 1
