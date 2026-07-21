@@ -15,7 +15,6 @@ export const domElements = {
   searchInput: document.getElementById('searchInput'),
   categoryTabsEl: document.getElementById('categoryTabs'),
   titleEl: document.getElementById('docTitle'),
-  pathEl: document.getElementById('docPath'),
   bannerEl: document.getElementById('heroBanner'),
   metaEl: document.getElementById('metaCards'),
   sectionEl: document.getElementById('sectionCards'),

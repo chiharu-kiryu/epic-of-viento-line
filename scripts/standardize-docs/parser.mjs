@@ -33,6 +33,19 @@ function isTableRow(line) {
   return line.includes('|') && line.trim().replace(/\|/g, '').trim().length > 0;
 }
 
+const SKILL_HEADER_KEYS = new Set([
+  '天生技能',
+  '先天技能',
+  '技能1',
+  '技能2',
+  '技能3',
+  '技能4',
+  '阳印',
+  '阴印',
+  '铸魔',
+  '铸神',
+]);
+
 function parseTableRow(line) {
   const body = line.trim().replace(/^\|/, '').replace(/\|$/, '');
   return body.split('|').map((cell) => cell.trim());
@@ -139,6 +152,28 @@ function parseTextContent(rawText, relPath) {
     currentListOrdered = false;
   };
 
+  const isSkillBlockContinuation = (currentKey, line) => {
+    if (!SKILL_HEADER_KEYS.has(currentKey)) {
+      return false;
+    }
+    const trimmedLine = line.trim();
+    if (!isKvLine(line)) {
+      return false;
+    }
+    const nextKv = isKvLine(trimmedLine);
+    if (!nextKv) {
+      return false;
+    }
+
+    const continuationKey = nextKv.key;
+    // For skill blocks, nested lines like “xxx：” are often part-name definitions.
+    if (continuationKey === currentKey) {
+      return false;
+    }
+    // Avoid swallowing explicit nested key that looks like a known top-level key.
+    return !SKILL_HEADER_KEYS.has(continuationKey);
+  };
+
   const parseKvValue = (_key, startIndex) => {
     const valueLines = [];
     let idx = startIndex;
@@ -148,7 +183,10 @@ function parseTextContent(rawText, relPath) {
       if (!trimmed) {
         break;
       }
-      if (isHeaderLine(trimmed) || isKvLine(line) || isListLine(line) || isTableRow(line)) {
+      if (isHeaderLine(trimmed) || isListLine(line) || isTableRow(line)) {
+        break;
+      }
+      if (isKvLine(line) && !isSkillBlockContinuation(_key, line)) {
         break;
       }
       valueLines.push(line);

@@ -3,7 +3,6 @@ import {
   CATEGORY_LABELS,
   CATEGORY_ORDER,
   TAB_DEFINITIONS,
-  BACKSTORY_CHUNK_SIZE,
 } from './app-state.js';
 import { domElements } from './app-state.js';
 
@@ -52,6 +51,11 @@ function getVisibleDocs(rawDocs = state.docs) {
 }
 
 function getHeroDisplayKey(doc) {
+  const metaHero = normalizeValue(doc?.meta?.hero);
+  if (metaHero) {
+    return metaHero;
+  }
+
   const rawName = normalizeValue(doc?.name);
   if (rawName) {
     return rawName;
@@ -64,7 +68,7 @@ function resolveHeroBackstory(doc) {
     return null;
   }
 
-  if (doc.backstory && doc.backstory.category === 'backstory') {
+  if (doc.backstory) {
     return doc.backstory;
   }
 
@@ -189,10 +193,6 @@ function renderTabs() {
 
 function normalizeValue(value) {
   return (value || '').toString().trim();
-}
-
-function getSourcePath(doc) {
-  return normalizeValue(doc?.source?.path) || normalizeValue(doc?.path) || '';
 }
 
 function normalizeLabel(value) {
@@ -531,7 +531,6 @@ function createDocButton(doc, onSelect = () => {}) {
   const category = getDisplayCategory(doc);
   const categoryLabel = CATEGORY_LABELS[category] || category || '其他';
   const groupText = doc.group ? `${doc.group}` : '';
-  const sourceText = getSourcePath(doc).replace(/^design-data\//, '');
 
   const button = document.createElement('button');
   button.className = 'doc-item';
@@ -547,14 +546,11 @@ function createDocButton(doc, onSelect = () => {}) {
   if (groupText) {
     pieces.push(groupText);
   }
-  if (sourceText) {
-    pieces.push(sourceText);
-  }
   subText.textContent = pieces.join(' · ');
 
   button.appendChild(titleText);
   button.appendChild(subText);
-  button.title = getSourcePath(doc);
+  button.title = normalizeValue(`${doc.title || doc.name}`);
   button.dataset.path = doc.path;
   button.addEventListener('click', () => onSelect(doc.path));
   return button;
@@ -761,7 +757,6 @@ export {
   getTabCounts,
   renderTabs,
   normalizeValue,
-  getSourcePath,
   normalizeLabel,
   splitItemGroup,
   detectItemRole,

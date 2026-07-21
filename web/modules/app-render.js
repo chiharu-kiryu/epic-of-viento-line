@@ -1,14 +1,12 @@
 import {
   CATEGORY_LABELS,
   ASSET_BASE_URL,
-  BACKSTORY_CHUNK_SIZE,
 } from './app-state.js';
 import { domElements } from './app-state.js';
 import {
   formatSize,
   formatTime,
   getDisplayCategory,
-  getSourcePath,
   normalizeLabel,
   normalizeValue,
   splitAbilityKeyName,
@@ -238,16 +236,13 @@ function renderHeroBanner(doc) {
 }
 
 function buildCommonCards(doc) {
-  const source = doc.source || {};
   const parser = doc.parser || {};
   const parserStats = doc.parserStats || {};
   const fields = doc.fields || {};
   const category = getDisplayCategory(doc);
-  const sourcePath = getSourcePath(doc);
 
   const metaPairs = [
     ['标题', doc.meta?.title || doc.title || doc.name],
-    ['路径', sourcePath],
     ['分类', CATEGORY_LABELS[category] || category || 'other'],
     ['分组', doc.group || '其他'],
     ['文件类型', doc.type || 'txt'],
@@ -255,19 +250,6 @@ function buildCommonCards(doc) {
     ['最后更新', formatTime(doc.lastModified)],
     ['体积', formatSize(doc.size)],
   ];
-
-  if (source.path && source.path !== sourcePath) {
-    metaPairs.push(['源路径', source.path]);
-  }
-  if (source.path && source.path !== doc.path && doc.path !== getSourcePath(doc)) {
-    metaPairs.push(['标准路径', doc.path]);
-  }
-  if (source.extension) {
-    metaPairs.push(['源后缀', source.extension]);
-  }
-  if (source.modifiedAt) {
-    metaPairs.push(['源文件更新时间', formatTime(source.modifiedAt)]);
-  }
 
   const parserPairs = [
     ['解析类型', parser.contentType || '-'],
@@ -292,6 +274,7 @@ function renderHeroTemplate(doc) {
   const fields = doc.fields || {};
   const used = new Set();
   const cards = [];
+  const sections = Array.isArray(doc.sections) ? doc.sections : [];
 
   const corePairs = readOrderedPairs(fields, [
     { label: '主属性', keys: ['主属性'] },
@@ -314,40 +297,11 @@ function renderHeroTemplate(doc) {
     { label: '击杀奖励', keys: ['击杀奖励'] },
   ], used);
 
-  const skillPairs = readOrderedPairs(fields, [
-    { label: '天生技能', keys: ['天生技能'] },
-    { label: '技能1', keys: ['技能1'] },
-    { label: '技能2', keys: ['技能2'] },
-    { label: '技能3', keys: ['技能3'] },
-    { label: '技能4', keys: ['技能4'] },
-    { label: '阳印', keys: ['阳印'] },
-    { label: '阴印', keys: ['阴印'] },
-    { label: '铸魔', keys: ['铸魔'] },
-    { label: '铸神', keys: ['铸神'] },
-    { label: '主动', keys: ['主动'] },
-  ], used);
-
   cards.push(createMetaSection('英雄属性', corePairs));
   cards.push(createMetaSection('作战参数', combatPairs));
-  cards.push(createTextSection('技能树', skillPairs));
 
-  const abilitySegments = collectHeroAbilitySegmentsFromSections(doc.sections || [], used);
-  if (abilitySegments.length > 0) {
-    cards.push(createTextSection('技能说明', abilitySegments.map((segment) => [segment.title, segment.value])));
-  }
-
-  const remainingPairs = collectRemainingPairs(fields, used);
-  if (remainingPairs.length > 0) {
-    cards.push(createMetaSection('额外字段', remainingPairs));
-  }
-
-  const sectionTimeline = collectSectionRows(doc.sections, {
-    skipKeys: new Set(['_header', '段落']),
-    usedKeys: used,
-  });
-  if (sectionTimeline.length > 0) {
-    cards.push(createTextSection('字段解析（文档原顺序）', sectionTimeline));
-  }
+  // 仅用于与原结构化内容去重，避免技能/段落在主面板和结构化区域重复。
+  collectHeroAbilitySegmentsFromSections(sections, used);
 
   doc._contentDedupeKeys = used;
   return cards;
@@ -473,32 +427,16 @@ function renderSkillTemplate(doc) {
 
 function renderBackstoryTemplate(doc) {
   const fields = doc.fields || {};
-  const pairs = collectRemainingPairs(fields, new Set());
-  const used = new Set();
   const cards = [];
 
-  const header = doc.meta?.hero ? `关联英雄：${doc.meta.hero}` : '背景故事';
-  cards.push(createMetaSection('背景信息', [
-    ['标签', header],
-    ['关联属性', doc.meta?.attribute || '-'],
-    ['主标题', fields._header || '-'],
-  ]));
-
-  const storyText = extractParagraphs(doc).join('\n');
-  const storyChunks = splitNarrativeToChunks(storyText, BACKSTORY_CHUNK_SIZE);
-  if (storyChunks.length > 0) {
-    cards.push(createTextSection('故事正文', storyChunks.map((text) => ['内容', text])));
+  const heroTag = doc.meta?.hero ? `（关联：${doc.meta.hero}）` : '';
+  const storyText = extractParagraphs(doc).join('\n\n');
+  if (storyText) {
+    cards.push(createTextSection(`背景故事${heroTag}`, [['内容', storyText]]));
   }
 
-  cards.push(createMetaSection('原始字段', pairs.filter(([key]) => {
-    if (key === '从风暴中传来' && !hasVisibleValue(fields[key])) {
-      return false;
-    }
-    used.add(key);
-    return true;
-  })));
-
-  doc._contentDedupeKeys = used;
+  const pairs = collectRemainingPairs(fields, new Set());
+  doc._contentDedupeKeys = new Set(pairs.map(([key]) => key));
   return cards;
 }
 
@@ -652,47 +590,6 @@ function extractParagraphs(doc) {
     .filter(Boolean);
 }
 
-function splitNarrativeToChunks(text, chunkSize = BACKSTORY_CHUNK_SIZE) {
-  const sourceText = normalizeValue(text);
-  if (!sourceText) {
-    return [];
-  }
-
-  const limit = Math.max(1, Number(chunkSize) || BACKSTORY_CHUNK_SIZE);
-  const chunks = [];
-  let start = 0;
-
-  while (start < sourceText.length) {
-    if (sourceText.length - start <= limit) {
-      chunks.push(sourceText.slice(start).trim());
-      break;
-    }
-
-    let end = start + limit;
-    const punctuationMarks = ['。', '！', '？', '；', ';', '.', '!', '?', '\n'];
-    let splitPoint = -1;
-
-    for (const mark of punctuationMarks) {
-      const index = sourceText.lastIndexOf(mark, end);
-      if (index > start && index > splitPoint) {
-        splitPoint = index + mark.length;
-      }
-    }
-
-    if (splitPoint <= start) {
-      splitPoint = end;
-    }
-
-    const chunk = sourceText.slice(start, splitPoint).trim();
-    if (chunk) {
-      chunks.push(chunk);
-    }
-    start = splitPoint;
-  }
-
-  return chunks;
-}
-
 function createTextBlock(text) {
   const node = document.createElement('div');
   node.className = 'doc-block';
@@ -790,7 +687,6 @@ export {
   renderFallbackTemplate,
   getHeroCardsByCategory,
   extractParagraphs,
-  splitNarrativeToChunks,
   createTextBlock,
   renderKvTableRows,
   renderListBlock,

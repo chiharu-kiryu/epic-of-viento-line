@@ -3,6 +3,9 @@
 .nomedia
 .DS_Store
 
+# Local temp/workspace output
+tmp/
+
 # Godot-specific ignores
 .import/
 export.cfg

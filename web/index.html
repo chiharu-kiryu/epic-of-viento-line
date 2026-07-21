@@ -9,12 +9,12 @@
   <body>
     <header class="topbar">
       <h1>Epic of Viento Line 文档浏览器</h1>
-      <p>自动扫描 design-data 目录，新增文档后刷新即可更新</p>
+      <p>自动读取 docs-standard 标准库（数据源统一）</p>
     </header>
     <main class="layout">
       <aside class="left">
         <div class="toolbar">
-          <input id="searchInput" type="text" placeholder="搜索文档名 / 路径" />
+          <input id="searchInput" type="text" placeholder="搜索文档名 / 标签" />
           <div id="categoryTabs" class="tabs" role="tablist" aria-label="文档分类选项卡"></div>
           <div id="status" class="status">正在加载文档索引...</div>
         </div>
@@ -23,7 +23,6 @@
       <section class="right">
         <div class="doc-meta">
           <div id="docTitle">未选择文档</div>
-          <div id="docPath" class="meta-path"></div>
         </div>
         <div id="heroBanner" class="hero-banner"></div>
         <div id="metaCards" class="meta-grid"></div>

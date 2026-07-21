@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import path from 'node:path';
+import { resolveHeroMeta, collectHeroSkillsFromSections } from './build-static-hero-skills.mjs';
 
 const PROJECT_ROOT = process.cwd();
 const ASSET_ROOT = path.join(PROJECT_ROOT, 'assets');
@@ -24,6 +25,48 @@ const CATEGORY_IMAGE_DIRS = {
 
 function normalizeValue(value) {
   return (value || '').toString().trim();
+}
+
+function normalizeStandardSourcePath(sourcePath) {
+  const cleaned = toPosix((sourcePath || '').toString()).replace(/\\/g, '/');
+  if (!cleaned) {
+    return '';
+  }
+  const normalized = cleaned.replace(/^\.\//, '').replace(/\/+/g, '/').replace(/^\/+/, '');
+  if (!normalized) {
+    return '';
+  }
+  if (normalized.startsWith('docs-standard/design-data/')) {
+    return normalized;
+  }
+  if (normalized.startsWith('design-data/')) {
+    return `docs-standard/${normalized}`;
+  }
+  if (normalized.includes('/docs-standard/design-data/')) {
+    const idx = normalized.indexOf('docs-standard/design-data/');
+    return normalized.slice(idx);
+  }
+  if (normalized.includes('/design-data/')) {
+    const idx = normalized.indexOf('design-data/');
+    return `docs-standard/${normalized.slice(idx)}`;
+  }
+  const absoluteRoot = toPosix(PROJECT_ROOT);
+  const withoutRoot = normalized.startsWith(`${absoluteRoot}/`) ? normalized.slice(absoluteRoot.length + 1) : normalized;
+  if (withoutRoot.startsWith('docs-standard/design-data/')) {
+    return withoutRoot;
+  }
+  if (withoutRoot.startsWith('design-data/')) {
+    return `docs-standard/${withoutRoot}`;
+  }
+  return normalized;
+}
+
+function classifyPathSegments(sourcePath) {
+  const segments = normalizeStandardSourcePath(sourcePath).split('/').filter(Boolean);
+  if (segments[0] === 'docs-standard' && segments[1] === 'design-data') {
+    return segments.slice(1);
+  }
+  return segments;
 }
 
 function splitItemGroup(groupText) {
@@ -147,7 +190,7 @@ function isTextPath(filePath) {
 }
 
 function classify(relativePath) {
-  const parts = relativePath.split('/');
+  const parts = classifyPathSegments(relativePath);
   if (parts.length >= 2 && parts[0] === 'design-data') {
     if (parts[1] === 'design-heros' && parts.length >= 4) {
       return {
@@ -198,6 +241,71 @@ function classify(relativePath) {
     return { category: 'other', group: parts[1] || '其他' };
   }
   return { category: 'other', group: '其他' };
+}
+
+function toDisplayPath(sourceCategory, sourcePath, sourceMeta = {}, name) {
+  const normalizedCategory = sourceCategory || 'other';
+  const normalizedName = trimExt(name || '');
+  const rawSegments = classifyPathSegments(sourcePath);
+  const startIndex = rawSegments[0] === 'design-data' ? 1 : 0;
+  const normalizedSegments = rawSegments.slice(startIndex);
+  const fallbackSegments = (normalizedCategory === 'other' || normalizedCategory === 'root')
+    ? rawSegments
+    : normalizedSegments;
+
+  if (normalizedCategory === 'hero') {
+    const attr = normalizeValue(sourceMeta.attribute || normalizedSegments[1] || '通用');
+    const hero = normalizeValue(sourceMeta.hero || normalizedName);
+    return toPosix(path.join('hero', attr, hero));
+  }
+
+  if (normalizedCategory === 'backstory') {
+    const attr = normalizeValue(sourceMeta.attribute || normalizedSegments[1] || '通用');
+    const hero = normalizeValue(sourceMeta.hero || normalizedSegments[2] || normalizedName);
+    return toPosix(path.join('hero', attr, hero, 'story'));
+  }
+
+  if (normalizedCategory === 'item') {
+    return toPosix(path.join('item', ...normalizedSegments.slice(1)));
+  }
+
+  if (normalizedCategory === 'skill') {
+    return toPosix(path.join('skill', ...normalizedSegments.slice(1)));
+  }
+
+  if (normalizedCategory === 'unit') {
+    return toPosix(path.join('unit', ...normalizedSegments.slice(1)));
+  }
+
+  if (normalizedCategory === 'building') {
+    return toPosix(path.join('building', ...normalizedSegments.slice(1)));
+  }
+
+  if (normalizedCategory === 'scene') {
+    return toPosix(path.join('scene', normalizedName));
+  }
+
+  if (normalizedCategory === 'rule') {
+    return toPosix(path.join('rule', normalizedName));
+  }
+
+  if (normalizedCategory === 'template') {
+    return toPosix(path.join('template', normalizedName));
+  }
+
+  if (normalizedName) {
+    if (fallbackSegments.length > 0) {
+      const fullSegments = fallbackSegments.slice(0, -1).concat([normalizedName]);
+      return toPosix(path.join(normalizedCategory, ...fullSegments));
+    }
+    return toPosix(path.join(normalizedCategory, normalizedName));
+  }
+
+  if (fallbackSegments.length > 0) {
+    return toPosix(path.join(normalizedCategory, ...fallbackSegments));
+  }
+
+  return '';
 }
 
 function trimImageExt(fileName) {
@@ -374,23 +482,9 @@ async function collectImagesForSourceDoc(standardDoc, sourcePath, sourceCategory
   const matched = new Set(explicitPaths);
 
   const cls = sourceCategory || 'other';
-  const clsObj = typeof sourceMeta === 'object' && sourceMeta !== null
-    ? sourceMeta
-    : {};
-  const parts = sourcePath.split('/');
+  const { attribute, hero } = resolveHeroMeta(cls, sourceMeta, sourcePath);
 
-  let attribute = clsObj.attribute;
-  let hero = clsObj.hero;
-  if (cls === 'hero' && (!attribute || !hero) && parts[0] === 'design-data' && parts[1] === 'design-heros') {
-    attribute = attribute || parts[2];
-    hero = hero || trimExt(parts[3] || '');
-  }
-  if (cls === 'backstory' && (!attribute || !hero) && parts[0] === 'design-data' && parts[1] === 'backstory') {
-    attribute = attribute || parts[2];
-    hero = hero || trimExt(parts[3] || '');
-  }
-
-  if (cls === 'hero' || cls === 'backstory') {
+  if (cls === 'hero') {
     if (attribute && hero) {
       const heroImages = await collectHeroImages(attribute, hero);
       heroImages.forEach((item) => matched.add(item));
@@ -457,9 +551,32 @@ async function collectHeroImages(attribute, hero) {
 function sourcePathFromStandardDoc(standardDoc, relativePath) {
   const sourcePath = standardDoc?.source?.path;
   if (typeof sourcePath === 'string' && sourcePath.trim()) {
-    return sourcePath.trim();
+    return normalizeStandardSourcePath(sourcePath);
   }
-  return relativePath.replace(/^docs-standard\//, '').replace(/\.json$/, '');
+  const fallback = normalizeStandardSourcePath(relativePath);
+  return fallback.replace(/\.json$/, '');
+}
+
+function normalizeBackstoryPayload(backstory) {
+  if (!backstory || typeof backstory !== 'object') {
+    return null;
+  }
+
+  const backstorySourcePath = normalizeStandardSourcePath(backstory.source?.path || backstory.rawPath || '');
+  const normalizedRawPath = backstorySourcePath || backstory.rawPath || '';
+
+  return {
+    ...backstory,
+    source: {
+      ...backstory.source,
+      path: backstorySourcePath || backstory.source?.path || '',
+    },
+    rawPath: normalizedRawPath,
+    meta: {
+      ...backstory.meta,
+      source: backstorySourcePath || backstory.meta?.source || '',
+    },
+  };
 }
 
 function sourceTypeFromPath(sourcePath) {
@@ -482,6 +599,8 @@ async function buildIndexFromStandard(assetCatalog) {
     const normalizedName = trimExt(path.basename(sourcePath));
     const sourceCategory = standardDoc.meta?.category || 'other';
     const cls = classify(sourcePath);
+    const effectiveCategory = sourceCategory || cls.category;
+    const sourceMeta = standardDoc.meta || cls.meta || {};
     const fileName = path.basename(sourcePath);
       const group = sourceCategory && sourceCategory !== 'other' ? standardDoc.meta?.group || cls.group : cls.group;
       const fields = standardDoc.fields || {};
@@ -489,16 +608,20 @@ async function buildIndexFromStandard(assetCatalog) {
     const imageList = await collectImagesForSourceDoc(
       standardDoc,
       sourcePath,
-      sourceCategory || cls.category,
-      standardDoc.meta || cls.meta || {},
+      effectiveCategory,
+      sourceMeta,
       assetCatalog
     );
+    const heroSkills = effectiveCategory === 'hero'
+      ? collectHeroSkillsFromSections(standardDoc.sections || [], imageList)
+      : [];
 
     docs.push({
-      path: relPath,
+      path: toDisplayPath(effectiveCategory, sourcePath, sourceMeta, normalizedName),
       title,
       name: normalizedName,
       category: sourceCategory || cls.category,
+      displayPath: toDisplayPath(effectiveCategory, sourcePath, sourceMeta, normalizedName),
       group: inferPurposeGroup(
         sourceCategory || cls.category,
         sourcePath,
@@ -506,7 +629,10 @@ async function buildIndexFromStandard(assetCatalog) {
         fields,
         standardDoc.meta || cls.meta || {},
       ) || (group || cls.group),
-      source: standardDoc.source || {},
+      source: {
+        ...standardDoc.source,
+        path: sourcePath,
+      },
       meta: {
         source: sourcePath,
         ...standardDoc.meta,
@@ -522,7 +648,7 @@ async function buildIndexFromStandard(assetCatalog) {
         schemaVersion: standardDoc.schemaVersion || 'standard-doc-v1',
       },
       fields,
-      backstory: standardDoc.backstory || null,
+      backstory: normalizeBackstoryPayload(standardDoc.backstory),
       sections: standardDoc.sections || [],
       outline: standardDoc.outline || [],
       blocks: standardDoc.blocks || [],
@@ -531,6 +657,7 @@ async function buildIndexFromStandard(assetCatalog) {
       size: standardDoc.source?.size || 0,
       content: standardDoc.raw || JSON.stringify(standardDoc.data || standardDoc, null, 2),
       heroImages: imageList,
+      heroSkills,
       standardPath: relPath,
       parser: standardDoc.parser || {},
       parserStats: standardDoc.parserStats || standardDoc.blockStats || {},
@@ -558,74 +685,7 @@ async function buildIndex() {
     };
   }
 
-  const files = await findFiles(path.join(PROJECT_ROOT, 'design-data'), 'design-data');
-  const docs = [];
-
-  for (const relPath of files) {
-    const absolutePath = path.join(PROJECT_ROOT, relPath);
-    const fileName = path.basename(relPath);
-    const ext = path.extname(fileName).toLowerCase();
-    const cls = classify(relPath);
-
-    const stat = await fs.stat(absolutePath);
-    const content = await fs.readFile(absolutePath, 'utf8');
-    const pseudoStandardDoc = { raw: content };
-    const imageList = await collectImagesForSourceDoc(
-      pseudoStandardDoc,
-      relPath,
-      cls.category,
-      cls.meta || {},
-      assetCatalog
-    );
-
-    docs.push({
-      path: relPath,
-      title: trimExt(fileName),
-      name: trimExt(fileName),
-      category: cls.category,
-      group: cls.group,
-      type: ext ? ext.slice(1) : 'txt',
-      lastModified: stat.mtime.toISOString(),
-      size: stat.size,
-      content,
-      heroImages: imageList,
-    });
-  }
-
-  const rootFiles = ['README.md', 'design-data/README.md'];
-  for (const relPath of rootFiles) {
-    const absolute = path.join(PROJECT_ROOT, relPath);
-    if (!fsSync.existsSync(absolute)) {
-      continue;
-    }
-    const stat = await fs.stat(absolute);
-    const raw = await fs.readFile(absolute, 'utf8');
-    docs.push({
-      path: relPath,
-      title: relPath === 'README.md' ? '项目说明文档' : '设计资料说明',
-      name: relPath === 'README.md' ? '项目说明文档' : '设计资料说明',
-      category: relPath === 'README.md' ? 'root' : 'other',
-      group: relPath === 'README.md' ? '根目录' : '设计资料',
-      type: 'md',
-      lastModified: stat.mtime.toISOString(),
-      size: stat.size,
-      content: raw,
-      heroImages: await collectImagesForSourceDoc({ raw }, relPath, relPath === 'README.md' ? 'root' : 'other', {}, assetCatalog),
-    });
-  }
-
-  docs.sort((a, b) => {
-    if (a.group !== b.group) {
-      return a.group.localeCompare(b.group, 'zh-CN');
-    }
-    return a.name.localeCompare(b.name, 'zh-CN');
-  });
-
-  return {
-    generatedAt: new Date().toISOString(),
-    count: docs.length,
-    docs,
-  };
+  throw new Error(`未检测到标准化目录：${path.relative(PROJECT_ROOT, STANDARD_ROOT)}`);
 }
 
 async function main() {
