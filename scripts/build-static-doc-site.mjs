@@ -495,7 +495,7 @@ async function buildIndexFromStandard(assetCatalog) {
     );
 
     docs.push({
-      path: sourcePath,
+      path: relPath,
       title,
       name: normalizedName,
       category: sourceCategory || cls.category,
@@ -522,6 +522,7 @@ async function buildIndexFromStandard(assetCatalog) {
         schemaVersion: standardDoc.schemaVersion || 'standard-doc-v1',
       },
       fields,
+      backstory: standardDoc.backstory || null,
       sections: standardDoc.sections || [],
       outline: standardDoc.outline || [],
       blocks: standardDoc.blocks || [],

@@ -53,8 +53,8 @@ pre {
 .layout {
   display: grid;
   grid-template-columns: minmax(320px, 35%) 1fr;
-  gap: 12px;
-  padding: 12px;
+  gap: 10px;
+  padding: 10px;
   min-height: calc(100vh - 94px);
 }
 
@@ -67,12 +67,12 @@ pre {
 }
 
 .left {
-  padding: 12px;
+  padding: 10px;
   overflow: auto;
 }
 
 .right {
-  padding: 12px 14px 14px;
+  padding: 10px 12px 12px;
   overflow: auto;
 }
 
@@ -92,7 +92,7 @@ pre {
   border-radius: 999px;
   background: rgba(14, 24, 52, 0.78);
   color: #d7e4ff;
-  padding: 6px 12px;
+  padding: 5px 10px;
   font-size: 12px;
   cursor: pointer;
 }
@@ -185,14 +185,14 @@ pre {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 3px;
+  gap: 2px;
   width: 100%;
   text-align: left;
   border: none;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   background: transparent;
   color: #dae5ff;
-  padding: 9px 12px;
+  padding: 8px 10px;
   cursor: pointer;
 }
 
@@ -219,7 +219,7 @@ pre {
   width: 100%;
   font-size: 12px;
   color: var(--c-muted);
-  line-height: 1.3;
+  line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -227,8 +227,8 @@ pre {
 
 .doc-meta {
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  padding-bottom: 8px;
-  margin-bottom: 10px;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 #docTitle {
@@ -237,13 +237,13 @@ pre {
 }
 
 .meta-path {
-  margin-top: 6px;
+  margin-top: 4px;
   color: var(--c-muted);
   font-size: 13px;
 }
 
 .hero-banner {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   min-height: 120px;
 }
 
@@ -251,7 +251,7 @@ pre {
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   border: 1px solid var(--c-line);
   border-radius: 14px;
   padding: 12px;
@@ -281,7 +281,7 @@ pre {
 }
 
 .hero-title {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   font-size: 22px;
   letter-spacing: 0.5px;
 }
@@ -327,20 +327,20 @@ pre {
 
 .meta-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 10px;
-  margin-bottom: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .meta-card {
   border: 1px solid var(--c-line);
   border-radius: 12px;
   background: rgba(12, 19, 40, 0.78);
-  padding: 10px 12px;
+  padding: 8px 10px;
 }
 
 .meta-card h3 {
-  margin: 0 0 9px;
+  margin: 0 0 7px;
   font-size: 13px;
   color: #d2dcff;
 }
@@ -361,9 +361,9 @@ pre {
 
 .meta-row {
   display: grid;
-  grid-template-columns: 96px 1fr;
-  gap: 6px;
-  margin-bottom: 7px;
+  grid-template-columns: 92px 1fr;
+  gap: 5px;
+  margin-bottom: 5px;
   font-size: 12px;
 }
 
@@ -379,8 +379,8 @@ pre {
 
 .meta-card .text-item {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 8px;
-  margin-top: 8px;
+  padding-top: 6px;
+  margin-top: 6px;
 }
 
 .meta-card .text-item:first-child {
@@ -392,14 +392,14 @@ pre {
 .text-title {
   color: #a3beff;
   font-size: 11px;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .text-body {
   color: #e9f0ff;
   white-space: pre-wrap;
-  font-size: 12px;
-  line-height: 1.45;
+  font-size: 11px;
+  line-height: 1.36;
 }
 
 .gallery {
