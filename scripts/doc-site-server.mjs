@@ -24,6 +24,7 @@ const MIME_TYPES = new Map([
   ['.jpeg', 'image/jpeg'],
   ['.webp', 'image/webp'],
 ]);
+const EDIT_ROOT_PREFIXES = ['design-data/', 'docs-standard/design-data/'];
 
 function normalizeSeparator(filePath) {
   return filePath.split(path.sep).join('/');
@@ -245,8 +246,70 @@ function safePathFromQuery(rawPath) {
   if (!rawPath) {
     return '';
   }
-  const clean = path.normalize(rawPath).replace(/^(\.\.(\/|\\))+/, '');
-  return clean;
+  if (rawPath.includes('\\0')) {
+    return '';
+  }
+  if (path.isAbsolute(rawPath)) {
+    return '';
+  }
+
+  const clean = path.normalize(rawPath).replace(/^(\.\.(\/|\\))+/, '').replace(/^\.\\?/, '');
+  const normalized = normalizeSeparator(clean);
+  if (!normalized || normalized.startsWith('../') || normalized.startsWith('..\\')) {
+    return '';
+  }
+  return normalized;
+}
+
+function isAllowedEditPath(relativePath) {
+  return EDIT_ROOT_PREFIXES.some((prefix) => relativePath.startsWith(prefix));
+}
+
+async function resolveEditableFilePath(relativePath) {
+  const candidates = [relativePath];
+  if (relativePath.startsWith('docs-standard/')) {
+    candidates.push(relativePath.replace(/^docs-standard\//, ''));
+  }
+
+  for (const candidate of candidates) {
+    if (!candidate || !isAllowedEditPath(candidate)) {
+      continue;
+    }
+    const absolutePath = path.join(PROJECT_ROOT, candidate);
+    try {
+      const stat = await fs.stat(absolutePath);
+      if (stat.isFile()) {
+        return { relativePath: candidate, absolutePath };
+      }
+    } catch {
+      // keep trying alternatives
+    }
+  }
+
+  return null;
+}
+
+async function readRequestJsonBody(request) {
+  return await new Promise((resolve, reject) => {
+    let body = '';
+    request.on('data', (chunk) => {
+      body += chunk;
+    });
+
+    request.on('end', () => {
+      if (!body.trim()) {
+        resolve({});
+        return;
+      }
+      try {
+        resolve(JSON.parse(body));
+      } catch (error) {
+        reject(error);
+      }
+    });
+
+    request.on('error', reject);
+  });
 }
 
 async function readTextFile(filePath) {
@@ -293,25 +356,85 @@ const server = createServer(async (req, res) => {
   }
 
   if (pathname === '/api/doc') {
-    const filePath = safePathFromQuery(url.searchParams.get('path') || '');
-    if (!filePath || !filePath.startsWith('design-data/')) {
-      await sendApiError(res, 400, 'bad path');
-      return;
-    }
-    const absolutePath = path.join(PROJECT_ROOT, filePath);
-    const content = await readTextFile(absolutePath);
-    if (content === null) {
-      await sendApiError(res, 404, 'document not found');
+    if (req.method === 'GET') {
+      const filePath = safePathFromQuery(url.searchParams.get('path') || '');
+      if (!filePath || !isAllowedEditPath(filePath)) {
+        await sendApiError(res, 400, 'bad path');
+        return;
+      }
+
+      const resolved = await resolveEditableFilePath(filePath);
+      if (!resolved) {
+        await sendApiError(res, 404, 'document not found');
+        return;
+      }
+
+      const content = await readTextFile(resolved.absolutePath);
+      if (content === null) {
+        await sendApiError(res, 404, 'document not found');
+        return;
+      }
+
+      const type = path.extname(resolved.relativePath).replace('.', '') || 'txt';
+      createApiResponse(res, {
+        path: resolved.relativePath,
+        type,
+        title: trimExt(path.basename(resolved.relativePath)),
+        content,
+      });
       return;
     }
 
-    const type = path.extname(filePath).replace('.', '') || 'txt';
-    createApiResponse(res, {
-      path: filePath,
-      type,
-      title: trimExt(path.basename(filePath)),
-      content,
-    });
+    if (req.method === 'POST' || req.method === 'PUT') {
+      let payload;
+      try {
+        payload = await readRequestJsonBody(req);
+      } catch (error) {
+        await sendApiError(res, 400, `invalid json: ${error?.message || 'parse error'}`);
+        return;
+      }
+
+      const requestedPath = payload?.path;
+      if (typeof requestedPath !== 'string') {
+        await sendApiError(res, 400, 'missing path');
+        return;
+      }
+
+      const filePath = safePathFromQuery(requestedPath);
+      if (!filePath || !isAllowedEditPath(filePath)) {
+        await sendApiError(res, 400, 'bad path');
+        return;
+      }
+
+      if (typeof payload?.content !== 'string') {
+        await sendApiError(res, 400, 'missing content');
+        return;
+      }
+
+      const resolved = await resolveEditableFilePath(filePath);
+      if (!resolved) {
+        await sendApiError(res, 404, 'document not found');
+        return;
+      }
+
+      const { absolutePath, relativePath: resolvedPath } = resolved;
+      try {
+        await fs.writeFile(absolutePath, payload.content, 'utf8');
+      } catch (error) {
+        await sendApiError(res, 500, error?.message || 'failed to save');
+        return;
+      }
+
+      createApiResponse(res, {
+        ok: true,
+        path: resolvedPath,
+      });
+      return;
+    }
+
+    res.statusCode = 405;
+    res.setHeader('Allow', 'GET, POST, PUT');
+    res.end('method not allowed');
     return;
   }
 

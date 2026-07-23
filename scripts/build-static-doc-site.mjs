@@ -22,6 +22,7 @@ const CATEGORY_IMAGE_DIRS = {
   rule: ['assets/images/rules'],
   template: ['assets/images/template'],
 };
+const HERO_PORTRAIT_KEYWORDS = ['原画', '立绘', '封面', '头像', 'hero', 'portrait', 'cover', '原画图', '立绘图'];
 
 function normalizeValue(value) {
   return (value || '').toString().trim();
@@ -445,6 +446,137 @@ function normalizeImagePathList(imageFiles, name) {
   });
 }
 
+function normalizeMatchValue(value) {
+  return (value || '').toString()
+    .trim()
+    .toLowerCase()
+    .normalize('NFKC')
+    .replace(/[\uFEFF]/g, '')
+    .replace(/[\s\-_.:：()（）【】\[\]]/g, '')
+    .replace(/[“”‘’"']/g, '')
+    .replace(/[^\p{L}\p{N}]/gu, '');
+}
+
+function normalizeAssetFilename(value) {
+  const normalized = (value || '').toString().trim();
+  if (!normalized) {
+    return '';
+  }
+  const base = normalized.split('/').at(-1);
+  return base ? base.replace(/\.[^.]+$/u, '') : '';
+}
+
+function isHeroPortraitImage(imagePath) {
+  const base = normalizeAssetFilename(imagePath);
+  if (!base) {
+    return false;
+  }
+  const text = base.toString().trim().toLowerCase();
+  return HERO_PORTRAIT_KEYWORDS.some((keyword) => text.includes(keyword));
+}
+
+function extractHeroSkillImageNames(skillEntries = []) {
+  const names = [];
+  const seen = new Set();
+
+  for (const skill of skillEntries) {
+    const sourceName = (skill?.name || skill?.key || '').toString().trim();
+    if (!sourceName) {
+      continue;
+    }
+    const normalized = normalizeMatchValue(sourceName);
+    if (normalized && !seen.has(normalized) && normalized.length > 1) {
+      seen.add(normalized);
+      names.push(normalized);
+    }
+  }
+
+  return names;
+}
+
+function isImageNameMatchSkillToken(fileName, skillTokens = []) {
+  const target = normalizeMatchValue(fileName);
+  if (!target) {
+    return false;
+  }
+  for (const token of skillTokens) {
+    if (!token) {
+      continue;
+    }
+    if (target === token || target.includes(token) || token.includes(target)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function sortHeroImagesForDisplay(rawImages = [], heroSkills = []) {
+  if (!Array.isArray(rawImages) || rawImages.length === 0) {
+    return [];
+  }
+
+  const uniqueImages = [];
+  const seenImages = new Set();
+  for (const image of rawImages) {
+    const current = (image || '').toString().trim();
+    if (!current || seenImages.has(current)) {
+      continue;
+    }
+    seenImages.add(current);
+    uniqueImages.push(current);
+  }
+
+  if (!uniqueImages.length) {
+    return [];
+  }
+
+  const output = [];
+  const used = new Set();
+  const markUsed = (path) => {
+    const current = (path || '').toString().trim();
+    if (!current || used.has(current)) {
+      return;
+    }
+    used.add(current);
+    output.push(current);
+  };
+
+  const portrait = uniqueImages.find((image) => isHeroPortraitImage(image));
+  if (portrait) {
+    markUsed(portrait);
+  }
+
+  const skillIcons = Array.isArray(heroSkills)
+    ? heroSkills.map((skill) => (skill?.icon || '').toString().trim())
+    : [];
+  for (const icon of skillIcons) {
+    if (!icon) {
+      continue;
+    }
+    if (uniqueImages.includes(icon)) {
+      markUsed(icon);
+    }
+  }
+
+  const skillTokens = extractHeroSkillImageNames(heroSkills);
+  for (const image of uniqueImages) {
+    if (used.has(image)) {
+      continue;
+    }
+    if (isImageNameMatchSkillToken(image, skillTokens)) {
+      markUsed(image);
+    }
+  }
+
+  for (const image of uniqueImages) {
+    if (!used.has(image)) {
+      markUsed(image);
+    }
+  }
+
+  return output;
+}
+
 function collectFromCatalog(category, name, assetMeta) {
   const results = [];
   const normalizedCategory = category || 'other';
@@ -615,6 +747,9 @@ async function buildIndexFromStandard(assetCatalog) {
     const heroSkills = effectiveCategory === 'hero'
       ? collectHeroSkillsFromSections(standardDoc.sections || [], imageList)
       : [];
+    const orderedHeroImages = effectiveCategory === 'hero'
+      ? sortHeroImagesForDisplay(imageList, heroSkills)
+      : imageList;
 
     docs.push({
       path: toDisplayPath(effectiveCategory, sourcePath, sourceMeta, normalizedName),
@@ -656,7 +791,7 @@ async function buildIndexFromStandard(assetCatalog) {
       lastModified: standardDoc.source?.modifiedAt || new Date().toISOString(),
       size: standardDoc.source?.size || 0,
       content: standardDoc.raw || JSON.stringify(standardDoc.data || standardDoc, null, 2),
-      heroImages: imageList,
+      heroImages: orderedHeroImages,
       heroSkills,
       standardPath: relPath,
       parser: standardDoc.parser || {},

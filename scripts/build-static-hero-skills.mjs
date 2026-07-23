@@ -14,6 +14,12 @@ const HERO_SKILL_KEYS = new Set([
 ]);
 
 const NEW_SKILL_MARKERS = /^(?:获得新技能|新增技能|新增被动技能|新增主动技能|新增额外技能)$/;
+const UNIFIED_ICON_BY_KEY = {
+  阳印: 'assets/images/unitizing/阳印.png',
+  阴印: 'assets/images/unitizing/阴印.png',
+  铸魔: 'assets/images/unitizing/铸魔.png',
+  铸神: 'assets/images/unitizing/铸神.png',
+};
 
 function isLikelySkillDescription(key, value) {
   if (normalizeMatchValue(value).length > 20 && value.length > 20) {
@@ -299,7 +305,6 @@ export function collectHeroSkillsFromSections(sections = [], imagePaths = []) {
   const imageIndex = buildHeroImageIndex(imagePaths);
   const entries = [];
   const seen = new Set();
-  const usedIcons = new Set();
   const knownSkillNames = [];
 
   for (let i = 0; i < sections.length; i += 1) {
@@ -325,16 +330,15 @@ export function collectHeroSkillsFromSections(sections = [], imagePaths = []) {
         if (!seen.has(dedupeKey)) {
           seen.add(dedupeKey);
           const mergedDesc = nextValue;
-          const mergedIcon = findHeroSkillIcon(mergedName || key, imageIndex);
+          const mergedIcon = findHeroSkillIcon(mergedName || key, imageIndex)
+            || UNIFIED_ICON_BY_KEY[key]
+            || null;
           entries.push({
             key,
             name: mergedName,
-            icon: usedIcons.has(mergedIcon) ? null : mergedIcon,
+            icon: mergedIcon,
             description: mergedDesc,
           });
-          if (mergedIcon) {
-            usedIcons.add(mergedIcon);
-          }
           if (mergedName) {
             knownSkillNames.push(mergedName);
           }
@@ -356,17 +360,16 @@ export function collectHeroSkillsFromSections(sections = [], imagePaths = []) {
     }
     seen.add(dedupeKey);
 
-    const icon = findHeroSkillIcon(name || key, imageIndex);
+    const icon = findHeroSkillIcon(name || key, imageIndex)
+      || UNIFIED_ICON_BY_KEY[key]
+      || null;
 
     entries.push({
       key,
       name,
-      icon: usedIcons.has(icon) ? null : icon,
+      icon,
       description: parsed.description || '',
     });
-    if (icon) {
-      usedIcons.add(icon);
-    }
     knownSkillNames.push(name);
   }
 

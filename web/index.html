@@ -3,34 +3,91 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>项目文档浏览器</title>
+    <title>Epic of Viento Line 文档站</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="stylesheet" href="/web/styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <h1>Epic of Viento Line 文档浏览器</h1>
-      <p>自动读取 docs-standard 标准库（数据源统一）</p>
-    </header>
-    <main class="layout">
-      <aside class="left">
-        <div class="toolbar">
-          <input id="searchInput" type="text" placeholder="搜索文档名 / 标签" />
-          <div id="categoryTabs" class="tabs" role="tablist" aria-label="文档分类选项卡"></div>
-          <div id="status" class="status">正在加载文档索引...</div>
+    <div class="page-shell">
+      <header class="topbar">
+        <div class="topbar-inner">
+          <div class="brand">
+            <div class="brand-badge">EVL</div>
+            <div class="brand-copy">
+              <h1>Epic of Viento Line 文档站</h1>
+              <p>Dota2 风格档案浏览 · 统一由 docs-standard 渲染</p>
+            </div>
+          </div>
+          <nav class="topbar-nav" aria-label="主导航">
+            <a href="#" aria-current="page">文档库</a>
+            <a href="#">英雄</a>
+            <a href="#">物品</a>
+            <a href="#">单位</a>
+          </nav>
         </div>
-        <div id="docList" class="doc-list">加载中…</div>
-      </aside>
-      <section class="right">
-        <div class="doc-meta">
-          <div id="docTitle">未选择文档</div>
-        </div>
-        <div id="heroBanner" class="hero-banner"></div>
-        <div id="metaCards" class="meta-grid"></div>
-        <div id="sectionCards" class="meta-grid"></div>
-        <div id="heroGallery" class="gallery"></div>
-        <pre id="docContent" class="content">请先在左侧选择一份文档。</pre>
-      </section>
-    </main>
+      </header>
+      <main class="layout">
+        <aside class="left">
+          <div class="left-shell">
+            <div class="toolbar">
+              <div class="search-wrap">
+                <input id="searchInput" type="text" placeholder="搜索文档名 / 标签" />
+                <button id="searchClear" type="button" class="search-clear" aria-label="清空搜索" title="清空搜索">×</button>
+              </div>
+              <div id="categoryTabs" class="tabs" role="tablist" aria-label="文档分类选项卡"></div>
+              <div id="status" class="status">正在加载文档索引...</div>
+            </div>
+            <div class="left-stats" aria-label="列表统计">
+              <article class="left-stat-card">
+                <div id="leftTotalStat" class="left-stat-value">—</div>
+                <div class="left-stat-label">库内文档</div>
+              </article>
+              <article class="left-stat-card">
+                <div id="leftVisibleStat" class="left-stat-value">—</div>
+                <div class="left-stat-label">当前展示</div>
+              </article>
+            </div>
+            <div id="leftLegend" class="left-legend" aria-label="分类分布">
+              <div class="left-legend-title">分类分布</div>
+              <div id="leftLegendBody" class="left-legend-body"></div>
+            </div>
+          </div>
+          <div id="docList" class="doc-list">加载中…</div>
+        </aside>
+        <section class="right">
+          <div class="content-frame">
+            <div class="doc-meta">
+              <div id="docMetaStrip" class="doc-meta-strip">
+                <span id="docTypeChip" class="doc-chip">未选择类型</span>
+                <span id="docGroupChip" class="doc-chip">未选择分组</span>
+                <span id="docPathChip" class="doc-chip">路径：—</span>
+              </div>
+              <div id="docTitle" class="doc-title">未选择文档</div>
+              <div id="docSubtitle" class="doc-subtitle">请选择左侧文档后查看细节</div>
+              <div id="docEditPanel" class="doc-edit-panel is-hidden">
+                <div class="doc-edit-meta">
+                  <div id="docEditPath" class="doc-edit-path muted">可编辑源：—</div>
+                  <div id="docEditActions" class="doc-edit-actions">
+                    <button id="docEditBtn" type="button" class="doc-btn">编辑</button>
+                    <button id="docSaveBtn" type="button" class="doc-btn doc-btn-success">保存</button>
+                    <button id="docCancelBtn" type="button" class="doc-btn doc-btn-ghost">取消</button>
+                  </div>
+                </div>
+                <div id="docEditorWrap" class="doc-editor-wrap">
+                  <textarea id="docSourceEditor" class="doc-editor" rows="14" spellcheck="false" placeholder="编辑文档内容"></textarea>
+                </div>
+                <div id="docEditStatus" class="doc-edit-status"></div>
+              </div>
+            </div>
+            <div id="heroBanner" class="hero-banner"></div>
+            <div id="metaCards" class="meta-grid"></div>
+            <div id="sectionCards" class="meta-grid"></div>
+            <div id="heroGallery" class="gallery"></div>
+            <pre id="docContent" class="content">请先在左侧选择一份文档。</pre>
+          </div>
+        </section>
+      </main>
+    </div>
     <script type="module" src="/web/app.js"></script>
   </body>
 </html>

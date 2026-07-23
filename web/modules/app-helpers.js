@@ -3,6 +3,7 @@ import {
   CATEGORY_LABELS,
   CATEGORY_ORDER,
   TAB_DEFINITIONS,
+  ASSET_BASE_URL,
 } from './app-state.js';
 import { domElements } from './app-state.js';
 
@@ -11,6 +12,10 @@ const {
   searchInput,
   categoryTabsEl,
 } = domElements;
+
+const RENDER_PLACEHOLDERS = new Set([
+  '-','—','——','———','暂无','未填写','无','未知','待补充','待完善','null','none','n/a','na',
+]);
 
 function getDisplayCategory(doc) {
   const category = doc?.category || 'other';
@@ -201,6 +206,150 @@ function normalizeLabel(value) {
     .replace(/\s+/g, '')
     .replace(/["“”‘’‘’《》『』「」]/g, '')
     .toLowerCase();
+}
+
+const HERO_PORTRAIT_KEYWORDS = ['原画', '立绘', '封面', '头像', 'hero', 'portrait', 'cover', '原画图', '立绘图'];
+
+function normalizeMatchValue(value) {
+  return normalizeValue(value)
+    .toLowerCase()
+    .normalize('NFKC')
+    .replace(/[\uFEFF]/g, '')
+    .replace(/[\s\-_.:：()（）【】\[\]]/g, '')
+    .replace(/[“”‘’"']/g, '')
+    .replace(/[^0-9A-Za-z\u4e00-\u9fff]/g, '');
+}
+
+function normalizeAssetFilename(value) {
+  const normalized = normalizeValue(value);
+  if (!normalized) {
+    return '';
+  }
+  const base = normalized.split('/').at(-1);
+  return base.replace(/\.[^.]+$/u, '');
+}
+
+function isHeroPortraitImage(imagePath) {
+  const base = normalizeAssetFilename(imagePath);
+  if (!base) {
+    return false;
+  }
+  const text = normalizeValue(base).toLowerCase();
+  if (!text) {
+    return false;
+  }
+
+  return HERO_PORTRAIT_KEYWORDS.some((keyword) => {
+    const normalizedKeyword = keyword.toLowerCase();
+    return text.includes(normalizedKeyword);
+  });
+}
+
+function extractHeroSkillImageNames(skillEntries = []) {
+  const names = [];
+  const seen = new Set();
+
+  for (const skill of skillEntries) {
+    const sourceName = normalizeValue(skill?.name || skill?.key);
+    if (!sourceName) {
+      continue;
+    }
+    const normalized = normalizeMatchValue(sourceName);
+    if (normalized && !seen.has(normalized) && normalized.length > 1) {
+      seen.add(normalized);
+      names.push(normalized);
+    }
+  }
+
+  return names;
+}
+
+function isImageNameMatchSkillToken(fileName, skillTokens = []) {
+  const target = normalizeMatchValue(fileName);
+  if (!target) {
+    return false;
+  }
+
+  for (const token of skillTokens) {
+    if (!token) {
+      continue;
+    }
+    if (target === token || target.includes(token) || token.includes(target)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function sortHeroImagesForDisplay(rawImages = [], heroSkills = []) {
+  if (!Array.isArray(rawImages) || !rawImages.length) {
+    return [];
+  }
+
+  const uniqueImages = [];
+  const seenImages = new Set();
+  for (const image of rawImages) {
+    const path = normalizeValue(image);
+    if (!path || seenImages.has(path)) {
+      continue;
+    }
+    seenImages.add(path);
+    uniqueImages.push(path);
+  }
+
+  if (!uniqueImages.length) {
+    return [];
+  }
+
+  const output = [];
+  const used = new Set();
+  const markUsed = (path) => {
+    const normalizedPath = normalizeValue(path);
+    if (!normalizedPath || used.has(normalizedPath)) {
+      return;
+    }
+    used.add(normalizedPath);
+    output.push(normalizedPath);
+  };
+
+  const portrait = uniqueImages.find((image) => isHeroPortraitImage(image));
+  if (portrait) {
+    markUsed(portrait);
+  }
+
+  const skillIcons = Array.isArray(heroSkills) ? heroSkills.map((skill) => normalizeValue(skill?.icon || '')) : [];
+  for (const icon of skillIcons) {
+    if (!icon) {
+      continue;
+    }
+    if (uniqueImages.includes(icon)) {
+      markUsed(icon);
+    }
+  }
+
+  const skillTokens = extractHeroSkillImageNames(heroSkills);
+  for (const image of uniqueImages) {
+    if (used.has(image)) {
+      continue;
+    }
+    if (isImageNameMatchSkillToken(image, skillTokens)) {
+      markUsed(image);
+    }
+  }
+
+  for (const image of uniqueImages) {
+    if (!used.has(image)) {
+      markUsed(image);
+    }
+  }
+
+  return output;
+}
+
+function pickHeroPortraitImage(heroImages = [], heroSkills = []) {
+  const ordered = sortHeroImagesForDisplay(heroImages, heroSkills);
+  return ordered.length ? ordered[0] : null;
 }
 
 function splitItemGroup(groupText) {
@@ -538,10 +687,32 @@ function createDocButton(doc, onSelect = () => {}) {
   const category = getDisplayCategory(doc);
   const categoryLabel = CATEGORY_LABELS[category] || category || '其他';
   const groupText = doc.group ? `${doc.group}` : '';
+  const isHeroDoc = category === 'hero' || doc.category === 'hero';
+  const isBackstory = category === 'backstory' || doc.category === 'backstory';
+  const orderedHeroImages = sortHeroImagesForDisplay(doc.heroImages || [], doc.heroSkills || []);
 
   const button = document.createElement('button');
-  button.className = 'doc-item';
+  button.className = `doc-item ${isHeroDoc ? 'is-hero' : ''} ${isBackstory ? 'is-backstory' : ''}`.trim();
   button.type = 'button';
+
+  if (isHeroDoc && orderedHeroImages[0]) {
+    const avatar = document.createElement('div');
+    avatar.className = 'doc-item-avatar';
+    const img = document.createElement('img');
+    img.loading = 'lazy';
+    img.src = new URL(orderedHeroImages[0], ASSET_BASE_URL).href;
+    img.alt = `${doc.name} 缩略图`;
+    avatar.appendChild(img);
+    button.appendChild(avatar);
+  } else {
+    const avatar = document.createElement('div');
+    avatar.className = 'doc-item-avatar doc-item-avatar--placeholder';
+    avatar.textContent = normalizeValue(categoryLabel).slice(0, 2) || '文档';
+    button.appendChild(avatar);
+  }
+
+  const textWrap = document.createElement('div');
+  textWrap.className = 'doc-item-body';
 
   const titleText = document.createElement('div');
   titleText.className = 'doc-item-main';
@@ -555,8 +726,21 @@ function createDocButton(doc, onSelect = () => {}) {
   }
   subText.textContent = pieces.join(' · ');
 
-  button.appendChild(titleText);
-  button.appendChild(subText);
+  const hint = document.createElement('div');
+  hint.className = 'doc-item-hint';
+  const rawAttrHint = normalizeValue(doc?.meta?.attribute || doc?.fields?.主属性 || '');
+  const normalizedAttrHint = rawAttrHint.replace(/\s+/g, '');
+  if (normalizedAttrHint && !RENDER_PLACEHOLDERS.has(normalizedAttrHint.toLowerCase()) && !RENDER_PLACEHOLDERS.has(rawAttrHint)) {
+    hint.textContent = `属性：${rawAttrHint}`;
+    textWrap.appendChild(titleText);
+    textWrap.appendChild(subText);
+    textWrap.appendChild(hint);
+  } else {
+    textWrap.appendChild(titleText);
+    textWrap.appendChild(subText);
+  }
+
+  button.appendChild(textWrap);
   button.title = normalizeValue(`${doc.title || doc.name}`);
   button.dataset.path = doc.path;
   button.addEventListener('click', () => onSelect(doc.path));
@@ -767,6 +951,9 @@ export {
   normalizeLabel,
   splitItemGroup,
   detectItemRole,
+  normalizeMatchValue,
+  sortHeroImagesForDisplay,
+  pickHeroPortraitImage,
   parseCapabilityHeader,
   isAbilityKey,
   splitAbilityKeyName,
