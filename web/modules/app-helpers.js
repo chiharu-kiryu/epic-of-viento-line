@@ -17,6 +17,20 @@ const RENDER_PLACEHOLDERS = new Set([
   '-','—','——','———','暂无','未填写','无','未知','待补充','待完善','null','none','n/a','na',
 ]);
 
+const visibleNoSearchDocCache = {
+  source: null,
+  all: [],
+  hero: [],
+  item: [],
+  other: [],
+};
+const visibleSearchDocCache = new WeakMap();
+const visibleSearchIndexCache = new WeakMap();
+const heroDisplayCache = new WeakMap();
+const SEARCH_INDEX_TOKEN_MAX_LENGTH = 4;
+const SEARCH_INDEX_TOKEN_MIN_LENGTH = 2;
+const SEARCH_QUERY_TOKEN_LENGTH = 3;
+
 function getDisplayCategory(doc) {
   const category = doc?.category || 'other';
   if (category === 'backstory') {
@@ -47,11 +61,251 @@ function docMatchesTab(doc, tabId) {
   return true;
 }
 
-function getVisibleDocs(rawDocs = state.docs) {
-  const keyword = searchInput.value.trim().toLowerCase();
-  return rawDocs.filter((doc) => {
-    const matchesSearch = keyword ? (doc._searchText || '').includes(keyword) : true;
-    return matchesSearch && docMatchesTab(doc, state.activeTab);
+function buildSearchIndex(rawDocs = state.docs) {
+  if (!Array.isArray(rawDocs) || rawDocs.length === 0) {
+    return {
+      all: new Map(),
+      hero: new Map(),
+      item: new Map(),
+      other: new Map(),
+    };
+  }
+
+  const indexByTab = {
+    all: new Map(),
+    hero: new Map(),
+    item: new Map(),
+    other: new Map(),
+  };
+  const tabs = Object.keys(indexByTab);
+
+  const addToIndex = (targetIndex, token, doc) => {
+    const existing = targetIndex.get(token);
+    if (existing) {
+      existing.push(doc);
+    } else {
+      targetIndex.set(token, [doc]);
+    }
+  };
+
+  for (const doc of rawDocs) {
+    if (!doc || typeof doc !== 'object') {
+      continue;
+    }
+    const text = normalizeValue(doc._searchText).toLowerCase();
+    if (!text) {
+      continue;
+    }
+
+    const dedupeTokens = new Set();
+    const textLength = text.length;
+    for (let start = 0; start < textLength; start += 1) {
+      for (let tokenLength = SEARCH_INDEX_TOKEN_MIN_LENGTH; tokenLength <= SEARCH_INDEX_TOKEN_MAX_LENGTH; tokenLength += 1) {
+        const end = start + tokenLength;
+        if (end > textLength) {
+          break;
+        }
+        const token = text.slice(start, end);
+        if (!token) {
+          continue;
+        }
+        if (dedupeTokens.has(token)) {
+          continue;
+        }
+        dedupeTokens.add(token);
+
+        for (const tab of tabs) {
+          if (tab === 'all' || docMatchesTab(doc, tab)) {
+            addToIndex(indexByTab[tab], token, doc);
+          }
+        }
+      }
+    }
+  }
+
+  return indexByTab;
+}
+
+function getSearchIndex(rawDocs = state.docs, forceRebuild = false) {
+  if (!Array.isArray(rawDocs)) {
+    return null;
+  }
+
+  const cached = visibleSearchIndexCache.get(rawDocs);
+  if (cached && !forceRebuild) {
+    return cached;
+  }
+
+  const index = buildSearchIndex(rawDocs);
+  visibleSearchIndexCache.set(rawDocs, index);
+  return index;
+}
+
+function getSearchQueryTokens(keyword = '') {
+  const normalized = normalizeValue(keyword).toLowerCase();
+  if (!normalized) {
+    return [];
+  }
+  if (normalized.length <= SEARCH_INDEX_TOKEN_MAX_LENGTH) {
+    return [normalized];
+  }
+
+  const tokens = [];
+  const totalTokens = normalized.length - SEARCH_QUERY_TOKEN_LENGTH + 1;
+  const maxQueryTokens = 12;
+  const step = Math.max(
+    1,
+    Math.ceil(totalTokens / maxQueryTokens),
+  );
+  for (let start = 0; start <= normalized.length - SEARCH_QUERY_TOKEN_LENGTH; start += step) {
+    tokens.push(normalized.slice(start, start + SEARCH_QUERY_TOKEN_LENGTH));
+  }
+  return tokens;
+}
+
+function getSearchCandidatesFromIndex(rawDocs = state.docs, keyword = '', activeTab = 'all') {
+  const normalizedKeyword = normalizeValue(keyword).toLowerCase();
+  if (!normalizedKeyword || normalizedKeyword.length < SEARCH_INDEX_TOKEN_MIN_LENGTH) {
+    return null;
+  }
+
+  const indexes = getSearchIndex(rawDocs, false);
+  if (!indexes) {
+    return null;
+  }
+  const index = indexes[activeTab] || indexes.all;
+  if (!index) {
+    return null;
+  }
+
+  const tokens = getSearchQueryTokens(normalizedKeyword);
+  if (!tokens.length) {
+    return null;
+  }
+
+  const postings = [];
+  for (const token of tokens) {
+    const docs = index.get(token);
+    if (!docs || !docs.length) {
+      return [];
+    }
+    postings.push(docs);
+  }
+
+  if (!postings.length) {
+    return null;
+  }
+  postings.sort((a, b) => a.length - b.length);
+
+  let candidates = new Set(postings[0]);
+  for (let i = 1; i < postings.length; i += 1) {
+    const current = new Set(postings[i]);
+    for (const doc of candidates) {
+      if (!current.has(doc)) {
+        candidates.delete(doc);
+      }
+    }
+    if (!candidates.size) {
+      return [];
+    }
+  }
+
+  return Array.from(candidates);
+}
+
+function getVisibleDocs(rawDocs = state.docs, keyword = searchInput.value, activeTab = state.activeTab) {
+  const normalizedKeyword = normalizeValue(keyword).toLowerCase();
+  const searchSource = typeof rawDocs === 'object' && rawDocs !== null ? rawDocs : [];
+  if (!Array.isArray(searchSource)) {
+    return [];
+  }
+  if (!normalizedKeyword && rawDocs === state.docs) {
+    if (visibleNoSearchDocCache.source !== rawDocs) {
+      const all = [];
+      const hero = [];
+      const item = [];
+      const other = [];
+      for (const doc of rawDocs) {
+        all.push(doc);
+        if (docMatchesTab(doc, 'hero')) {
+          hero.push(doc);
+        }
+        if (docMatchesTab(doc, 'item')) {
+          item.push(doc);
+        }
+        if (docMatchesTab(doc, 'other')) {
+          other.push(doc);
+        }
+      }
+      visibleNoSearchDocCache.source = rawDocs;
+      visibleNoSearchDocCache.all = all;
+      visibleNoSearchDocCache.hero = hero;
+      visibleNoSearchDocCache.item = item;
+      visibleNoSearchDocCache.other = other;
+    }
+
+    if (activeTab === 'hero') {
+      return visibleNoSearchDocCache.hero;
+    }
+    if (activeTab === 'item') {
+      return visibleNoSearchDocCache.item;
+    }
+    if (activeTab === 'other') {
+      return visibleNoSearchDocCache.other;
+    }
+    return visibleNoSearchDocCache.all;
+  }
+
+  if (searchSource.length && normalizedKeyword) {
+    const cacheKey = `${activeTab}::${normalizedKeyword}`;
+    const cachedBySource = visibleSearchDocCache.get(searchSource);
+    const cached = cachedBySource?.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    let baseQuery = '';
+    let baseList = null;
+    if (cachedBySource) {
+      const prefix = `${activeTab}::`;
+      for (const key of cachedBySource.keys()) {
+        if (!key.startsWith(prefix)) {
+          continue;
+        }
+        const previousQuery = key.slice(prefix.length);
+        if (!previousQuery || previousQuery.length >= normalizedKeyword.length) {
+          continue;
+        }
+        if (normalizedKeyword.startsWith(previousQuery) && previousQuery.length > baseQuery.length) {
+          baseQuery = previousQuery;
+          baseList = cachedBySource.get(key) || null;
+        }
+      }
+    }
+
+    const sourceForSearch = baseList
+      || getSearchCandidatesFromIndex(searchSource, normalizedKeyword, activeTab)
+      || searchSource;
+    const results = sourceForSearch.filter((doc) => {
+      const matchesSearch = (doc._searchText || '').includes(normalizedKeyword);
+      return matchesSearch && docMatchesTab(doc, activeTab);
+    });
+
+    const nextCache = cachedBySource || new Map();
+    nextCache.set(cacheKey, results);
+    if (nextCache.size > 60) {
+      const firstKey = nextCache.keys().next().value;
+      if (firstKey !== undefined) {
+        nextCache.delete(firstKey);
+      }
+    }
+    visibleSearchDocCache.set(searchSource, nextCache);
+    return results;
+  }
+
+  return searchSource.filter((doc) => {
+    const matchesSearch = normalizedKeyword ? (doc._searchText || '').includes(normalizedKeyword) : true;
+    return matchesSearch && docMatchesTab(doc, activeTab);
   });
 }
 
@@ -85,9 +339,16 @@ function resolveHeroBackstory(doc) {
   return state.docs.find((item) => item?.category === 'backstory' && getHeroDisplayKey(item) === heroKey) || null;
 }
 
-function getHeroDisplayDocs(rawDocs = []) {
-  if (state.activeTab !== 'hero' && state.activeTab !== 'all') {
+function getHeroDisplayDocs(rawDocs = [], activeTab = state.activeTab) {
+  if (activeTab !== 'hero' && activeTab !== 'all') {
     return rawDocs;
+  }
+
+  if (typeof rawDocs === 'object' && rawDocs !== null) {
+    const cached = heroDisplayCache.get(rawDocs);
+    if (cached?.[activeTab]) {
+      return cached[activeTab];
+    }
   }
 
   const mergedDocs = [];
@@ -138,6 +399,11 @@ function getHeroDisplayDocs(rawDocs = []) {
     }
   }
 
+  if (typeof rawDocs === 'object' && rawDocs !== null) {
+    const cached = heroDisplayCache.get(rawDocs) || {};
+    cached[activeTab] = mergedDocs;
+    heroDisplayCache.set(rawDocs, cached);
+  }
   return mergedDocs;
 }
 
@@ -151,9 +417,8 @@ function getHeroCount(sourceDocs = state.docs) {
   return unique.size;
 }
 
-function getTabCounts() {
-  const source = state.docs;
-  const allDisplayDocs = getHeroDisplayDocs(source);
+function getTabCounts(source = state.docs) {
+  const allDisplayDocs = getHeroDisplayDocs(source, 'all');
   return {
     all: allDisplayDocs.length,
     hero: getHeroCount(source),
@@ -162,19 +427,19 @@ function getTabCounts() {
   };
 }
 
-function renderTabs() {
+function renderTabs(onTabChange = () => {}, counts = null) {
   if (!categoryTabsEl) {
     return;
   }
 
-  const counts = getTabCounts();
+  const tabCounts = counts || getTabCounts();
   categoryTabsEl.innerHTML = '';
 
   for (const tab of TAB_DEFINITIONS) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = `tab-btn ${tab.id === state.activeTab ? 'is-active' : ''}`;
-    button.textContent = `${tab.label}（${counts[tab.id] || 0}）`;
+    button.textContent = `${tab.label}（${tabCounts[tab.id] || 0}）`;
     button.setAttribute('role', 'tab');
     button.setAttribute('aria-selected', String(tab.id === state.activeTab));
 
@@ -189,7 +454,7 @@ function renderTabs() {
         return;
       }
       state.activeTab = tab.id;
-      renderFilteredDocs();
+      onTabChange();
     });
 
     categoryTabsEl.appendChild(button);
@@ -304,6 +569,7 @@ function sortHeroImagesForDisplay(rawImages = [], heroSkills = []) {
 
   const output = [];
   const used = new Set();
+  const imageSet = new Set(uniqueImages);
   const markUsed = (path) => {
     const normalizedPath = normalizeValue(path);
     if (!normalizedPath || used.has(normalizedPath)) {
@@ -323,7 +589,7 @@ function sortHeroImagesForDisplay(rawImages = [], heroSkills = []) {
     if (!icon) {
       continue;
     }
-    if (uniqueImages.includes(icon)) {
+    if (imageSet.has(icon)) {
       markUsed(icon);
     }
   }
@@ -350,6 +616,23 @@ function sortHeroImagesForDisplay(rawImages = [], heroSkills = []) {
 function pickHeroPortraitImage(heroImages = [], heroSkills = []) {
   const ordered = sortHeroImagesForDisplay(heroImages, heroSkills);
   return ordered.length ? ordered[0] : null;
+}
+
+function getHeroImagesForDisplay(doc = {}, heroSkills = []) {
+  if (!doc || typeof doc !== 'object') {
+    return [];
+  }
+
+  if (Array.isArray(doc._heroImagesOrdered)) {
+    return doc._heroImagesOrdered;
+  }
+
+  const ordered = sortHeroImagesForDisplay(
+    Array.isArray(doc.heroImages) ? doc.heroImages : [],
+    heroSkills.length ? heroSkills : (doc.heroSkills || []),
+  );
+  doc._heroImagesOrdered = ordered;
+  return ordered;
 }
 
 function splitItemGroup(groupText) {
@@ -689,7 +972,7 @@ function createDocButton(doc, onSelect = () => {}) {
   const groupText = doc.group ? `${doc.group}` : '';
   const isHeroDoc = category === 'hero' || doc.category === 'hero';
   const isBackstory = category === 'backstory' || doc.category === 'backstory';
-  const orderedHeroImages = sortHeroImagesForDisplay(doc.heroImages || [], doc.heroSkills || []);
+  const orderedHeroImages = getHeroImagesForDisplay(doc, doc.heroSkills || []);
 
   const button = document.createElement('button');
   button.className = `doc-item ${isHeroDoc ? 'is-hero' : ''} ${isBackstory ? 'is-backstory' : ''}`.trim();
@@ -949,11 +1232,13 @@ export {
   renderTabs,
   normalizeValue,
   normalizeLabel,
+  getSearchIndex,
   splitItemGroup,
   detectItemRole,
   normalizeMatchValue,
   sortHeroImagesForDisplay,
   pickHeroPortraitImage,
+  getHeroImagesForDisplay,
   parseCapabilityHeader,
   isAbilityKey,
   splitAbilityKeyName,

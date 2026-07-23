@@ -14,6 +14,8 @@ import {
 import {
   getHeroDisplayDocs,
   getVisibleDocs,
+  getSearchIndex,
+  getHeroImagesForDisplay,
   createDetailsGroup,
   renderTabs,
   markActiveItem,
@@ -22,8 +24,6 @@ import {
   createDocButton,
   getDisplayCategory,
   toDisplayValue,
-  sortHeroImagesForDisplay,
-  pickHeroPortraitImage,
 } from './app-helpers.js';
 import { renderHeroBanner, buildCommonCards, getHeroCardsByCategory } from './app-render.js';
 import { renderStructuredBlocks, hasRenderableToken } from './app-structured.js';
@@ -62,8 +62,27 @@ const {
 } = domElements;
 
 const REBUILD_TEXT = '重建索引';
+const SEARCH_INPUT_DEBOUNCE_MS = 180;
+const LIST_RENDER_BATCH_SIZE = 120;
+const CATEGORY_ORDER_INDEX = new Map(
+  CATEGORY_ORDER.map((category, index) => [category, index]),
+);
 let rebuildProgressTimer = null;
 let rebuildProgressStart = 0;
+let searchDebounceTimer = null;
+let lastSearchQuery = '';
+let listRenderToken = 0;
+let cachedTabCounts = null;
+const cachedListGroups = {
+  source: null,
+  activeTab: '',
+  filtered: null,
+  groups: null,
+};
+
+function getSearchQuery() {
+  return normalizeDisplayValue(searchInput.value).toLowerCase();
+}
 
 function formatElapsedSeconds(startAt) {
   const elapsed = Math.max(0, Date.now() - startAt);
@@ -414,13 +433,13 @@ function categoryLabel(category) {
   return CATEGORY_LABELS[getDisplayCategory({ category })] || CATEGORY_LABELS[category] || category || '其他';
 }
 
-function updateLeftPanelStats(filtered = []) {
+function updateLeftPanelStatsFromGroups(groupMap, filteredCount = 0) {
   if (leftTotalStatEl) {
     leftTotalStatEl.textContent = String(state.docs.length);
   }
 
   if (leftVisibleStatEl) {
-    leftVisibleStatEl.textContent = String(filtered.length);
+    leftVisibleStatEl.textContent = String(filteredCount);
   }
 
   if (!leftLegendBodyEl) {
@@ -428,9 +447,12 @@ function updateLeftPanelStats(filtered = []) {
   }
 
   const countMap = new Map();
-  for (const doc of filtered) {
-    const key = getDisplayCategory(doc);
-    countMap.set(key, (countMap.get(key) || 0) + 1);
+  for (const [key, groupMapByCategory] of groupMap) {
+    let count = 0;
+    for (const docsInGroup of groupMapByCategory.values()) {
+      count += docsInGroup.length;
+    }
+    countMap.set(key, count);
   }
 
   if (countMap.size === 0) {
@@ -438,9 +460,7 @@ function updateLeftPanelStats(filtered = []) {
     return;
   }
 
-  const items = [...countMap.entries()]
-    .sort((a, b) => b[1] - a[1]);
-
+  const items = [...countMap.entries()].sort((a, b) => b[1] - a[1]);
   leftLegendBodyEl.innerHTML = '';
   for (const [key, count] of items) {
     const pill = document.createElement('span');
@@ -679,7 +699,8 @@ function buildHeroSkillCards(doc) {
     return null;
   }
 
-  const portraitImage = pickHeroPortraitImage(doc.heroImages || [], doc.heroSkills || []);
+  const heroImages = getHeroImagesForDisplay(doc, doc.heroSkills || []);
+  const portraitImage = heroImages[0] || null;
   const excludeIcons = new Set();
   if (portraitImage) {
     excludeIcons.add(portraitImage);
@@ -697,7 +718,7 @@ function buildHeroSkillCards(doc) {
     used.add(signature);
 
     const icon = normalizeDisplayValue(item.icon)
-      || pickSkillIconFromGallery(name, doc.heroImages || [], excludeIcons);
+      || pickSkillIconFromGallery(name, heroImages, excludeIcons);
     entries.push({
       key,
       name,
@@ -800,14 +821,13 @@ function renderSectionCards(doc) {
   }
 }
 
-function renderGallery(images, heroSkills = []) {
+function renderGallery(images) {
   galleryEl.innerHTML = '';
   if (!images || images.length === 0) {
     return;
   }
 
-  const ordered = sortHeroImagesForDisplay(images, heroSkills);
-  for (const url of ordered) {
+  for (const url of images) {
     const img = document.createElement('img');
     img.loading = 'lazy';
     img.src = new URL(url, ASSET_BASE_URL).href;
@@ -1400,23 +1420,27 @@ function renderContent(doc) {
   }
 }
 
-function renderList(filteredDocs) {
+function renderList(groups) {
+  const currentRenderId = ++listRenderToken;
   listEl.innerHTML = '';
-  if (!filteredDocs.length) {
-    const msg = searchInput.value.trim() ? '未匹配到文档' : '当前标签暂无文档';
-    listEl.innerHTML = `<div class=\"doc-group\">${msg}</div>`;
+
+  if (!(groups instanceof Map) || !groups.size) {
+    const msg = lastSearchQuery ? '未匹配到文档' : '当前标签暂无文档';
+    listEl.innerHTML = `<div class="doc-group">${msg}</div>`;
+    markActiveItem();
     return;
   }
 
-  const groups = groupDocs(filteredDocs);
   const categoryNames = [...groups.keys()].sort((a, b) => {
-    const aIndex = CATEGORY_ORDER.indexOf(a);
-    const bIndex = CATEGORY_ORDER.indexOf(b);
-    if (aIndex !== -1 || bIndex !== -1) {
-      return (aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex) - (bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex);
+    const aOrder = CATEGORY_ORDER_INDEX.has(a) ? CATEGORY_ORDER_INDEX.get(a) : Number.MAX_SAFE_INTEGER;
+    const bOrder = CATEGORY_ORDER_INDEX.has(b) ? CATEGORY_ORDER_INDEX.get(b) : Number.MAX_SAFE_INTEGER;
+    if (aOrder !== bOrder) {
+      return aOrder - bOrder;
     }
     return a.localeCompare(b, 'zh-CN');
   });
+
+  const categoryNodes = [];
 
   for (const categoryName of categoryNames) {
     const categoryMap = groups.get(categoryName) || new Map();
@@ -1434,28 +1458,74 @@ function renderList(filteredDocs) {
       categoryNode.appendChild(groupNode);
     }
 
-    listEl.appendChild(categoryNode);
+    categoryNodes.push(categoryNode);
   }
 
-  markActiveItem();
+  const flushNodes = () => {
+    if (currentRenderId !== listRenderToken) {
+      return;
+    }
+    if (categoryNodes.length === 0) {
+      markActiveItem();
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < LIST_RENDER_BATCH_SIZE && categoryNodes.length > 0; i += 1) {
+      fragment.appendChild(categoryNodes.shift());
+    }
+    listEl.appendChild(fragment);
+    requestAnimationFrame(flushNodes);
+  };
+
+  requestAnimationFrame(flushNodes);
 }
 
-function renderFilteredDocs(preferredPath = '') {
-  const filtered = getHeroDisplayDocs(getVisibleDocs());
-  updateLeftPanelStats(filtered);
-  renderList(filtered);
+function renderTabsNow() {
+  if (!categoryTabsEl) {
+    return;
+  }
+  renderTabs(
+    () => renderFilteredDocs('', { skipTabs: false }),
+    cachedTabCounts,
+  );
+}
+
+function renderFilteredDocs(preferredPath = '', options = {}) {
+  const { skipTabs = false } = options;
+  const searchQuery = getSearchQuery();
+  const filtered = getHeroDisplayDocs(getVisibleDocs(state.docs, searchQuery), state.activeTab);
+  let groups = null;
+  if (
+    searchQuery === ''
+    && cachedListGroups.source === state.docs
+    && cachedListGroups.activeTab === state.activeTab
+    && cachedListGroups.filtered === filtered
+  ) {
+    groups = cachedListGroups.groups;
+  } else {
+    groups = groupDocs(filtered);
+    if (searchQuery === '') {
+      cachedListGroups.source = state.docs;
+      cachedListGroups.activeTab = state.activeTab;
+      cachedListGroups.filtered = filtered;
+      cachedListGroups.groups = groups;
+    }
+  }
+  updateLeftPanelStatsFromGroups(groups, filtered.length);
+  renderList(groups);
 
   if (!filtered.length) {
-    const hasKeyword = searchInput.value.trim();
+    const hasKeyword = Boolean(searchQuery);
     statusEl.textContent = `${hasKeyword ? '未匹配到文档' : '当前标签暂无文档'} ${state.generatedStatus}`;
-    if (categoryTabsEl) {
-      renderTabs();
+    if (!skipTabs) {
+      renderTabsNow();
     }
     return;
   }
 
   const displayText = `当前显示 ${filtered.length} 个文档（共 ${state.docs.length} 个）`;
-  const tabText = searchInput.value.trim() ? '（已按关键词筛选）' : '';
+  const tabText = searchQuery ? '（已按关键词筛选）' : '';
   statusEl.textContent = `${displayText} ${tabText} ${state.generatedStatus}`;
 
   const desiredPath = preferredPath && filtered.some((doc) => doc.path === preferredPath) ? preferredPath : state.activePath;
@@ -1465,8 +1535,8 @@ function renderFilteredDocs(preferredPath = '') {
     selectDoc(desiredPath);
   }
 
-  if (categoryTabsEl) {
-    renderTabs();
+  if (!skipTabs) {
+    renderTabsNow();
   }
 }
 
@@ -1510,7 +1580,8 @@ function selectDoc(pathValue) {
   renderHeroBanner(doc);
   renderMeta(doc);
   renderSectionCards(doc);
-  renderGallery(doc.heroImages || [], doc.heroSkills || []);
+  const heroImages = getHeroImagesForDisplay(doc, doc.heroSkills || []);
+  renderGallery(heroImages);
   renderContent(doc);
   updateEditorForDoc(doc);
   markActiveItem();
@@ -1551,14 +1622,21 @@ async function loadData(preferredPath = '') {
       doc.blocks = doc.blocks || [];
       doc.parser = doc.parser || {};
       doc.heroSkills = doc.heroSkills || [];
-      doc.heroImages = sortHeroImagesForDisplay(doc.heroImages || [], doc.heroSkills || []);
+      doc._heroImagesOrdered = undefined;
       doc._sourceRenderedText = undefined;
       doc._sourceCachedText = undefined;
     });
+    getSearchIndex(state.docs, true);
 
+    cachedTabCounts = getTabCounts();
+    cachedListGroups.source = null;
+    cachedListGroups.activeTab = '';
+    cachedListGroups.filtered = null;
+    cachedListGroups.groups = null;
     state.generatedStatus = `（静态生成 ${formatTime(payload.generatedAt)}）`;
-    renderTabs();
+    renderTabsNow();
     renderFilteredDocs(preferredPath || state.activePath);
+    lastSearchQuery = getSearchQuery();
     updateSearchClearState();
   } catch (error) {
     statusEl.textContent = `加载失败：${error.message}`;
@@ -1569,14 +1647,31 @@ async function loadData(preferredPath = '') {
 function initApp() {
   searchInput.addEventListener('input', () => {
     updateSearchClearState();
-    renderFilteredDocs();
+    const query = getSearchQuery();
+    if (query === lastSearchQuery) {
+      return;
+    }
+    lastSearchQuery = query;
+
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer);
+    }
+    searchDebounceTimer = setTimeout(() => {
+      renderFilteredDocs('', { skipTabs: true });
+      searchDebounceTimer = null;
+    }, SEARCH_INPUT_DEBOUNCE_MS);
   });
 
   if (searchClearEl) {
     searchClearEl.addEventListener('click', () => {
       searchInput.value = '';
       updateSearchClearState();
-      renderFilteredDocs();
+      lastSearchQuery = '';
+      if (searchDebounceTimer) {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = null;
+      }
+      renderFilteredDocs('', { skipTabs: true });
       searchInput.focus();
     });
   }

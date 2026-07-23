@@ -4,7 +4,24 @@ import { createServer } from 'node:http';
 import { createReadStream } from 'node:fs';
 import { spawn } from 'node:child_process';
 
-const PORT = Number(process.env.PORT || 4173);
+function resolvePort(argv = process.argv.slice(2)) {
+  const envPort = process.env.PORT;
+  if (envPort && Number.isInteger(Number(envPort))) {
+    return Number(envPort);
+  }
+
+  const cliIndex = argv.indexOf('--port');
+  if (cliIndex !== -1 && argv[cliIndex + 1]) {
+    const candidate = Number(argv[cliIndex + 1]);
+    if (Number.isInteger(candidate)) {
+      return candidate;
+    }
+  }
+
+  return 4173;
+}
+
+const PORT = resolvePort();
 const PROJECT_ROOT = process.cwd();
 const DOC_ROOT = path.join(PROJECT_ROOT, 'design-data');
 const ASSET_ROOT = path.join(PROJECT_ROOT, 'assets');
@@ -198,12 +215,11 @@ async function safeReadDir(dir, relativeBase = '') {
       }
       const full = path.join(dir, entry.name);
       if (entry.isDirectory()) {
-        const child = await safeReadDir(full, `${relativeBase}${entry.name}/`);
+        const child = await safeReadDir(full);
         files.push(...child);
       } else if (entry.isFile()) {
         if (isTextFile(entry.name)) {
-          const rel = path.join(relativeBase, entry.name);
-          files.push(path.join(dir, rel));
+          files.push(full);
         }
       }
     }
@@ -310,13 +326,48 @@ function safePathFromQuery(rawPath) {
   if (rawPath.includes('\\0')) {
     return '';
   }
+  if (/^[A-Za-z]:\//.test(rawPath)) {
+    return '';
+  }
   if (path.isAbsolute(rawPath)) {
     return '';
   }
 
-  const clean = path.normalize(rawPath).replace(/^(\.\.(\/|\\))+/, '').replace(/^\.\\?/, '');
-  const normalized = normalizeSeparator(clean);
-  if (!normalized || normalized.startsWith('../') || normalized.startsWith('..\\')) {
+  const normalized = normalizeSeparator(rawPath.replace(/\\/g, '/'));
+  const segments = normalized.split('/').filter((segment) => segment.length > 0);
+
+  if (!segments.length) {
+    return '';
+  }
+
+  if (segments.some((segment) => segment === '..')) {
+    return '';
+  }
+
+  const filteredSegments = [];
+  for (const segment of segments) {
+    if (segment === '.') {
+      continue;
+    }
+    if (segment === '..') {
+      return '';
+    }
+    filteredSegments.push(segment);
+  }
+
+  const sanitized = filteredSegments.join('/');
+  if (!sanitized) {
+    return '';
+  }
+  return sanitizePathPrefix(sanitized);
+}
+
+function sanitizePathPrefix(normalizedPath) {
+  const normalized = normalizedPath.replace(/^\.\//, '');
+  if (!normalized) {
+    return '';
+  }
+  if (normalized.startsWith('.')) {
     return '';
   }
   return normalized;
@@ -576,7 +627,7 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  if (pathname === '/' || pathname === '/index.html') {
+  if (pathname === '/' || pathname === '/index.html' || pathname === '/web' || pathname === '/web/') {
     const indexPath = path.join(WEB_ROOT, 'index.html');
     await sendFile(indexPath, res);
     return;

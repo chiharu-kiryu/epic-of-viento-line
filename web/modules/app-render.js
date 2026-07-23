@@ -7,7 +7,7 @@ import {
   formatSize,
   formatTime,
   getDisplayCategory,
-  pickHeroPortraitImage,
+  getHeroImagesForDisplay,
   normalizeLabel,
   normalizeValue,
   resolveHeroBackstory,
@@ -594,7 +594,8 @@ function renderHeroBanner(doc) {
   const category = getDisplayCategory(doc);
   const title = doc.meta?.title || doc.meta?.hero || doc.title || doc.name || doc.path;
   const fields = doc.fields || {};
-  const coverImage = pickHeroPortraitImage(doc.heroImages || [], doc.heroSkills || []);
+  const heroImages = getHeroImagesForDisplay(doc, doc.heroSkills || []);
+  const coverImage = heroImages[0] || null;
   const categoryLabel = CATEGORY_LABELS[category] || '文档';
   const attr = normalizeValue(fields['主属性'] || doc.meta?.attribute || '');
   const hasAttr = hasRenderableValue('主属性', attr);
