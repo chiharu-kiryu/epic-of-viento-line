@@ -455,8 +455,15 @@ function collectHeroAbilitySegmentsFromSections(sections = [], usedKeys = new Se
         .split('\n')
         .map((line) => line.trim())
         .filter(Boolean);
-      const titleLine = lines.shift() || rawKey;
-      const body = lines.join('\n');
+      const explicitName = lines[0]?.match(/^名称[:：]\s*(.*)$/);
+      const titleLine = explicitName ? (explicitName[1] || rawKey) : (lines.shift() || rawKey);
+      if (explicitName) {
+        lines.shift();
+      }
+      const bodyLines = lines
+        .map((line) => line.replace(/^描述[:：]\s*/, ''))
+        .filter((line) => !/^(?:类型|描述)[:：]\s*$/.test(line));
+      const body = bodyLines.join('\n');
       return {
         title: `${rawKey}：${titleLine === rawKey ? '' : titleLine}`.trim().replace(/^：/, ''),
         body,

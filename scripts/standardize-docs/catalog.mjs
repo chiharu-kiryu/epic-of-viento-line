@@ -19,6 +19,38 @@ import {
 } from './utils.mjs';
 import { parseJsonContent, parseTextContent } from './parser.mjs';
 
+function normalizeFilterPath(rawPath) {
+  return toPosix((rawPath || '').trim())
+    .replace(/^\.\/+/, '')
+    .replace(/\/+$/, '')
+    .replace(/\/+/g, '/');
+}
+
+function isPathMatch(candidate, filter) {
+  if (!filter) {
+    return false;
+  }
+  const normalizedCandidate = normalizeFilterPath(candidate);
+  const normalizedFilter = normalizeFilterPath(filter);
+
+  if (!normalizedFilter) {
+    return false;
+  }
+
+  return (
+    normalizedCandidate === normalizedFilter
+    || normalizedCandidate.startsWith(`${normalizedFilter}/`)
+    || normalizedFilter.startsWith(`${normalizedCandidate}/`)
+  );
+}
+
+function inSourceScopes(candidatePath, sourceFilters = []) {
+  if (sourceFilters.length === 0) {
+    return true;
+  }
+  return sourceFilters.some((filter) => isPathMatch(candidatePath, filter));
+}
+
 function buildBackstoryPayload(standardDoc) {
   return {
     source: standardDoc.source?.path || '',
@@ -97,9 +129,10 @@ function buildStandardObject(relativePath, absolutePath, parsedContent, stats) {
   };
 }
 
-async function walkFiles(rootDir, relativeBase = '') {
+async function walkFiles(rootDir, relativeBase = '', sourceFilters = []) {
   const entries = await fs.readdir(rootDir, { withFileTypes: true });
   const files = [];
+  const normalizedFilters = sourceFilters.map(normalizeFilterPath);
   for (const entry of entries) {
     if (entry.name.startsWith('.')) {
       continue;
@@ -110,11 +143,17 @@ async function walkFiles(rootDir, relativeBase = '') {
     const absolute = path.join(rootDir, entry.name);
     const relative = toPosix(path.join(relativeBase, entry.name));
     if (entry.isDirectory()) {
-      const child = await walkFiles(absolute, relative);
+      if (!inSourceScopes(relative, normalizedFilters)) {
+        continue;
+      }
+      const child = await walkFiles(absolute, relative, normalizedFilters);
       files.push(...child);
       continue;
     }
     if (!entry.isFile() || !isTextLike(entry.name)) {
+      continue;
+    }
+    if (!inSourceScopes(relative, normalizedFilters)) {
       continue;
     }
     files.push(relative);
@@ -122,8 +161,10 @@ async function walkFiles(rootDir, relativeBase = '') {
   return files;
 }
 
-async function buildStandardCatalog() {
-  const files = await walkFiles(PROJECT_ROOT);
+async function buildStandardCatalog(sourceFilters = [], options = {}) {
+  const outputRoot = options.outputRoot || STANDARD_ROOT;
+  const normalizedFilters = sourceFilters.map(normalizeFilterPath);
+  const files = await walkFiles(PROJECT_ROOT, '', normalizedFilters);
   const sourceDocs = [];
   for (const relPath of files) {
     const absolutePath = path.join(PROJECT_ROOT, relPath);
@@ -178,7 +219,7 @@ async function buildStandardCatalog() {
     const standardRelPath = toPosix(
       path.join(path.dirname(item.relPath), `${trimName(path.basename(item.relPath))}.json`)
     );
-    const standardAbsolute = path.join(STANDARD_ROOT, standardRelPath);
+    const standardAbsolute = path.join(outputRoot, standardRelPath);
     await fs.mkdir(path.dirname(standardAbsolute), { recursive: true });
     await fs.writeFile(standardAbsolute, `${JSON.stringify(toWrite)}\n`, 'utf8');
     output.push({
@@ -214,17 +255,23 @@ async function buildStandardCatalog() {
   return output;
 }
 
-async function cleanupStandardStaleFiles(sourcePaths) {
+async function cleanupStandardStaleFiles(sourcePaths, options = {}) {
+  const outputRoot = options.outputRoot || STANDARD_ROOT;
+  const { scope = [] } = options;
+  const normalizedScope = scope.map(normalizeFilterPath);
   if (sourcePaths.length === 0) {
     return;
   }
-  const existing = await walkFiles(STANDARD_ROOT);
+  const existing = await walkFiles(outputRoot);
   const validSet = new Set(sourcePaths.map((item) =>
     toPosix(path.join(path.dirname(item.source), `${trimName(path.basename(item.source))}.json`))
   ));
   for (const relStandard of existing) {
+    if (normalizedScope.length > 0 && !inSourceScopes(relStandard, normalizedScope)) {
+      continue;
+    }
     if (!validSet.has(relStandard)) {
-      await fs.rm(path.join(STANDARD_ROOT, relStandard));
+      await fs.rm(path.join(outputRoot, relStandard));
     }
   }
 }

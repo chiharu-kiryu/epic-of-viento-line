@@ -9,6 +9,7 @@ import {
   getDisplayCategory,
   normalizeLabel,
   normalizeValue,
+  resolveHeroBackstory,
   splitAbilityKeyName,
   collectAbilitySegmentsFromSections,
   collectHeroAbilitySegmentsFromSections,

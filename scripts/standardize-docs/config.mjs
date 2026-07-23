@@ -3,9 +3,8 @@ import path from 'node:path';
 const PROJECT_ROOT = process.cwd();
 const cliArgs = process.argv.slice(2);
 const cliOptions = new Set(cliArgs.filter((arg) => arg.startsWith('-')));
-const cliPositional = cliArgs.filter((arg) => !arg.startsWith('-'));
 
-const STANDARD_ROOT = path.join(PROJECT_ROOT, cliPositional[0] || 'docs-standard');
+const STANDARD_ROOT = path.join(PROJECT_ROOT, 'docs-standard');
 const MERGE_BACKSTORY = !cliOptions.has('--no-merge-backstory');
 
 const TARGET_EXTENSIONS = new Set(['.md', '.txt', '.json', '.yml', '.yaml']);
@@ -14,7 +13,9 @@ const SKIP_DIRS = new Set([
   '.DS_Store',
   'node_modules',
   '.tmp',
+  'tmp',
   'web',
+  'data-template',
   'docs-standard',
   'web/.parcel-cache',
   '.cache',

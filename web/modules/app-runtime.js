@@ -128,6 +128,17 @@ function parseHeroSkillHeaderFromLines(key, lines = [], knownNames = []) {
       continue;
     }
 
+    const explicitName = current.match(/^名称(?:[:：]\s*(.*))?$/);
+    if (explicitName) {
+      const name = stripSkillSuffixes(explicitName[1]) || key;
+      const description = lines
+        .slice(cursor + 1)
+        .map((line) => line.replace(/^描述[:：]\s*/, ''))
+        .filter((line) => !/^(?:类型|描述)[:：]\s*$/.test(line))
+        .join('\n');
+      return { name, description };
+    }
+
     if (NEW_SKILL_MARKERS.test(current) || /^新增/.test(current)) {
       cursor += 1;
       continue;
@@ -244,7 +255,7 @@ function buildHeroSkillsFallback(sections = []) {
     const parsed = parseHeroSkillHeaderFromLines(key, lines, knownNames);
     const name = trimKnownSkillName(parsed.name || key, knownNames);
     const description = parsed.description;
-    const signature = normalizeMatchValue(name) || normalizeMatchValue(key);
+    const signature = normalizeMatchValue(key);
     if (seen.has(signature)) {
       continue;
     }
@@ -270,7 +281,7 @@ function buildHeroSkillCards(doc) {
   for (const item of sourceEntries) {
     const key = normalizeDisplayValue(item.key);
     const name = normalizeDisplayValue(item.name || key);
-    const signature = normalizeMatchValue(name) || normalizeMatchValue(key);
+    const signature = `${normalizeMatchValue(key)}::${normalizeMatchValue(name)}`;
     if (!signature || used.has(signature)) {
       continue;
     }

@@ -113,6 +113,17 @@ function parseHeroSkillHeaderFromLines(key, lines, candidateNames = []) {
       continue;
     }
 
+    const explicitName = current.match(/^名称(?:[:：]\s*(.*))?$/);
+    if (explicitName) {
+      const name = stripSkillSuffixes(explicitName[1]) || key;
+      const description = lines
+        .slice(cursor + 1)
+        .map((line) => line.replace(/^描述[:：]\s*/, ''))
+        .filter((line) => !/^(?:类型|描述)[:：]\s*$/.test(line))
+        .join('\n');
+      return { name, description };
+    }
+
     const passivePrefix = current.match(/^(?:被动|主动)[:：]\s*(.+)$/);
     if (passivePrefix) {
       const name = stripSkillSuffixes(passivePrefix[1]);
@@ -310,7 +321,7 @@ export function collectHeroSkillsFromSections(sections = [], imagePaths = []) {
 
       if (next && nextKey && nextValue) {
         const mergedName = trimKnownSkillName(nextKey, knownSkillNames);
-        const dedupeKey = normalizeMatchValue(mergedName) || normalizeMatchValue(key);
+        const dedupeKey = normalizeMatchValue(key);
         if (!seen.has(dedupeKey)) {
           seen.add(dedupeKey);
           const mergedDesc = nextValue;
@@ -339,7 +350,7 @@ export function collectHeroSkillsFromSections(sections = [], imagePaths = []) {
     }
 
     const name = trimKnownSkillName(parsed.name || key, knownSkillNames);
-    const dedupeKey = normalizeMatchValue(name) || normalizeMatchValue(key);
+    const dedupeKey = normalizeMatchValue(key);
     if (seen.has(dedupeKey)) {
       continue;
     }
