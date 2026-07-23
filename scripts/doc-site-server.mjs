@@ -2,12 +2,15 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createServer } from 'node:http';
 import { createReadStream } from 'node:fs';
+import { spawn } from 'node:child_process';
 
 const PORT = Number(process.env.PORT || 4173);
 const PROJECT_ROOT = process.cwd();
 const DOC_ROOT = path.join(PROJECT_ROOT, 'design-data');
 const ASSET_ROOT = path.join(PROJECT_ROOT, 'assets');
 const WEB_ROOT = path.join(PROJECT_ROOT, 'web');
+const STANDARDIZE_SCRIPT = path.join(PROJECT_ROOT, 'scripts', 'standardize-docs.mjs');
+const BUILD_STATIC_SCRIPT = path.join(PROJECT_ROOT, 'scripts', 'build-static-doc-site.mjs');
 
 const TEXT_EXTENSIONS = new Set(['.md', '.txt', '.json', '.yml', '.yaml']);
 const IGNORE_DIRS = new Set(['.git', '.DS_Store', '.tmp', 'node_modules']);
@@ -25,6 +28,7 @@ const MIME_TYPES = new Map([
   ['.webp', 'image/webp'],
 ]);
 const EDIT_ROOT_PREFIXES = ['design-data/', 'docs-standard/design-data/'];
+let rebuildInProgress = false;
 
 function normalizeSeparator(filePath) {
   return filePath.split(path.sep).join('/');
@@ -32,6 +36,63 @@ function normalizeSeparator(filePath) {
 
 function trimExt(name) {
   return name.replace(/\.md$|\.txt$/i, '').replace(/\.json$/i, '');
+}
+
+function normalizeStandardizeSourceFilter(rawPath = '') {
+  const safePath = safePathFromQuery(rawPath);
+  if (!safePath) {
+    return '';
+  }
+  if (safePath === 'docs-standard' || safePath === 'design-data') {
+    return '';
+  }
+  if (safePath.startsWith('design-data/')) {
+    return safePath;
+  }
+  if (safePath.startsWith('docs-standard/design-data/')) {
+    return safePath.replace(/^docs-standard\/design-data\//, 'design-data/');
+  }
+  if (safePath.startsWith('docs-standard/')) {
+    return '';
+  }
+  return '';
+}
+
+function runNodeScript(scriptPath, args = []) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [scriptPath, ...args], {
+      cwd: PROJECT_ROOT,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: process.env,
+    });
+
+    let stdout = '';
+    let stderr = '';
+
+    child.stdout.on('data', (chunk) => {
+      stdout += chunk.toString();
+    });
+    child.stderr.on('data', (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    child.on('error', (error) => {
+      reject(error);
+    });
+
+    child.on('close', (code, signal) => {
+      if (signal) {
+        reject(new Error(`${path.basename(scriptPath)} interrupted: ${signal}`));
+        return;
+      }
+      if (code !== 0) {
+        const details = (stderr || stdout || 'no output').trim();
+        reject(new Error(`${path.basename(scriptPath)} failed with exit code ${code}. ${details}`));
+        return;
+      }
+      resolve({ code, stdout: stdout.trim(), stderr: stderr.trim() });
+    });
+  });
 }
 
 function classifyEntry(relativePath) {
@@ -265,27 +326,43 @@ function isAllowedEditPath(relativePath) {
   return EDIT_ROOT_PREFIXES.some((prefix) => relativePath.startsWith(prefix));
 }
 
-async function resolveEditableFilePath(relativePath) {
+async function resolveEditableFilePath(relativePath, options = {}) {
+  const { allowCreate = false } = options;
   const candidates = [relativePath];
   if (relativePath.startsWith('docs-standard/')) {
     candidates.push(relativePath.replace(/^docs-standard\//, ''));
   }
 
+  let fallbackCandidate = null;
   for (const candidate of candidates) {
     if (!candidate || !isAllowedEditPath(candidate)) {
       continue;
+    }
+    if (!fallbackCandidate) {
+      const fallbackAbsolutePath = path.join(PROJECT_ROOT, candidate);
+      fallbackCandidate = { relativePath: candidate, absolutePath: fallbackAbsolutePath };
     }
     const absolutePath = path.join(PROJECT_ROOT, candidate);
     try {
       const stat = await fs.stat(absolutePath);
       if (stat.isFile()) {
-        return { relativePath: candidate, absolutePath };
+        return {
+          relativePath: candidate,
+          absolutePath,
+          exists: true,
+        };
       }
     } catch {
       // keep trying alternatives
     }
   }
 
+  if (allowCreate && fallbackCandidate) {
+    return {
+      ...fallbackCandidate,
+      exists: false,
+    };
+  }
   return null;
 }
 
@@ -411,14 +488,21 @@ const server = createServer(async (req, res) => {
         return;
       }
 
-      const resolved = await resolveEditableFilePath(filePath);
+      const createMode = payload?.create === true;
+      const resolved = await resolveEditableFilePath(filePath, { allowCreate: createMode });
       if (!resolved) {
         await sendApiError(res, 404, 'document not found');
         return;
       }
 
+      if (createMode && resolved.exists) {
+        await sendApiError(res, 409, 'document already exists');
+        return;
+      }
+
       const { absolutePath, relativePath: resolvedPath } = resolved;
       try {
+        await fs.mkdir(path.dirname(absolutePath), { recursive: true });
         await fs.writeFile(absolutePath, payload.content, 'utf8');
       } catch (error) {
         await sendApiError(res, 500, error?.message || 'failed to save');
@@ -435,6 +519,60 @@ const server = createServer(async (req, res) => {
     res.statusCode = 405;
     res.setHeader('Allow', 'GET, POST, PUT');
     res.end('method not allowed');
+    return;
+  }
+
+  if (pathname === '/api/rebuild') {
+    if (req.method !== 'POST') {
+      res.statusCode = 405;
+      res.setHeader('Allow', 'POST');
+      res.end('method not allowed');
+      return;
+    }
+
+    if (rebuildInProgress) {
+      await sendApiError(res, 409, 'rebuild already in progress');
+      return;
+    }
+
+    let payload;
+    try {
+      payload = await readRequestJsonBody(req);
+    } catch (error) {
+      await sendApiError(res, 400, `invalid json: ${error?.message || 'parse error'}`);
+      return;
+    }
+
+    const requestedSource = typeof payload?.source === 'string'
+      ? payload.source
+      : (typeof payload?.path === 'string' ? payload.path : '');
+    const sourceFilter = normalizeStandardizeSourceFilter(requestedSource);
+    const startedAt = Date.now();
+    rebuildInProgress = true;
+
+    try {
+      if (sourceFilter) {
+        await runNodeScript(STANDARDIZE_SCRIPT, [sourceFilter]);
+      } else {
+        await runNodeScript(STANDARDIZE_SCRIPT, []);
+      }
+      const standardResult = await runNodeScript(BUILD_STATIC_SCRIPT, []);
+
+      const elapsedMs = Date.now() - startedAt;
+      createApiResponse(res, {
+        ok: true,
+        mode: sourceFilter ? 'partial' : 'full',
+        source: sourceFilter || null,
+        generatedAt: new Date().toISOString(),
+        elapsedMs,
+        message: `rebuild finished in ${elapsedMs}ms`,
+        stdout: standardResult.stdout || '',
+      });
+    } catch (error) {
+      await sendApiError(res, 500, error?.message || 'rebuild failed');
+    } finally {
+      rebuildInProgress = false;
+    }
     return;
   }
 

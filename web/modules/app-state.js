@@ -2,6 +2,7 @@ export const PAGE_BASE = new URL('./', location.href);
 export const DATA_INDEX_URL = new URL('data/index.json', PAGE_BASE).href;
 export const ASSET_BASE_URL = new URL('../', PAGE_BASE).href;
 export const DOC_API_URL = new URL('/api/doc', PAGE_BASE).href;
+export const DOC_REBUILD_URL = new URL('/api/rebuild', PAGE_BASE).href;
 
 export const appState = {
   docs: [],
@@ -9,8 +10,12 @@ export const appState = {
   activeTab: 'all',
   generatedStatus: '',
   isEditing: false,
+  isRebuilding: false,
+  isCreating: false,
+  isCreatePathValid: true,
   activeEditPath: '',
   activeEditSource: '',
+  activeCreatePath: '',
 };
 
 export const domElements = {
@@ -30,10 +35,14 @@ export const domElements = {
   contentEl: document.getElementById('docContent'),
   galleryEl: document.getElementById('heroGallery'),
   editActionsEl: document.getElementById('docEditActions'),
+  editCreateBtnEl: document.getElementById('docCreateBtn'),
   editBtnEl: document.getElementById('docEditBtn'),
   editSaveBtnEl: document.getElementById('docSaveBtn'),
   editCancelBtnEl: document.getElementById('docCancelBtn'),
+  editRebuildBtnEl: document.getElementById('docRebuildBtn'),
   editPathEl: document.getElementById('docEditPath'),
+  createPathWrapEl: document.getElementById('docCreatePathWrap'),
+  createPathInputEl: document.getElementById('docCreatePathInput'),
   editStatusEl: document.getElementById('docEditStatus'),
   editEditorEl: document.getElementById('docSourceEditor'),
   editPanelEl: document.getElementById('docEditPanel'),
@@ -49,7 +58,14 @@ export const APP_ERROR_MESSAGES = {
   noEditablePath: '该文档当前未绑定到可编辑源文件',
   loadingSource: '正在读取源文档...',
   savingSource: '正在保存源码...',
-  saveSuccess: '保存成功，页面已更新预览；如需完整重建索引请手动执行 build-static-doc-site',
+  saveSuccess: '保存成功，正在重建索引...',
+  createSuccess: '新建成功，正在重建索引...',
+  createPathRequired: '请先填写新建路径',
+  createPathInvalid: '新建路径无效',
+  createPathPlaceholder: '请输入可编辑路径（如 design-data/xxx.md）',
+  rebuildStarting: '重建索引中...',
+  rebuildSuccess: '重建完成，文档已刷新',
+  rebuildFailed: '重建失败，请稍后重试',
 };
 
 export const TAB_DEFINITIONS = [

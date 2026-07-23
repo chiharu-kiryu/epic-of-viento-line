@@ -3,6 +3,7 @@ import {
   domElements,
   DATA_INDEX_URL,
   DOC_API_URL,
+  DOC_REBUILD_URL,
   CATEGORY_LABELS,
   CATEGORY_TAG,
   CATEGORY_ORDER,
@@ -43,10 +44,14 @@ const {
   contentEl,
   galleryEl,
   editActionsEl,
+  editCreateBtnEl,
   editBtnEl,
   editSaveBtnEl,
   editCancelBtnEl,
+  editRebuildBtnEl,
   editPathEl,
+  createPathWrapEl,
+  createPathInputEl,
   editStatusEl,
   editEditorEl,
   editPanelEl,
@@ -55,6 +60,169 @@ const {
   leftVisibleStatEl,
   leftLegendBodyEl,
 } = domElements;
+
+const REBUILD_TEXT = '重建索引';
+let rebuildProgressTimer = null;
+let rebuildProgressStart = 0;
+
+function formatElapsedSeconds(startAt) {
+  const elapsed = Math.max(0, Date.now() - startAt);
+  return `${(elapsed / 1000).toFixed(1)}s`;
+}
+
+function normalizeCreatePathValue(rawPath) {
+  return normalizeDisplayValue(rawPath).replace(/\\\\/g, '/');
+}
+
+function getCreateBaseDirectory(sourcePath) {
+  const normalizedPath = normalizeCreatePathValue(sourcePath);
+  if (!normalizedPath.startsWith('design-data/')) {
+    return 'design-data/';
+  }
+  const lastSlash = normalizedPath.lastIndexOf('/');
+  if (lastSlash === -1) {
+    return 'design-data/';
+  }
+  return `${normalizedPath.slice(0, lastSlash + 1)}`;
+}
+
+function ensureMarkdownLikeExtension(sourcePath) {
+  const trimmed = normalizeDisplayValue(sourcePath);
+  if (!trimmed) {
+    return '';
+  }
+  if (/\.[A-Za-z0-9]+$/.test(trimmed)) {
+    return trimmed;
+  }
+  return `${trimmed}.txt`;
+}
+
+function getSuggestedCreatePath(sourcePath = '') {
+  const base = getCreateBaseDirectory(sourcePath) || 'design-data/';
+  const timestamp = new Date().toISOString().replace(/[-:.T]/g, '').replace(/Z$/, '');
+  return `${base}新建文档_${timestamp}.txt`;
+}
+
+function getCreateInputPath() {
+  if (!createPathInputEl) {
+    return '';
+  }
+  return normalizeCreatePathValue(createPathInputEl.value);
+}
+
+function isInvalidCreatePath(pathValue) {
+  const normalizedPath = normalizeCreatePathValue(pathValue);
+  if (!normalizedPath) {
+    return APP_ERROR_MESSAGES.createPathRequired;
+  }
+  if (normalizedPath.startsWith('/') || /^[A-Za-z]:\//.test(normalizedPath)) {
+    return '路径不能是绝对路径';
+  }
+  const segments = normalizedPath.split('/').filter(Boolean);
+  if (segments.some((segment) => segment === '.' || segment === '..')) {
+    return '路径不能包含 . 或 .. 路径段';
+  }
+  if (!normalizedPath.startsWith('design-data/')
+    && !normalizedPath.startsWith('docs-standard/design-data/')) {
+    return '路径必须以 design-data/ 或 docs-standard/design-data/ 开头';
+  }
+  if (normalizedPath.endsWith('/')) {
+    return '路径不能以 / 结尾';
+  }
+  if (/[<>:"|?*]/.test(normalizedPath)) {
+    return '路径包含非法字符';
+  }
+  return '';
+}
+
+function validateCreatePath(rawPath) {
+  const normalizedPath = normalizeCreatePathValue(rawPath);
+  const errorMessage = isInvalidCreatePath(normalizedPath);
+  if (errorMessage) {
+    return {
+      isValid: false,
+      value: normalizedPath,
+      message: `${APP_ERROR_MESSAGES.createPathInvalid}：${errorMessage}`,
+    };
+  }
+  return {
+    isValid: true,
+    value: normalizedPath,
+    message: '',
+  };
+}
+
+function setCreatePath(pathValue, fallback = '', ensureExt = false) {
+  if (!createPathInputEl) {
+    return '';
+  }
+  const rawValue = normalizeCreatePathValue(pathValue || fallback || getCreateInputPath());
+  const value = ensureExt ? ensureMarkdownLikeExtension(rawValue) : rawValue;
+  const validation = validateCreatePath(value);
+
+  createPathInputEl.value = value;
+  state.isCreatePathValid = validation.isValid;
+  createPathInputEl.classList.toggle('is-invalid', !validation.isValid);
+  return value;
+}
+
+function updateCreatePathValidation(showStatus = false) {
+  if (!state.isCreating || !createPathInputEl) {
+    return {
+      isValid: state.isCreating ? state.isCreatePathValid : true,
+      value: getCreateInputPath(),
+      message: '',
+    };
+  }
+  const validation = validateCreatePath(createPathInputEl.value);
+  setCreatePath(validation.value);
+  if (showStatus) {
+    if (!validation.isValid) {
+      setEditorStatus(validation.message);
+    } else {
+      setEditorStatus('');
+    }
+  }
+  if (editSaveBtnEl && state.isCreating) {
+    editSaveBtnEl.disabled = !validation.isValid || state.isRebuilding;
+  }
+  return validation;
+}
+
+function startRebuildProgressIndicator() {
+  if (rebuildProgressTimer) {
+    clearInterval(rebuildProgressTimer);
+  }
+  rebuildProgressStart = Date.now();
+
+  if (editRebuildBtnEl && !editRebuildBtnEl.dataset.rebuildText) {
+    editRebuildBtnEl.dataset.rebuildText = editRebuildBtnEl.textContent || REBUILD_TEXT;
+  }
+  if (editRebuildBtnEl) {
+    editRebuildBtnEl.classList.add('is-loading');
+  }
+
+  const refreshProgress = () => {
+    const elapsedText = formatElapsedSeconds(rebuildProgressStart);
+    if (editRebuildBtnEl && editRebuildBtnEl.hidden === false) {
+      editRebuildBtnEl.textContent = `重建中 ${elapsedText}`;
+    }
+    setEditorStatus(`${APP_ERROR_MESSAGES.rebuildStarting} ${formatElapsedSeconds(rebuildProgressStart)}`);
+  };
+  refreshProgress();
+  rebuildProgressTimer = setInterval(refreshProgress, 300);
+}
+
+function stopRebuildProgressIndicator() {
+  if (rebuildProgressTimer) {
+    clearInterval(rebuildProgressTimer);
+    rebuildProgressTimer = null;
+  }
+  if (editRebuildBtnEl) {
+    editRebuildBtnEl.classList.remove('is-loading');
+    editRebuildBtnEl.textContent = editRebuildBtnEl.dataset.rebuildText || REBUILD_TEXT;
+  }
+}
 
 function normalizeDisplayValue(value) {
   return (value || '').toString().trim();
@@ -128,6 +296,20 @@ function getSourcePath(doc) {
   return normalizeDisplayValue(source);
 }
 
+function toRebuildFilter(sourcePath) {
+  const normalized = normalizeDisplayValue(sourcePath).replace(/^[/\\]+/, '');
+  if (!normalized) {
+    return '';
+  }
+  if (normalized.startsWith('design-data/')) {
+    return normalized;
+  }
+  if (normalized.startsWith('docs-standard/design-data/')) {
+    return normalized.replace(/^docs-standard\/design-data\//, 'design-data/');
+  }
+  return '';
+}
+
 function isEditableSourcePath(sourcePath) {
   return (
     typeof sourcePath === 'string'
@@ -179,8 +361,11 @@ function getEditableFallbackContent(doc) {
 
 function resetDocEditorState() {
   state.isEditing = false;
+  state.isCreating = false;
+  state.isCreatePathValid = true;
   state.activeEditPath = '';
   state.activeEditSource = '';
+  state.activeCreatePath = '';
   if (editStatusEl) {
     editStatusEl.textContent = '';
   }
@@ -197,6 +382,22 @@ function resetDocEditorState() {
   }
   if (editCancelBtnEl) {
     editCancelBtnEl.hidden = true;
+  }
+  if (editRebuildBtnEl) {
+    editRebuildBtnEl.hidden = true;
+    editRebuildBtnEl.disabled = false;
+  }
+  if (editCreateBtnEl) {
+    editCreateBtnEl.hidden = false;
+    editCreateBtnEl.disabled = false;
+  }
+  if (createPathWrapEl) {
+    createPathWrapEl.classList.add('is-hidden');
+  }
+  if (createPathInputEl) {
+    createPathInputEl.value = '';
+    createPathInputEl.placeholder = APP_ERROR_MESSAGES.createPathPlaceholder;
+    createPathInputEl.classList.remove('is-invalid');
   }
 }
 
@@ -676,30 +877,69 @@ function setEditorStatus(message = '') {
   }
 }
 
-function setEditButtons({ isEditing, canEdit }) {
+function setEditButtons({ isEditing, isCreating, canEdit }) {
+  const isCreateMode = !!isCreating;
+  const saveText = isCreateMode ? '创建' : '保存';
+  const isEditorVisible = isEditing || isCreateMode;
+
+  if (editCreateBtnEl) {
+    editCreateBtnEl.hidden = isCreateMode || isEditorVisible;
+    editCreateBtnEl.disabled = false;
+  }
+
   if (editBtnEl) {
-    editBtnEl.hidden = !canEdit;
+    editBtnEl.hidden = isCreateMode || !canEdit;
     editBtnEl.disabled = !canEdit;
     editBtnEl.textContent = isEditing ? '返回' : '编辑';
   }
+
   if (editSaveBtnEl) {
-    editSaveBtnEl.hidden = !isEditing;
-    editSaveBtnEl.disabled = !isEditing;
+    editSaveBtnEl.hidden = !isEditorVisible;
+    editSaveBtnEl.textContent = saveText;
+    const createPathBlocked = isCreateMode && state.isCreatePathValid === false;
+    editSaveBtnEl.disabled = !isEditorVisible || state.isRebuilding || createPathBlocked;
+    editSaveBtnEl.classList.toggle('doc-btn-success', isEditorVisible);
   }
+
   if (editCancelBtnEl) {
-    editCancelBtnEl.hidden = !isEditing;
+    editCancelBtnEl.hidden = !isEditorVisible;
   }
+
+  if (editRebuildBtnEl) {
+    editRebuildBtnEl.hidden = !canEdit || isEditing || isCreateMode;
+    editRebuildBtnEl.disabled = !canEdit || isEditorVisible || state.isRebuilding;
+  }
+
+  if (createPathWrapEl) {
+    createPathWrapEl.classList.toggle('is-hidden', !isCreateMode);
+  }
+
   if (docEditorWrapEl) {
-    docEditorWrapEl.hidden = !isEditing;
+    docEditorWrapEl.hidden = !isEditorVisible;
   }
+
   if (editEditorEl) {
-    editEditorEl.disabled = !isEditing;
+    editEditorEl.disabled = !isEditorVisible;
+  }
+
+  if (editCreateBtnEl && isCreateMode) {
+    editCreateBtnEl.disabled = true;
+  }
+
+  if (!isCreateMode && isEditorVisible) {
+    editCreateBtnEl.hidden = true;
   }
 }
 
 function applyEditMode(doc, isEditing) {
   state.isEditing = isEditing;
-  setEditButtons({ isEditing, canEdit: isEditableSourcePath(getSourcePath(doc)) });
+  state.isCreating = false;
+  state.isCreatePathValid = true;
+  setEditButtons({
+    isEditing,
+    isCreating: false,
+    canEdit: isEditableSourcePath(getSourcePath(doc)),
+  });
   if (!isEditing) {
     state.activeEditPath = '';
     state.activeEditSource = '';
@@ -714,6 +954,43 @@ function applyEditMode(doc, isEditing) {
     editEditorEl.focus();
   }
   contentEl.classList.toggle('is-empty', false);
+}
+
+function enterCreateMode() {
+  if (state.isEditing && state.isCreating) {
+    return;
+  }
+  if (state.isEditing) {
+    exitEditMode();
+  }
+
+  const activeDoc = state.docs.find((item) => item.path === state.activePath);
+  const baseSourcePath = isEditableSourcePath(getSourcePath(activeDoc || {}))
+    ? getSourcePath(activeDoc || {})
+    : 'design-data/';
+  const suggestedPath = getSuggestedCreatePath(baseSourcePath);
+
+  state.isEditing = true;
+  state.isCreating = true;
+  state.activeEditPath = '__new__';
+  state.activeCreatePath = suggestedPath;
+  setEditButtons({
+    isEditing: false,
+    isCreating: true,
+    canEdit: true,
+  });
+  if (editPathEl) {
+    editPathEl.textContent = `新建源：${suggestedPath}`;
+  }
+  if (editEditorEl) {
+    editEditorEl.value = '';
+  }
+  setCreatePath(suggestedPath);
+  updateCreatePathValidation();
+  contentEl.classList.add('is-hidden');
+  contentEl.hidden = true;
+  contentEl.classList.toggle('is-empty', false);
+  setEditorStatus('输入新建路径与内容后，点击“创建”');
 }
 
 async function fetchEditableSource(pathValue) {
@@ -760,6 +1037,94 @@ function enterEditMode() {
 }
 
 async function saveCurrentDoc() {
+  if (!editEditorEl) {
+    return;
+  }
+
+  if (state.isCreating) {
+    await saveNewDoc();
+    return;
+  }
+
+  await saveExistingDoc();
+}
+
+async function saveNewDoc() {
+  const validation = updateCreatePathValidation(true);
+  if (!validation.isValid) {
+    return;
+  }
+  const sourcePath = ensureMarkdownLikeExtension(validation.value);
+  setCreatePath(sourcePath, '', true);
+  if (!sourcePath) {
+    setEditorStatus(APP_ERROR_MESSAGES.createPathRequired);
+    return;
+  }
+
+  const content = editEditorEl.value;
+  setEditorStatus(APP_ERROR_MESSAGES.savingSource);
+  if (editSaveBtnEl) {
+    editSaveBtnEl.disabled = true;
+  }
+  if (editRebuildBtnEl) {
+    editRebuildBtnEl.disabled = true;
+  }
+
+  try {
+    const response = await fetch(DOC_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        path: sourcePath,
+        content,
+        create: true,
+      }),
+    });
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      const extra = payload?.error ? `：${payload.error}` : '';
+      setEditorStatus(`新建失败（HTTP ${response.status}）${extra}`);
+      if (editSaveBtnEl) {
+        editSaveBtnEl.disabled = false;
+      }
+      if (editRebuildBtnEl) {
+        editRebuildBtnEl.disabled = false;
+      }
+      return;
+    }
+
+    await response.json();
+    const createdSource = sourcePath;
+    state.activeCreatePath = createdSource;
+    state.isCreating = false;
+    state.isEditing = false;
+    state.activeEditPath = '';
+    state.activeEditSource = '';
+    setEditorStatus(APP_ERROR_MESSAGES.createSuccess);
+    await rebuildIndexForDoc({
+      path: createdSource,
+      meta: {},
+      sourcePath: createdSource,
+    }, {
+      preferredPath: createdSource,
+    });
+    await loadData(createdSource);
+  } catch (error) {
+    setEditorStatus(`新建失败：${error?.message || '未知错误'}`);
+  } finally {
+    if (editSaveBtnEl) {
+      editSaveBtnEl.disabled = state.isRebuilding;
+    }
+    if (editRebuildBtnEl) {
+      editRebuildBtnEl.disabled = false;
+    }
+  }
+}
+
+async function saveExistingDoc() {
   const doc = state.docs.find((item) => item.path === state.activePath);
   if (!doc || !isEditableSourcePath(getSourcePath(doc))) {
     return;
@@ -774,6 +1139,9 @@ async function saveCurrentDoc() {
   setEditorStatus(APP_ERROR_MESSAGES.savingSource);
   if (editSaveBtnEl) {
     editSaveBtnEl.disabled = true;
+  }
+  if (editRebuildBtnEl) {
+    editRebuildBtnEl.disabled = true;
   }
 
   try {
@@ -794,6 +1162,9 @@ async function saveCurrentDoc() {
       if (editSaveBtnEl) {
         editSaveBtnEl.disabled = false;
       }
+      if (editRebuildBtnEl) {
+        editRebuildBtnEl.disabled = false;
+      }
       return;
     }
 
@@ -805,24 +1176,114 @@ async function saveCurrentDoc() {
     if (editSaveBtnEl) {
       editSaveBtnEl.disabled = false;
     }
+    if (editRebuildBtnEl) {
+      editRebuildBtnEl.disabled = false;
+    }
     applyEditMode(doc, true);
     renderContent(doc);
     renderMeta(doc);
-    setTimeout(() => {
-      if (state.isEditing && state.activePath === doc.path) {
-        setEditorStatus(APP_ERROR_MESSAGES.saveSuccess);
-      }
-    }, 1400);
+    await rebuildIndexForDoc(doc);
   } catch (error) {
     const message = `保存失败：${error?.message || '未知错误'}`;
     setEditorStatus(message);
     if (editSaveBtnEl) {
       editSaveBtnEl.disabled = false;
     }
+    if (editRebuildBtnEl) {
+      editRebuildBtnEl.disabled = false;
+    }
+  }
+}
+
+async function rebuildIndexForDoc(doc, options = {}) {
+  if (!doc) {
+    return;
+  }
+
+  const sourcePath = getSourcePath(doc);
+  if (!isEditableSourcePath(sourcePath)) {
+    return;
+  }
+
+  const rebuildFilter = toRebuildFilter(sourcePath);
+  state.isRebuilding = true;
+  const preferredPath = options.preferredPath || state.activePath;
+  const isCurrentDocEditing = state.isEditing && !state.isCreating && state.activeEditPath === doc.path;
+  setEditButtons({
+    isEditing: isCurrentDocEditing,
+    isCreating: false,
+    canEdit: true,
+  });
+  startRebuildProgressIndicator();
+
+  try {
+    const response = await fetch(DOC_REBUILD_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        source: rebuildFilter,
+      }),
+    });
+
+    if (!response.ok) {
+      const message = `重建失败（HTTP ${response.status}）`;
+      const payload = await response.json().catch(() => null);
+      const extra = payload?.error ? `：${payload.error}` : '';
+      setEditorStatus(`${message}${extra}`);
+      stopRebuildProgressIndicator();
+      return;
+    }
+
+    await response.json();
+    await loadData(preferredPath);
+    if (!state.isEditing && isCurrentDocEditing) {
+      enterEditMode();
+    } else if (state.isEditing && state.activeEditPath === doc.path) {
+      const activeDoc = state.docs.find((item) => item.path === state.activePath);
+      if (activeDoc) {
+        syncDocEditorSource(activeDoc).then(() => {
+          if (state.activePath === activeDoc.path) {
+            fillSourcePreview(activeDoc, getSourcePath(activeDoc));
+          }
+        });
+      }
+    }
+    const elapsed = formatElapsedSeconds(rebuildProgressStart);
+    setEditorStatus(`${APP_ERROR_MESSAGES.rebuildSuccess}（耗时 ${elapsed}）`);
+  } catch (error) {
+    setEditorStatus(`重建失败：${error?.message || '未知错误'}`);
+  } finally {
+    stopRebuildProgressIndicator();
+    state.isRebuilding = false;
+    const currentDoc = state.docs.find((item) => item.path === state.activePath);
+    setEditButtons({
+      isEditing: state.isEditing && state.activeEditPath === (currentDoc?.path || ''),
+      isCreating: state.isCreating,
+      canEdit: isEditableSourcePath(getSourcePath(currentDoc || {})),
+    });
+    if (editRebuildBtnEl) {
+      editRebuildBtnEl.disabled = false;
+    }
   }
 }
 
 function exitEditMode() {
+  if (state.isCreating) {
+    state.isCreating = false;
+    state.activeEditPath = '';
+    state.activeEditSource = '';
+    if (state.activePath) {
+      const currentDoc = state.docs.find((item) => item.path === state.activePath);
+      if (currentDoc) {
+        setEditorStatus('');
+        applyEditMode(currentDoc, false);
+        return;
+      }
+    }
+  }
+
   const doc = state.docs.find((item) => item.path === state.activePath);
   if (doc) {
     renderContent(doc);
@@ -849,18 +1310,24 @@ function updateEditorForDoc(doc) {
   const sourcePath = getSourcePath(doc);
   const canEdit = isEditableSourcePath(sourcePath);
 
-  if (!canEdit) {
-    setEditorPanelVisibility(false);
-    return;
-  }
-
   setEditorPanelVisibility(true);
   setEditorStatus('');
 
-  fillSourcePreview(doc, sourcePath);
+  if (canEdit) {
+    fillSourcePreview(doc, sourcePath);
+  } else {
+    if (editPathEl) {
+      editPathEl.textContent = '可编辑源：当前文档不可直接编辑';
+    }
+    if (editEditorEl) {
+      editEditorEl.value = '';
+    }
+  }
+
   setEditButtons({
     isEditing: state.isEditing && state.activeEditPath === doc.path,
-    canEdit: true,
+    isCreating: false,
+    canEdit,
   });
 }
 
@@ -973,7 +1440,7 @@ function renderList(filteredDocs) {
   markActiveItem();
 }
 
-function renderFilteredDocs() {
+function renderFilteredDocs(preferredPath = '') {
   const filtered = getHeroDisplayDocs(getVisibleDocs());
   updateLeftPanelStats(filtered);
   renderList(filtered);
@@ -991,10 +1458,11 @@ function renderFilteredDocs() {
   const tabText = searchInput.value.trim() ? '（已按关键词筛选）' : '';
   statusEl.textContent = `${displayText} ${tabText} ${state.generatedStatus}`;
 
-  if (!filtered.some((doc) => doc.path === state.activePath)) {
+  const desiredPath = preferredPath && filtered.some((doc) => doc.path === preferredPath) ? preferredPath : state.activePath;
+  if (!filtered.some((doc) => doc.path === desiredPath)) {
     selectDoc(filtered[0].path);
   } else {
-    selectDoc(state.activePath);
+    selectDoc(desiredPath);
   }
 
   if (categoryTabsEl) {
@@ -1064,7 +1532,7 @@ function collectSearchText(doc) {
   return `${base} ${fields} ${sections} ${blocks} ${outline}`.toLowerCase();
 }
 
-async function loadData() {
+async function loadData(preferredPath = '') {
   try {
     const response = await fetch(DATA_INDEX_URL);
     if (!response.ok) {
@@ -1090,7 +1558,7 @@ async function loadData() {
 
     state.generatedStatus = `（静态生成 ${formatTime(payload.generatedAt)}）`;
     renderTabs();
-    renderFilteredDocs();
+    renderFilteredDocs(preferredPath || state.activePath);
     updateSearchClearState();
   } catch (error) {
     statusEl.textContent = `加载失败：${error.message}`;
@@ -1115,6 +1583,9 @@ function initApp() {
 
   if (editBtnEl) {
     editBtnEl.addEventListener('click', () => {
+      if (state.isCreating) {
+        return;
+      }
       const doc = state.docs.find((item) => item.path === state.activePath);
       if (!doc) {
         return;
@@ -1127,6 +1598,27 @@ function initApp() {
     });
   }
 
+  if (editCreateBtnEl) {
+    editCreateBtnEl.addEventListener('click', () => {
+      enterCreateMode();
+    });
+  }
+
+  if (createPathInputEl) {
+    createPathInputEl.addEventListener('input', () => {
+      if (!state.isCreating) {
+        return;
+      }
+      updateCreatePathValidation(true);
+    });
+    createPathInputEl.addEventListener('blur', () => {
+      if (!state.isCreating) {
+        return;
+      }
+      updateCreatePathValidation(true);
+    });
+  }
+
   if (editSaveBtnEl) {
     editSaveBtnEl.addEventListener('click', () => {
       void saveCurrentDoc();
@@ -1136,6 +1628,16 @@ function initApp() {
   if (editCancelBtnEl) {
     editCancelBtnEl.addEventListener('click', () => {
       exitEditMode();
+    });
+  }
+
+  if (editRebuildBtnEl) {
+    editRebuildBtnEl.addEventListener('click', () => {
+      const doc = state.docs.find((item) => item.path === state.activePath);
+      if (!doc || state.isEditing) {
+        return;
+      }
+      void rebuildIndexForDoc(doc);
     });
   }
 

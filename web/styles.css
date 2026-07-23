@@ -637,6 +637,47 @@ pre {
   flex-wrap: wrap;
 }
 
+.doc-create-path-wrap {
+  margin-top: 4px;
+  border: 1px solid rgba(125, 173, 255, 0.22);
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: rgba(12, 22, 46, 0.55);
+}
+
+.doc-create-path-wrap.is-hidden {
+  display: none;
+}
+
+.doc-create-path-label {
+  color: var(--muted);
+  font-size: 11px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.doc-create-path-input {
+  width: 100%;
+  border: 1px solid rgba(136, 185, 255, 0.42);
+  border-radius: 8px;
+  background: rgba(8, 14, 28, 0.88);
+  color: var(--text);
+  padding: 5px 8px;
+  font-size: 11px;
+  font-family: inherit;
+}
+
+.doc-create-path-input:focus-visible {
+  outline: none;
+  border-color: rgba(145, 202, 255, 0.7);
+  box-shadow: 0 0 0 3px rgba(145, 202, 255, 0.18);
+}
+
+.doc-create-path-input.is-invalid {
+  border-color: rgba(255, 130, 130, 0.72);
+  box-shadow: 0 0 0 3px rgba(255, 130, 130, 0.15);
+}
+
 .doc-btn {
   border: 1px solid rgba(152, 197, 255, 0.45);
   border-radius: 8px;
@@ -658,6 +699,37 @@ pre {
 .doc-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+.doc-btn.is-loading {
+  position: relative;
+  padding-left: 26px;
+  color: #f3f9ff;
+}
+
+.doc-btn.is-loading::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  margin-top: -5.5px;
+  border: 2px solid rgba(192, 220, 255, 0.42);
+  border-top-color: #a0d0ff;
+  border-radius: 50%;
+  animation: doc-btn-spin 0.8s linear infinite;
+}
+
+.doc-btn.is-loading:disabled {
+  opacity: 0.78;
+  cursor: wait;
+}
+
+@keyframes doc-btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .doc-btn-success {

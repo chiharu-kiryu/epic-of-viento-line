@@ -68,10 +68,16 @@
                 <div class="doc-edit-meta">
                   <div id="docEditPath" class="doc-edit-path muted">可编辑源：—</div>
                   <div id="docEditActions" class="doc-edit-actions">
+                    <button id="docCreateBtn" type="button" class="doc-btn doc-btn-ghost">新建文档</button>
                     <button id="docEditBtn" type="button" class="doc-btn">编辑</button>
                     <button id="docSaveBtn" type="button" class="doc-btn doc-btn-success">保存</button>
                     <button id="docCancelBtn" type="button" class="doc-btn doc-btn-ghost">取消</button>
+                    <button id="docRebuildBtn" type="button" class="doc-btn doc-btn-ghost">重建索引</button>
                   </div>
+                </div>
+                <div id="docCreatePathWrap" class="doc-create-path-wrap is-hidden">
+                  <label for="docCreatePathInput" class="doc-create-path-label">新建路径（例如: design-data/xxx.md）</label>
+                  <input id="docCreatePathInput" class="doc-create-path-input" type="text" placeholder="design-data/xxx.md" />
                 </div>
                 <div id="docEditorWrap" class="doc-editor-wrap">
                   <textarea id="docSourceEditor" class="doc-editor" rows="14" spellcheck="false" placeholder="编辑文档内容"></textarea>
