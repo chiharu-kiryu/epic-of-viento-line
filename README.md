@@ -23,17 +23,59 @@
 
 ## 文档网页化预览（HTML5）
 
-新增了纯静态文档仓库站点，主页面位于 [web/index.html](/Users/Shared/chroot/dev/epic-of-viento-line/web/index.html)。
+新增了文档仓库站点，主页面位于 [web/index.html](/Users/Shared/chroot/dev/epic-of-viento-line/web/index.html)。
 
-启动步骤：
-1. 运行一键启动脚本：`./scripts/start-doc-site.sh`
+站点支持两种模式：
+
+- 浏览模式（只读）：使用标准化后的静态页面。
+- 编辑模式（可新建 / 编辑 / 重建）：在页面提供编辑接口的前提下运行服务端 API。
+
+### 一键启动（推荐）
+
+`./scripts/start-doc-site.sh` 支持动态模式切换，`--mode` 可选：
+
+- `--mode browse`：浏览模式（默认，只读）
+- `--mode edit`：编辑模式（带 `/api/doc`、`/api/rebuild`）
+
+示例：
+
+- 浏览：`./scripts/start-doc-site.sh --mode browse --no-open`
+- 编辑：`./scripts/start-doc-site.sh --mode edit --no-open`
+
+也可以继续使用兼容入口：
+
+- `./scripts/start-doc-site-edit.sh --no-open`（等价于 `--mode edit`）
+- `./scripts/start-doc-site-live.sh --no-open`（等价于 `--mode edit`）
+
+### 浏览模式
+
+1. 运行：`./scripts/start-doc-site.sh --mode browse --no-open`
 2. 默认会先标准化全部文档到 [docs-standard](/Users/Shared/chroot/dev/epic-of-viento-line/docs-standard)（不改动原文件），再生成清单并启动本地服务。
-3. 浏览器自动打开 `http://127.0.0.1:4173/web/`
-4. 命令参数可选：
+3. 默认行为：`backstory` 独立输出，不会合并到英雄文档；如果需要回到“合并 backstory”的模式，可在启动时加 `--merge-backstory`。
+4. 浏览器自动打开 `http://127.0.0.1:4173/web/`
+5. 命令参数可选：
    - `./scripts/start-doc-site.sh --port 8080`
    - `./scripts/start-doc-site.sh --no-build`（保留现有 `web/data/index.json`，不重新构建）
    - `./scripts/start-doc-site.sh --no-standardize`（只构建索引，不重建标准化数据）
    - `./scripts/start-doc-site.sh --no-open`
+
+### 编辑模式
+
+若你要使用页面里的“新建/编辑/重建”能力，请启动编辑模式：
+
+1. 运行：`./scripts/start-doc-site.sh --mode edit --no-open`
+   - 兼容入口：`./scripts/start-doc-site-edit.sh --no-open` 或 `./scripts/start-doc-site-live.sh --no-open`
+2. 默认端口同样是 `4173`，访问：`http://127.0.0.1:4173/web/`
+3. 该命令会包含：
+   - `node scripts/standardize-docs.mjs`
+   - `node scripts/build-static-doc-site.mjs`
+   - `node scripts/doc-site-server.mjs --port 4173`
+
+参数与说明同样支持：
+- `-p / --port` 切换端口
+- `--no-open` 禁止自动打开浏览器
+- `--no-build` 跳过 `web/data/index.json` 重建
+- `--no-standardize` 跳过标准化步骤
 
 标准化脚本可单独运行：
 - `node scripts/standardize-docs.mjs`

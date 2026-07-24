@@ -1,6 +1,7 @@
 export const PAGE_BASE = new URL('./', location.href);
 export const DATA_INDEX_URL = new URL('data/index.json', PAGE_BASE).href;
 export const ASSET_BASE_URL = new URL('../', PAGE_BASE).href;
+export const DOC_CAPABILITIES_URL = new URL('/api/capabilities', PAGE_BASE).href;
 export const DOC_API_URL = new URL('/api/doc', PAGE_BASE).href;
 export const DOC_REBUILD_URL = new URL('/api/rebuild', PAGE_BASE).href;
 
@@ -9,6 +10,10 @@ export const appState = {
   activePath: '',
   activeTab: 'all',
   generatedStatus: '',
+  editInputMode: 'source',
+  editBlockDrafts: [],
+  mode: 'browse',
+  editBackendAvailable: false,
   isEditing: false,
   isRebuilding: false,
   isCreating: false,
@@ -41,10 +46,18 @@ export const domElements = {
   editCancelBtnEl: document.getElementById('docCancelBtn'),
   editRebuildBtnEl: document.getElementById('docRebuildBtn'),
   editPathEl: document.getElementById('docEditPath'),
+  editModeBarEl: document.getElementById('docEditModeBar'),
+  editSourceModeBtnEl: document.getElementById('docEditSourceModeBtn'),
+  editBlockModeBtnEl: document.getElementById('docEditBlockModeBtn'),
+  editBlockEditorEl: document.getElementById('docBlockEditor'),
   createPathWrapEl: document.getElementById('docCreatePathWrap'),
   createPathInputEl: document.getElementById('docCreatePathInput'),
   editStatusEl: document.getElementById('docEditStatus'),
   editEditorEl: document.getElementById('docSourceEditor'),
+  modeSwitchEl: document.getElementById('modeSwitch'),
+  modeBrowseBtnEl: document.getElementById('modeBrowseBtn'),
+  modeEditBtnEl: document.getElementById('modeEditBtn'),
+  modeStateEl: document.getElementById('modeStateChip'),
   editPanelEl: document.getElementById('docEditPanel'),
   docEditorWrapEl: document.getElementById('docEditorWrap'),
   leftTotalStatEl: document.getElementById('leftTotalStat'),
@@ -66,6 +79,8 @@ export const APP_ERROR_MESSAGES = {
   rebuildStarting: '重建索引中...',
   rebuildSuccess: '重建完成，文档已刷新',
   rebuildFailed: '重建失败，请稍后重试',
+  editModeUnavailable: '当前后端未开启编辑接口，已切到浏览模式。请用 `start-doc-site.sh --mode edit` 启动。',
+  granularEditUnavailable: '当前文档不支持区块编辑，已切到源码模式。',
 };
 
 export const TAB_DEFINITIONS = [

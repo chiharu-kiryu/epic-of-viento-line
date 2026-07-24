@@ -966,7 +966,9 @@ function collectHeroAbilitySegmentsFromSections(sections = [], usedKeys = new Se
   return segments;
 }
 
-function createDocButton(doc, onSelect = () => {}) {
+function createDocButton(doc, onSelect = () => {}, options = {}) {
+  const showEditAccess = options.showEditAccess === true;
+  const isEditable = options.isEditable === true;
   const category = getDisplayCategory(doc);
   const categoryLabel = CATEGORY_LABELS[category] || category || '其他';
   const groupText = doc.group ? `${doc.group}` : '';
@@ -975,7 +977,7 @@ function createDocButton(doc, onSelect = () => {}) {
   const orderedHeroImages = getHeroImagesForDisplay(doc, doc.heroSkills || []);
 
   const button = document.createElement('button');
-  button.className = `doc-item ${isHeroDoc ? 'is-hero' : ''} ${isBackstory ? 'is-backstory' : ''}`.trim();
+  button.className = `doc-item ${isHeroDoc ? 'is-hero' : ''} ${isBackstory ? 'is-backstory' : ''} ${isEditable ? 'doc-item-editable' : showEditAccess ? 'doc-item-readonly' : ''}`.trim();
   button.type = 'button';
 
   if (isHeroDoc && orderedHeroImages[0]) {
@@ -1021,6 +1023,13 @@ function createDocButton(doc, onSelect = () => {}) {
   } else {
     textWrap.appendChild(titleText);
     textWrap.appendChild(subText);
+  }
+
+  if (showEditAccess) {
+    const permissionTag = document.createElement('div');
+    permissionTag.className = isEditable ? 'doc-item-edit-access is-editable' : 'doc-item-edit-access is-readonly';
+    permissionTag.textContent = isEditable ? '可编辑' : '不可编辑';
+    textWrap.appendChild(permissionTag);
   }
 
   button.appendChild(textWrap);

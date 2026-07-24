@@ -26,12 +26,20 @@ function normalizeFilterPath(rawPath) {
     .replace(/\/+/g, '/');
 }
 
+function normalizeComparablePath(rawPath) {
+  return toPosix((rawPath || '').trim())
+    .replace(/^\.\/+/, '')
+    .replace(/\/+$/, '')
+    .replace(/\/+/g, '/')
+    .replace(/\.[A-Za-z0-9]{1,10}$/u, '');
+}
+
 function isPathMatch(candidate, filter) {
   if (!filter) {
     return false;
   }
-  const normalizedCandidate = normalizeFilterPath(candidate);
-  const normalizedFilter = normalizeFilterPath(filter);
+  const normalizedCandidate = normalizeComparablePath(candidate);
+  const normalizedFilter = normalizeComparablePath(filter);
 
   if (!normalizedFilter) {
     return false;
@@ -239,7 +247,7 @@ async function buildStandardCatalog(sourceFilters = [], options = {}) {
       const standardRelPath = toPosix(
         path.join(path.dirname(item.relPath), `${trimName(path.basename(item.relPath))}.json`)
       );
-      const standardAbsolute = path.join(STANDARD_ROOT, standardRelPath);
+      const standardAbsolute = path.join(outputRoot, standardRelPath);
       await fs.mkdir(path.dirname(standardAbsolute), { recursive: true });
       await fs.writeFile(standardAbsolute, `${JSON.stringify(item.normalized)}\n`, 'utf8');
       output.push({
@@ -259,9 +267,6 @@ async function cleanupStandardStaleFiles(sourcePaths, options = {}) {
   const outputRoot = options.outputRoot || STANDARD_ROOT;
   const { scope = [] } = options;
   const normalizedScope = scope.map(normalizeFilterPath);
-  if (sourcePaths.length === 0) {
-    return;
-  }
   const existing = await walkFiles(outputRoot);
   const validSet = new Set(sourcePaths.map((item) =>
     toPosix(path.join(path.dirname(item.source), `${trimName(path.basename(item.source))}.json`))

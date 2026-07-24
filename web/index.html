@@ -18,14 +18,19 @@
               <p>Dota2 风格档案浏览 · 统一由 docs-standard 渲染</p>
             </div>
           </div>
-          <nav class="topbar-nav" aria-label="主导航">
-            <a href="#" aria-current="page">文档库</a>
-            <a href="#">英雄</a>
-            <a href="#">物品</a>
-            <a href="#">单位</a>
-          </nav>
-        </div>
-      </header>
+            <nav class="topbar-nav" aria-label="主导航">
+              <a href="#" aria-current="page">文档库</a>
+              <a href="#">英雄</a>
+              <a href="#">物品</a>
+              <a href="#">单位</a>
+            </nav>
+            <div id="modeSwitch" class="topbar-mode" role="group" aria-label="模式切换">
+              <button id="modeBrowseBtn" type="button" class="mode-btn mode-btn-active" data-mode="browse">浏览</button>
+              <button id="modeEditBtn" type="button" class="mode-btn" data-mode="edit">编辑</button>
+              <span id="modeStateChip" class="mode-state" aria-live="polite">浏览模式</span>
+            </div>
+          </div>
+        </header>
       <main class="layout">
         <aside class="left">
           <div class="left-shell">
@@ -64,10 +69,10 @@
               </div>
               <div id="docTitle" class="doc-title">未选择文档</div>
               <div id="docSubtitle" class="doc-subtitle">请选择左侧文档后查看细节</div>
-              <div id="docEditPanel" class="doc-edit-panel is-hidden">
-                <div class="doc-edit-meta">
-                  <div id="docEditPath" class="doc-edit-path muted">可编辑源：—</div>
-                  <div id="docEditActions" class="doc-edit-actions">
+                <div id="docEditPanel" class="doc-edit-panel is-hidden">
+                  <div class="doc-edit-meta">
+                    <div id="docEditPath" class="doc-edit-path muted">可编辑源：—</div>
+                    <div id="docEditActions" class="doc-edit-actions">
                     <button id="docCreateBtn" type="button" class="doc-btn doc-btn-ghost">新建文档</button>
                     <button id="docEditBtn" type="button" class="doc-btn">编辑</button>
                     <button id="docSaveBtn" type="button" class="doc-btn doc-btn-success">保存</button>
@@ -79,6 +84,11 @@
                   <label for="docCreatePathInput" class="doc-create-path-label">新建路径（例如: design-data/xxx.md）</label>
                   <input id="docCreatePathInput" class="doc-create-path-input" type="text" placeholder="design-data/xxx.md" />
                 </div>
+                <div id="docEditModeBar" class="doc-edit-mode-bar is-hidden">
+                  <button id="docEditSourceModeBtn" type="button" class="doc-btn doc-btn-ghost doc-btn-active" data-mode="source">源码</button>
+                  <button id="docEditBlockModeBtn" type="button" class="doc-btn doc-btn-ghost" data-mode="blocks">区块</button>
+                </div>
+                <div id="docBlockEditor" class="doc-block-editor is-hidden" aria-live="polite"></div>
                 <div id="docEditorWrap" class="doc-editor-wrap">
                   <textarea id="docSourceEditor" class="doc-editor" rows="14" spellcheck="false" placeholder="编辑文档内容"></textarea>
                 </div>

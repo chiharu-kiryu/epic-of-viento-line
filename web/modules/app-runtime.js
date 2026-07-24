@@ -2,6 +2,7 @@ import {
   appState as state,
   domElements,
   DATA_INDEX_URL,
+  DOC_CAPABILITIES_URL,
   DOC_API_URL,
   DOC_REBUILD_URL,
   CATEGORY_LABELS,
@@ -50,10 +51,18 @@ const {
   editCancelBtnEl,
   editRebuildBtnEl,
   editPathEl,
+  editModeBarEl,
+  editSourceModeBtnEl,
+  editBlockModeBtnEl,
+  editBlockEditorEl,
   createPathWrapEl,
   createPathInputEl,
   editStatusEl,
   editEditorEl,
+  modeSwitchEl,
+  modeBrowseBtnEl,
+  modeEditBtnEl,
+  modeStateEl,
   editPanelEl,
   docEditorWrapEl,
   leftTotalStatEl,
@@ -67,18 +76,177 @@ const LIST_RENDER_BATCH_SIZE = 120;
 const CATEGORY_ORDER_INDEX = new Map(
   CATEGORY_ORDER.map((category, index) => [category, index]),
 );
+const MODE_LOCAL_STORAGE_KEY = 'doc-site-mode';
+const DEFAULT_DOC_MODE = 'browse';
 let rebuildProgressTimer = null;
 let rebuildProgressStart = 0;
 let searchDebounceTimer = null;
 let lastSearchQuery = '';
 let listRenderToken = 0;
 let cachedTabCounts = null;
+let blockDraftSourcePath = '';
 const cachedListGroups = {
   source: null,
   activeTab: '',
   filtered: null,
   groups: null,
 };
+
+function getActiveDoc() {
+  return state.docs.find((item) => item.path === state.activePath);
+}
+
+function setModeUi() {
+  const isEditMode = state.mode === 'edit';
+  const activeDoc = getActiveDoc();
+  const activeDocEditable = activeDoc ? canUserEditDoc(activeDoc) : false;
+  if (modeBrowseBtnEl) {
+    modeBrowseBtnEl.classList.toggle('mode-btn-active', !isEditMode);
+    modeBrowseBtnEl.setAttribute('aria-pressed', isEditMode ? 'false' : 'true');
+  }
+  if (modeEditBtnEl) {
+    modeEditBtnEl.classList.toggle('mode-btn-active', isEditMode);
+    modeEditBtnEl.setAttribute('aria-pressed', isEditMode ? 'true' : 'false');
+    modeEditBtnEl.disabled = !state.editBackendAvailable;
+  }
+  if (modeStateEl) {
+    if (isEditMode) {
+      if (!state.editBackendAvailable) {
+        modeStateEl.textContent = '编辑模式（后端未接入）';
+      } else if (!activeDoc) {
+        modeStateEl.textContent = '编辑模式（请选择文档）';
+      } else if (activeDocEditable) {
+        modeStateEl.textContent = '编辑模式';
+      } else {
+        modeStateEl.textContent = '编辑模式（当前文档不可编辑）';
+      }
+    } else if (state.editBackendAvailable) {
+      modeStateEl.textContent = '浏览模式';
+    } else {
+      modeStateEl.textContent = '浏览模式（编辑接口不可用）';
+    }
+  }
+  if (modeSwitchEl && !state.editBackendAvailable) {
+    modeEditBtnEl?.setAttribute('title', '编辑模式需要启动 /api 服务');
+  } else if (modeEditBtnEl) {
+    modeEditBtnEl.removeAttribute('title');
+  }
+}
+
+function setMode(requestedMode, options = {}) {
+  const shouldPersist = options.persist === true;
+  const resolvedMode = normalizeMode(requestedMode) || DEFAULT_DOC_MODE;
+  const finalMode = resolvedMode === 'edit' && state.editBackendAvailable ? 'edit' : 'browse';
+
+  const prevMode = state.mode;
+  state.mode = finalMode;
+
+  if (shouldPersist) {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(MODE_LOCAL_STORAGE_KEY, finalMode);
+    }
+  }
+
+  const url = new URL(location.href);
+  url.searchParams.set('mode', finalMode);
+  if (url.searchParams.get('mode') !== state.mode || location.search !== url.search) {
+    if (typeof history !== 'undefined' && history.replaceState) {
+      history.replaceState({}, '', url.toString());
+    }
+  }
+
+  setModeUi();
+
+  if (prevMode !== finalMode && state.docs?.length) {
+    if (!isEditModeActive()) {
+      resetDocEditorState();
+      setEditorPanelVisibility(false);
+      if (state.isEditing || state.isCreating) {
+        exitEditMode();
+      }
+      const current = state.docs.find((item) => item.path === state.activePath);
+      if (current) {
+        updateEditorForDoc(current);
+      } else if (state.docs.length > 0) {
+        selectDoc(state.docs[0].path);
+      }
+      syncDocListEditPermissions();
+      return;
+    }
+    const current = state.docs.find((item) => item.path === state.activePath);
+    if (current) {
+      updateEditorForDoc(current);
+    } else if (state.docs.length > 0) {
+      selectDoc(state.docs[0].path);
+    }
+  }
+
+  if (resolvedMode === 'edit' && !state.editBackendAvailable && modeStateEl) {
+    modeStateEl.textContent = APP_ERROR_MESSAGES.editModeUnavailable;
+  }
+
+  syncDocListEditPermissions();
+}
+
+async function detectEditBackend() {
+  state.editBackendAvailable = false;
+  try {
+    const response = await fetch(DOC_CAPABILITIES_URL, { cache: 'no-store' });
+    if (!response.ok) {
+      return;
+    }
+    const payload = await response.json();
+    if (typeof payload === 'object' && payload !== null) {
+      const direct = Boolean(payload?.capabilities?.edit);
+      const legacy = payload?.editMode === 'edit';
+      const modeFlag = direct || legacy;
+      state.editBackendAvailable = Boolean(modeFlag || payload?.ok);
+    }
+  } catch {
+    state.editBackendAvailable = false;
+  }
+}
+
+function resolveInitialMode() {
+  const queryMode = normalizeMode(new URL(location.href).searchParams.get('mode'));
+  if (queryMode) {
+    return queryMode;
+  }
+
+  const savedMode = normalizeMode(
+    typeof window !== 'undefined' && window.localStorage
+      ? localStorage.getItem(MODE_LOCAL_STORAGE_KEY)
+      : '',
+  );
+  return savedMode || DEFAULT_DOC_MODE;
+}
+
+function normalizeMode(mode) {
+  const normalized = normalizeDisplayValue(mode).toLowerCase();
+  if (normalized === 'edit') {
+    return 'edit';
+  }
+  if (normalized === 'browse') {
+    return 'browse';
+  }
+  return '';
+}
+
+function hasEditableBackend() {
+  return Boolean(state.editBackendAvailable);
+}
+
+function isEditModeActive() {
+  return state.mode === 'edit' && hasEditableBackend();
+}
+
+function isEditableSourceAvailable(sourcePath) {
+  return isEditModeActive() && isEditableSourcePath(sourcePath);
+}
+
+function canUserEditDoc(doc) {
+  return isEditableSourceAvailable(getSourcePath(doc));
+}
 
 function getSearchQuery() {
   return normalizeDisplayValue(searchInput.value).toLowerCase();
@@ -395,9 +563,268 @@ function getEditableFallbackContent(doc) {
   return '';
 }
 
+function hasStructuredBlocks(doc) {
+  return Array.isArray(doc?.blocks) && doc.blocks.length > 0;
+}
+
+function isBlockModeEnabled() {
+  return state.editInputMode === 'blocks';
+}
+
+function serializeBlockForEditor(block) {
+  if (!block || typeof block !== 'object') {
+    return '';
+  }
+
+  if (block.type === 'heading') {
+    return `${'#'.repeat(block.level || 1)} ${normalizeDisplayValue(block.title || block.text || '')}`.trim();
+  }
+
+  if (block.type === 'paragraph' || block.type === 'json') {
+    return normalizeDisplayValue(block.text || block.value || '');
+  }
+
+  if (block.type === 'kv') {
+    return `${normalizeDisplayValue(block.key || '')}：${normalizeDisplayValue(block.value || '')}`;
+  }
+
+  if (block.type === 'list') {
+    const items = Array.isArray(block.items) ? block.items : [];
+    const prefix = block.ordered ? (index) => `${index + 1}. ` : () => '- ';
+    return items
+      .filter((item) => item !== undefined && item !== null)
+      .map((item, index) => `${prefix(index)}${normalizeDisplayValue(item)}`)
+      .filter(Boolean)
+      .join('\n');
+  }
+
+  if (block.type === 'table') {
+    const lines = [];
+    if (Array.isArray(block.header) && block.header.length > 0) {
+      lines.push(`| ${block.header.join(' | ')} |`);
+      lines.push(`| ${block.header.map(() => '---').join(' | ')} |`);
+    }
+    const rows = Array.isArray(block.rows) ? block.rows : [];
+    for (const row of rows) {
+      if (Array.isArray(row) && row.length > 0) {
+        lines.push(`| ${row.join(' | ')} |`);
+      }
+    }
+    if (lines.length > 0) {
+      return lines.join('\n');
+    }
+  }
+
+  if (block.type === 'kv' || block.type === 'text') {
+    return normalizeDisplayValue(block.text || block.value || '');
+  }
+
+  return normalizeDisplayValue(block.value || block.text || '');
+}
+
+function buildBlockFromEditorLines(type, text) {
+  if (type === 'heading') {
+    const trimmed = normalizeDisplayValue(text);
+    const rawMatch = trimmed.match(/^(#{1,6})\s*(.*)$/);
+    if (rawMatch) {
+      return `${rawMatch[1]} ${rawMatch[2]}`.trim();
+    }
+    return `# ${trimmed}`;
+  }
+
+  if (type === 'list') {
+    const lines = normalizeDisplayValue(text).split('\n');
+    return lines
+      .map((line) => normalizeDisplayValue(line))
+      .filter(Boolean)
+      .join('\n');
+  }
+
+  if (type === 'kv') {
+    const normalized = normalizeDisplayValue(text);
+    const hasKey = normalized.includes('：') || normalized.includes(':');
+    if (hasKey) {
+      return normalized;
+    }
+    return `${normalized}`;
+  }
+
+  return normalizeDisplayValue(text);
+}
+
+function buildSourceFromBlockDrafts() {
+  if (!editBlockEditorEl) {
+    return '';
+  }
+  const textareas = Array.from(editBlockEditorEl.querySelectorAll('.doc-block-editor-text'));
+  const blocks = [];
+  for (const textarea of textareas) {
+    const blockType = textarea.dataset.blockType || '';
+    const value = normalizeDisplayValue(textarea.value);
+    const rebuilt = buildBlockFromEditorLines(blockType, value);
+    blocks.push(rebuilt);
+  }
+  return blocks.join('\n\n') + (blocks.length ? '\n' : '');
+}
+
+function canUseBlockEditor(doc) {
+  return hasStructuredBlocks(doc) && isEditModeActive();
+}
+
+function getCurrentEditableDocForMode(overrides = null) {
+  if (overrides) {
+    return overrides;
+  }
+  if (!state.isEditing || state.isCreating) {
+    return null;
+  }
+  return state.docs.find((item) => item.path === state.activePath) || null;
+}
+
+function renderBlockEditor(doc) {
+  if (!editBlockEditorEl) {
+    return;
+  }
+  if (!doc || !hasStructuredBlocks(doc)) {
+    editBlockEditorEl.innerHTML = '<div class="doc-edit-status">该文档暂无可编辑结构区块，可直接切到源码模式修改。</div>';
+    state.editBlockDrafts = [];
+    blockDraftSourcePath = '';
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  state.editBlockDrafts = [];
+  doc.blocks.forEach((block, index) => {
+    const value = serializeBlockForEditor(block);
+    const item = document.createElement('div');
+    item.className = 'doc-block-editor-item';
+    const label = document.createElement('div');
+    label.className = 'doc-block-editor-label';
+    label.textContent = `区块 ${index + 1} · ${block.type || 'text'}`;
+    const editor = document.createElement('textarea');
+    editor.className = 'doc-block-editor-text';
+    editor.rows = 6;
+    editor.dataset.blockType = block.type || 'text';
+    editor.dataset.blockIndex = String(index);
+    editor.value = value;
+    item.appendChild(label);
+    item.appendChild(editor);
+    fragment.appendChild(item);
+    state.editBlockDrafts.push({
+      index,
+      type: block.type || 'text',
+      value,
+    });
+  });
+  editBlockEditorEl.innerHTML = '';
+  editBlockEditorEl.appendChild(fragment);
+  blockDraftSourcePath = doc?.path || '';
+}
+
+function setEditInputMode(mode, options = {}) {
+  const doc = getCurrentEditableDocForMode(options.doc);
+  const previousMode = state.editInputMode || 'source';
+  const nextMode = mode === 'blocks' ? 'blocks' : 'source';
+
+  if (!state.isEditing || state.isCreating) {
+    if (editStatusEl) {
+      setEditorStatus('');
+    }
+    state.editInputMode = 'source';
+    state.editBlockDrafts = [];
+    blockDraftSourcePath = '';
+    if (editModeBarEl) {
+      editModeBarEl.classList.add('is-hidden');
+    }
+    if (docEditorWrapEl) {
+      docEditorWrapEl.hidden = true;
+    }
+    if (editEditorEl) {
+      editEditorEl.disabled = true;
+    }
+    if (editBlockEditorEl) {
+      editBlockEditorEl.classList.add('is-hidden');
+      editBlockEditorEl.innerHTML = '';
+    }
+    if (editSourceModeBtnEl) {
+      editSourceModeBtnEl.classList.remove('doc-btn-active');
+      editSourceModeBtnEl.disabled = false;
+    }
+    if (editBlockModeBtnEl) {
+      editBlockModeBtnEl.classList.remove('doc-btn-active');
+      editBlockModeBtnEl.disabled = true;
+    }
+    return;
+  }
+
+  const canUseBlock = canUseBlockEditor(doc);
+  if (nextMode === 'blocks' && canUseBlock) {
+    state.editInputMode = 'blocks';
+    if (blockDraftSourcePath !== (doc?.path || '')) {
+      state.editBlockDrafts = [];
+      renderBlockEditor(doc);
+    } else if (!state.editBlockDrafts.length) {
+      renderBlockEditor(doc);
+    }
+  } else {
+    state.editInputMode = 'source';
+    if (nextMode === 'blocks' && !canUseBlock && editStatusEl) {
+      setEditorStatus(APP_ERROR_MESSAGES.granularEditUnavailable);
+    }
+  }
+
+  const isSourceMode = state.editInputMode === 'source';
+  if (editModeBarEl) {
+    editModeBarEl.classList.remove('is-hidden');
+  }
+
+  if (editSourceModeBtnEl) {
+    editSourceModeBtnEl.classList.toggle('doc-btn-active', isSourceMode);
+    editSourceModeBtnEl.disabled = false;
+  }
+  if (editBlockModeBtnEl) {
+    editBlockModeBtnEl.classList.toggle('doc-btn-active', !isSourceMode);
+    editBlockModeBtnEl.disabled = !canUseBlock;
+  }
+
+  if (isSourceMode) {
+    if (doc && editEditorEl) {
+      if (previousMode === 'blocks') {
+        editEditorEl.value = buildSourceFromBlockDrafts();
+      } else if (!editEditorEl.value) {
+        fillSourcePreview(doc, getSourcePath(doc));
+      }
+      editEditorEl.focus();
+    }
+    if (editStatusEl) {
+      setEditorStatus('');
+    }
+  }
+
+  if (docEditorWrapEl) {
+    docEditorWrapEl.hidden = !isSourceMode;
+  }
+  if (editEditorEl) {
+    editEditorEl.disabled = !isSourceMode;
+  }
+  if (editBlockEditorEl) {
+    editBlockEditorEl.classList.toggle('is-hidden', isSourceMode);
+  }
+}
+
+function getCurrentEditContent() {
+  if (state.isCreating || state.editInputMode !== 'blocks') {
+    return editEditorEl ? editEditorEl.value : '';
+  }
+  return buildSourceFromBlockDrafts();
+}
+
 function resetDocEditorState() {
   state.isEditing = false;
   state.isCreating = false;
+  state.editInputMode = 'source';
+  state.editBlockDrafts = [];
+  blockDraftSourcePath = '';
   state.isCreatePathValid = true;
   state.activeEditPath = '';
   state.activeEditSource = '';
@@ -407,6 +834,13 @@ function resetDocEditorState() {
   }
   if (docEditorWrapEl) {
     docEditorWrapEl.hidden = true;
+  }
+  if (editModeBarEl) {
+    editModeBarEl.classList.add('is-hidden');
+  }
+  if (editBlockEditorEl) {
+    editBlockEditorEl.classList.add('is-hidden');
+    editBlockEditorEl.innerHTML = '';
   }
   if (editBtnEl) {
     editBtnEl.hidden = false;
@@ -915,9 +1349,48 @@ function setEditorStatus(message = '') {
 }
 
 function setEditButtons({ isEditing, isCreating, canEdit }) {
+  const editModeAvailable = isEditModeActive();
   const isCreateMode = !!isCreating;
   const saveText = isCreateMode ? '创建' : '保存';
   const isEditorVisible = isEditing || isCreateMode;
+
+  if (!editModeAvailable) {
+    if (editCreateBtnEl) {
+      editCreateBtnEl.hidden = true;
+      editCreateBtnEl.disabled = true;
+    }
+    if (editBtnEl) {
+      editBtnEl.hidden = true;
+      editBtnEl.disabled = true;
+    }
+    if (editSaveBtnEl) {
+      editSaveBtnEl.hidden = true;
+      editSaveBtnEl.disabled = true;
+      editSaveBtnEl.classList.remove('doc-btn-success');
+    }
+    if (editCancelBtnEl) {
+      editCancelBtnEl.hidden = true;
+      editCancelBtnEl.disabled = true;
+    }
+    if (editRebuildBtnEl) {
+      editRebuildBtnEl.hidden = true;
+      editRebuildBtnEl.disabled = true;
+    }
+    if (createPathWrapEl) {
+      createPathWrapEl.classList.add('is-hidden');
+    }
+    if (docEditorWrapEl) {
+      docEditorWrapEl.hidden = true;
+    }
+    if (editEditorEl) {
+      editEditorEl.disabled = true;
+    }
+    if (editPathEl) {
+      editPathEl.textContent = '可编辑源：编辑模式未开启';
+    }
+    setEditorPanelVisibility(false);
+    return;
+  }
 
   if (editCreateBtnEl) {
     editCreateBtnEl.hidden = isCreateMode || isEditorVisible;
@@ -969,31 +1442,44 @@ function setEditButtons({ isEditing, isCreating, canEdit }) {
 }
 
 function applyEditMode(doc, isEditing) {
+  if (!isEditModeActive()) {
+    resetDocEditorState();
+    setEditorPanelVisibility(false);
+    return;
+  }
   state.isEditing = isEditing;
   state.isCreating = false;
   state.isCreatePathValid = true;
   setEditButtons({
     isEditing,
     isCreating: false,
-    canEdit: isEditableSourcePath(getSourcePath(doc)),
+    canEdit: isEditableSourceAvailable(getSourcePath(doc)),
   });
+  if (!state.isCreating && state.isEditing && !state.activeEditPath) {
+    state.activeEditPath = doc?.path || '';
+  }
+
   if (!isEditing) {
     state.activeEditPath = '';
     state.activeEditSource = '';
     if (editEditorEl) {
       editEditorEl.value = '';
     }
+    setEditInputMode('source', { doc: null });
     contentEl.classList.remove('is-hidden');
     contentEl.hidden = false;
   } else if (editEditorEl) {
     contentEl.classList.add('is-hidden');
     contentEl.hidden = true;
-    editEditorEl.focus();
+    setEditInputMode(state.editInputMode || 'source', { doc });
   }
   contentEl.classList.toggle('is-empty', false);
 }
 
 function enterCreateMode() {
+  if (!isEditModeActive()) {
+    return;
+  }
   if (state.isEditing && state.isCreating) {
     return;
   }
@@ -1002,13 +1488,16 @@ function enterCreateMode() {
   }
 
   const activeDoc = state.docs.find((item) => item.path === state.activePath);
-  const baseSourcePath = isEditableSourcePath(getSourcePath(activeDoc || {}))
+  const baseSourcePath = canUserEditDoc(activeDoc || {})
     ? getSourcePath(activeDoc || {})
     : 'design-data/';
   const suggestedPath = getSuggestedCreatePath(baseSourcePath);
 
   state.isEditing = true;
   state.isCreating = true;
+  state.editInputMode = 'source';
+  state.editBlockDrafts = [];
+  blockDraftSourcePath = '';
   state.activeEditPath = '__new__';
   state.activeCreatePath = suggestedPath;
   setEditButtons({
@@ -1024,6 +1513,7 @@ function enterCreateMode() {
   }
   setCreatePath(suggestedPath);
   updateCreatePathValidation();
+  setEditInputMode('source');
   contentEl.classList.add('is-hidden');
   contentEl.hidden = true;
   contentEl.classList.toggle('is-empty', false);
@@ -1031,6 +1521,9 @@ function enterCreateMode() {
 }
 
 async function fetchEditableSource(pathValue) {
+  if (!isEditModeActive()) {
+    return { error: APP_ERROR_MESSAGES.noEditablePath };
+  }
   const response = await fetch(`${DOC_API_URL}?path=${encodeURIComponent(pathValue)}`);
   if (!response.ok) {
     const message = `读取源码失败（HTTP ${response.status}）`;
@@ -1053,27 +1546,38 @@ function fillSourcePreview(doc, sourcePath) {
 }
 
 function enterEditMode() {
+  if (!isEditModeActive()) {
+    return;
+  }
   const doc = state.docs.find((item) => item.path === state.activePath);
   if (!doc) {
     return;
   }
   const sourcePath = getSourcePath(doc);
-  if (!isEditableSourcePath(sourcePath)) {
+  if (!isEditableSourceAvailable(sourcePath)) {
     return;
   }
 
   state.activeEditPath = doc.path;
   state.activeEditSource = sourcePath;
+  state.editInputMode = 'source';
+  state.editBlockDrafts = [];
+  blockDraftSourcePath = '';
   if (doc._sourceCachedText === undefined) {
     doc._sourceCachedText = getEditableFallbackContent(doc);
   }
   applyEditMode(doc, true);
+  setEditInputMode('source', { doc });
   if (editEditorEl) {
-    editEditorEl.value = typeof doc._sourceCachedText === 'string' ? doc._sourceCachedText : '';
+    fillSourcePreview(doc, sourcePath);
+    editEditorEl.focus();
   }
 }
 
 async function saveCurrentDoc() {
+  if (!isEditModeActive()) {
+    return;
+  }
   if (!editEditorEl) {
     return;
   }
@@ -1087,6 +1591,9 @@ async function saveCurrentDoc() {
 }
 
 async function saveNewDoc() {
+  if (!isEditModeActive()) {
+    return;
+  }
   const validation = updateCreatePathValidation(true);
   if (!validation.isValid) {
     return;
@@ -1098,7 +1605,7 @@ async function saveNewDoc() {
     return;
   }
 
-  const content = editEditorEl.value;
+  const content = getCurrentEditContent();
   setEditorStatus(APP_ERROR_MESSAGES.savingSource);
   if (editSaveBtnEl) {
     editSaveBtnEl.disabled = true;
@@ -1166,8 +1673,11 @@ async function saveNewDoc() {
 }
 
 async function saveExistingDoc() {
+  if (!isEditModeActive()) {
+    return;
+  }
   const doc = state.docs.find((item) => item.path === state.activePath);
-  if (!doc || !isEditableSourcePath(getSourcePath(doc))) {
+  if (!doc || !isEditableSourceAvailable(getSourcePath(doc))) {
     return;
   }
 
@@ -1176,7 +1686,7 @@ async function saveExistingDoc() {
     return;
   }
 
-  const content = editEditorEl.value;
+  const content = getCurrentEditContent();
   setEditorStatus(APP_ERROR_MESSAGES.savingSource);
   if (editSaveBtnEl) {
     editSaveBtnEl.disabled = true;
@@ -1237,12 +1747,15 @@ async function saveExistingDoc() {
 }
 
 async function rebuildIndexForDoc(doc, options = {}) {
+  if (!isEditModeActive()) {
+    return;
+  }
   if (!doc) {
     return;
   }
 
   const sourcePath = getSourcePath(doc);
-  if (!isEditableSourcePath(sourcePath)) {
+  if (!isEditableSourceAvailable(sourcePath)) {
     return;
   }
 
@@ -1304,7 +1817,7 @@ async function rebuildIndexForDoc(doc, options = {}) {
     setEditButtons({
       isEditing: state.isEditing && state.activeEditPath === (currentDoc?.path || ''),
       isCreating: state.isCreating,
-      canEdit: isEditableSourcePath(getSourcePath(currentDoc || {})),
+      canEdit: isEditableSourceAvailable(getSourcePath(currentDoc || {})),
     });
     if (editRebuildBtnEl) {
       editRebuildBtnEl.disabled = false;
@@ -1351,12 +1864,28 @@ async function syncDocEditorSource(doc) {
 
 function updateEditorForDoc(doc) {
   const sourcePath = getSourcePath(doc);
-  const canEdit = isEditableSourcePath(sourcePath);
+  const canEdit = canUserEditDoc(doc);
+  const isCurrentDocEditable = canEdit && isEditModeActive();
 
-  setEditorPanelVisibility(true);
+  setEditorPanelVisibility(isEditModeActive());
   setEditorStatus('');
 
-  if (canEdit) {
+  if (!isEditModeActive()) {
+    if (editPathEl) {
+      editPathEl.textContent = '可编辑源：当前为浏览模式';
+    }
+    if (editEditorEl) {
+      editEditorEl.value = '';
+    }
+    setEditButtons({
+      isEditing: false,
+      isCreating: false,
+      canEdit: false,
+    });
+    return;
+  }
+
+  if (isCurrentDocEditable) {
     fillSourcePreview(doc, sourcePath);
   } else {
     if (editPathEl) {
@@ -1372,6 +1901,60 @@ function updateEditorForDoc(doc) {
     isCreating: false,
     canEdit,
   });
+  syncDocListEditPermissions();
+}
+
+function syncDocListEditPermissions() {
+  if (!listEl) {
+    return;
+  }
+  const showGranularEditState = isEditModeActive();
+  const docByPath = new Map();
+  for (const doc of state.docs) {
+    if (doc?.path) {
+      docByPath.set(normalizeDisplayValue(doc.path), doc);
+    }
+  }
+  const buttons = Array.from(listEl.querySelectorAll('button.doc-item[data-path]'));
+  for (const button of buttons) {
+    const path = normalizeDisplayValue(button.dataset.path);
+    if (!path) {
+      continue;
+    }
+    const itemDoc = docByPath.get(path);
+    if (!itemDoc) {
+      button.classList.remove('doc-item-readonly');
+      button.classList.remove('doc-item-editable');
+      const oldTag = button.querySelector('.doc-item-edit-access');
+      if (oldTag) {
+        oldTag.remove();
+      }
+      continue;
+    }
+
+    const editable = canUserEditDoc(itemDoc);
+    const showEditTag = showGranularEditState;
+    button.classList.toggle('doc-item-editable', showEditTag && editable);
+    button.classList.toggle('doc-item-readonly', showEditTag && !editable);
+
+    const oldTag = button.querySelector('.doc-item-edit-access');
+    if (showEditTag) {
+      if (oldTag) {
+        oldTag.textContent = editable ? '可编辑' : '不可编辑';
+        oldTag.className = `doc-item-edit-access ${editable ? 'is-editable' : 'is-readonly'}`;
+      } else {
+        const textWrap = button.querySelector('.doc-item-body');
+        if (textWrap) {
+          const permissionTag = document.createElement('div');
+          permissionTag.className = editable ? 'doc-item-edit-access is-editable' : 'doc-item-edit-access is-readonly';
+          permissionTag.textContent = editable ? '可编辑' : '不可编辑';
+          textWrap.appendChild(permissionTag);
+        }
+      }
+    } else if (oldTag) {
+      oldTag.remove();
+    }
+  }
 }
 
 function renderContent(doc) {
@@ -1475,7 +2058,10 @@ function renderList(groups) {
       const docsInGroup = categoryMap.get(groupName);
       const groupNode = createDetailsGroup(groupName, docsInGroup.length, true);
       for (const doc of docsInGroup) {
-        const button = createDocButton(doc, selectDoc);
+        const button = createDocButton(doc, selectDoc, {
+          showEditAccess: isEditModeActive(),
+          isEditable: canUserEditDoc(doc),
+        });
         groupNode.appendChild(button);
       }
       categoryNode.appendChild(groupNode);
@@ -1588,7 +2174,7 @@ function selectDoc(pathValue) {
     setEditorStatus('');
   }
 
-  if (isEditableSourcePath(getSourcePath(doc))) {
+  if (isEditModeActive() && isEditableSourcePath(getSourcePath(doc))) {
     if (doc._sourceCachedText === undefined) {
       setEditorStatus(APP_ERROR_MESSAGES.loadingSource);
       syncDocEditorSource(doc)
@@ -1618,6 +2204,7 @@ function selectDoc(pathValue) {
   renderGallery(heroImages);
   renderContent(doc);
   updateEditorForDoc(doc);
+  setModeUi();
   markActiveItem();
 }
 
@@ -1679,6 +2266,7 @@ async function loadData(preferredPath = '', options = {}) {
     state.generatedStatus = `（静态生成 ${formatTime(payload.generatedAt)}）`;
     renderTabsNow();
     renderFilteredDocs(normalizedPreferredPath || state.activePath, { preferredSourcePath });
+    syncDocListEditPermissions();
     lastSearchQuery = getSearchQuery();
     updateSearchClearState();
   } catch (error) {
@@ -1687,7 +2275,7 @@ async function loadData(preferredPath = '', options = {}) {
   }
 }
 
-function initApp() {
+async function initApp() {
   searchInput.addEventListener('input', () => {
     updateSearchClearState();
     const query = getSearchQuery();
@@ -1721,6 +2309,9 @@ function initApp() {
 
   if (editBtnEl) {
     editBtnEl.addEventListener('click', () => {
+      if (!isEditModeActive()) {
+        return;
+      }
       if (state.isCreating) {
         return;
       }
@@ -1730,7 +2321,7 @@ function initApp() {
       }
       if (state.isEditing && state.activeEditPath === doc.path) {
         exitEditMode();
-      } else if (isEditableSourcePath(getSourcePath(doc))) {
+      } else if (canUserEditDoc(doc)) {
         enterEditMode();
       }
     });
@@ -1739,6 +2330,32 @@ function initApp() {
   if (editCreateBtnEl) {
     editCreateBtnEl.addEventListener('click', () => {
       enterCreateMode();
+    });
+  }
+
+  if (editSourceModeBtnEl) {
+    editSourceModeBtnEl.addEventListener('click', () => {
+      if (!state.isEditing || state.isCreating || !isEditModeActive()) {
+        return;
+      }
+      const doc = getActiveDoc();
+      if (!doc) {
+        return;
+      }
+      setEditInputMode('source', { doc });
+    });
+  }
+
+  if (editBlockModeBtnEl) {
+    editBlockModeBtnEl.addEventListener('click', () => {
+      if (!state.isEditing || state.isCreating || !isEditModeActive()) {
+        return;
+      }
+      const doc = getActiveDoc();
+      if (!doc) {
+        return;
+      }
+      setEditInputMode('blocks', { doc });
     });
   }
 
@@ -1759,6 +2376,9 @@ function initApp() {
 
   if (editSaveBtnEl) {
     editSaveBtnEl.addEventListener('click', () => {
+      if (!isEditModeActive()) {
+        return;
+      }
       void saveCurrentDoc();
     });
   }
@@ -1771,11 +2391,26 @@ function initApp() {
 
   if (editRebuildBtnEl) {
     editRebuildBtnEl.addEventListener('click', () => {
+      if (!isEditModeActive()) {
+        return;
+      }
       const doc = state.docs.find((item) => item.path === state.activePath);
       if (!doc || state.isEditing) {
         return;
       }
       void rebuildIndexForDoc(doc);
+    });
+  }
+
+  if (modeBrowseBtnEl) {
+    modeBrowseBtnEl.addEventListener('click', () => {
+      setMode('browse', { persist: true });
+    });
+  }
+
+  if (modeEditBtnEl) {
+    modeEditBtnEl.addEventListener('click', () => {
+      setMode('edit', { persist: true });
     });
   }
 
@@ -1790,7 +2425,9 @@ function initApp() {
 
   resetDocEditorState();
   setEditorPanelVisibility(false);
-  loadData();
+  await detectEditBackend();
+  setMode(resolveInitialMode());
+  await loadData();
 }
 
 export { initApp };

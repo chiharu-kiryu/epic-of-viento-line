@@ -47,6 +47,30 @@ const MIME_TYPES = new Map([
 const EDIT_ROOT_PREFIXES = ['design-data/', 'docs-standard/design-data/'];
 let rebuildInProgress = false;
 
+function resolveBackstoryModeFromEnv() {
+  const mode = process.env.DOCS_BACKSTORY_MODE;
+  if (mode === 'on') {
+    return 'enabled';
+  }
+  if (mode === 'off') {
+    return 'disabled';
+  }
+  return 'disabled (default)';
+}
+
+function resolveStandardizeArgs(modeLabel) {
+  if (modeLabel === 'enabled') {
+    return ['--merge-backstory'];
+  }
+  if (modeLabel === 'disabled' || modeLabel.startsWith('disabled')) {
+    return ['--no-merge-backstory'];
+  }
+  return [];
+}
+
+const BACKSTORY_MERGE_MODE = resolveBackstoryModeFromEnv();
+const STANDARDIZE_ARGS = resolveStandardizeArgs(BACKSTORY_MERGE_MODE);
+
 function normalizeSeparator(filePath) {
   return filePath.split(path.sep).join('/');
 }
@@ -487,6 +511,30 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  if (pathname === '/api/capabilities') {
+    if (req.method !== 'GET') {
+      res.statusCode = 405;
+      res.setHeader('Allow', 'GET');
+      res.end('method not allowed');
+      return;
+    }
+
+    createApiResponse(res, {
+      ok: true,
+      mode: 'edit',
+      editablePrefixes: EDIT_ROOT_PREFIXES,
+      endpoints: ['/api/doc', '/api/rebuild', '/api/index', '/api/capabilities'],
+      backstoryMergeMode: BACKSTORY_MERGE_MODE,
+      version: process?.version || 'node',
+      capabilities: {
+        edit: true,
+        create: true,
+        rebuild: true,
+      },
+    });
+    return;
+  }
+
   if (pathname === '/api/doc') {
     if (req.method === 'GET') {
       const filePath = safePathFromQuery(url.searchParams.get('path') || '');
@@ -607,9 +655,9 @@ const server = createServer(async (req, res) => {
 
     try {
       if (sourceFilter) {
-        await runNodeScript(STANDARDIZE_SCRIPT, [sourceFilter]);
+        await runNodeScript(STANDARDIZE_SCRIPT, [...STANDARDIZE_ARGS, sourceFilter]);
       } else {
-        await runNodeScript(STANDARDIZE_SCRIPT, []);
+        await runNodeScript(STANDARDIZE_SCRIPT, STANDARDIZE_ARGS);
       }
       const standardResult = await runNodeScript(BUILD_STATIC_SCRIPT, []);
 
@@ -628,6 +676,26 @@ const server = createServer(async (req, res) => {
     } finally {
       rebuildInProgress = false;
     }
+    return;
+  }
+
+  if (pathname === '/favicon.ico' || pathname === '/web/favicon.ico') {
+    const faviconCandidates = [
+      path.join(PROJECT_ROOT, 'favicon.ico'),
+      path.join(WEB_ROOT, 'favicon.ico'),
+    ];
+
+    for (const faviconPath of faviconCandidates) {
+      try {
+        await fs.access(faviconPath);
+        await sendFile(faviconPath, res);
+        return;
+      } catch {
+        // continue to next candidate
+      }
+    }
+
+    await sendApiError(res, 404, 'favicon not found');
     return;
   }
 
@@ -672,4 +740,5 @@ const server = createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`Doc viewer running at http://localhost:${PORT}`);
+  console.log(`Backstory merge mode: ${BACKSTORY_MERGE_MODE}`);
 });
