@@ -90,7 +90,7 @@ function formatElapsedSeconds(startAt) {
 }
 
 function normalizeCreatePathValue(rawPath) {
-  return normalizeDisplayValue(rawPath).replace(/\\\\/g, '/');
+  return normalizeDisplayValue(rawPath).replace(/\\+/g, '/');
 }
 
 function getCreateBaseDirectory(sourcePath) {
@@ -313,6 +313,23 @@ function getContentRenderMode(doc) {
 function getSourcePath(doc) {
   const source = doc?.meta?.source || doc?.source?.path || doc?.sourcePath;
   return normalizeDisplayValue(source);
+}
+
+function canonicalizeSourcePath(rawPath) {
+  const normalized = normalizeDisplayValue(rawPath)
+    .replace(/\\/g, '/')
+    .replace(/^\/+/, '')
+    .replace(/\/+/g, '/');
+  if (!normalized) {
+    return '';
+  }
+  return normalized.startsWith('docs-standard/')
+    ? normalized.replace(/^docs-standard\//, '')
+    : normalized;
+}
+
+function getSourcePathKey(doc) {
+  return canonicalizeSourcePath(getSourcePath(doc));
 }
 
 function toRebuildFilter(sourcePath) {
@@ -1130,8 +1147,12 @@ async function saveNewDoc() {
       sourcePath: createdSource,
     }, {
       preferredPath: createdSource,
+      preferredSourcePath: createdSource,
     });
-    await loadData(createdSource);
+    await loadData({
+      preferredPath: state.activePath,
+      preferredSourcePath: createdSource,
+    });
   } catch (error) {
     setEditorStatus(`新建失败：${error?.message || '未知错误'}`);
   } finally {
@@ -1257,7 +1278,9 @@ async function rebuildIndexForDoc(doc, options = {}) {
     }
 
     await response.json();
-    await loadData(preferredPath);
+    await loadData(preferredPath, {
+      preferredSourcePath: options.preferredSourcePath || '',
+    });
     if (!state.isEditing && isCurrentDocEditing) {
       enterEditMode();
     } else if (state.isEditing && state.activeEditPath === doc.path) {
@@ -1493,6 +1516,7 @@ function renderTabsNow() {
 
 function renderFilteredDocs(preferredPath = '', options = {}) {
   const { skipTabs = false } = options;
+  const preferredSourcePath = canonicalizeSourcePath(options.preferredSourcePath || '');
   const searchQuery = getSearchQuery();
   const filtered = getHeroDisplayDocs(getVisibleDocs(state.docs, searchQuery), state.activeTab);
   let groups = null;
@@ -1528,7 +1552,17 @@ function renderFilteredDocs(preferredPath = '', options = {}) {
   const tabText = searchQuery ? '（已按关键词筛选）' : '';
   statusEl.textContent = `${displayText} ${tabText} ${state.generatedStatus}`;
 
-  const desiredPath = preferredPath && filtered.some((doc) => doc.path === preferredPath) ? preferredPath : state.activePath;
+  let desiredPath = preferredPath;
+  if (preferredSourcePath) {
+    const fromSource = filtered.find((doc) => getSourcePathKey(doc) === preferredSourcePath);
+    if (fromSource) {
+      desiredPath = fromSource.path;
+    }
+  }
+  if (!desiredPath || !filtered.some((doc) => doc.path === desiredPath)) {
+    desiredPath = state.activePath;
+  }
+
   if (!filtered.some((doc) => doc.path === desiredPath)) {
     selectDoc(filtered[0].path);
   } else {
@@ -1603,7 +1637,16 @@ function collectSearchText(doc) {
   return `${base} ${fields} ${sections} ${blocks} ${outline}`.toLowerCase();
 }
 
-async function loadData(preferredPath = '') {
+async function loadData(preferredPath = '', options = {}) {
+  const loadArgs = typeof preferredPath === 'object' && preferredPath !== null
+    ? preferredPath
+    : {
+      preferredPath,
+      ...options,
+    };
+  const normalizedPreferredPath = normalizeDisplayValue(loadArgs.preferredPath || '');
+  const preferredSourcePath = normalizeDisplayValue(loadArgs.preferredSourcePath || '');
+
   try {
     const response = await fetch(DATA_INDEX_URL);
     if (!response.ok) {
@@ -1635,7 +1678,7 @@ async function loadData(preferredPath = '') {
     cachedListGroups.groups = null;
     state.generatedStatus = `（静态生成 ${formatTime(payload.generatedAt)}）`;
     renderTabsNow();
-    renderFilteredDocs(preferredPath || state.activePath);
+    renderFilteredDocs(normalizedPreferredPath || state.activePath, { preferredSourcePath });
     lastSearchQuery = getSearchQuery();
     updateSearchClearState();
   } catch (error) {

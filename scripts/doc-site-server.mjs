@@ -309,6 +309,7 @@ async function buildDocIndex() {
   return {
     generatedAt: new Date().toISOString(),
     count: result.length,
+    docs: result,
     entries: result,
   };
 }
@@ -323,7 +324,10 @@ function safePathFromQuery(rawPath) {
   if (!rawPath) {
     return '';
   }
-  if (rawPath.includes('\\0')) {
+  if (rawPath.includes('\\')) {
+    return '';
+  }
+  if (rawPath.includes('\0')) {
     return '';
   }
   if (/^[A-Za-z]:\//.test(rawPath)) {
