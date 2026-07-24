@@ -712,6 +712,38 @@ pre {
   gap: 10px;
 }
 
+.doc-edit-dirty-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: #ffd88f;
+  border: 1px solid rgba(255, 190, 96, 0.36);
+  background: rgba(91, 60, 13, 0.28);
+}
+
+.doc-edit-dirty-indicator::before {
+  content: "●";
+  color: #ffcc70;
+}
+
+.doc-edit-dirty-indicator.is-hidden {
+  display: none;
+}
+
+.doc-edit-dirty-indicator.is-unsaved {
+  color: #ff6d6d;
+  border-color: rgba(255, 119, 119, 0.48);
+  background: rgba(80, 24, 24, 0.28);
+}
+
+.doc-edit-dirty-indicator.is-unsaved::before {
+  content: "●";
+  color: #ff7171;
+}
+
 .doc-edit-actions {
   display: flex;
   gap: 6px;
@@ -825,6 +857,12 @@ pre {
   background: rgba(53, 111, 76, 0.72);
 }
 
+.doc-btn-unsaved {
+  border-color: rgba(255, 157, 157, 0.72);
+  background: rgba(124, 35, 35, 0.42);
+  color: #ffe2e2;
+}
+
 .doc-btn-ghost {
   border-color: rgba(169, 190, 225, 0.35);
   background: rgba(12, 18, 35, 0.68);
@@ -936,6 +974,94 @@ pre {
 
 .doc-edit-status.is-visible {
   color: #c8f6d9;
+}
+
+.doc-conflict-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+.doc-conflict-overlay.is-hidden {
+  display: none;
+}
+
+.doc-conflict-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 10, 24, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.doc-conflict-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(620px, 94vw);
+  border-radius: 14px;
+  border: 1px solid rgba(139, 176, 255, 0.34);
+  background: var(--panel);
+  box-shadow: 0 18px 60px rgba(2, 8, 20, 0.55);
+  padding: 14px 16px;
+}
+
+.doc-conflict-force .doc-conflict-dialog {
+  border-color: rgba(255, 130, 130, 0.65);
+  box-shadow: 0 18px 60px rgba(120, 12, 12, 0.45);
+}
+
+.doc-conflict-title {
+  margin: 0;
+  font-size: 16px;
+  color: #f7fbff;
+}
+
+.doc-conflict-dialog-title-danger {
+  color: #ffd4d4;
+}
+
+.doc-conflict-message {
+  margin: 10px 0 14px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+  white-space: pre-line;
+}
+
+.doc-conflict-warning {
+  margin: 0 0 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 130, 130, 0.52);
+  color: #ffc5c5;
+  background: rgba(102, 18, 18, 0.35);
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.doc-conflict-warning.is-hidden {
+  display: none;
+}
+
+.doc-conflict-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.doc-btn-danger {
+  border-color: rgba(255, 130, 130, 0.45);
+  background: rgba(108, 24, 24, 0.75);
+  color: #ffd4d4;
+}
+
+.doc-btn-danger:hover {
+  border-color: rgba(255, 130, 130, 0.78);
+  background: rgba(158, 37, 37, 0.72);
 }
 
 .doc-chip + .doc-chip {

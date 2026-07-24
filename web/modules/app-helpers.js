@@ -27,6 +27,10 @@ const visibleNoSearchDocCache = {
 const visibleSearchDocCache = new WeakMap();
 const visibleSearchIndexCache = new WeakMap();
 const heroDisplayCache = new WeakMap();
+const docButtonCacheByPath = new Map();
+const docButtonMetaByPath = new Map();
+let docButtonCacheVersion = 0;
+let activeDocPath = '';
 const SEARCH_INDEX_TOKEN_MAX_LENGTH = 4;
 const SEARCH_INDEX_TOKEN_MIN_LENGTH = 2;
 const SEARCH_QUERY_TOKEN_LENGTH = 3;
@@ -1025,8 +1029,9 @@ function createDocButton(doc, onSelect = () => {}, options = {}) {
     textWrap.appendChild(subText);
   }
 
+  let permissionTag = null;
   if (showEditAccess) {
-    const permissionTag = document.createElement('div');
+    permissionTag = document.createElement('div');
     permissionTag.className = isEditable ? 'doc-item-edit-access is-editable' : 'doc-item-edit-access is-readonly';
     permissionTag.textContent = isEditable ? '可编辑' : '不可编辑';
     textWrap.appendChild(permissionTag);
@@ -1035,6 +1040,10 @@ function createDocButton(doc, onSelect = () => {}, options = {}) {
   button.appendChild(textWrap);
   button.title = normalizeValue(`${doc.title || doc.name}`);
   button.dataset.path = doc.path;
+  button.dataset.editPermission = showEditAccess
+    ? (isEditable ? 'editable' : 'readonly')
+    : 'hidden';
+  cacheDocListButton(doc.path, button, permissionTag, textWrap);
   button.addEventListener('click', () => onSelect(doc.path));
   return button;
 }
@@ -1147,9 +1156,77 @@ function getPurposeGroup(doc, itemPairCounts = new Map(), overrideFields = null)
 }
 
 function markActiveItem() {
-  for (const button of listEl.querySelectorAll('.doc-item')) {
-    button.classList.toggle('active', button.dataset.path === state.activePath);
+  const nextPath = state.activePath || '';
+  if (activeDocPath === nextPath) {
+    return;
   }
+
+  if (activeDocPath) {
+    const previousButton = docButtonCacheByPath.get(activeDocPath);
+    if (previousButton) {
+      previousButton.classList.remove('active');
+    }
+  }
+
+  if (nextPath) {
+    const nextButton = docButtonCacheByPath.get(nextPath);
+    if (nextButton) {
+      nextButton.classList.add('active');
+    }
+  }
+
+  activeDocPath = nextPath;
+}
+
+function cacheDocListButton(pathValue, button, permissionTag = null, textWrap = null) {
+  if (!pathValue || !button) {
+    return;
+  }
+  const normalizedPath = String(pathValue);
+  docButtonCacheByPath.set(normalizedPath, button);
+  if (!docButtonMetaByPath.has(normalizedPath)) {
+    docButtonMetaByPath.set(normalizedPath, {
+      permissionTag: null,
+      textWrap: null,
+    });
+  }
+  const existingMeta = docButtonMetaByPath.get(normalizedPath);
+  existingMeta.permissionTag = permissionTag || null;
+  existingMeta.textWrap = textWrap || null;
+  existingMeta.button = button;
+}
+
+function resetDocListButtonCache() {
+  docButtonCacheByPath.clear();
+  docButtonMetaByPath.clear();
+  activeDocPath = '';
+  docButtonCacheVersion += 1;
+}
+
+function getDocListButtonMeta(pathValue) {
+  if (!pathValue) {
+    return null;
+  }
+  return docButtonMetaByPath.get(String(pathValue)) || null;
+}
+
+function setDocListButtonMeta(pathValue, patch = {}) {
+  if (!pathValue || !patch || typeof patch !== 'object') {
+    return;
+  }
+  const normalizedPath = String(pathValue);
+  const existingMeta = docButtonMetaByPath.get(normalizedPath);
+  if (existingMeta) {
+    Object.assign(existingMeta, patch);
+  }
+}
+
+function getRenderedDocListButtons() {
+  return docButtonCacheByPath.values();
+}
+
+function getDocListButtonCacheVersion() {
+  return docButtonCacheVersion;
 }
 
 function formatTime(value) {
@@ -1258,6 +1335,12 @@ export {
   groupDocs,
   getPurposeGroup,
   markActiveItem,
+  cacheDocListButton,
+  resetDocListButtonCache,
+  getRenderedDocListButtons,
+  getDocListButtonCacheVersion,
+  getDocListButtonMeta,
+  setDocListButtonMeta,
   formatTime,
   formatSize,
   hasVisibleValue,

@@ -338,10 +338,10 @@ async function buildDocIndex() {
   };
 }
 
-async function sendApiError(response, statusCode, message) {
+async function sendApiError(response, statusCode, message, extra = {}) {
   response.statusCode = statusCode;
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
-  response.end(JSON.stringify({ error: message }));
+  response.end(JSON.stringify({ error: message, ...extra }));
 }
 
 function safePathFromQuery(rawPath) {
@@ -388,6 +388,22 @@ function safePathFromQuery(rawPath) {
     return '';
   }
   return sanitizePathPrefix(sanitized);
+}
+
+function normalizeLockVersion(rawVersion) {
+  if (typeof rawVersion === 'number' && Number.isFinite(rawVersion)) {
+    return String(rawVersion);
+  }
+  if (typeof rawVersion === 'string') {
+    const normalized = rawVersion.trim();
+    if (!normalized) {
+      return '';
+    }
+    if (/^\d+(?:\.\d+)?$/.test(normalized)) {
+      return normalized;
+    }
+  }
+  return '';
 }
 
 function sanitizePathPrefix(normalizedPath) {
@@ -556,11 +572,22 @@ const server = createServer(async (req, res) => {
       }
 
       const type = path.extname(resolved.relativePath).replace('.', '') || 'txt';
+      let modifiedAt = '';
+      let version = '';
+      try {
+        const stats = await fs.stat(resolved.absolutePath);
+        modifiedAt = stats.mtime.toISOString();
+        version = String(stats.mtimeMs);
+      } catch {
+        // keep defaults
+      }
       createApiResponse(res, {
         path: resolved.relativePath,
         type,
         title: trimExt(path.basename(resolved.relativePath)),
         content,
+        lastModified: modifiedAt,
+        version,
       });
       return;
     }
@@ -592,8 +619,15 @@ const server = createServer(async (req, res) => {
       }
 
       const createMode = payload?.create === true;
+      const forceOverwrite = payload?.force === true;
+      const expectedVersion = normalizeLockVersion(payload?.expectedVersion || payload?.expectedLastModified);
       const resolved = await resolveEditableFilePath(filePath, { allowCreate: createMode });
       if (!resolved) {
+        await sendApiError(res, 404, 'document not found');
+        return;
+      }
+
+      if (!createMode && !resolved.exists) {
         await sendApiError(res, 404, 'document not found');
         return;
       }
@@ -604,18 +638,47 @@ const server = createServer(async (req, res) => {
       }
 
       const { absolutePath, relativePath: resolvedPath } = resolved;
+
+      if (!createMode && !expectedVersion && !forceOverwrite) {
+        await sendApiError(res, 409, 'missing expectedLastModified for existing doc');
+        return;
+      }
+
+      if (!createMode && expectedVersion && !forceOverwrite) {
+        try {
+          const stats = await fs.stat(absolutePath);
+          const currentVersion = String(stats.mtimeMs);
+          if (currentVersion !== expectedVersion) {
+            await sendApiError(res, 409, 'document was modified by another client', {
+              currentVersion,
+              lastModified: stats.mtime.toISOString(),
+            });
+            return;
+          }
+        } catch (error) {
+          if (error?.code === 'ENOENT') {
+            await sendApiError(res, 404, 'document not found');
+            return;
+          }
+          await sendApiError(res, 500, error?.message || 'failed to check version');
+          return;
+        }
+      }
+
       try {
         await fs.mkdir(path.dirname(absolutePath), { recursive: true });
         await fs.writeFile(absolutePath, payload.content, 'utf8');
+        const stats = await fs.stat(absolutePath);
+        createApiResponse(res, {
+          ok: true,
+          path: resolvedPath,
+          lastModified: stats.mtime.toISOString(),
+          version: String(stats.mtimeMs),
+        });
       } catch (error) {
         await sendApiError(res, 500, error?.message || 'failed to save');
         return;
       }
-
-      createApiResponse(res, {
-        ok: true,
-        path: resolvedPath,
-      });
       return;
     }
 

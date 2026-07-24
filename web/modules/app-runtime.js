@@ -23,6 +23,11 @@ import {
   formatTime,
   groupDocs,
   createDocButton,
+  resetDocListButtonCache,
+  getRenderedDocListButtons,
+  getDocListButtonCacheVersion,
+  getDocListButtonMeta,
+  setDocListButtonMeta,
   getDisplayCategory,
   toDisplayValue,
 } from './app-helpers.js';
@@ -51,6 +56,7 @@ const {
   editCancelBtnEl,
   editRebuildBtnEl,
   editPathEl,
+  editDirtyIndicatorEl,
   editModeBarEl,
   editSourceModeBtnEl,
   editBlockModeBtnEl,
@@ -59,6 +65,14 @@ const {
   createPathInputEl,
   editStatusEl,
   editEditorEl,
+  saveConflictDialogEl,
+  saveConflictDialogTitleEl,
+  saveConflictDialogMessageEl,
+  saveConflictDialogWarningEl,
+  saveConflictReloadBtnEl,
+  saveConflictKeepBtnEl,
+  saveConflictForceBtnEl,
+  saveConflictCancelBtnEl,
   modeSwitchEl,
   modeBrowseBtnEl,
   modeEditBtnEl,
@@ -85,15 +99,301 @@ let lastSearchQuery = '';
 let listRenderToken = 0;
 let cachedTabCounts = null;
 let blockDraftSourcePath = '';
+let editSessionVersion = '';
+let saveConflictResolver = null;
+let renderedDocRef = null;
+let cachedListRenderState = {
+  filtered: null,
+  activeTab: '',
+  groups: null,
+};
+let cachedEditPermissionSyncState = {
+  showGranularEditState: false,
+  cacheVersion: -1,
+  mode: '',
+  backendAvailable: false,
+};
 const cachedListGroups = {
   source: null,
   activeTab: '',
   filtered: null,
   groups: null,
 };
+let cachedGroupedDocs = new WeakMap();
+let editSessionBaselineContent = '';
+const docByPathCache = new Map();
+const docBySourcePathCache = new Map();
+
+function getCachedGroupsByFilteredDocs(filteredDocs, activeTab = 'all') {
+  if (!Array.isArray(filteredDocs) || filteredDocs.length === 0) {
+    return new Map();
+  }
+
+  let cacheByTab = cachedGroupedDocs.get(filteredDocs);
+  if (!cacheByTab) {
+    cacheByTab = new Map();
+    cachedGroupedDocs.set(filteredDocs, cacheByTab);
+  }
+
+  if (cacheByTab.has(activeTab)) {
+    return cacheByTab.get(activeTab);
+  }
+
+  const groups = groupDocs(filteredDocs);
+  cacheByTab.set(activeTab, groups);
+  return groups;
+}
+
+function rebuildDocPathCaches(docs = state.docs) {
+  docByPathCache.clear();
+  docBySourcePathCache.clear();
+  if (!Array.isArray(docs)) {
+    return;
+  }
+  for (const doc of docs) {
+    if (!doc || typeof doc !== 'object') {
+      continue;
+    }
+    if (doc.path) {
+      docByPathCache.set(String(doc.path), doc);
+    }
+    if (doc.sourcePath) {
+      docBySourcePathCache.set(canonicalizeSourcePath(doc.sourcePath), doc);
+    }
+  }
+}
+
+function getDocByPath(pathValue = '') {
+  const normalizedPath = normalizeDisplayValue(pathValue);
+  if (!normalizedPath) {
+    return null;
+  }
+  return docByPathCache.get(normalizedPath) || docByPathCache.get(pathValue) || null;
+}
+
+function getDocBySourcePath(sourcePathValue = '') {
+  const normalizedSourcePath = canonicalizeSourcePath(sourcePathValue);
+  if (!normalizedSourcePath) {
+    return null;
+  }
+  return docBySourcePathCache.get(normalizedSourcePath) || null;
+}
+
+function isInEditSession() {
+  return state.isEditing || state.isCreating;
+}
+
+function getCurrentEditDraftContent() {
+  if (!isInEditSession()) {
+    return '';
+  }
+  if (state.isCreating || state.editInputMode !== 'blocks') {
+    return editEditorEl ? editEditorEl.value : '';
+  }
+  return buildSourceFromBlockDrafts();
+}
+
+function normalizeEditSessionVersion(rawVersion) {
+  if (typeof rawVersion === 'number' && Number.isFinite(rawVersion)) {
+    return String(Math.trunc(rawVersion));
+  }
+  if (typeof rawVersion === 'string') {
+    const normalized = rawVersion.trim();
+    if (!normalized) {
+      return '';
+    }
+    if (/^\d+(?:\.\d+)?$/.test(normalized)) {
+      return normalized;
+    }
+  }
+  return '';
+}
+
+function formatVersionForConflict(versionValue) {
+  const normalized = normalizeEditSessionVersion(versionValue);
+  if (!normalized) {
+    return '—';
+  }
+  return normalized.slice(0, 8);
+}
+
+function renderConflictMessagePayload(conflictPayload) {
+  const currentVersion = normalizeEditSessionVersion(conflictPayload?.currentVersion);
+  const lastModified = typeof conflictPayload?.lastModified === 'string' ? conflictPayload.lastModified : '';
+  const latestLabel = lastModified
+    ? `${formatVersionForConflict(currentVersion)}（${lastModified}）`
+    : formatVersionForConflict(currentVersion);
+
+  return [
+    `保存冲突：文档已被其他会话更新（最新版本：${latestLabel}）。`,
+    '1) 载入服务器最新内容并放弃当前草稿',
+    '2) 保留当前草稿，放弃这次保存',
+    '3) 强制覆盖（会覆盖他人最新修改，存在风险）',
+  ].join('\n');
+}
+
+function renderForceConfirmMessagePayload(conflictPayload) {
+  const currentVersion = normalizeEditSessionVersion(conflictPayload?.currentVersion);
+  const lastModified = typeof conflictPayload?.lastModified === 'string' ? conflictPayload.lastModified : '';
+  const latestLabel = lastModified
+    ? `${formatVersionForConflict(currentVersion)}（${lastModified}）`
+    : formatVersionForConflict(currentVersion);
+
+  return [
+    `确定要执行“强制覆盖”吗？`,
+    `目标版本：${latestLabel}`,
+    '强制覆盖将覆盖该版本内容，可能覆盖其他编辑者的最新修改。',
+    '请再次确认，是否继续？',
+  ].join('\n');
+}
+
+function setSaveConflictDialogMode(mode = 'default') {
+  if (
+    !saveConflictDialogEl
+    || !saveConflictDialogReloadBtnEl
+    || !saveConflictDialogKeepBtnEl
+    || !saveConflictDialogForceBtnEl
+  ) {
+    return;
+  }
+  const isForceConfirm = mode === 'force';
+  saveConflictDialogReloadBtnEl.classList.toggle('is-hidden', isForceConfirm);
+  saveConflictDialogKeepBtnEl.classList.toggle('is-hidden', isForceConfirm);
+  saveConflictDialogForceBtnEl.textContent = isForceConfirm ? '确认覆盖' : '强制覆盖';
+  saveConflictDialogEl.classList.toggle('doc-conflict-force', isForceConfirm);
+  if (saveConflictDialogTitleEl) {
+    saveConflictDialogTitleEl.classList.toggle('doc-conflict-dialog-title-danger', isForceConfirm);
+  }
+  if (saveConflictDialogWarningEl) {
+    saveConflictDialogWarningEl.classList.toggle('is-hidden', !isForceConfirm);
+    if (isForceConfirm) {
+      saveConflictDialogWarningEl.textContent = '⚠️ 危险操作：此操作会覆盖当前已存在的版本。请确认无误后再继续。';
+    }
+  }
+}
+
+function closeSaveConflictDialog() {
+  if (!saveConflictDialogEl) {
+    return;
+  }
+  if (!saveConflictDialogEl.classList.contains('is-hidden')) {
+    saveConflictDialogEl.classList.add('is-hidden');
+  }
+}
+
+function resolveSaveConflictAction(action) {
+  if (typeof saveConflictResolver !== 'function') {
+    closeSaveConflictDialog();
+    return;
+  }
+  const resolver = saveConflictResolver;
+  saveConflictResolver = null;
+  closeSaveConflictDialog();
+  resolver(action);
+}
+
+function openSaveConflictDialog(conflictPayload, options = {}) {
+  if (!saveConflictDialogEl || !saveConflictDialogTitleEl || !saveConflictDialogMessageEl) {
+    return Promise.resolve('cancel');
+  }
+  const mode = options.mode === 'force' ? 'force' : 'default';
+
+  if (saveConflictResolver) {
+    resolveSaveConflictAction('cancel');
+  }
+
+  saveConflictDialogTitleEl.textContent = mode === 'force' ? '强制覆盖确认' : '保存冲突';
+  saveConflictDialogMessageEl.textContent = mode === 'force'
+    ? renderForceConfirmMessagePayload(conflictPayload)
+    : renderConflictMessagePayload(conflictPayload);
+  setSaveConflictDialogMode(mode);
+  if (saveConflictDialogEl.classList.contains('is-hidden')) {
+    saveConflictDialogEl.classList.remove('is-hidden');
+  }
+
+  return new Promise((resolve) => {
+    saveConflictResolver = resolve;
+  });
+}
+
+async function handleSaveConflict(doc, conflictPayload) {
+  const sourcePath = getSourcePath(doc);
+  const currentVersion = normalizeEditSessionVersion(conflictPayload?.currentVersion);
+  const action = await openSaveConflictDialog(conflictPayload);
+
+  const normalizedAction = action || 'cancel';
+  if (normalizedAction === '1') {
+    const reloaded = await syncDocEditorSource(doc);
+    if (reloaded?.error) {
+      setEditorStatus(`读取最新内容失败：${reloaded.error}`);
+      return 'cancel';
+    }
+    state.activeEditSourceVersion = currentVersion || state.activeEditSourceVersion;
+    doc._sourceVersion = state.activeEditSourceVersion;
+    fillSourcePreview(doc, sourcePath, { skipSync: true });
+    setEditInputMode('source', {
+      doc,
+      skipBlockToSourceRestore: true,
+      forceSourceRefresh: true,
+    });
+    setEditSessionClean(editEditorEl ? editEditorEl.value : '', state.activeEditSourceVersion);
+    setEditorStatus('已加载服务器最新内容，你可以基于该内容继续编辑并保存。');
+    return 'reload';
+  }
+
+  if (normalizedAction === '2') {
+    setEditorStatus('已保留当前草稿，请在确认内容后重试保存。');
+    return 'keep';
+  }
+
+  if (normalizedAction === '3') {
+    const forceConfirmAction = await openSaveConflictDialog(conflictPayload, { mode: 'force' });
+    return forceConfirmAction === '3' ? 'force' : 'cancel';
+  }
+
+  return 'cancel';
+}
+
+function setEditSessionClean(content, version = '') {
+  editSessionBaselineContent = content;
+  editSessionVersion = normalizeEditSessionVersion(version);
+  state.activeEditSourceVersion = editSessionVersion;
+  state.editHasUnsavedChanges = false;
+  updateEditUnsavedUi();
+}
+
+function refreshEditSessionDirtyState() {
+  if (!isInEditSession()) {
+    state.editHasUnsavedChanges = false;
+    updateEditUnsavedUi();
+    return false;
+  }
+  const currentContent = getCurrentEditDraftContent();
+  state.editHasUnsavedChanges = currentContent !== editSessionBaselineContent;
+  updateEditUnsavedUi();
+  return state.editHasUnsavedChanges;
+}
+
+function updateEditUnsavedUi() {
+  const showUnsaved = isInEditSession() && !!state.editHasUnsavedChanges;
+  if (editDirtyIndicatorEl) {
+    editDirtyIndicatorEl.classList.toggle('is-hidden', !showUnsaved);
+    editDirtyIndicatorEl.classList.toggle('is-unsaved', showUnsaved);
+  }
+  if (editSaveBtnEl) {
+    editSaveBtnEl.classList.toggle('doc-btn-unsaved', showUnsaved);
+  }
+}
+
+function confirmDiscardUnsavedChanges(message = '放弃后，当前编辑未保存内容将丢失，是否继续？') {
+  if (!state.editHasUnsavedChanges) {
+    return true;
+  }
+  return window.confirm(message);
+}
 
 function getActiveDoc() {
-  return state.docs.find((item) => item.path === state.activePath);
+  return getDocByPath(state.activePath);
 }
 
 function setModeUi() {
@@ -139,6 +439,13 @@ function setMode(requestedMode, options = {}) {
   const finalMode = resolvedMode === 'edit' && state.editBackendAvailable ? 'edit' : 'browse';
 
   const prevMode = state.mode;
+
+  if (prevMode === 'edit' && finalMode === 'browse' && (state.isEditing || state.isCreating)) {
+    if (!confirmDiscardUnsavedChanges('当前有未保存内容，切换到浏览模式将丢失这些修改，是否继续？')) {
+      return;
+    }
+  }
+
   state.mode = finalMode;
 
   if (shouldPersist) {
@@ -162,9 +469,9 @@ function setMode(requestedMode, options = {}) {
       resetDocEditorState();
       setEditorPanelVisibility(false);
       if (state.isEditing || state.isCreating) {
-        exitEditMode();
+        exitEditMode({ skipUnsavedConfirm: true });
       }
-      const current = state.docs.find((item) => item.path === state.activePath);
+      const current = getDocByPath(state.activePath);
       if (current) {
         updateEditorForDoc(current);
       } else if (state.docs.length > 0) {
@@ -173,7 +480,7 @@ function setMode(requestedMode, options = {}) {
       syncDocListEditPermissions();
       return;
     }
-    const current = state.docs.find((item) => item.path === state.activePath);
+    const current = getDocByPath(state.activePath);
     if (current) {
       updateEditorForDoc(current);
     } else if (state.docs.length > 0) {
@@ -675,10 +982,10 @@ function getCurrentEditableDocForMode(overrides = null) {
   if (overrides) {
     return overrides;
   }
-  if (!state.isEditing || state.isCreating) {
+  if (!state.isEditing && !state.isCreating) {
     return null;
   }
-  return state.docs.find((item) => item.path === state.activePath) || null;
+  return getDocByPath(state.activePath) || null;
 }
 
 function renderBlockEditor(doc) {
@@ -725,8 +1032,9 @@ function setEditInputMode(mode, options = {}) {
   const doc = getCurrentEditableDocForMode(options.doc);
   const previousMode = state.editInputMode || 'source';
   const nextMode = mode === 'blocks' ? 'blocks' : 'source';
+  const preserveCleanState = isInEditSession() && !state.editHasUnsavedChanges;
 
-  if (!state.isEditing || state.isCreating) {
+  if (!state.isEditing && !state.isCreating) {
     if (editStatusEl) {
       setEditorStatus('');
     }
@@ -789,9 +1097,9 @@ function setEditInputMode(mode, options = {}) {
 
   if (isSourceMode) {
     if (doc && editEditorEl) {
-      if (previousMode === 'blocks') {
+      if (previousMode === 'blocks' && !options.skipBlockToSourceRestore) {
         editEditorEl.value = buildSourceFromBlockDrafts();
-      } else if (!editEditorEl.value) {
+      } else if (options.forceSourceRefresh || !editEditorEl.value) {
         fillSourcePreview(doc, getSourcePath(doc));
       }
       editEditorEl.focus();
@@ -810,6 +1118,11 @@ function setEditInputMode(mode, options = {}) {
   if (editBlockEditorEl) {
     editBlockEditorEl.classList.toggle('is-hidden', isSourceMode);
   }
+
+  refreshEditSessionDirtyState();
+  if (preserveCleanState && isInEditSession()) {
+    syncEditSessionBaseline();
+  }
 }
 
 function getCurrentEditContent() {
@@ -817,6 +1130,14 @@ function getCurrentEditContent() {
     return editEditorEl ? editEditorEl.value : '';
   }
   return buildSourceFromBlockDrafts();
+}
+
+function syncEditSessionBaseline(nextVersion = '') {
+  if (!isInEditSession()) {
+    return;
+  }
+  const cleanContent = getCurrentEditDraftContent();
+  setEditSessionClean(cleanContent, nextVersion || state.activeEditSourceVersion);
 }
 
 function resetDocEditorState() {
@@ -828,7 +1149,12 @@ function resetDocEditorState() {
   state.isCreatePathValid = true;
   state.activeEditPath = '';
   state.activeEditSource = '';
+  state.activeEditSourceVersion = '';
+  editSessionVersion = '';
   state.activeCreatePath = '';
+  state.editHasUnsavedChanges = false;
+  editSessionBaselineContent = '';
+  updateEditUnsavedUi();
   if (editStatusEl) {
     editStatusEl.textContent = '';
   }
@@ -1450,6 +1776,13 @@ function applyEditMode(doc, isEditing) {
   state.isEditing = isEditing;
   state.isCreating = false;
   state.isCreatePathValid = true;
+  if (!isEditing) {
+    state.editHasUnsavedChanges = false;
+    state.activeEditSourceVersion = '';
+    editSessionBaselineContent = '';
+    editSessionVersion = '';
+    updateEditUnsavedUi();
+  }
   setEditButtons({
     isEditing,
     isCreating: false,
@@ -1484,10 +1817,13 @@ function enterCreateMode() {
     return;
   }
   if (state.isEditing) {
+    if (!confirmDiscardUnsavedChanges('当前有未保存内容，进入新建将丢失这些修改，是否继续？')) {
+      return;
+    }
     exitEditMode();
   }
 
-  const activeDoc = state.docs.find((item) => item.path === state.activePath);
+  const activeDoc = getDocByPath(state.activePath);
   const baseSourcePath = canUserEditDoc(activeDoc || {})
     ? getSourcePath(activeDoc || {})
     : 'design-data/';
@@ -1514,6 +1850,7 @@ function enterCreateMode() {
   setCreatePath(suggestedPath);
   updateCreatePathValidation();
   setEditInputMode('source');
+  syncEditSessionBaseline();
   contentEl.classList.add('is-hidden');
   contentEl.hidden = true;
   contentEl.classList.toggle('is-empty', false);
@@ -1532,24 +1869,32 @@ async function fetchEditableSource(pathValue) {
 
   const payload = await response.json();
   const content = typeof payload?.content === 'string' ? payload.content : '';
-  return { content };
+  return {
+    content,
+    lastModified: typeof payload?.lastModified === 'string' ? payload.lastModified : '',
+    version: normalizeEditSessionVersion(payload?.version),
+  };
 }
 
-function fillSourcePreview(doc, sourcePath) {
+function fillSourcePreview(doc, sourcePath, options = {}) {
   const sourceContent = typeof doc._sourceCachedText === 'string' ? doc._sourceCachedText : getEditableFallbackContent(doc);
+  const sourceVersion = typeof doc._sourceVersion === 'string' ? doc._sourceVersion : '';
   if (editPathEl) {
     editPathEl.textContent = sourcePath ? `可编辑源：${sourcePath}` : '可编辑源：—';
   }
   if (editEditorEl) {
     editEditorEl.value = sourceContent || '';
   }
+  if (!options.skipSync && isInEditSession() && getActiveDoc()?.path === doc?.path && !state.isCreating) {
+    syncEditSessionBaseline(sourceVersion);
+  }
 }
 
-function enterEditMode() {
+async function enterEditMode() {
   if (!isEditModeActive()) {
     return;
   }
-  const doc = state.docs.find((item) => item.path === state.activePath);
+  const doc = getDocByPath(state.activePath);
   if (!doc) {
     return;
   }
@@ -1560,10 +1905,20 @@ function enterEditMode() {
 
   state.activeEditPath = doc.path;
   state.activeEditSource = sourcePath;
+  state.activeEditSourceVersion = normalizeEditSessionVersion(
+    doc._sourceVersion || doc._sourceLastModified || doc.lastModified,
+  );
   state.editInputMode = 'source';
   state.editBlockDrafts = [];
   blockDraftSourcePath = '';
   if (doc._sourceCachedText === undefined) {
+    const sourceInfo = await syncDocEditorSource(doc);
+    if (sourceInfo?.error) {
+      setEditorStatus(sourceInfo.error);
+      return;
+    }
+  }
+  if (!doc._sourceCachedText) {
     doc._sourceCachedText = getEditableFallbackContent(doc);
   }
   applyEditMode(doc, true);
@@ -1572,6 +1927,7 @@ function enterEditMode() {
     fillSourcePreview(doc, sourcePath);
     editEditorEl.focus();
   }
+  syncEditSessionBaseline();
 }
 
 async function saveCurrentDoc() {
@@ -1640,8 +1996,10 @@ async function saveNewDoc() {
       return;
     }
 
-    await response.json();
+    const saved = await response.json();
     const createdSource = sourcePath;
+    const createdVersion = normalizeEditSessionVersion(saved?.version);
+    setEditSessionClean(content, createdVersion);
     state.activeCreatePath = createdSource;
     state.isCreating = false;
     state.isEditing = false;
@@ -1672,11 +2030,12 @@ async function saveNewDoc() {
   }
 }
 
-async function saveExistingDoc() {
+async function saveExistingDoc(options = {}) {
+  const forceOverwrite = options.forceOverwrite === true;
   if (!isEditModeActive()) {
     return;
   }
-  const doc = state.docs.find((item) => item.path === state.activePath);
+  const doc = getDocByPath(state.activePath);
   if (!doc || !isEditableSourceAvailable(getSourcePath(doc))) {
     return;
   }
@@ -1696,6 +2055,12 @@ async function saveExistingDoc() {
   }
 
   try {
+    const expectedVersion = normalizeEditSessionVersion(
+      state.activeEditSourceVersion || doc._sourceVersion || doc._sourceLastModified || doc.lastModified,
+    );
+    if (!expectedVersion) {
+      throw new Error('未获取到当前文件的编辑锁版本，请刷新后重试');
+    }
     const response = await fetch(DOC_API_URL, {
       method: 'POST',
       headers: {
@@ -1704,11 +2069,59 @@ async function saveExistingDoc() {
       body: JSON.stringify({
         path: sourcePath,
         content,
+        expectedLastModified: expectedVersion,
+        force: forceOverwrite,
       }),
     });
 
     if (!response.ok) {
-      const message = `保存失败（HTTP ${response.status}）`;
+      const payload = await response.json().catch(() => null);
+      const extra = payload?.error ? `：${payload.error}` : '';
+      let message = response.status === 409
+        ? `${APP_ERROR_MESSAGES.saveConflict}（HTTP ${response.status}）${extra}`
+        : `保存失败（HTTP ${response.status}）${extra}`;
+      if (payload?.currentVersion) {
+        const latestVersion = normalizeEditSessionVersion(payload.currentVersion);
+        if (latestVersion) {
+          state.activeEditSourceVersion = latestVersion;
+        }
+      }
+      if (response.status === 409 && !forceOverwrite && payload?.currentVersion) {
+        const conflictAction = await handleSaveConflict(doc, payload);
+        if (conflictAction === 'reload' || conflictAction === 'keep') {
+          if (editSaveBtnEl) {
+            editSaveBtnEl.disabled = false;
+          }
+          if (editRebuildBtnEl) {
+            editRebuildBtnEl.disabled = false;
+          }
+          return;
+        }
+        if (conflictAction === 'force') {
+          if (payload?.currentVersion) {
+            state.activeEditSourceVersion = normalizeEditSessionVersion(payload.currentVersion);
+          }
+          if (editSaveBtnEl) {
+            editSaveBtnEl.disabled = true;
+          }
+          if (editRebuildBtnEl) {
+            editRebuildBtnEl.disabled = true;
+          }
+          await saveExistingDoc({ forceOverwrite: true });
+          return;
+        }
+        if (conflictAction === 'cancel') {
+          message = '已取消保存：版本冲突处理已中止。';
+          setEditorStatus(message);
+          if (editSaveBtnEl) {
+            editSaveBtnEl.disabled = false;
+          }
+          if (editRebuildBtnEl) {
+            editRebuildBtnEl.disabled = false;
+          }
+          return;
+        }
+      }
       setEditorStatus(message);
       if (editSaveBtnEl) {
         editSaveBtnEl.disabled = false;
@@ -1719,10 +2132,13 @@ async function saveExistingDoc() {
       return;
     }
 
-    await response.json();
+    const saved = await response.json();
     doc._sourceCachedText = content;
     doc._sourceRenderedText = content;
     setEditorStatus(APP_ERROR_MESSAGES.saveSuccess);
+    setEditSessionClean(content, saved?.version);
+    doc._sourceVersion = normalizeEditSessionVersion(saved?.version);
+    state.activeEditSource = getSourcePath(doc);
 
     if (editSaveBtnEl) {
       editSaveBtnEl.disabled = false;
@@ -1795,9 +2211,9 @@ async function rebuildIndexForDoc(doc, options = {}) {
       preferredSourcePath: options.preferredSourcePath || '',
     });
     if (!state.isEditing && isCurrentDocEditing) {
-      enterEditMode();
+      void enterEditMode();
     } else if (state.isEditing && state.activeEditPath === doc.path) {
-      const activeDoc = state.docs.find((item) => item.path === state.activePath);
+      const activeDoc = getDocByPath(state.activePath);
       if (activeDoc) {
         syncDocEditorSource(activeDoc).then(() => {
           if (state.activePath === activeDoc.path) {
@@ -1813,7 +2229,7 @@ async function rebuildIndexForDoc(doc, options = {}) {
   } finally {
     stopRebuildProgressIndicator();
     state.isRebuilding = false;
-    const currentDoc = state.docs.find((item) => item.path === state.activePath);
+    const currentDoc = getDocByPath(state.activePath);
     setEditButtons({
       isEditing: state.isEditing && state.activeEditPath === (currentDoc?.path || ''),
       isCreating: state.isCreating,
@@ -1825,13 +2241,17 @@ async function rebuildIndexForDoc(doc, options = {}) {
   }
 }
 
-function exitEditMode() {
+function exitEditMode(options = {}) {
+  if (!options.skipUnsavedConfirm && isInEditSession() && !confirmDiscardUnsavedChanges('当前有未保存内容，放弃编辑并返回浏览？')) {
+    return;
+  }
+
   if (state.isCreating) {
     state.isCreating = false;
     state.activeEditPath = '';
     state.activeEditSource = '';
     if (state.activePath) {
-      const currentDoc = state.docs.find((item) => item.path === state.activePath);
+      const currentDoc = getDocByPath(state.activePath);
       if (currentDoc) {
         setEditorStatus('');
         applyEditMode(currentDoc, false);
@@ -1840,7 +2260,7 @@ function exitEditMode() {
     }
   }
 
-  const doc = state.docs.find((item) => item.path === state.activePath);
+  const doc = getDocByPath(state.activePath);
   if (doc) {
     renderContent(doc);
   }
@@ -1859,6 +2279,8 @@ async function syncDocEditorSource(doc) {
   }
   doc._editorSource = sourcePath;
   doc._sourceCachedText = sourceInfo.content;
+  doc._sourceLastModified = sourceInfo.lastModified || '';
+  doc._sourceVersion = sourceInfo.version || '';
   return { sourcePath, content: sourceInfo.content };
 }
 
@@ -1909,52 +2331,99 @@ function syncDocListEditPermissions() {
     return;
   }
   const showGranularEditState = isEditModeActive();
-  const docByPath = new Map();
-  for (const doc of state.docs) {
-    if (doc?.path) {
-      docByPath.set(normalizeDisplayValue(doc.path), doc);
-    }
+  const cacheVersion = getDocListButtonCacheVersion();
+  if (
+    cachedEditPermissionSyncState.showGranularEditState === showGranularEditState
+    && cachedEditPermissionSyncState.cacheVersion === cacheVersion
+    && cachedEditPermissionSyncState.mode === state.mode
+    && cachedEditPermissionSyncState.backendAvailable === state.editBackendAvailable
+  ) {
+    return;
   }
-  const buttons = Array.from(listEl.querySelectorAll('button.doc-item[data-path]'));
+
+  const buttons = getRenderedDocListButtons();
   for (const button of buttons) {
     const path = normalizeDisplayValue(button.dataset.path);
     if (!path) {
       continue;
     }
-    const itemDoc = docByPath.get(path);
+    const itemDoc = getDocByPath(path);
+    const buttonMeta = getDocListButtonMeta(path);
+    const textWrap = buttonMeta?.textWrap || null;
+    let permissionTag = buttonMeta?.permissionTag || null;
+    const editable = itemDoc ? canUserEditDoc(itemDoc) : false;
+    const nextState = showGranularEditState ? (editable ? 'editable' : 'readonly') : 'hidden';
     if (!itemDoc) {
-      button.classList.remove('doc-item-readonly');
-      button.classList.remove('doc-item-editable');
-      const oldTag = button.querySelector('.doc-item-edit-access');
-      if (oldTag) {
-        oldTag.remove();
+      if (button.dataset.editPermission !== 'hidden') {
+        button.dataset.editPermission = 'hidden';
+        button.classList.remove('doc-item-readonly');
+        button.classList.remove('doc-item-editable');
+        if (permissionTag) {
+          permissionTag.remove();
+          permissionTag = null;
+          setDocListButtonMeta(path, { permissionTag: null });
+        }
       }
       continue;
     }
 
-    const editable = canUserEditDoc(itemDoc);
     const showEditTag = showGranularEditState;
-    button.classList.toggle('doc-item-editable', showEditTag && editable);
-    button.classList.toggle('doc-item-readonly', showEditTag && !editable);
+    const currentState = button.dataset.editPermission || 'hidden';
 
-    const oldTag = button.querySelector('.doc-item-edit-access');
-    if (showEditTag) {
-      if (oldTag) {
-        oldTag.textContent = editable ? '可编辑' : '不可编辑';
-        oldTag.className = `doc-item-edit-access ${editable ? 'is-editable' : 'is-readonly'}`;
-      } else {
-        const textWrap = button.querySelector('.doc-item-body');
-        if (textWrap) {
-          const permissionTag = document.createElement('div');
-          permissionTag.className = editable ? 'doc-item-edit-access is-editable' : 'doc-item-edit-access is-readonly';
-          permissionTag.textContent = editable ? '可编辑' : '不可编辑';
-          textWrap.appendChild(permissionTag);
+    if (currentState !== nextState) {
+      button.dataset.editPermission = nextState;
+      if (!showEditTag || nextState === 'hidden') {
+        button.classList.remove('doc-item-readonly');
+        button.classList.remove('doc-item-editable');
+        if (permissionTag) {
+          permissionTag.remove();
+          permissionTag = null;
+          setDocListButtonMeta(path, { permissionTag: null });
+        }
+        continue;
+      }
+
+      button.classList.toggle('doc-item-editable', editable);
+      button.classList.toggle('doc-item-readonly', !editable);
+
+      if (!permissionTag && textWrap) {
+        permissionTag = document.createElement('div');
+        permissionTag.className = editable ? 'doc-item-edit-access is-editable' : 'doc-item-edit-access is-readonly';
+        permissionTag.textContent = editable ? '可编辑' : '不可编辑';
+        textWrap.appendChild(permissionTag);
+        setDocListButtonMeta(path, { permissionTag });
+      } else if (permissionTag) {
+        const nextLabel = editable ? '可编辑' : '不可编辑';
+        const nextClassName = `doc-item-edit-access ${editable ? 'is-editable' : 'is-readonly'}`;
+        if (permissionTag.textContent !== nextLabel || permissionTag.className !== nextClassName) {
+          permissionTag.textContent = nextLabel;
+          permissionTag.className = nextClassName;
         }
       }
-    } else if (oldTag) {
-      oldTag.remove();
+    } else if (showEditTag) {
+      if (!permissionTag && textWrap) {
+        permissionTag = document.createElement('div');
+        permissionTag.className = editable ? 'doc-item-edit-access is-editable' : 'doc-item-edit-access is-readonly';
+        permissionTag.textContent = editable ? '可编辑' : '不可编辑';
+        textWrap.appendChild(permissionTag);
+        setDocListButtonMeta(path, { permissionTag });
+      } else if (permissionTag) {
+        const nextLabel = editable ? '可编辑' : '不可编辑';
+        const nextClassName = `doc-item-edit-access ${editable ? 'is-editable' : 'is-readonly'}`;
+        if (permissionTag.textContent !== nextLabel || permissionTag.className !== nextClassName) {
+          permissionTag.textContent = nextLabel;
+          permissionTag.className = nextClassName;
+        }
+      }
     }
   }
+
+  cachedEditPermissionSyncState = {
+    showGranularEditState,
+    cacheVersion,
+    mode: state.mode,
+    backendAvailable: state.editBackendAvailable,
+  };
 }
 
 function renderContent(doc) {
@@ -2028,6 +2497,7 @@ function renderContent(doc) {
 
 function renderList(groups) {
   const currentRenderId = ++listRenderToken;
+  resetDocListButtonCache();
   listEl.innerHTML = '';
 
   if (!(groups instanceof Map) || !groups.size) {
@@ -2070,19 +2540,22 @@ function renderList(groups) {
     categoryNodes.push(categoryNode);
   }
 
+  let cursor = 0;
   const flushNodes = () => {
     if (currentRenderId !== listRenderToken) {
       return;
     }
-    if (categoryNodes.length === 0) {
+    if (cursor >= categoryNodes.length) {
       markActiveItem();
       return;
     }
 
     const fragment = document.createDocumentFragment();
-    for (let i = 0; i < LIST_RENDER_BATCH_SIZE && categoryNodes.length > 0; i += 1) {
-      fragment.appendChild(categoryNodes.shift());
+    const end = Math.min(cursor + LIST_RENDER_BATCH_SIZE, categoryNodes.length);
+    for (let i = cursor; i < end; i += 1) {
+      fragment.appendChild(categoryNodes[i]);
     }
+    cursor = end;
     listEl.appendChild(fragment);
     requestAnimationFrame(flushNodes);
   };
@@ -2114,7 +2587,7 @@ function renderFilteredDocs(preferredPath = '', options = {}) {
   ) {
     groups = cachedListGroups.groups;
   } else {
-    groups = groupDocs(filtered);
+    groups = getCachedGroupsByFilteredDocs(filtered, state.activeTab);
     if (searchQuery === '') {
       cachedListGroups.source = state.docs;
       cachedListGroups.activeTab = state.activeTab;
@@ -2122,8 +2595,27 @@ function renderFilteredDocs(preferredPath = '', options = {}) {
       cachedListGroups.groups = groups;
     }
   }
-  updateLeftPanelStatsFromGroups(groups, filtered.length);
-  renderList(groups);
+
+  const shouldRenderList = cachedListRenderState.filtered !== filtered
+    || cachedListRenderState.activeTab !== state.activeTab;
+  const shouldRenderStats = cachedListRenderState.groups !== groups
+    || cachedListRenderState.filtered !== filtered
+    || cachedListRenderState.activeTab !== state.activeTab;
+  if (shouldRenderStats) {
+    updateLeftPanelStatsFromGroups(groups, filtered.length);
+  }
+  if (shouldRenderList) {
+    renderList(groups);
+  } else if (state.activePath && state.activePath !== (renderedDocRef && renderedDocRef.path)) {
+    // Keep active marker aligned when active path changes but list structure unchanged.
+    markActiveItem();
+  }
+
+  cachedListRenderState = {
+    filtered,
+    activeTab: state.activeTab,
+    groups,
+  };
 
   if (!filtered.length) {
     const hasKeyword = Boolean(searchQuery);
@@ -2138,22 +2630,33 @@ function renderFilteredDocs(preferredPath = '', options = {}) {
   const tabText = searchQuery ? '（已按关键词筛选）' : '';
   statusEl.textContent = `${displayText} ${tabText} ${state.generatedStatus}`;
 
+  const filteredPathSet = new Set(filtered.map((doc) => doc.path));
   let desiredPath = preferredPath;
   if (preferredSourcePath) {
-    const fromSource = filtered.find((doc) => getSourcePathKey(doc) === preferredSourcePath);
-    if (fromSource) {
+    const fromSource = getDocBySourcePath(preferredSourcePath);
+    if (fromSource && filteredPathSet.has(fromSource.path)) {
       desiredPath = fromSource.path;
     }
   }
-  if (!desiredPath || !filtered.some((doc) => doc.path === desiredPath)) {
+  if (!desiredPath || !filteredPathSet.has(desiredPath)) {
     desiredPath = state.activePath;
   }
 
-  if (!filtered.some((doc) => doc.path === desiredPath)) {
-    selectDoc(filtered[0].path);
-  } else {
-    selectDoc(desiredPath);
+  let targetPath = '';
+  if (desiredPath && filteredPathSet.has(desiredPath)) {
+    targetPath = desiredPath;
   }
+  if (!targetPath) {
+    const activeDoc = getDocByPath(state.activePath);
+    if (activeDoc && filteredPathSet.has(activeDoc.path)) {
+      targetPath = activeDoc.path;
+    }
+  }
+  if (!targetPath) {
+    targetPath = filtered[0].path;
+  }
+
+  selectDoc(targetPath);
 
   if (!skipTabs) {
     renderTabsNow();
@@ -2161,17 +2664,27 @@ function renderFilteredDocs(preferredPath = '', options = {}) {
 }
 
 function selectDoc(pathValue) {
-  const doc = state.docs.find((item) => item.path === pathValue);
+  const doc = getDocByPath(pathValue);
   if (!doc) {
     return;
   }
 
   const isDifferentDoc = state.activePath !== pathValue;
+  const shouldRefreshContent = isDifferentDoc || renderedDocRef !== doc;
+  if (isDifferentDoc && isInEditSession() && !confirmDiscardUnsavedChanges('当前有未保存内容，切换文档将丢失这些修改，是否继续？')) {
+    return;
+  }
   state.activePath = doc.path;
 
   if (isDifferentDoc) {
     applyEditMode(null, false);
     setEditorStatus('');
+  }
+
+  if (!shouldRefreshContent) {
+    markActiveItem();
+    setModeUi();
+    return;
   }
 
   if (isEditModeActive() && isEditableSourcePath(getSourcePath(doc))) {
@@ -2206,6 +2719,7 @@ function selectDoc(pathValue) {
   updateEditorForDoc(doc);
   setModeUi();
   markActiveItem();
+  renderedDocRef = doc;
 }
 
 function collectSearchText(doc) {
@@ -2255,14 +2769,24 @@ async function loadData(preferredPath = '', options = {}) {
       doc._heroImagesOrdered = undefined;
       doc._sourceRenderedText = undefined;
       doc._sourceCachedText = undefined;
+      doc._sourceVersion = normalizeEditSessionVersion(doc._sourceVersion || doc.lastModified || doc._sourceLastModified || '');
+      doc._sourceLastModified = doc._sourceLastModified || doc.lastModified || '';
     });
+    rebuildDocPathCaches(state.docs);
     getSearchIndex(state.docs, true);
 
     cachedTabCounts = getTabCounts();
+    cachedListRenderState = {
+      filtered: null,
+      activeTab: '',
+      groups: null,
+    };
+    renderedDocRef = null;
     cachedListGroups.source = null;
     cachedListGroups.activeTab = '';
     cachedListGroups.filtered = null;
     cachedListGroups.groups = null;
+    cachedGroupedDocs = new WeakMap();
     state.generatedStatus = `（静态生成 ${formatTime(payload.generatedAt)}）`;
     renderTabsNow();
     renderFilteredDocs(normalizedPreferredPath || state.activePath, { preferredSourcePath });
@@ -2315,14 +2839,14 @@ async function initApp() {
       if (state.isCreating) {
         return;
       }
-      const doc = state.docs.find((item) => item.path === state.activePath);
+      const doc = getDocByPath(state.activePath);
       if (!doc) {
         return;
       }
       if (state.isEditing && state.activeEditPath === doc.path) {
         exitEditMode();
       } else if (canUserEditDoc(doc)) {
-        enterEditMode();
+        void enterEditMode();
       }
     });
   }
@@ -2383,9 +2907,50 @@ async function initApp() {
     });
   }
 
+  if (editEditorEl) {
+    const onSourceInput = () => {
+      if (!isInEditSession()) {
+        return;
+      }
+      refreshEditSessionDirtyState();
+    };
+    editEditorEl.addEventListener('input', onSourceInput);
+  }
+
+  if (editBlockEditorEl) {
+    editBlockEditorEl.addEventListener('input', (event) => {
+      const target = event.target;
+      if (!isInEditSession() || !target || !target.classList || !target.classList.contains('doc-block-editor-text')) {
+        return;
+      }
+      refreshEditSessionDirtyState();
+    });
+  }
+
   if (editCancelBtnEl) {
     editCancelBtnEl.addEventListener('click', () => {
       exitEditMode();
+    });
+  }
+
+  if (saveConflictDialogEl) {
+    const attachConflictAction = (button, action) => {
+      if (!button) {
+        return;
+      }
+      button.addEventListener('click', () => {
+        resolveSaveConflictAction(action);
+      });
+    };
+    attachConflictAction(saveConflictDialogReloadBtnEl, '1');
+    attachConflictAction(saveConflictDialogKeepBtnEl, '2');
+    attachConflictAction(saveConflictDialogForceBtnEl, '3');
+    attachConflictAction(saveConflictDialogCancelBtnEl, 'cancel');
+
+    saveConflictDialogEl.addEventListener('click', (event) => {
+      if (event.target === saveConflictDialogEl || event.target.classList.contains('doc-conflict-backdrop')) {
+        resolveSaveConflictAction('cancel');
+      }
     });
   }
 
@@ -2394,7 +2959,7 @@ async function initApp() {
       if (!isEditModeActive()) {
         return;
       }
-      const doc = state.docs.find((item) => item.path === state.activePath);
+  const doc = getDocByPath(state.activePath);
       if (!doc || state.isEditing) {
         return;
       }
@@ -2420,6 +2985,22 @@ async function initApp() {
         event.preventDefault();
         void saveCurrentDoc();
       }
+    });
+  }
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && typeof saveConflictResolver === 'function') {
+        resolveSaveConflictAction('cancel');
+      }
+    });
+
+    window.addEventListener('beforeunload', (event) => {
+      if (!state.editHasUnsavedChanges) {
+        return;
+      }
+      event.preventDefault();
+      event.returnValue = '';
     });
   }
 

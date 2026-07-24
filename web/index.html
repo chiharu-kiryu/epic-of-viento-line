@@ -72,6 +72,7 @@
                 <div id="docEditPanel" class="doc-edit-panel is-hidden">
                   <div class="doc-edit-meta">
                     <div id="docEditPath" class="doc-edit-path muted">可编辑源：—</div>
+                    <span id="docEditDirtyIndicator" class="doc-edit-dirty-indicator is-hidden" aria-live="polite">未保存</span>
                     <div id="docEditActions" class="doc-edit-actions">
                     <button id="docCreateBtn" type="button" class="doc-btn doc-btn-ghost">新建文档</button>
                     <button id="docEditBtn" type="button" class="doc-btn">编辑</button>
@@ -103,6 +104,20 @@
           </div>
         </section>
       </main>
+    </div>
+    <div id="docSaveConflictDialog" class="doc-conflict-overlay is-hidden" role="dialog" aria-modal="true" aria-labelledby="docSaveConflictDialogTitle" aria-describedby="docSaveConflictDialogMessage">
+      <div class="doc-conflict-backdrop"></div>
+      <div class="doc-conflict-dialog" role="document">
+        <h3 id="docSaveConflictDialogTitle" class="doc-conflict-title">保存冲突</h3>
+        <p id="docSaveConflictDialogMessage" class="doc-conflict-message"></p>
+        <div id="docSaveConflictDialogWarning" class="doc-conflict-warning is-hidden" aria-live="polite"></div>
+        <div class="doc-conflict-actions">
+          <button id="docSaveConflictReloadBtn" type="button" class="doc-btn doc-btn-ghost" data-save-conflict-action="1">载入最新（放弃草稿）</button>
+          <button id="docSaveConflictKeepBtn" type="button" class="doc-btn" data-save-conflict-action="2">保留草稿</button>
+          <button id="docSaveConflictForceBtn" type="button" class="doc-btn doc-btn-danger" data-save-conflict-action="3">强制覆盖</button>
+          <button id="docSaveConflictCancelBtn" type="button" class="doc-btn doc-btn-ghost" data-save-conflict-action="cancel">取消</button>
+        </div>
+      </div>
     </div>
     <script type="module" src="/web/app.js"></script>
   </body>
