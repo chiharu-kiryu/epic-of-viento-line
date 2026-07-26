@@ -8,125 +8,111 @@ const CONTRACT_PATH = path.join(PROJECT_ROOT, 'scripts/lib/doc-api-contract.mjs'
 const ROUTES_PATH = path.join(PROJECT_ROOT, 'scripts/lib/doc-server-routes.mjs');
 const APP_STATE_PATH = path.join(PROJECT_ROOT, 'web/modules/app-state.js');
 const APP_RUNTIME_PATH = path.join(PROJECT_ROOT, 'web/modules/app-runtime.js');
+const CHECK_PREFIX = '[doc-api-contract-check]';
+const PRECHECK_MAX_HINTS = 8;
 
-function fail(message) {
-  throw new Error(`[doc-api-contract-check] ${message}`);
-}
-
-function assert(condition, message) {
-  if (!condition) {
-    fail(message);
-  }
-}
-
-function assertString(value, label) {
-  assert(typeof value === 'string' && value.length > 0, `${label} should be a non-empty string`);
-}
-
-function assertStringOrBoolean(value, label) {
-  assert(typeof value === 'string' ? value.length > 0 : typeof value === 'boolean', `${label} should be a non-empty string or boolean`);
-}
-
-function assertBoolean(value, label) {
-  assert(typeof value === 'boolean', `${label} should be boolean`);
-}
-
-async function loadContractModule() {
-  return await import(pathToFileURL(CONTRACT_PATH).href);
-}
-
-async function loadTextFile(filePath) {
-  return await fs.readFile(filePath, 'utf8');
+function createContractPrecheckError({ issues, failedModules }) {
+  const error = new Error(formatPreflightReport(issues));
+  error.code = 'DOCAPI_PRECHECK_FAILED';
+  error.name = 'DocApiContractPrecheckError';
+  error.details = issues;
+  error.failedModules = failedModules;
+  error.summary = {
+    totalIssues: issues.length,
+    modules: summarizeIssuesByArea(issues),
+  };
+  return error;
 }
 
 function normalizeTextForMatch(content) {
-  return content.replace(/\s+/g, ' ');
+  return typeof content === 'string' ? content.replace(/\s+/g, ' ') : '';
 }
 
-function ensureRequestContract(contract) {
-  assert(contract.API_PATHS && typeof contract.API_PATHS === 'object', 'API_PATHS missing');
-  assert(contract.API_METHODS && typeof contract.API_METHODS === 'object', 'API_METHODS missing');
-  assert(contract.API_REQUEST_KEYS && typeof contract.API_REQUEST_KEYS === 'object', 'API_REQUEST_KEYS missing');
+function createIssue(code, area, message, hint = '') {
+  return { code, area, message, hint };
+}
 
-  assertString(contract.API_PATHS.CAPABILITIES, 'API_PATHS.CAPABILITIES');
-  assertString(contract.API_PATHS.INDEX, 'API_PATHS.INDEX');
-  assertString(contract.API_PATHS.DOC, 'API_PATHS.DOC');
-  assertString(contract.API_PATHS.REBUILD, 'API_PATHS.REBUILD');
+function isNonEmptyString(value) {
+  return typeof value === 'string' && value.length > 0;
+}
 
-  assert(contract.API_PATHS.CAPABILITIES === '/api/capabilities', 'CAPABILITIES path expected /api/capabilities');
-  assert(contract.API_PATHS.INDEX === '/api/index', 'INDEX path expected /api/index');
-  assert(contract.API_PATHS.DOC === '/api/doc', 'DOC path expected /api/doc');
-  assert(contract.API_PATHS.REBUILD === '/api/rebuild', 'REBUILD path expected /api/rebuild');
+function isBool(value) {
+  return typeof value === 'boolean';
+}
 
-  assertString(contract.API_METHODS.GET, 'API_METHODS.GET');
-  assertString(contract.API_METHODS.POST, 'API_METHODS.POST');
-  assertString(contract.API_METHODS.PUT, 'API_METHODS.PUT');
+function isStringOrBool(value) {
+  return isNonEmptyString(value) || isBool(value);
+}
+
+async function readText(filePath) {
+  return fs.readFile(filePath, 'utf8');
+}
+
+async function readContract() {
+  return import(pathToFileURL(CONTRACT_PATH).href);
+}
+
+function check(condition, code, area, message, hint, issues) {
+  if (!condition) {
+    issues.push(createIssue(code, area, message, hint));
+  }
+}
+
+function validateContract(contract, issues) {
+  check(contract && typeof contract === 'object', 'DOCAPI-CONTRACT-001', 'contract', 'doc-api-contract.mjs 无法解析为对象', '确认文件语法正确且导出有效对象', issues);
+  if (!contract || typeof contract !== 'object') {
+    return;
+  }
+
+  check(contract.API_PATHS && typeof contract.API_PATHS === 'object', 'DOCAPI-CONTRACT-002', 'contract/API_PATHS', '缺少 API_PATHS', '确保在 doc-api-contract.mjs 中导出 API_PATHS', issues);
+  check(contract.API_METHODS && typeof contract.API_METHODS === 'object', 'DOCAPI-CONTRACT-003', 'contract/API_METHODS', '缺少 API_METHODS', '确保在 doc-api-contract.mjs 中导出 API_METHODS', issues);
+  check(contract.API_REQUEST_KEYS && typeof contract.API_REQUEST_KEYS === 'object', 'DOCAPI-CONTRACT-004', 'contract/API_REQUEST_KEYS', '缺少 API_REQUEST_KEYS', '确保在 doc-api-contract.mjs 中导出 API_REQUEST_KEYS', issues);
+
+  if (!isNonEmptyString(contract.API_PATHS?.CAPABILITIES)) {
+    issues.push(createIssue('DOCAPI-CONTRACT-011', 'contract/API_PATHS/CAPABILITIES', 'CAPABILITIES 为空或类型错误', '应为 "/api/capabilities" 字符串'));
+  }
+  if (!isNonEmptyString(contract.API_PATHS?.INDEX)) {
+    issues.push(createIssue('DOCAPI-CONTRACT-012', 'contract/API_PATHS/INDEX', 'INDEX 为空或类型错误', '应为 "/api/index" 字符串'));
+  }
+  if (!isNonEmptyString(contract.API_PATHS?.DOC)) {
+    issues.push(createIssue('DOCAPI-CONTRACT-013', 'contract/API_PATHS/DOC', 'DOC 为空或类型错误', '应为 "/api/doc" 字符串'));
+  }
+  if (!isNonEmptyString(contract.API_PATHS?.REBUILD)) {
+    issues.push(createIssue('DOCAPI-CONTRACT-014', 'contract/API_PATHS/REBUILD', 'REBUILD 为空或类型错误', '应为 "/api/rebuild" 字符串'));
+  }
+
+  check(contract.API_PATHS?.CAPABILITIES === '/api/capabilities', 'DOCAPI-CONTRACT-021', 'contract/API_PATHS/CAPABILITIES', '路径值不匹配', '应为 "/api/capabilities"', issues);
+  check(contract.API_PATHS?.INDEX === '/api/index', 'DOCAPI-CONTRACT-022', 'contract/API_PATHS/INDEX', '路径值不匹配', '应为 "/api/index"', issues);
+  check(contract.API_PATHS?.DOC === '/api/doc', 'DOCAPI-CONTRACT-023', 'contract/API_PATHS/DOC', '路径值不匹配', '应为 "/api/doc"', issues);
+  check(contract.API_PATHS?.REBUILD === '/api/rebuild', 'DOCAPI-CONTRACT-024', 'contract/API_PATHS/REBUILD', '路径值不匹配', '应为 "/api/rebuild"', issues);
+
+  check(isNonEmptyString(contract.API_METHODS?.GET), 'DOCAPI-CONTRACT-031', 'contract/API_METHODS/GET', '缺少 GET', '确保包含 GET 方法字符串', issues);
+  check(isNonEmptyString(contract.API_METHODS?.POST), 'DOCAPI-CONTRACT-032', 'contract/API_METHODS/POST', '缺少 POST', '确保包含 POST 方法字符串', issues);
+  check(isNonEmptyString(contract.API_METHODS?.PUT), 'DOCAPI-CONTRACT-033', 'contract/API_METHODS/PUT', '缺少 PUT', '确保包含 PUT 方法字符串', issues);
 
   const requiredKeys = ['path', 'content', 'expectedVersion', 'expectedLockVersion', 'force', 'create', 'source', 'runStandardize', 'runBuild'];
   for (const key of requiredKeys) {
-    assertString(contract.API_REQUEST_KEYS[key], `API_REQUEST_KEYS.${key}`);
+    check(isNonEmptyString(contract.API_REQUEST_KEYS?.[key]), `DOCAPI-CONTRACT-04${requiredKeys.indexOf(key) + 1}`, `contract/API_REQUEST_KEYS/${key}`, `缺少请求字段 ${key}`, `在 API_REQUEST_KEYS 中补齐 ${key}`, issues);
   }
 
-  assertStringOrBoolean(contract.DOC_CAPABILITIES_FIELDS.edit, 'DOC_CAPABILITIES_FIELDS.edit');
-  assertStringOrBoolean(contract.DOC_CAPABILITIES_FIELDS.create, 'DOC_CAPABILITIES_FIELDS.create');
-  assertStringOrBoolean(contract.DOC_CAPABILITIES_FIELDS.rebuild, 'DOC_CAPABILITIES_FIELDS.rebuild');
-  assertBoolean(contract.DOC_CAPABILITIES_FIELDS.okValue, 'DOC_CAPABILITIES_FIELDS.okValue');
-  assertString(contract.API_RESPONSE.error, 'API_RESPONSE.error');
-  assertString(contract.API_RESPONSE.ok, 'API_RESPONSE.ok');
+  check(isStringOrBool(contract.DOC_CAPABILITIES_FIELDS?.edit), 'DOCAPI-CONTRACT-051', 'contract/DOC_CAPABILITIES_FIELDS/edit', 'edit 字段类型异常', '应为布尔或非空字符串', issues);
+  check(isStringOrBool(contract.DOC_CAPABILITIES_FIELDS?.create), 'DOCAPI-CONTRACT-052', 'contract/DOC_CAPABILITIES_FIELDS/create', 'create 字段类型异常', '应为布尔或非空字符串', issues);
+  check(isStringOrBool(contract.DOC_CAPABILITIES_FIELDS?.rebuild), 'DOCAPI-CONTRACT-053', 'contract/DOC_CAPABILITIES_FIELDS/rebuild', 'rebuild 字段类型异常', '应为布尔或非空字符串', issues);
+  check(isBool(contract.DOC_CAPABILITIES_FIELDS?.okValue), 'DOCAPI-CONTRACT-054', 'contract/DOC_CAPABILITIES_FIELDS/okValue', 'okValue 应为布尔值', '请确认是否为 boolean', issues);
+  check(isNonEmptyString(contract.API_RESPONSE?.error), 'DOCAPI-CONTRACT-061', 'contract/API_RESPONSE/error', '缺少 API_RESPONSE.error', '请补充错误字段名', issues);
+  check(isNonEmptyString(contract.API_RESPONSE?.ok), 'DOCAPI-CONTRACT-062', 'contract/API_RESPONSE/ok', '缺少 API_RESPONSE.ok', '请补充成功字段名', issues);
 }
 
-async function ensureRouteContract() {
-  const routeModule = await import(pathToFileURL(ROUTES_PATH).href);
-  assert(typeof routeModule.handleApiRequest === 'function', 'doc-server-routes should export handleApiRequest');
-  assert(typeof routeModule.methodNotAllowed === 'function', 'doc-server-routes should export methodNotAllowed');
-}
-
-async function ensureWebFrontendReferencesContract() {
-  const [appState, appRuntime] = await Promise.all([
-    loadTextFile(APP_STATE_PATH),
-    loadTextFile(APP_RUNTIME_PATH),
-  ]);
-
-  const normalizedState = normalizeTextForMatch(appState);
-  const normalizedRuntime = normalizeTextForMatch(appRuntime);
-
-  const requiredStateMarkers = [
-    "from '../../scripts/lib/doc-api-contract.mjs'",
-    'API_PATHS.CAPABILITIES',
-    'DOC_CAPABILITIES_URL',
-    'DOC_API_URL',
-    'DOC_REBUILD_URL',
-  ];
-
-  for (const marker of requiredStateMarkers) {
-    assert(normalizedState.includes(marker), `app-state.js missing marker: ${marker}`);
-  }
-
-  const requiredRuntimeMarkers = [
-    'API_REQUEST_KEYS',
-    'DOC_API_URL',
-    '[API_REQUEST_KEYS.path]',
-    '[API_REQUEST_KEYS.content]',
-    '[API_REQUEST_KEYS.expectedVersion]',
-    '[API_REQUEST_KEYS.force]',
-    '[API_REQUEST_KEYS.create]',
-    '[API_REQUEST_KEYS.source]',
-  ];
-
-  for (const marker of requiredRuntimeMarkers) {
-    assert(normalizedRuntime.includes(marker), `app-runtime.js missing marker: ${marker}`);
+function checkTextMarkers(fileText, markers, prefix, issues) {
+  const normalized = normalizeTextForMatch(fileText);
+  for (const marker of markers) {
+    check(normalized.includes(marker), `${prefix}-${String(markers.indexOf(marker) + 1).padStart(3, '0')}`, 'frontend marker', `缺少关键引用 ${marker}`, `请确认引用未被重构为更高层别名或替代路径`, issues);
   }
 }
 
-async function runDocApiContractPreflight() {
-  const [contract, routeText] = await Promise.all([
-    loadContractModule(),
-    loadTextFile(ROUTES_PATH),
-  ]);
-  ensureRequestContract(contract);
-
+function validateRoute(contract, routeText, issues) {
   const normalizedRouteText = normalizeTextForMatch(routeText);
-  const routeMarkers = [
+  const markers = [
     'API_PATHS.INDEX',
     'API_PATHS.CAPABILITIES',
     'API_PATHS.DOC',
@@ -138,14 +124,151 @@ async function runDocApiContractPreflight() {
     'makeRebuildResponse',
   ];
 
-  for (const marker of routeMarkers) {
-    assert(normalizedRouteText.includes(marker), `doc-server-routes.js missing marker: ${marker}`);
+  for (const marker of markers) {
+    check(normalizedRouteText.includes(marker), `DOCAPI-ROUTE-${String(markers.indexOf(marker) + 1).padStart(3, '0')}`, 'doc-server-routes/实现', `缺少关键引用 ${marker}`, '请确认路由层仍基于 doc-api-contract.mjs 中定义进行路由/方法分派', issues);
   }
 
-  ensureRouteContract();
-  await ensureWebFrontendReferencesContract();
+  check(contract.API_PATHS?.INDEX && contract.API_METHODS?.GET, 'DOCAPI-ROUTE-010', 'doc-server-routes/export', 'handleApiRequest 未检测到标准索引/方法约束', '确认路由层已从 contract 读取常量', issues);
+}
+
+async function validateRouteExport(issues) {
+  try {
+    const routeModule = await import(pathToFileURL(ROUTES_PATH).href);
+    check(typeof routeModule.handleApiRequest === 'function', 'DOCAPI-ROUTE-011', 'doc-server-routes/export', '缺少 handleApiRequest 导出', '请确认 export handleApiRequest', issues);
+    check(typeof routeModule.methodNotAllowed === 'function', 'DOCAPI-ROUTE-012', 'doc-server-routes/export', '缺少 methodNotAllowed 导出', '请确认 export methodNotAllowed', issues);
+  } catch (error) {
+    issues.push(createIssue('DOCAPI-ROUTE-013', 'doc-server-routes/import', `路由模块导入失败: ${error?.message || error}`, '检查脚本语法与依赖路径是否正确'));
+  }
+}
+
+function validateFrontendText(issues, appStateText, appRuntimeText) {
+  const stateMarkers = [
+    "from '../../scripts/lib/doc-api-contract.mjs'",
+    'API_PATHS.CAPABILITIES',
+    'DOC_CAPABILITIES_URL',
+    'DOC_API_URL',
+    'DOC_REBUILD_URL',
+  ];
+  checkTextMarkers(appStateText, stateMarkers, 'DOCAPI-FRONTEND-STATE', issues);
+
+  const runtimeMarkers = [
+    'API_REQUEST_KEYS',
+    'DOC_API_URL',
+    '[API_REQUEST_KEYS.path]',
+    '[API_REQUEST_KEYS.content]',
+    '[API_REQUEST_KEYS.expectedVersion]',
+    '[API_REQUEST_KEYS.force]',
+    '[API_REQUEST_KEYS.create]',
+    '[API_REQUEST_KEYS.source]',
+  ];
+  checkTextMarkers(appRuntimeText, runtimeMarkers, 'DOCAPI-FRONTEND-RUNTIME', issues);
+}
+
+function summarizeIssuesByArea(issues) {
+  const map = {};
+  for (const issue of issues) {
+    map[issue.area] = (map[issue.area] || 0) + 1;
+  }
+  return map;
+}
+
+function getTopHints(issues) {
+  const hints = [];
+  for (const issue of issues) {
+    if (issue.hint && issue.hint.trim()) {
+      hints.push(issue.hint);
+    }
+  }
+  const uniq = [...new Set(hints)];
+  return uniq.slice(0, PRECHECK_MAX_HINTS);
+}
+
+function formatPreflightReport(issues) {
+  const lines = [];
+  lines.push(`${CHECK_PREFIX} API 契约预检失败：共 ${issues.length} 项问题`);
+  for (const issue of issues) {
+    lines.push(`- ${issue.code} | ${issue.area}\n  问题: ${issue.message}`);
+    if (issue.hint) {
+      lines.push(`  建议: ${issue.hint}`);
+    }
+  }
+
+  const summary = summarizeIssuesByArea(issues);
+  if (Object.keys(summary).length > 1) {
+    lines.push('');
+    lines.push('问题分布：');
+    for (const [area, count] of Object.entries(summary)) {
+      lines.push(`- ${area}: ${count} 条`);
+    }
+  }
+
+  const hints = getTopHints(issues);
+  if (hints.length > 0) {
+    lines.push('');
+    lines.push('优先处理建议：');
+    for (const [index, hint] of hints.entries()) {
+      lines.push(`${index + 1}. ${hint}`);
+    }
+  }
+
+  lines.push('');
+  lines.push('修复后可重试：node scripts/ops/site.mjs');
+  return lines.join('\n');
+}
+
+async function runDocApiContractPreflight() {
+  const issues = [];
+  const fileReads = await Promise.allSettled([
+    readText(ROUTES_PATH),
+    readText(APP_STATE_PATH),
+    readText(APP_RUNTIME_PATH),
+  ]);
+
+  const routeText = fileReads[0].status === 'fulfilled' ? fileReads[0].value : '';
+  const appStateText = fileReads[1].status === 'fulfilled' ? fileReads[1].value : '';
+  const appRuntimeText = fileReads[2].status === 'fulfilled' ? fileReads[2].value : '';
+
+  if (fileReads[0].status === 'rejected') {
+    issues.push(createIssue('DOCAPI-ROUTE-000', 'doc-server-routes', `doc-server-routes.mjs 读取失败: ${fileReads[0].reason?.message || fileReads[0].reason}`, '确认文件路径与内容可读'));
+  }
+  if (fileReads[1].status === 'rejected') {
+    issues.push(createIssue('DOCAPI-FRONTEND-STATE-000', 'app-state.js', `app-state.js 读取失败: ${fileReads[1].reason?.message || fileReads[1].reason}`, '确认文件存在且可读'));
+  }
+  if (fileReads[2].status === 'rejected') {
+    issues.push(createIssue('DOCAPI-FRONTEND-RUNTIME-000', 'app-runtime.js', `app-runtime.js 读取失败: ${fileReads[2].reason?.message || fileReads[2].reason}`, '确认文件存在且可读'));
+  }
+
+  let contract = null;
+  try {
+    contract = await readContract();
+  } catch (error) {
+    issues.push(createIssue('DOCAPI-CONTRACT-000', 'contract/import', `无法导入 doc-api-contract.mjs: ${error?.message || error}`, '检查文件是否存在且可解析'));
+  }
+
+  validateContract(contract, issues);
+
+  if (contract) {
+    validateRoute(contract, routeText, issues);
+  }
+
+  await validateRouteExport(issues);
+  if (appStateText || appRuntimeText) {
+    validateFrontendText(issues, appStateText, appRuntimeText);
+  }
+
+  if (issues.length > 0) {
+    const failedModules = Object.keys(summarizeIssuesByArea(issues)).filter((area) => area.includes('/') || area.includes('app-') || area.includes('contract') || area.includes('doc-'));
+    throw createContractPrecheckError({ issues, failedModules });
+  }
+
+  return {
+    ok: true,
+    checksPassed: true,
+    issues,
+  };
 }
 
 export {
   runDocApiContractPreflight,
+  createContractPrecheckError,
 };
