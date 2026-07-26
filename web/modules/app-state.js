@@ -31,6 +31,7 @@ export const appState = {
 export const domElements = {
   statusEl: document.getElementById('status'),
   listEl: document.getElementById('docList'),
+  loadRetryBtnEl: document.getElementById('docLoadRetryBtn'),
   searchInput: document.getElementById('searchInput'),
   searchClearEl: document.getElementById('searchClear'),
   categoryTabsEl: document.getElementById('categoryTabs'),

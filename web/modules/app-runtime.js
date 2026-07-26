@@ -41,6 +41,7 @@ import { getDocTemplate, DOC_TYPE_TEMPLATE_DEFS } from './app-type-templates.js'
 const {
   statusEl,
   listEl,
+  loadRetryBtnEl,
   searchInput,
   categoryTabsEl,
   searchClearEl,
@@ -93,6 +94,8 @@ const {
 const REBUILD_TEXT = '重建索引';
 const SEARCH_INPUT_DEBOUNCE_MS = 180;
 const LIST_RENDER_BATCH_SIZE = 120;
+const DATA_INDEX_REQUEST_TIMEOUT_MS = 12000;
+const CAPABILITIES_REQUEST_TIMEOUT_MS = 5000;
 const CATEGORY_ORDER_INDEX = new Map(
   CATEGORY_ORDER.map((category, index) => [category, index]),
 );
@@ -132,6 +135,111 @@ let cachedGroupedDocs = new WeakMap();
 let editSessionBaselineContent = '';
 const docByPathCache = new Map();
 const docBySourcePathCache = new Map();
+
+function showLoadRetry(statusMessage, listMessage, mode = 'normal') {
+  if (statusEl) {
+    statusEl.textContent = statusMessage;
+  }
+  if (listEl && listMessage) {
+    listEl.textContent = listMessage;
+  }
+  if (loadRetryBtnEl) {
+    const isForceMode = mode === 'force';
+    loadRetryBtnEl.hidden = false;
+    loadRetryBtnEl.classList.remove('is-hidden');
+    loadRetryBtnEl.disabled = false;
+    loadRetryBtnEl.classList.remove('is-loading');
+    loadRetryBtnEl.dataset.retryMode = isForceMode ? 'force' : 'normal';
+    loadRetryBtnEl.textContent = isForceMode ? '清缓存重试' : '重试加载';
+  }
+}
+
+function hideLoadRetry() {
+  if (loadRetryBtnEl) {
+    loadRetryBtnEl.hidden = true;
+    loadRetryBtnEl.classList.add('is-hidden');
+    loadRetryBtnEl.classList.remove('is-loading');
+    loadRetryBtnEl.disabled = false;
+  }
+}
+
+function setLoadingState(stateText, listText) {
+  if (statusEl) {
+    statusEl.textContent = stateText;
+  }
+  if (listEl && listText) {
+    listEl.textContent = listText;
+  }
+}
+
+function withCacheBust(url, forceCacheBust = false) {
+  if (!forceCacheBust) {
+    return url;
+  }
+
+  try {
+    const urlObject = new URL(url);
+    urlObject.searchParams.set('_cacheBust', String(Date.now()));
+    return urlObject.toString();
+  } catch {
+    return `${url}${url.includes('?') ? '&' : '?'}_cacheBust=${Date.now()}`;
+  }
+}
+
+async function retryLoadData({ forceCacheBust = false } = {}) {
+  if (loadRetryBtnEl) {
+    loadRetryBtnEl.disabled = true;
+    loadRetryBtnEl.classList.add('is-loading');
+  }
+  setLoadingState('正在重试加载文档索引...', '重试加载中…');
+  hideLoadRetry();
+  await loadData({
+    isRetryAttempt: true,
+    forceCacheBust,
+  });
+}
+
+function getDataIndexUrlCandidates() {
+  const candidates = [DATA_INDEX_URL];
+  const currentLocation = new URL(location.href);
+  const webPrefix = new URL('/web/data/index.json', currentLocation).href;
+  const rootPrefix = new URL('/data/index.json', currentLocation.origin).href;
+
+  if (webPrefix !== DATA_INDEX_URL) {
+    candidates.push(webPrefix);
+  }
+  if (rootPrefix !== DATA_INDEX_URL && rootPrefix !== webPrefix) {
+    candidates.push(rootPrefix);
+  }
+  return candidates;
+}
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = 10000, timeoutMessage = '请求') {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    return response;
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      throw new Error(`${timeoutMessage}超时（${Math.round(timeoutMs / 1000)} 秒）`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function getFriendlyLoadErrorMessage(error) {
+  if (!error) {
+    return '未知错误';
+  }
+  return error.message || '请求失败';
+}
 
 function getStoredCreateType(defaultType = 'hero') {
   try {
@@ -534,7 +642,12 @@ function setMode(requestedMode, options = {}) {
 async function detectEditBackend() {
   state.editBackendAvailable = false;
   try {
-    const response = await fetch(DOC_CAPABILITIES_URL, { cache: 'no-store' });
+    const response = await fetchWithTimeout(
+      DOC_CAPABILITIES_URL,
+      { cache: 'no-store' },
+      CAPABILITIES_REQUEST_TIMEOUT_MS,
+      '检测编辑能力',
+    );
     if (!response.ok) {
       return;
     }
@@ -3115,15 +3228,47 @@ async function loadData(preferredPath = '', options = {}) {
     };
   const normalizedPreferredPath = normalizeDisplayValue(loadArgs.preferredPath || '');
   const preferredSourcePath = normalizeDisplayValue(loadArgs.preferredSourcePath || '');
+  const isRetryAttempt = Boolean(loadArgs.isRetryAttempt);
+  const forceCacheBust = Boolean(loadArgs.forceCacheBust);
 
   try {
-    const response = await fetch(DATA_INDEX_URL);
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+    if (statusEl) {
+      statusEl.textContent = '正在加载文档索引…';
+    }
+    if (listEl) {
+      listEl.textContent = '加载文档列表…';
+    }
+    hideLoadRetry();
+    const indexUrls = getDataIndexUrlCandidates();
+    let payload = null;
+    let lastError = null;
+
+    for (const candidateUrl of indexUrls) {
+      try {
+        const response = await fetchWithTimeout(
+          withCacheBust(candidateUrl, forceCacheBust),
+          { cache: 'no-store' },
+          DATA_INDEX_REQUEST_TIMEOUT_MS,
+          '加载文档索引',
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        payload = await response.json();
+        break;
+      } catch (error) {
+        lastError = error;
+      }
     }
 
-    const payload = await response.json();
+    if (!payload) {
+      throw lastError || new Error('未成功获取文档索引');
+    }
     state.docs = payload?.docs || payload?.state?.docs || [];
+    if (!Array.isArray(state.docs)) {
+      throw new Error('文档索引格式异常');
+    }
+    hideLoadRetry();
     state.docs.forEach((doc) => {
       doc._searchText = collectSearchText(doc);
       doc.meta = doc.meta || {};
@@ -3162,12 +3307,22 @@ async function loadData(preferredPath = '', options = {}) {
     lastSearchQuery = getSearchQuery();
     updateSearchClearState();
   } catch (error) {
-    statusEl.textContent = `加载失败：${error.message}`;
-    listEl.textContent = '请先执行静态生成脚本：node scripts/build-static-doc-site.mjs';
+    showLoadRetry(
+      `加载失败：${getFriendlyLoadErrorMessage(error)}`,
+      `文档列表加载失败：${getFriendlyLoadErrorMessage(error)}。请确认服务运行正常并重试。`,
+      isRetryAttempt && forceCacheBust ? 'force' : (isRetryAttempt ? 'force' : 'normal'),
+    );
   }
 }
 
 async function initApp() {
+  if (statusEl) {
+    statusEl.textContent = '正在初始化文档站...';
+  }
+  if (listEl) {
+    listEl.textContent = '初始化中…';
+  }
+
   searchInput.addEventListener('input', () => {
     updateSearchClearState();
     const query = getSearchQuery();
@@ -3196,6 +3351,12 @@ async function initApp() {
       }
       renderFilteredDocs('', { skipTabs: true });
       searchInput.focus();
+    });
+  }
+
+  if (loadRetryBtnEl) {
+    loadRetryBtnEl.addEventListener('click', () => {
+      void retryLoadData();
     });
   }
 
@@ -3425,9 +3586,22 @@ async function initApp() {
   state.activeCreateType = getStoredCreateType(state.activeCreateType);
   renderCreateTypeOptions();
   setEditorPanelVisibility(false);
-  await detectEditBackend();
-  setMode(resolveInitialMode());
-  await loadData();
+  try {
+    await detectEditBackend();
+    setMode(resolveInitialMode());
+    await loadData();
+  } catch (error) {
+    if (statusEl) {
+      statusEl.textContent = `初始化失败：${error?.message || '未知错误'}`;
+    }
+    if (listEl) {
+      listEl.textContent = '初始化失败，请刷新页面后重试。';
+    }
+    if (modeStateEl) {
+      modeStateEl.textContent = '初始化失败';
+    }
+    console.error('[doc-site] initApp failed', error);
+  }
 }
 
 export { initApp };

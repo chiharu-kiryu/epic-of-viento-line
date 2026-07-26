@@ -486,6 +486,19 @@ pre {
   padding-left: 4px;
 }
 
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 22px;
+}
+
+.doc-btn-small {
+  font-size: 11px;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
 .doc-list {
   margin-top: 8px;
   display: grid;
