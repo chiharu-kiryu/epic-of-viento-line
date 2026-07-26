@@ -1,9 +1,11 @@
+import { API_PATHS } from '../../scripts/lib/doc-api-contract.mjs';
+
 export const PAGE_BASE = new URL('./', location.href);
 export const DATA_INDEX_URL = new URL('data/index.json', PAGE_BASE).href;
 export const ASSET_BASE_URL = new URL('../', PAGE_BASE).href;
-export const DOC_CAPABILITIES_URL = new URL('/api/capabilities', PAGE_BASE).href;
-export const DOC_API_URL = new URL('/api/doc', PAGE_BASE).href;
-export const DOC_REBUILD_URL = new URL('/api/rebuild', PAGE_BASE).href;
+export const DOC_CAPABILITIES_URL = new URL(API_PATHS.CAPABILITIES, PAGE_BASE).href;
+export const DOC_API_URL = new URL(API_PATHS.DOC, PAGE_BASE).href;
+export const DOC_REBUILD_URL = new URL(API_PATHS.REBUILD, PAGE_BASE).href;
 
 export const appState = {
   docs: [],

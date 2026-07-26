@@ -12,6 +12,7 @@ import {
   EDITABLE_SOURCE_PREFIXES,
   APP_ERROR_MESSAGES,
 } from './app-state.js';
+import { API_REQUEST_KEYS } from '../../scripts/lib/doc-api-contract.mjs';
 import {
   getHeroDisplayDocs,
   getVisibleDocs,
@@ -2017,9 +2018,9 @@ async function saveNewDoc() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        path: sourcePath,
-        content,
-        create: true,
+        [API_REQUEST_KEYS.path]: sourcePath,
+        [API_REQUEST_KEYS.content]: content,
+        [API_REQUEST_KEYS.create]: true,
       }),
     });
 
@@ -2107,10 +2108,10 @@ async function saveExistingDoc(options = {}) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        path: sourcePath,
-        content,
-        expectedLastModified: expectedVersion,
-        force: forceOverwrite,
+        [API_REQUEST_KEYS.path]: sourcePath,
+        [API_REQUEST_KEYS.content]: content,
+        [API_REQUEST_KEYS.expectedVersion]: expectedVersion,
+        [API_REQUEST_KEYS.force]: forceOverwrite,
       }),
     });
 
@@ -2233,7 +2234,7 @@ async function rebuildIndexForDoc(doc, options = {}) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        source: rebuildFilter,
+        [API_REQUEST_KEYS.source]: rebuildFilter,
       }),
     });
 

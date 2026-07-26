@@ -1,0 +1,326 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { createReadStream } from 'node:fs';
+import { collectHeroImages } from './image-index.mjs';
+import { collectFilesRecursive } from './scan-files.mjs';
+import { inferCategory } from './category.mjs';
+import { PROJECT_ROOT, DOC_ROOT, WEB_ROOT, trimName, toPosix } from './paths.mjs';
+
+const EDIT_ROOT_PREFIXES = ['design-data/', 'docs-standard/design-data/'];
+
+const MIME_TYPES = new Map([
+  ['.html', 'text/html; charset=utf-8'],
+  ['.css', 'text/css; charset=utf-8'],
+  ['.js', 'application/javascript; charset=utf-8'],
+  ['.json', 'application/json; charset=utf-8'],
+  ['.txt', 'text/plain; charset=utf-8'],
+  ['.md', 'text/plain; charset=utf-8'],
+  ['.png', 'image/png'],
+  ['.jpg', 'image/jpeg'],
+  ['.jpeg', 'image/jpeg'],
+  ['.webp', 'image/webp'],
+]);
+
+function resolvePort(argv = process.argv.slice(2)) {
+  const envPort = process.env.PORT;
+  if (envPort && Number.isInteger(Number(envPort))) {
+    return Number(envPort);
+  }
+
+  const cliIndex = argv.indexOf('--port');
+  if (cliIndex !== -1 && argv[cliIndex + 1]) {
+    const candidate = Number(argv[cliIndex + 1]);
+    if (Number.isInteger(candidate)) {
+      return candidate;
+    }
+  }
+
+  return 4173;
+}
+
+function sanitizePathPrefix(normalizedPath) {
+  const normalized = normalizedPath.replace(/^\.\//, '');
+  if (!normalized) {
+    return '';
+  }
+  if (normalized.startsWith('.')) {
+    return '';
+  }
+  return normalized;
+}
+
+function safePathFromQuery(rawPath) {
+  if (!rawPath) {
+    return '';
+  }
+  if (rawPath.includes('\\') || rawPath.includes('\0')) {
+    return '';
+  }
+  if (/^[A-Za-z]:\//.test(rawPath) || path.isAbsolute(rawPath)) {
+    return '';
+  }
+
+  const normalized = toPosix(rawPath.replace(/\\/g, '/'));
+  const segments = normalized.split('/').filter((segment) => segment.length > 0);
+
+  if (!segments.length) {
+    return '';
+  }
+
+  const filteredSegments = [];
+  for (const segment of segments) {
+    if (segment === '.' || segment === '') {
+      continue;
+    }
+    if (segment === '..') {
+      return '';
+    }
+    filteredSegments.push(segment);
+  }
+
+  if (!filteredSegments.length) {
+    return '';
+  }
+
+  return sanitizePathPrefix(filteredSegments.join('/'));
+}
+
+function normalizeLockVersion(rawVersion) {
+  if (typeof rawVersion === 'number' && Number.isFinite(rawVersion)) {
+    return String(rawVersion);
+  }
+  if (typeof rawVersion === 'string') {
+    const normalized = rawVersion.trim();
+    if (!normalized) {
+      return '';
+    }
+    if (/^\d+(?:\.\d+)?$/.test(normalized)) {
+      return normalized;
+    }
+  }
+  return '';
+}
+
+function normalizeStandardizeSourceFilter(rawPath = '') {
+  const safePath = safePathFromQuery(rawPath);
+  if (!safePath) {
+    return '';
+  }
+  if (safePath === 'docs-standard' || safePath === 'design-data') {
+    return '';
+  }
+  if (safePath.startsWith('design-data/')) {
+    return safePath;
+  }
+  if (safePath.startsWith('docs-standard/design-data/')) {
+    return safePath.replace(/^docs-standard\/design-data\//, 'design-data/');
+  }
+  if (safePath.startsWith('docs-standard/')) {
+    return '';
+  }
+  return '';
+}
+
+function isAllowedEditPath(relativePath) {
+  return EDIT_ROOT_PREFIXES.some((prefix) => relativePath.startsWith(prefix));
+}
+
+async function resolveEditableFilePath(relativePath, options = {}) {
+  const { allowCreate = false } = options;
+  const candidates = [relativePath];
+  if (relativePath.startsWith('docs-standard/')) {
+    candidates.push(relativePath.replace(/^docs-standard\//, ''));
+  }
+
+  let fallbackCandidate = null;
+  for (const candidate of candidates) {
+    if (!candidate || !isAllowedEditPath(candidate)) {
+      continue;
+    }
+    if (!fallbackCandidate) {
+      const fallbackAbsolutePath = path.join(PROJECT_ROOT, candidate);
+      fallbackCandidate = { relativePath: candidate, absolutePath: fallbackAbsolutePath };
+    }
+    const absolutePath = path.join(PROJECT_ROOT, candidate);
+    try {
+      const stat = await fs.stat(absolutePath);
+      if (stat.isFile()) {
+        return { relativePath: candidate, absolutePath, exists: true };
+      }
+    } catch {
+      // keep trying
+    }
+  }
+
+  if (allowCreate && fallbackCandidate) {
+    return { ...fallbackCandidate, exists: false };
+  }
+  return null;
+}
+
+async function readRequestJsonBody(request) {
+  return await new Promise((resolve, reject) => {
+    let body = '';
+    request.on('data', (chunk) => {
+      body += chunk;
+    });
+    request.on('end', () => {
+      if (!body.trim()) {
+        resolve({});
+        return;
+      }
+      try {
+        resolve(JSON.parse(body));
+      } catch (error) {
+        reject(error);
+      }
+    });
+    request.on('error', reject);
+  });
+}
+
+async function readTextFile(filePath) {
+  try {
+    return await fs.readFile(filePath, 'utf8');
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return null;
+    }
+    throw error;
+  }
+}
+
+function classifyEntry(relativePath) {
+  const inferred = inferCategory(relativePath);
+  return {
+    ...inferred,
+    name: trimName(path.basename(relativePath)),
+  };
+}
+
+async function buildEditableDocIndex() {
+  const result = [];
+  const fileList = await collectFilesRecursive(DOC_ROOT, { relativeBase: '' });
+
+  for (const filePath of fileList) {
+    const rel = toPosix(path.join('design-data', filePath));
+    const absolutePath = path.join(PROJECT_ROOT, rel);
+    const classification = classifyEntry(rel);
+    const baseName = path.basename(absolutePath);
+
+    const entry = {
+      path: rel,
+      title: trimName(baseName),
+      category: classification.category,
+      group: classification.group,
+      name: trimName(baseName),
+      fullPath: rel,
+      lastModified: '',
+      heroImages: [],
+    };
+
+    if (classification.category === 'hero') {
+      entry.heroImages = await collectHeroImages(classification.meta.attribute, classification.meta.hero);
+    }
+
+    try {
+      const stats = await fs.stat(absolutePath);
+      entry.lastModified = stats.mtime.toISOString();
+    } catch {
+      entry.lastModified = '';
+    }
+
+    result.push(entry);
+  }
+
+  const readmePaths = ['README.md', 'design-data/README.md'];
+  for (const readme of readmePaths) {
+    const abs = path.join(PROJECT_ROOT, readme);
+    if (await fs.access(abs).then(() => true).catch(() => false)) {
+      const rel = toPosix(readme);
+      if (!result.some((item) => item.path === rel)) {
+        result.unshift({
+          path: rel,
+          title: '项目说明文档',
+          category: 'root',
+          group: '根目录',
+          name: '项目说明文档',
+          lastModified: '',
+          heroImages: [],
+        });
+      }
+    }
+  }
+
+  result.sort((a, b) => {
+    if (a.group !== b.group) {
+      return a.group.localeCompare(b.group, 'zh-CN');
+    }
+    return a.name.localeCompare(b.name, 'zh-CN');
+  });
+
+  return {
+    generatedAt: new Date().toISOString(),
+    count: result.length,
+    docs: result,
+    entries: result,
+  };
+}
+
+function getMime(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  return MIME_TYPES.get(ext) || 'application/octet-stream';
+}
+
+async function sendFile(filePath, response) {
+  response.statusCode = 200;
+  response.setHeader('Content-Type', getMime(filePath));
+  const stream = createReadStream(filePath);
+  stream.pipe(response);
+}
+
+function sendApiResponse(response, data) {
+  response.statusCode = 200;
+  response.setHeader('Content-Type', 'application/json; charset=utf-8');
+  response.end(JSON.stringify(data));
+}
+
+async function sendApiError(response, statusCode, message, extra = {}) {
+  response.statusCode = statusCode;
+  response.setHeader('Content-Type', 'application/json; charset=utf-8');
+  response.end(JSON.stringify({ error: message, ...extra }));
+}
+
+function getWebRootIndexPath() {
+  return path.join(WEB_ROOT, 'index.html');
+}
+
+function getProjectFilePath(relativePath) {
+  const rel = relativePath.startsWith('/') ? relativePath.slice(1) : relativePath;
+  return path.join(PROJECT_ROOT, rel);
+}
+
+function isProjectFilePathSafe(candidatePath) {
+  return candidatePath.startsWith(PROJECT_ROOT);
+}
+
+export {
+  EDIT_ROOT_PREFIXES,
+  resolvePort,
+  safePathFromQuery,
+  normalizeLockVersion,
+  normalizeStandardizeSourceFilter,
+  isAllowedEditPath,
+  resolveEditableFilePath,
+  readRequestJsonBody,
+  readTextFile,
+  classifyEntry,
+  buildEditableDocIndex,
+  getMime,
+  sendFile,
+  sendApiResponse,
+  sendApiError,
+  getWebRootIndexPath,
+  getProjectFilePath,
+  isProjectFilePathSafe,
+};
