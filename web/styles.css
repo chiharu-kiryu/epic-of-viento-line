@@ -762,6 +762,42 @@ pre {
   background: rgba(12, 22, 46, 0.55);
 }
 
+.doc-create-type-wrap {
+  margin-top: 4px;
+  border: 1px solid rgba(125, 173, 255, 0.22);
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: rgba(12, 22, 46, 0.55);
+}
+
+.doc-create-type-wrap.is-hidden {
+  display: none;
+}
+
+.doc-create-type-label {
+  color: var(--muted);
+  font-size: 11px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.doc-create-type-select {
+  width: 100%;
+  border: 1px solid rgba(136, 185, 255, 0.42);
+  border-radius: 8px;
+  background: rgba(8, 14, 28, 0.88);
+  color: var(--text);
+  padding: 5px 8px;
+  font-size: 11px;
+  font-family: inherit;
+}
+
+.doc-create-type-select:focus-visible {
+  outline: none;
+  border-color: rgba(145, 202, 255, 0.7);
+  box-shadow: 0 0 0 3px rgba(145, 202, 255, 0.18);
+}
+
 .doc-create-path-wrap.is-hidden {
   display: none;
 }

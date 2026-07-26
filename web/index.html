@@ -73,7 +73,7 @@
                   <div class="doc-edit-meta">
                     <div id="docEditPath" class="doc-edit-path muted">可编辑源：—</div>
                     <span id="docEditDirtyIndicator" class="doc-edit-dirty-indicator is-hidden" aria-live="polite">未保存</span>
-                    <div id="docEditActions" class="doc-edit-actions">
+                <div id="docEditActions" class="doc-edit-actions">
                     <button id="docCreateBtn" type="button" class="doc-btn doc-btn-ghost">新建文档</button>
                     <button id="docEditBtn" type="button" class="doc-btn">编辑</button>
                     <button id="docSaveBtn" type="button" class="doc-btn doc-btn-success">保存</button>
@@ -81,9 +81,15 @@
                     <button id="docRebuildBtn" type="button" class="doc-btn doc-btn-ghost">重建索引</button>
                   </div>
                 </div>
+                <div id="docCreateTypeWrap" class="doc-create-type-wrap is-hidden">
+                  <label for="docCreateTypeSelect" class="doc-create-type-label">新建类型</label>
+                  <select id="docCreateTypeSelect" class="doc-create-type-select">
+                    <option value="hero">英雄</option>
+                  </select>
+                </div>
                 <div id="docCreatePathWrap" class="doc-create-path-wrap is-hidden">
-                  <label for="docCreatePathInput" class="doc-create-path-label">新建路径（例如: design-data/xxx.md）</label>
-                  <input id="docCreatePathInput" class="doc-create-path-input" type="text" placeholder="design-data/xxx.md" />
+                  <label for="docCreatePathInput" class="doc-create-path-label">新建路径（例如: design-data/xxx.txt）</label>
+                  <input id="docCreatePathInput" class="doc-create-path-input" type="text" placeholder="design-data/xxx.txt" />
                 </div>
                 <div id="docEditModeBar" class="doc-edit-mode-bar is-hidden">
                   <button id="docEditSourceModeBtn" type="button" class="doc-btn doc-btn-ghost doc-btn-active" data-mode="source">源码</button>

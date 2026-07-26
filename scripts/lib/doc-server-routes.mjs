@@ -168,20 +168,19 @@ async function handleApiRebuild(response, request, {
     await sendApiError(response, 409, API_ERRORS.rebuildInProgress);
     return;
   }
-
-  let payload;
-  try {
-    payload = await readRequestJsonBody(request);
-  } catch (error) {
-    await sendApiError(response, 400, `invalid json: ${error?.message || 'parse error'}`);
-    return;
-  }
-
-  const rebuildRequest = normalizeRebuildRequest(payload);
-  const sourceFilter = normalizeStandardizeSourceFilter(rebuildRequest.source);
   state.rebuildInProgress = true;
 
   try {
+    let payload;
+    try {
+      payload = await readRequestJsonBody(request);
+    } catch (error) {
+      await sendApiError(response, 400, `invalid json: ${error?.message || 'parse error'}`);
+      return;
+    }
+
+    const rebuildRequest = normalizeRebuildRequest(payload);
+    const sourceFilter = normalizeStandardizeSourceFilter(rebuildRequest.source);
     const result = await rebuildIndex({
       backstoryMode: backstoryMergeMode,
       sourceFilter,

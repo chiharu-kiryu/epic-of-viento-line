@@ -9,11 +9,18 @@ import {
 } from './doc-server.mjs';
 
 function safeDecodePath(pathname) {
+  if (/%2f|%2F|%5c|%5C/.test(pathname)) {
+    return '';
+  }
   try {
     return decodeURIComponent(pathname);
   } catch {
     return '';
   }
+}
+
+function isApiPath(pathname) {
+  return pathname.startsWith('/api/');
 }
 
 function isRootPath(pathname) {
@@ -30,6 +37,13 @@ function isWebAssetPath(pathname) {
 
 function isFaviconPath(pathname) {
   return pathname === '/favicon.ico' || pathname === '/web/favicon.ico';
+}
+
+function isManagedAssetPath(pathname) {
+  return pathname.startsWith('/assets/')
+    || pathname.startsWith('/data-template/')
+    || pathname.startsWith('/design-data/')
+    || pathname.startsWith('/docs-standard/');
 }
 
 function buildFaviconCandidates(projectRoot, webRoot) {
@@ -85,7 +99,8 @@ async function handleProjectFileRequest({ response, pathname, projectRoot }) {
     await sendFile(candidatePath, response);
     return true;
   } catch {
-    if (isWebAssetPath(pathname)) {
+    const normalizedPath = decodedPath || pathname;
+    if (isWebAssetPath(normalizedPath) || isManagedAssetPath(normalizedPath)) {
       response.statusCode = 404;
       response.end('Not found');
       return true;
@@ -100,6 +115,11 @@ async function handleProjectFileRequest({ response, pathname, projectRoot }) {
 async function handleStaticRequest({ pathname, response, projectRoot, webRoot }) {
   if (isFaviconPath(pathname)) {
     return handleFavicon({ response, projectRoot, webRoot });
+  }
+
+  if (isApiPath(pathname)) {
+    await sendApiError(response, 404, 'not found');
+    return true;
   }
 
   if (isRootPath(pathname)) {

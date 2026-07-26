@@ -36,6 +36,7 @@ import {
 } from './app-helpers.js';
 import { renderHeroBanner, buildCommonCards, getHeroCardsByCategory } from './app-render.js';
 import { renderStructuredBlocks, hasRenderableToken } from './app-structured.js';
+import { getDocTemplate, DOC_TYPE_TEMPLATE_DEFS } from './app-type-templates.js';
 
 const {
   statusEl,
@@ -64,6 +65,8 @@ const {
   editSourceModeBtnEl,
   editBlockModeBtnEl,
   editBlockEditorEl,
+  createTypeWrapEl,
+  createTypeSelectEl,
   createPathWrapEl,
   createPathInputEl,
   editStatusEl,
@@ -94,6 +97,7 @@ const CATEGORY_ORDER_INDEX = new Map(
   CATEGORY_ORDER.map((category, index) => [category, index]),
 );
 const MODE_LOCAL_STORAGE_KEY = 'doc-site-mode';
+const CREATE_TYPE_LOCAL_STORAGE_KEY = 'doc-site-create-type';
 const DEFAULT_DOC_MODE = 'browse';
 let rebuildProgressTimer = null;
 let rebuildProgressStart = 0;
@@ -105,6 +109,8 @@ let blockDraftSourcePath = '';
 let editSessionVersion = '';
 let saveConflictResolver = null;
 let renderedDocRef = null;
+const createTemplateCache = new Map();
+const createTypeOrder = ['hero', 'item', 'unit', 'skill', 'building', 'backstory', 'scene', 'rule', 'template'];
 let cachedListRenderState = {
   filtered: null,
   activeTab: '',
@@ -126,6 +132,33 @@ let cachedGroupedDocs = new WeakMap();
 let editSessionBaselineContent = '';
 const docByPathCache = new Map();
 const docBySourcePathCache = new Map();
+
+function getStoredCreateType(defaultType = 'hero') {
+  try {
+    const rawType = normalizeCreateType(typeof window !== 'undefined' && window.localStorage
+      ? localStorage.getItem(CREATE_TYPE_LOCAL_STORAGE_KEY)
+      : '');
+    return rawType || defaultType;
+  } catch {
+    return defaultType;
+  }
+}
+
+function setStoredCreateType(type = '') {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return;
+  }
+  try {
+    const normalizedType = normalizeCreateType(type);
+    if (!normalizedType) {
+      localStorage.removeItem(CREATE_TYPE_LOCAL_STORAGE_KEY);
+      return;
+    }
+    localStorage.setItem(CREATE_TYPE_LOCAL_STORAGE_KEY, normalizedType);
+  } catch {
+    // Ignore storage failures in restricted environments.
+  }
+}
 
 function getCachedGroupsByFilteredDocs(filteredDocs, activeTab = 'all') {
   if (!Array.isArray(filteredDocs) || filteredDocs.length === 0) {
@@ -571,16 +604,256 @@ function normalizeCreatePathValue(rawPath) {
   return normalizeDisplayValue(rawPath).replace(/\\+/g, '/');
 }
 
-function getCreateBaseDirectory(sourcePath) {
-  const normalizedPath = normalizeCreatePathValue(sourcePath);
-  if (!normalizedPath.startsWith('design-data/')) {
-    return 'design-data/';
+function getCreateTypeLabel(type = '') {
+  return CATEGORY_LABELS[type] || type || '其他';
+}
+
+function getCreateTypeDisplayList() {
+  const available = createTypeOrder.filter((type) => Boolean(getDocTemplate(type)));
+  if (available.length > 0) {
+    return available;
   }
-  const lastSlash = normalizedPath.lastIndexOf('/');
-  if (lastSlash === -1) {
-    return 'design-data/';
+  return ['hero'];
+}
+
+function getCreateDefaultNameByType(type = '') {
+  const template = getDocTemplate(type);
+  if (!template) {
+    return '新建文档';
   }
-  return `${normalizedPath.slice(0, lastSlash + 1)}`;
+  if (type === 'hero') {
+    return '新建英雄';
+  }
+  if (type === 'item') {
+    return '新建物品';
+  }
+  if (type === 'unit') {
+    return '新建单位';
+  }
+  if (type === 'skill') {
+    return '新建技能';
+  }
+  if (type === 'building') {
+    return '新建建筑';
+  }
+  if (type === 'backstory') {
+    return '新建背景故事';
+  }
+  if (type === 'scene') {
+    return '新建场景';
+  }
+  if (type === 'rule') {
+    return '新建规则';
+  }
+  if (type === 'template') {
+    return '新建模板';
+  }
+  return template.templateSource && template.templateSource.includes('场景')
+    ? '新建场景'
+    : `新建${getCreateTypeLabel(type)}`;
+}
+
+function normalizeCreateType(rawType = '') {
+  const normalized = normalizeDisplayValue(rawType).toLowerCase();
+  return getCreateTypeDisplayList().includes(normalized)
+    ? normalized
+    : getCreateTypeDisplayList()[0];
+}
+
+function splitCreateSourcePath(sourcePath = '') {
+  const normalizedSourcePath = normalizeCreatePathValue(sourcePath).replace(/^docs-standard\//, '');
+  return normalizedSourcePath
+    .split('/')
+    .filter(Boolean);
+}
+
+function splitDesignSourcePath(sourcePath = '') {
+  const segments = splitCreateSourcePath(sourcePath);
+  if (segments[0] === 'design-data' && segments[1]) {
+    return {
+      domain: segments[1],
+      chain: segments.slice(2),
+    };
+  }
+  return {
+    domain: segments[0] || '',
+    chain: segments.slice(1),
+  };
+}
+
+function getCreateTypeBasePath(createType = '', referenceSourcePath = '') {
+  const type = normalizeCreateType(createType);
+  const { chain } = splitDesignSourcePath(referenceSourcePath);
+  const baseSegment = chain[0] || '';
+  const subSegment = chain.length >= 3 ? chain[1] : '';
+
+  if (type === 'hero') {
+    return `design-data/design-heros/${baseSegment || '力量'}/`;
+  }
+  if (type === 'item') {
+    return `design-data/design-item/${baseSegment || '基础'}/${subSegment || '通用'}/`;
+  }
+  if (type === 'skill') {
+    return `design-data/design-skills/${baseSegment || '主动'}/`;
+  }
+  if (type === 'unit') {
+    return `design-data/design-units/${baseSegment || '中立'}/`;
+  }
+  if (type === 'building') {
+    return 'design-data/design-building/';
+  }
+  if (type === 'backstory') {
+    return `design-data/backstory/${baseSegment || '故事'}/`;
+  }
+  if (type === 'scene') {
+    return 'design-data/design-scenes/';
+  }
+  if (type === 'rule') {
+    return 'design-data/design-rules/';
+  }
+  if (type === 'template') {
+    return 'design-data/design-template/';
+  }
+
+  return 'design-data/';
+}
+
+function getCreateDefaultTypeFromActiveContext() {
+  const activeDoc = getDocByPath(state.activePath);
+  if (activeDoc && activeDoc.category && DOC_TYPE_TEMPLATE_DEFS[activeDoc.category]) {
+    return normalizeCreateType(activeDoc.category);
+  }
+
+  const persistedType = getStoredCreateType('hero');
+  if (persistedType) {
+    return persistedType;
+  }
+
+  const tabType = normalizeCreateType(state.activeTab);
+  if (createTypeOrder.includes(tabType)) {
+    return tabType;
+  }
+
+  if (state.activeTab === 'item') {
+    return 'item';
+  }
+
+  if (state.activeTab === 'hero') {
+    return 'hero';
+  }
+
+  return 'hero';
+}
+
+function renderCreateTypeOptions() {
+  if (!createTypeSelectEl) {
+    return;
+  }
+  const types = getCreateTypeDisplayList();
+  const previousType = normalizeCreateType(createTypeSelectEl.value || state.activeCreateType);
+  createTypeSelectEl.innerHTML = types
+    .map((type) => `<option value="${type}">${getCreateTypeLabel(type)}</option>`)
+    .join('');
+  const nextType = types.includes(previousType) ? previousType : types[0] || '';
+  createTypeSelectEl.value = nextType;
+  state.activeCreateType = nextType || 'hero';
+}
+
+function getCreateTypeTemplateContent(type = '') {
+  const definition = getDocTemplate(normalizeCreateType(type));
+  if (!definition || !definition.templateSource) {
+    return '';
+  }
+  return normalizeCreatePathValue(definition.templateSource);
+}
+
+function getCreateTypeTemplateCacheKey(type = '') {
+  return getCreateTypeTemplateContent(type) || '';
+}
+
+function getCreateTemplateContentPath(type = '') {
+  const templateSource = getCreateTypeTemplateCacheKey(type);
+  if (!templateSource) {
+    return '';
+  }
+  return `/${templateSource}`;
+}
+
+async function loadCreateTypeTemplate(type = '') {
+  const normalizedType = normalizeCreateType(type);
+  const templatePath = getCreateTemplateContentPath(normalizedType);
+
+  if (!templatePath) {
+    return '';
+  }
+
+  if (createTemplateCache.has(templatePath)) {
+    return createTemplateCache.get(templatePath);
+  }
+
+  try {
+    const response = await fetch(templatePath);
+    if (!response.ok) {
+      createTemplateCache.set(templatePath, '');
+      return '';
+    }
+    const contentType = response.headers.get('content-type') || '';
+    if (/text\/html/i.test(contentType)) {
+      createTemplateCache.set(templatePath, '');
+      return '';
+    }
+    const content = await response.text();
+    createTemplateCache.set(templatePath, content);
+    return content;
+  } catch {
+    createTemplateCache.set(templatePath, '');
+    return '';
+  }
+}
+
+async function applyCreateTemplate(type = '') {
+  if (!editEditorEl) {
+    return;
+  }
+  const normalizedType = normalizeCreateType(type);
+  const templateContent = await loadCreateTypeTemplate(normalizedType);
+  editEditorEl.value = templateContent;
+  syncEditSessionBaseline();
+  if (createTypeSelectEl) {
+    createTypeSelectEl.value = normalizedType;
+  }
+  state.activeCreateType = normalizedType;
+}
+
+async function setCreateTypeState(type = '', options = {}) {
+  const normalizedType = normalizeCreateType(type);
+  const nextType = normalizedType;
+  const referenceSourcePath = options.referenceSourcePath || '';
+  const shouldLoadTemplate = options.loadTemplate !== false;
+
+  state.activeCreateType = nextType;
+  if (createTypeSelectEl) {
+    createTypeSelectEl.value = nextType;
+  }
+
+  const pathSeed = referenceSourcePath || getSourcePath(getDocByPath(state.activePath)) || '';
+  const suggestedPath = getSuggestedCreatePath(pathSeed, nextType);
+  const finalPath = setCreatePath(suggestedPath, '', true);
+
+  if (editPathEl) {
+    editPathEl.textContent = `新建源（${getCreateTypeLabel(nextType)}）：${finalPath}`;
+  }
+  state.activeCreatePath = finalPath;
+
+  if (shouldLoadTemplate && isInEditSession()) {
+    await applyCreateTemplate(nextType);
+  }
+  setStoredCreateType(nextType);
+
+  return {
+    type: nextType,
+    path: finalPath,
+  };
 }
 
 function ensureMarkdownLikeExtension(sourcePath) {
@@ -594,10 +867,11 @@ function ensureMarkdownLikeExtension(sourcePath) {
   return `${trimmed}.txt`;
 }
 
-function getSuggestedCreatePath(sourcePath = '') {
-  const base = getCreateBaseDirectory(sourcePath) || 'design-data/';
+function getSuggestedCreatePath(sourcePath = '', createType = 'hero') {
+  const base = getCreateTypeBasePath(createType, sourcePath) || 'design-data/';
+  const defaultName = getCreateDefaultNameByType(createType);
   const timestamp = new Date().toISOString().replace(/[-:.T]/g, '').replace(/Z$/, '');
-  return `${base}新建文档_${timestamp}.txt`;
+  return `${base}${defaultName}_${timestamp}.txt`;
 }
 
 function getCreateInputPath() {
@@ -1193,11 +1467,18 @@ function resetDocEditorState() {
   if (createPathWrapEl) {
     createPathWrapEl.classList.add('is-hidden');
   }
+  if (createTypeWrapEl) {
+    createTypeWrapEl.classList.add('is-hidden');
+  }
   if (createPathInputEl) {
     createPathInputEl.value = '';
     createPathInputEl.placeholder = APP_ERROR_MESSAGES.createPathPlaceholder;
     createPathInputEl.classList.remove('is-invalid');
   }
+  if (createTypeSelectEl) {
+    createTypeSelectEl.value = getCreateTypeDisplayList()[0] || '';
+  }
+  state.activeCreateType = getCreateTypeDisplayList()[0] || 'hero';
 }
 
 const NEW_SKILL_MARKERS = /^(?:获得新技能|新增技能|新增被动技能|新增主动技能|新增额外技能)$/;
@@ -1746,6 +2027,9 @@ function setEditButtons({ isEditing, isCreating, canEdit }) {
     if (createPathWrapEl) {
       createPathWrapEl.classList.add('is-hidden');
     }
+    if (createTypeWrapEl) {
+      createTypeWrapEl.classList.add('is-hidden');
+    }
     if (docEditorWrapEl) {
       docEditorWrapEl.hidden = true;
     }
@@ -1789,6 +2073,10 @@ function setEditButtons({ isEditing, isCreating, canEdit }) {
 
   if (createPathWrapEl) {
     createPathWrapEl.classList.toggle('is-hidden', !isCreateMode);
+  }
+
+  if (createTypeWrapEl) {
+    createTypeWrapEl.classList.toggle('is-hidden', !isCreateMode);
   }
 
   if (docEditorWrapEl) {
@@ -1850,7 +2138,7 @@ function applyEditMode(doc, isEditing) {
   contentEl.classList.toggle('is-empty', false);
 }
 
-function enterCreateMode() {
+async function enterCreateMode() {
   if (!isEditModeActive()) {
     return;
   }
@@ -1868,7 +2156,8 @@ function enterCreateMode() {
   const baseSourcePath = canUserEditDoc(activeDoc || {})
     ? getSourcePath(activeDoc || {})
     : 'design-data/';
-  const suggestedPath = getSuggestedCreatePath(baseSourcePath);
+  const defaultCreateType = getCreateDefaultTypeFromActiveContext();
+  const suggestedPath = getSuggestedCreatePath(baseSourcePath, defaultCreateType);
 
   state.isEditing = true;
   state.isCreating = true;
@@ -1882,16 +2171,13 @@ function enterCreateMode() {
     isCreating: true,
     canEdit: true,
   });
-  if (editPathEl) {
-    editPathEl.textContent = `新建源：${suggestedPath}`;
-  }
-  if (editEditorEl) {
-    editEditorEl.value = '';
-  }
-  setCreatePath(suggestedPath);
+  const createState = await setCreateTypeState(defaultCreateType, {
+    referenceSourcePath: baseSourcePath,
+    loadTemplate: true,
+  });
+  state.activeCreatePath = createState?.path || getCreateInputPath() || suggestedPath;
   updateCreatePathValidation();
   setEditInputMode('source');
-  syncEditSessionBaseline();
   contentEl.classList.add('is-hidden');
   contentEl.hidden = true;
   contentEl.classList.toggle('is-empty', false);
@@ -2935,7 +3221,23 @@ async function initApp() {
 
   if (editCreateBtnEl) {
     editCreateBtnEl.addEventListener('click', () => {
-      enterCreateMode();
+      void enterCreateMode();
+    });
+  }
+
+  if (createTypeSelectEl) {
+    createTypeSelectEl.addEventListener('change', async () => {
+      if (!state.isCreating) {
+        return;
+      }
+      if (state.editHasUnsavedChanges && !confirmDiscardUnsavedChanges('切换新建类型将重置当前内容，是否继续？')) {
+        createTypeSelectEl.value = state.activeCreateType;
+        return;
+      }
+      await setCreateTypeState(createTypeSelectEl.value, {
+        referenceSourcePath: getSourcePath(getDocByPath(state.activePath)) || 'design-data/',
+        loadTemplate: true,
+      });
     });
   }
 
@@ -3120,6 +3422,8 @@ async function initApp() {
   }
 
   resetDocEditorState();
+  state.activeCreateType = getStoredCreateType(state.activeCreateType);
+  renderCreateTypeOptions();
   setEditorPanelVisibility(false);
   await detectEditBackend();
   setMode(resolveInitialMode());

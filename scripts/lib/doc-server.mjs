@@ -127,9 +127,13 @@ function isAllowedEditPath(relativePath) {
 
 async function resolveEditableFilePath(relativePath, options = {}) {
   const { allowCreate = false } = options;
-  const candidates = [relativePath];
-  if (relativePath.startsWith('docs-standard/')) {
-    candidates.push(relativePath.replace(/^docs-standard\//, ''));
+  const canonicalPath = relativePath.startsWith('docs-standard/design-data/')
+    ? relativePath.replace(/^docs-standard\/design-data\//, 'design-data/')
+    : relativePath;
+  const candidates = [canonicalPath];
+
+  if (relativePath !== canonicalPath) {
+    candidates.push(relativePath);
   }
 
   let fallbackCandidate = null;
