@@ -550,6 +550,10 @@ pre {
   transition: background 0.16s ease, border-color 0.16s ease;
 }
 
+.doc-item.doc-item-no-avatar {
+  grid-template-columns: 1fr;
+}
+
 .doc-item::before {
   content: "";
   position: absolute;
@@ -1503,12 +1507,15 @@ pre {
 }
 
 .hero-skill-empty {
-  display: grid;
-  place-items: center;
   background: rgba(13, 24, 48, 0.75);
   color: #9cb1d4;
   font-size: 11px;
   text-align: center;
+}
+
+.hero-skill-empty:not(img) {
+  display: grid;
+  place-items: center;
 }
 
 .hero-skill-info .text-title {

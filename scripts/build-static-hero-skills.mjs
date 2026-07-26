@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { toPosix } from './lib/paths.mjs';
 
 const HERO_SKILL_KEYS = new Set([
   '天生技能',
@@ -33,10 +34,6 @@ function isLikelySkillDescription(key, value) {
 
 function normalizeValue(value) {
   return (value || '').toString().trim();
-}
-
-function toPosixPath(filePath) {
-  return filePath.split(path.sep).join('/');
 }
 
 function trimExtName(name) {
@@ -182,7 +179,7 @@ function normalizeMatchValue(value) {
 }
 
 export function resolveHeroMeta(sourceCategory, sourceMeta = {}, sourcePath = '') {
-  const normalizedSourcePath = toPosixPath(sourcePath)
+  const normalizedSourcePath = toPosix(sourcePath)
     .replace(/\\/g, '/')
     .replace(/\/+/g, '/')
     .replace(/^\/+/, '')

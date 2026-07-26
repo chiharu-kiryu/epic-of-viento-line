@@ -1,8 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { DOC_ROOT } from './lib/paths.mjs';
+import { runTextNormalizationBatch } from './lib/normalize-runner.mjs';
 
-const PROJECT_ROOT = process.cwd();
-const HERO_ROOT = path.join(PROJECT_ROOT, 'design-data', 'design-heros');
+const HERO_ROOT = path.join(DOC_ROOT, 'design-heros');
 const WRITE = process.argv.includes('--write');
 
 const CORE_ORDER = [
@@ -328,18 +329,16 @@ async function listHeroFiles() {
   return files.sort((a, b) => a.localeCompare(b, 'zh-CN'));
 }
 
-const files = await listHeroFiles();
-let changed = 0;
-for (const filePath of files) {
-  const raw = await fs.readFile(filePath, 'utf8');
-  const normalized = normalizeHero(filePath, raw);
-  if (normalized === raw) {
-    continue;
-  }
-  changed += 1;
-  if (WRITE) {
-    await fs.writeFile(filePath, normalized, 'utf8');
-  }
+function normalizeHeroForWrite(normalizedText) {
+  return normalizedText.endsWith('\n') ? normalizedText : `${normalizedText}\n`;
 }
 
-console.log(`${WRITE ? 'normalized' : 'would normalize'} ${changed}/${files.length} hero files`);
+const heroFiles = await listHeroFiles();
+const heroResult = await runTextNormalizationBatch({
+  files: heroFiles,
+  normalizeItem: normalizeHero,
+  shouldWrite: WRITE,
+  formatWriteValue: normalizeHeroForWrite,
+});
+
+console.log(`${WRITE ? 'normalized' : 'would normalize'} ${heroResult.changed}/${heroResult.total} hero files`);

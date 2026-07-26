@@ -81,3 +81,5 @@
 - `node scripts/standardize-docs.mjs`
 - 生成文件位于 [docs-standard](/Users/Shared/chroot/dev/epic-of-viento-line/docs-standard)
 - 原始文件与现有目录保持不变，适合用于版本化存档和后续站点接入。
+
+脚本层也已重构：启动入口仍是 `./scripts/start-doc-site.sh`，实际逻辑集中在 `scripts/ops` 与 `scripts/lib`，详细分层说明见 [`scripts/README.md`](scripts/README.md)。

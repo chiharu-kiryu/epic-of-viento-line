@@ -1,17 +1,13 @@
 import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import path from 'node:path';
+import { PROJECT_ROOT, STANDARD_ROOT as DEFAULT_STANDARD_ROOT, toPosix } from './lib/paths.mjs';
+import { collectFilesRecursive, DEFAULT_SKIP_DIRS } from './lib/scan-files.mjs';
 
-const PROJECT_ROOT = process.cwd();
 const args = process.argv.slice(2).filter((arg) => arg && !arg.startsWith('-'));
 const options = new Set(process.argv.slice(2).filter((arg) => arg.startsWith('-')));
-const STANDARD_ROOT = path.join(PROJECT_ROOT, args[0] || 'docs-standard');
+const STANDARD_ROOT = args[0] ? path.join(PROJECT_ROOT, args[0]) : DEFAULT_STANDARD_ROOT;
 const STRICT_MODE = options.has('--strict');
-const SKIP_DIRS = new Set(['.git', '.DS_Store', 'node_modules', '.tmp']);
-
-function toPosix(filePath) {
-  return filePath.split(path.sep).join('/');
-}
 
 function isTextFileLike(fileName) {
   return fileName.endsWith('.json');
@@ -159,35 +155,6 @@ function validateDocument(doc, relPath) {
   return issues;
 }
 
-async function walkFiles(rootDir, relativeBase = '') {
-  const entries = await fs.readdir(rootDir, { withFileTypes: true });
-  const out = [];
-
-  for (const entry of entries) {
-    if (entry.name.startsWith('.')) {
-      continue;
-    }
-    if (SKIP_DIRS.has(entry.name)) {
-      continue;
-    }
-
-    const absolute = path.join(rootDir, entry.name);
-    const relative = toPosix(path.join(relativeBase, entry.name));
-
-    if (entry.isDirectory()) {
-      const nested = await walkFiles(absolute, relative);
-      out.push(...nested);
-      continue;
-    }
-    if (!entry.isFile() || !isTextFileLike(entry.name)) {
-      continue;
-    }
-    out.push(relative);
-  }
-
-  return out;
-}
-
 async function main() {
   const exists = fsSync.existsSync(STANDARD_ROOT);
   if (!exists) {
@@ -195,7 +162,11 @@ async function main() {
     process.exit(1);
   }
 
-  const files = await walkFiles(STANDARD_ROOT);
+  const files = await collectFilesRecursive(STANDARD_ROOT, {
+    relativeBase: '',
+    skipDirs: DEFAULT_SKIP_DIRS,
+    acceptedExtensions: new Set(['.json']),
+  });
   const summary = {
     total: files.length,
     failed: 0,

@@ -1,8 +1,10 @@
-import fs from 'node:fs/promises';
 import path from 'node:path';
+import { collectFilesRecursive } from './lib/scan-files.mjs';
+import { DOC_ROOT } from './lib/paths.mjs';
+import { runTextNormalizationBatch } from './lib/normalize-runner.mjs';
+import { normalizeForCompare, toUnixLineEndings } from './lib/normalize-text-utils.mjs';
 
-const PROJECT_ROOT = process.cwd();
-const UNIT_ROOT = path.join(PROJECT_ROOT, 'design-data', 'design-units');
+const UNIT_ROOT = path.join(DOC_ROOT, 'design-units');
 const WRITE = process.argv.includes('--write');
 
 const CORE_ORDER = [
@@ -29,22 +31,16 @@ const KEY_ALIASES = new Map([
   ...CORE_ORDER.map((key) => [key, key]),
 ]);
 
-function toUnixText(text) {
-  return text.replace(/\r\n?/g, '\n').replace(/^\uFEFF/, '');
-}
-
 function parseLineKv(line) {
   const match = line.match(/^(.{1,60}?)\s*[:：]\s*(.*)$/);
   if (!match) return null;
   return { key: match[1].trim(), value: match[2].trim() };
 }
 
-function normalizeForCompare(text) {
-  return toUnixText(text)
-    .replace(/[ \t]+\n/g, '\n')
-    .replace(/^\n+|\n+$/g, '')
-    .trim();
-}
+const normalizeForDiff = (text) => normalizeForCompare(text, {
+  stripBomMode: 'leading',
+  trimMode: 'trim',
+});
 
 function normalizeLabelLine(line) {
   return line.trim()
@@ -85,7 +81,9 @@ function emitKvLine(label, value) {
 }
 
 function normalizeUnitText(filePath, text) {
-  const lines = toUnixText(text).split('\n');
+  const lines = toUnixLineEndings(text)
+    .replace(/^\uFEFF/, '')
+    .split('\n');
   const titleIndex = lines.findIndex((line) => line.trim().length > 0);
   if (titleIndex < 0) {
     throw new Error(`${filePath}: 无标题`);
@@ -242,46 +240,21 @@ function normalizeUnitText(filePath, text) {
   return output.join('\n').trimEnd();
 }
 
-async function listFiles(dir) {
-  const entries = await fs.readdir(dir, { withFileTypes: true });
-  const files = [];
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...await listFiles(fullPath));
-    } else {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
-}
-
 async function main() {
-  const files = (await listFiles(UNIT_ROOT)).sort();
-  let changed = 0;
-  const normalizedItems = [];
+  const files = (await collectFilesRecursive(UNIT_ROOT, {
+    relativeBase: '',
+    acceptedExtensions: new Set(['', '.md', '.txt', '.json', '.yml', '.yaml']),
+  })).map((file) => path.join(UNIT_ROOT, file)).sort();
+  const unitResult = await runTextNormalizationBatch({
+    files,
+    normalizeItem: normalizeUnitText,
+    compareValue: normalizeForDiff,
+    shouldWrite: WRITE,
+    formatWriteValue: (normalized) => `${normalized}\n`,
+  });
 
-  for (const file of files) {
-    const raw = await fs.readFile(file, 'utf8');
-    const sourceText = normalizeForCompare(raw);
-    const normalized = normalizeUnitText(file, raw);
-    const normalizedText = normalizeForCompare(normalized);
-    const shouldUpdate = sourceText !== normalizedText;
-    if (shouldUpdate) changed += 1;
-    normalizedItems.push({ file, normalized, shouldUpdate });
-  }
-
-  if (WRITE) {
-    for (const item of normalizedItems) {
-      if (!item.shouldUpdate) continue;
-      await fs.writeFile(item.file, `${item.normalized}\n`, 'utf8');
-    }
-  }
-
-  console.log(`normalize-unit-data: would ${WRITE ? 'normalize' : 'update'} ${changed}/${files.length} unit files`);
-  for (const item of normalizedItems.filter((item) => item.shouldUpdate)) {
+  console.log(`normalize-unit-data: would ${WRITE ? 'normalize' : 'update'} ${unitResult.changed}/${unitResult.total} unit files`);
+  for (const item of unitResult.results.filter((item) => item.shouldUpdate)) {
     console.log(item.file);
   }
 }

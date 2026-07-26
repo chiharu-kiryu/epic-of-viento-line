@@ -31,9 +31,18 @@ const docButtonCacheByPath = new Map();
 const docButtonMetaByPath = new Map();
 let docButtonCacheVersion = 0;
 let activeDocPath = '';
+const docNameAvatarCache = new Map();
 const SEARCH_INDEX_TOKEN_MAX_LENGTH = 4;
 const SEARCH_INDEX_TOKEN_MIN_LENGTH = 2;
 const SEARCH_QUERY_TOKEN_LENGTH = 3;
+const PLACEHOLDER_ASSET_ROOT = {
+  item: 'assets/images/item',
+  unit: 'assets/images/units',
+  skill: 'assets/images/skills',
+  building: 'assets/images/building',
+  scene: 'assets/images/scene',
+};
+const CATEGORIES_NO_DOC_THUMBNAIL = new Set(['template', 'rule', 'root', 'other']);
 
 function getDisplayCategory(doc) {
   const category = doc?.category || 'other';
@@ -475,6 +484,167 @@ function normalizeLabel(value) {
     .replace(/\s+/g, '')
     .replace(/["“”‘’‘’《》『』「」]/g, '')
     .toLowerCase();
+}
+
+function normalizeDisplayValue(value) {
+  return normalizeValue(value).normalize('NFKC');
+}
+
+function getAvatarPlaceholderLabel(rawLabel) {
+  const label = normalizeDisplayValue(rawLabel).replace(/[\s\-_/|【】\[\]{}（）()]+/g, '');
+  if (!label) {
+    return '文档';
+  }
+  const compact = label.replace(/\s+/g, '');
+  if (!compact) {
+    return '文档';
+  }
+  return compact.slice(0, 2);
+}
+
+function hashTextToHue(value) {
+  const text = normalizeDisplayValue(value);
+  let hash = 0;
+  for (let i = 0; i < text.length; i += 1) {
+    hash = ((hash << 5) - hash) + text.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash) % 360;
+}
+
+function escapeXml(value) {
+  return normalizeDisplayValue(value).replace(/[&<>"']/g, (char) => {
+    switch (char) {
+      case '&':
+        return '&amp;';
+      case '<':
+        return '&lt;';
+      case '>':
+        return '&gt;';
+      case '"':
+        return '&quot;';
+      case '\'':
+        return '&#39;';
+      default:
+        return char;
+    }
+  });
+}
+
+function getNameAvatarDataUrl(rawLabel) {
+  const label = getAvatarPlaceholderLabel(rawLabel);
+  const cacheKey = normalizeDisplayValue(rawLabel) || label;
+  if (docNameAvatarCache.has(cacheKey)) {
+    return docNameAvatarCache.get(cacheKey);
+  }
+
+  const hue = hashTextToHue(cacheKey);
+  const hue2 = (hue + 45 + (cacheKey.length * 7)) % 360;
+  const escapedLabel = escapeXml(label);
+  const svg = `<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"128\" height=\"128\" viewBox=\"0 0 128 128\" role=\"img\" aria-label=\"${escapeXml(label)}\">
+  <defs>
+    <linearGradient id=\"g\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">
+      <stop offset=\"0%\" stop-color=\"hsl(${hue}, 72%, 46%)\" />
+      <stop offset=\"100%\" stop-color=\"hsl(${hue2}, 72%, 36%)\" />
+    </linearGradient>
+  </defs>
+  <rect width=\"128\" height=\"128\" rx=\"18\" fill=\"url(#g)\" />
+  <text x=\"64\" y=\"82\" text-anchor=\"middle\" font-size=\"46\" fill=\"#eff4ff\" font-family=\"Arial, sans-serif\" font-weight=\"700\" letter-spacing=\"2\">${escapedLabel}</text>
+</svg>`;
+
+  const dataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  docNameAvatarCache.set(cacheKey, dataUrl);
+  return dataUrl;
+}
+
+function normalizePlaceholderSegment(rawValue) {
+  const text = String(rawValue || '')
+    .normalize('NFKC')
+    .trim()
+    .replace(/\r\n?/g, '')
+    .replace(/[/\\:*?"<>|]/g, '')
+    .replace(/\.\.+/g, '.');
+  return text || '占位';
+}
+
+function isSourceMarkdownDoc(doc) {
+  const extension = String(doc?.source?.extension || '').toLowerCase();
+  const sourcePath = String(doc?.source?.path || '');
+  return extension === '.md' || sourcePath.toLowerCase().endsWith('.md');
+}
+
+function shouldShowDocThumbnail(doc = {}) {
+  const category = String(doc?.category || doc?.displayCategory || '').trim();
+  if (CATEGORIES_NO_DOC_THUMBNAIL.has(category)) {
+    return false;
+  }
+  if (isSourceMarkdownDoc(doc)) {
+    return false;
+  }
+  return true;
+}
+
+function getDocImagePlaceholderPath(doc = {}, fallbackLabel = '') {
+  const category = String(doc?.category || '').trim();
+  if (CATEGORIES_NO_DOC_THUMBNAIL.has(category)) {
+    return '';
+  }
+  if (isSourceMarkdownDoc(doc)) {
+    return '';
+  }
+
+  if (!doc || category === 'hero' || category === 'backstory') {
+    return '';
+  }
+
+  const docPath = String(doc.path || '').trim();
+  if (!docPath) {
+    return '';
+  }
+  const base = PLACEHOLDER_ASSET_ROOT[category];
+  if (!base) {
+    return '';
+  }
+
+  const segments = docPath.split('/').map((segment) => segment.trim()).filter(Boolean);
+  if (segments.length < 2) {
+    return '';
+  }
+
+  const fileName = normalizePlaceholderSegment(fallbackLabel || doc.name || doc.title || '文档');
+  const folderParts = segments.slice(1, -1).map((segment) => normalizePlaceholderSegment(segment));
+  const pathParts = [base, ...folderParts, `${fileName}.png`];
+  return pathParts.filter(Boolean).join('/');
+}
+
+function getHeroFallbackPath(doc = {}) {
+  const docPath = String(doc.path || '').trim();
+  if (!docPath.startsWith('hero/')) {
+    return '';
+  }
+  const parts = docPath.split('/').map((segment) => segment.trim()).filter(Boolean);
+  if (parts.length < 3) {
+    return '';
+  }
+  const attr = normalizePlaceholderSegment(parts[1]);
+  const hero = normalizePlaceholderSegment(parts[2]);
+  return `assets/images/heros/${attr}/${hero}/${hero}.png`;
+}
+
+function getHeroSkillImagePlaceholderPath(doc = {}, label = '') {
+  if (!doc || String(doc.category || '').trim() !== 'hero') {
+    return '';
+  }
+  const docPath = String(doc.path || '').trim();
+  const parts = docPath.split('/').map((segment) => segment.trim()).filter(Boolean);
+  if (parts.length < 3) {
+    return '';
+  }
+  const attr = normalizePlaceholderSegment(parts[1]);
+  const hero = normalizePlaceholderSegment(parts[2]);
+  const name = normalizePlaceholderSegment(label || '技能');
+  return `assets/images/heros/${attr}/${hero}/${name}.png`;
 }
 
 const HERO_PORTRAIT_KEYWORDS = ['原画', '立绘', '封面', '头像', 'hero', 'portrait', 'cover', '原画图', '立绘图'];
@@ -973,15 +1143,19 @@ function collectHeroAbilitySegmentsFromSections(sections = [], usedKeys = new Se
 function createDocButton(doc, onSelect = () => {}, options = {}) {
   const showEditAccess = options.showEditAccess === true;
   const isEditable = options.isEditable === true;
+  const initialEditPermissionState = showEditAccess
+    ? (isEditable ? 'editable' : 'readonly')
+    : 'hidden';
   const category = getDisplayCategory(doc);
   const categoryLabel = CATEGORY_LABELS[category] || category || '其他';
   const groupText = doc.group ? `${doc.group}` : '';
   const isHeroDoc = category === 'hero' || doc.category === 'hero';
   const isBackstory = category === 'backstory' || doc.category === 'backstory';
   const orderedHeroImages = getHeroImagesForDisplay(doc, doc.heroSkills || []);
+  const shouldShowThumbnail = shouldShowDocThumbnail(doc);
 
   const button = document.createElement('button');
-  button.className = `doc-item ${isHeroDoc ? 'is-hero' : ''} ${isBackstory ? 'is-backstory' : ''} ${isEditable ? 'doc-item-editable' : showEditAccess ? 'doc-item-readonly' : ''}`.trim();
+  button.className = `doc-item ${isHeroDoc ? 'is-hero' : ''} ${isBackstory ? 'is-backstory' : ''} ${isEditable ? 'doc-item-editable' : showEditAccess ? 'doc-item-readonly' : ''} ${shouldShowThumbnail ? '' : 'doc-item-no-avatar'}`.trim();
   button.type = 'button';
 
   if (isHeroDoc && orderedHeroImages[0]) {
@@ -991,12 +1165,33 @@ function createDocButton(doc, onSelect = () => {}, options = {}) {
     img.loading = 'lazy';
     img.src = new URL(orderedHeroImages[0], ASSET_BASE_URL).href;
     img.alt = `${doc.name} 缩略图`;
+    img.onerror = () => {
+      if (img.dataset.placeholderLoaded === '1') {
+        return;
+      }
+      img.dataset.placeholderLoaded = '1';
+      img.src = getNameAvatarDataUrl(doc.name || doc.title || categoryLabel);
+    };
     avatar.appendChild(img);
     button.appendChild(avatar);
-  } else {
+  } else if (shouldShowThumbnail) {
     const avatar = document.createElement('div');
     avatar.className = 'doc-item-avatar doc-item-avatar--placeholder';
-    avatar.textContent = normalizeValue(categoryLabel).slice(0, 2) || '文档';
+    const fallbackLabel = getAvatarPlaceholderLabel(doc.name || doc.title || categoryLabel);
+    const image = document.createElement('img');
+    image.loading = 'lazy';
+    const localPlaceholder = getDocImagePlaceholderPath(doc, doc.name || doc.title || categoryLabel);
+    const dataUrlPlaceholder = getNameAvatarDataUrl(fallbackLabel);
+    if (localPlaceholder) {
+      image.src = new URL(localPlaceholder, ASSET_BASE_URL).href;
+      image.onerror = () => {
+        image.src = dataUrlPlaceholder;
+      };
+    } else {
+      image.src = dataUrlPlaceholder;
+    }
+    image.alt = `${normalizeValue(doc.name) || categoryLabel} 缩略图`;
+    avatar.appendChild(image);
     button.appendChild(avatar);
   }
 
@@ -1039,11 +1234,11 @@ function createDocButton(doc, onSelect = () => {}, options = {}) {
 
   button.appendChild(textWrap);
   button.title = normalizeValue(`${doc.title || doc.name}`);
+  const normalizedPath = normalizeDisplayValue(doc.path);
   button.dataset.path = doc.path;
-  button.dataset.editPermission = showEditAccess
-    ? (isEditable ? 'editable' : 'readonly')
-    : 'hidden';
-  cacheDocListButton(doc.path, button, permissionTag, textWrap);
+  button.dataset.pathKey = normalizedPath;
+  button.dataset.editPermission = initialEditPermissionState;
+  cacheDocListButton(doc.path, button, permissionTag, textWrap, normalizedPath);
   button.addEventListener('click', () => onSelect(doc.path));
   return button;
 }
@@ -1178,7 +1373,7 @@ function markActiveItem() {
   activeDocPath = nextPath;
 }
 
-function cacheDocListButton(pathValue, button, permissionTag = null, textWrap = null) {
+function cacheDocListButton(pathValue, button, permissionTag = null, textWrap = null, normalizedPathValue = '') {
   if (!pathValue || !button) {
     return;
   }
@@ -1186,14 +1381,18 @@ function cacheDocListButton(pathValue, button, permissionTag = null, textWrap = 
   docButtonCacheByPath.set(normalizedPath, button);
   if (!docButtonMetaByPath.has(normalizedPath)) {
     docButtonMetaByPath.set(normalizedPath, {
+      normalizedPath: normalizedPathValue || normalizeDisplayValue(normalizedPath),
+      path: normalizedPath,
       permissionTag: null,
       textWrap: null,
+      editPermissionState: button?.dataset?.editPermission || 'hidden',
     });
   }
   const existingMeta = docButtonMetaByPath.get(normalizedPath);
   existingMeta.permissionTag = permissionTag || null;
   existingMeta.textWrap = textWrap || null;
   existingMeta.button = button;
+  existingMeta.editPermissionState = button?.dataset?.editPermission || existingMeta.editPermissionState || 'hidden';
 }
 
 function resetDocListButtonCache() {
@@ -1322,6 +1521,10 @@ export {
   splitItemGroup,
   detectItemRole,
   normalizeMatchValue,
+  getNameAvatarDataUrl,
+  getDocImagePlaceholderPath,
+  getHeroFallbackPath,
+  getHeroSkillImagePlaceholderPath,
   sortHeroImagesForDisplay,
   pickHeroPortraitImage,
   getHeroImagesForDisplay,

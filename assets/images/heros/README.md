@@ -7,4 +7,4 @@
 - 技能图文件：按英雄设计文档中的“天生技能 / 技能1-技能4”名称命名，例如 `星空祈唤.png`
 - 视频资源：与图片并列保存在 `assets/videos/<英雄名>.mp4`
 
-资源清单见 [资源对照表.md](/Users/Shared/chroot/dev/epic-of-viento-line/assets/images/heros/资源对照表.md)。
+资源清单见 [资源对照表.md](/assets/images/heros/资源对照表.md)。

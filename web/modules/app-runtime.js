@@ -17,6 +17,8 @@ import {
   getVisibleDocs,
   getSearchIndex,
   getHeroImagesForDisplay,
+  getNameAvatarDataUrl,
+  getHeroSkillImagePlaceholderPath,
   createDetailsGroup,
   renderTabs,
   markActiveItem,
@@ -1524,15 +1526,45 @@ function buildHeroSkillCards(doc) {
 
     const media = document.createElement('div');
     media.className = 'hero-skill-media';
+    const iconLabel = normalizeDisplayValue(item.name || item.key || '技能');
+    const fallbackIconPath = getHeroSkillImagePlaceholderPath(doc, iconLabel);
+    const fallbackIconDataUrl = getNameAvatarDataUrl(iconLabel);
+    const applyFallback = (imgEl) => {
+      if (imgEl.dataset.placeholderLoaded === '1') {
+        return;
+      }
+      imgEl.dataset.placeholderLoaded = '1';
+      if (fallbackIconPath) {
+        imgEl.src = new URL(fallbackIconPath, ASSET_BASE_URL).href;
+      } else {
+        imgEl.src = fallbackIconDataUrl;
+      }
+      imgEl.onerror = () => {
+        if (imgEl.dataset.placeholderFallbacked === '1') {
+          return;
+        }
+        imgEl.dataset.placeholderFallbacked = '1';
+        imgEl.src = fallbackIconDataUrl;
+      };
+    };
     if (item.icon) {
       const img = document.createElement('img');
       img.loading = 'lazy';
       img.src = new URL(item.icon, ASSET_BASE_URL).href;
       img.alt = `${item.name || item.key || '技能'}图标`;
+      img.onerror = () => applyFallback(img);
       media.appendChild(img);
     } else {
-      const placeholder = document.createElement('div');
+      const placeholder = document.createElement('img');
       placeholder.className = 'hero-skill-empty';
+      placeholder.loading = 'lazy';
+      if (fallbackIconPath) {
+        placeholder.src = new URL(fallbackIconPath, ASSET_BASE_URL).href;
+      } else {
+        placeholder.src = fallbackIconDataUrl;
+      }
+      placeholder.alt = `${iconLabel || '技能'} 占位图`;
+      placeholder.onerror = () => applyFallback(placeholder);
       media.appendChild(placeholder);
     }
 
@@ -1598,7 +1630,7 @@ function renderSectionCards(doc) {
   }
 }
 
-function renderGallery(images) {
+function renderGallery(images, fallbackLabel = '媒体') {
   galleryEl.innerHTML = '';
   if (!images || images.length === 0) {
     return;
@@ -1609,6 +1641,14 @@ function renderGallery(images) {
     img.loading = 'lazy';
     img.src = new URL(url, ASSET_BASE_URL).href;
     img.alt = url;
+    img.onerror = () => {
+      if (img.dataset.placeholderLoaded === '1') {
+        return;
+      }
+      img.dataset.placeholderLoaded = '1';
+      img.src = getNameAvatarDataUrl(fallbackLabel);
+      img.alt = `${fallbackLabel} 占位图`;
+    };
     galleryEl.appendChild(img);
   }
 }
@@ -2343,78 +2383,119 @@ function syncDocListEditPermissions() {
 
   const buttons = getRenderedDocListButtons();
   for (const button of buttons) {
-    const path = normalizeDisplayValue(button.dataset.path);
-    if (!path) {
+    const rawPath = button.dataset.path || '';
+    if (!rawPath) {
       continue;
     }
-    const itemDoc = getDocByPath(path);
-    const buttonMeta = getDocListButtonMeta(path);
+    const buttonMeta = getDocListButtonMeta(rawPath);
     const textWrap = buttonMeta?.textWrap || null;
     let permissionTag = buttonMeta?.permissionTag || null;
-    const editable = itemDoc ? canUserEditDoc(itemDoc) : false;
-    const nextState = showGranularEditState ? (editable ? 'editable' : 'readonly') : 'hidden';
-    if (!itemDoc) {
-      if (button.dataset.editPermission !== 'hidden') {
+    const cachedState = buttonMeta?.editPermissionState || button.dataset.editPermission || 'hidden';
+
+    if (!showGranularEditState) {
+      if (cachedState !== 'hidden') {
         button.dataset.editPermission = 'hidden';
         button.classList.remove('doc-item-readonly');
         button.classList.remove('doc-item-editable');
         if (permissionTag) {
           permissionTag.remove();
           permissionTag = null;
-          setDocListButtonMeta(path, { permissionTag: null });
+          setDocListButtonMeta(rawPath, {
+            permissionTag: null,
+            editPermissionState: 'hidden',
+          });
         }
+      }
+      if (buttonMeta && buttonMeta.editPermissionState !== 'hidden') {
+        buttonMeta.editPermissionState = 'hidden';
       }
       continue;
     }
 
-    const showEditTag = showGranularEditState;
-    const currentState = button.dataset.editPermission || 'hidden';
-
-    if (currentState !== nextState) {
-      button.dataset.editPermission = nextState;
-      if (!showEditTag || nextState === 'hidden') {
+    const path = button.dataset.pathKey || rawPath;
+    const itemDoc = getDocByPath(path);
+    if (!itemDoc) {
+      if (cachedState !== 'hidden') {
+        button.dataset.editPermission = 'hidden';
         button.classList.remove('doc-item-readonly');
         button.classList.remove('doc-item-editable');
         if (permissionTag) {
           permissionTag.remove();
           permissionTag = null;
-          setDocListButtonMeta(path, { permissionTag: null });
+          setDocListButtonMeta(rawPath, {
+            permissionTag: null,
+            editPermissionState: 'hidden',
+          });
+        } else {
+          setDocListButtonMeta(rawPath, {
+            editPermissionState: 'hidden',
+          });
         }
-        continue;
+      } else if (buttonMeta?.editPermissionState !== 'hidden') {
+        buttonMeta.editPermissionState = 'hidden';
+      }
+      continue;
+    }
+
+    const editable = itemDoc ? canUserEditDoc(itemDoc) : false;
+    const nextState = editable ? 'editable' : 'readonly';
+
+    if (cachedState === nextState) {
+      if (permissionTag && editable) {
+        const nextClassName = 'doc-item-edit-access is-editable';
+        const nextLabel = '可编辑';
+        if (permissionTag.textContent !== nextLabel || permissionTag.className !== nextClassName) {
+          permissionTag.textContent = nextLabel;
+          permissionTag.className = nextClassName;
+        }
+      } else if (permissionTag && !editable) {
+        const nextClassName = 'doc-item-edit-access is-readonly';
+        const nextLabel = '不可编辑';
+        if (permissionTag.textContent !== nextLabel || permissionTag.className !== nextClassName) {
+          permissionTag.textContent = nextLabel;
+          permissionTag.className = nextClassName;
+        }
+      } else if (!permissionTag && textWrap) {
+        permissionTag = document.createElement('div');
+        permissionTag.className = editable ? 'doc-item-edit-access is-editable' : 'doc-item-edit-access is-readonly';
+        permissionTag.textContent = editable ? '可编辑' : '不可编辑';
+        textWrap.appendChild(permissionTag);
+        setDocListButtonMeta(rawPath, { permissionTag });
       }
 
+      if (buttonMeta) {
+        buttonMeta.editPermissionState = nextState;
+      } else {
+        setDocListButtonMeta(rawPath, { editPermissionState: nextState });
+      }
+      continue;
+    }
+
+    button.dataset.editPermission = nextState;
+    if (itemDoc) {
       button.classList.toggle('doc-item-editable', editable);
       button.classList.toggle('doc-item-readonly', !editable);
+    }
 
-      if (!permissionTag && textWrap) {
-        permissionTag = document.createElement('div');
-        permissionTag.className = editable ? 'doc-item-edit-access is-editable' : 'doc-item-edit-access is-readonly';
-        permissionTag.textContent = editable ? '可编辑' : '不可编辑';
-        textWrap.appendChild(permissionTag);
-        setDocListButtonMeta(path, { permissionTag });
-      } else if (permissionTag) {
-        const nextLabel = editable ? '可编辑' : '不可编辑';
-        const nextClassName = `doc-item-edit-access ${editable ? 'is-editable' : 'is-readonly'}`;
-        if (permissionTag.textContent !== nextLabel || permissionTag.className !== nextClassName) {
-          permissionTag.textContent = nextLabel;
-          permissionTag.className = nextClassName;
-        }
+    if (!permissionTag && textWrap) {
+      permissionTag = document.createElement('div');
+      permissionTag.className = editable ? 'doc-item-edit-access is-editable' : 'doc-item-edit-access is-readonly';
+      permissionTag.textContent = editable ? '可编辑' : '不可编辑';
+      textWrap.appendChild(permissionTag);
+      setDocListButtonMeta(rawPath, { permissionTag });
+    } else if (permissionTag) {
+      const nextClassName = editable ? 'doc-item-edit-access is-editable' : 'doc-item-edit-access is-readonly';
+      const nextLabel = editable ? '可编辑' : '不可编辑';
+      if (permissionTag.textContent !== nextLabel || permissionTag.className !== nextClassName) {
+        permissionTag.textContent = nextLabel;
+        permissionTag.className = nextClassName;
       }
-    } else if (showEditTag) {
-      if (!permissionTag && textWrap) {
-        permissionTag = document.createElement('div');
-        permissionTag.className = editable ? 'doc-item-edit-access is-editable' : 'doc-item-edit-access is-readonly';
-        permissionTag.textContent = editable ? '可编辑' : '不可编辑';
-        textWrap.appendChild(permissionTag);
-        setDocListButtonMeta(path, { permissionTag });
-      } else if (permissionTag) {
-        const nextLabel = editable ? '可编辑' : '不可编辑';
-        const nextClassName = `doc-item-edit-access ${editable ? 'is-editable' : 'is-readonly'}`;
-        if (permissionTag.textContent !== nextLabel || permissionTag.className !== nextClassName) {
-          permissionTag.textContent = nextLabel;
-          permissionTag.className = nextClassName;
-        }
-      }
+    }
+
+    if (buttonMeta) {
+      buttonMeta.editPermissionState = nextState;
+    } else {
+      setDocListButtonMeta(rawPath, { editPermissionState: nextState });
     }
   }
 
@@ -2714,7 +2795,7 @@ function selectDoc(pathValue) {
   renderMeta(doc);
   renderSectionCards(doc);
   const heroImages = getHeroImagesForDisplay(doc, doc.heroSkills || []);
-  renderGallery(heroImages);
+  renderGallery(heroImages, doc.meta?.title || doc.title || doc.name || doc.path);
   renderContent(doc);
   updateEditorForDoc(doc);
   setModeUi();
@@ -2896,6 +2977,18 @@ async function initApp() {
       }
       updateCreatePathValidation(true);
     });
+    createPathInputEl.addEventListener('keydown', (event) => {
+      if (!state.isCreating) {
+        return;
+      }
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        updateCreatePathValidation(true);
+        if (state.isCreatePathValid) {
+          void saveCurrentDoc();
+        }
+      }
+    });
   }
 
   if (editSaveBtnEl) {
@@ -2984,12 +3077,33 @@ async function initApp() {
       if (event.key === 's' && (event.ctrlKey || event.metaKey)) {
         event.preventDefault();
         void saveCurrentDoc();
+      } else if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+        event.preventDefault();
+        void saveCurrentDoc();
       }
     });
   }
 
   if (typeof window !== 'undefined') {
     window.addEventListener('keydown', (event) => {
+      if (!saveConflictDialogEl || saveConflictDialogEl.classList.contains('is-hidden')) {
+        return;
+      }
+      if (event.key === '1') {
+        event.preventDefault();
+        resolveSaveConflictAction('1');
+        return;
+      }
+      if (event.key === '2') {
+        event.preventDefault();
+        resolveSaveConflictAction('2');
+        return;
+      }
+      if (event.key === '3') {
+        event.preventDefault();
+        resolveSaveConflictAction('3');
+        return;
+      }
       if (event.key === 'Escape' && typeof saveConflictResolver === 'function') {
         resolveSaveConflictAction('cancel');
       }

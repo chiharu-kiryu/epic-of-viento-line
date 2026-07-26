@@ -1,10 +1,16 @@
 #!/usr/bin/env node
-import fs from 'node:fs';
+import fs from 'node:fs/promises';
 import path from 'node:path';
+import {
+  PROJECT_ROOT,
+  DATA_TEMPLATE_ROOT,
+  STANDARD_ROOT as DEFAULT_STANDARD_ROOT,
+  toPosix,
+} from './lib/paths.mjs';
+import { collectFilesRecursive } from './lib/scan-files.mjs';
 
-const PROJECT_ROOT = process.cwd();
-const DATA_TEMPLATE_DIR = path.join(PROJECT_ROOT, 'data-template');
-const STANDARD_ROOT = path.join(PROJECT_ROOT, 'docs-standard');
+const DATA_TEMPLATE_DIR = DATA_TEMPLATE_ROOT;
+const STANDARD_ROOT = DEFAULT_STANDARD_ROOT;
 const TYPE_TEMPLATE_FILE = path.join(PROJECT_ROOT, 'web/modules/app-type-templates.js');
 const MIN_DOC_FREQUENCY = 2;
 const SKIP_TEMPLATE_SOURCE_DIRS = new Set(['.', '..', '.DS_Store']);
@@ -22,12 +28,8 @@ const DATA_TEMPLATE_DIR_TO_CATEGORY = {
   'design-template': 'template',
 };
 
-function toPosix(filePath) {
-  return (filePath || '').split(path.sep).join('/');
-}
-
-function readModuleTemplateDefs() {
-  const content = fs.readFileSync(TYPE_TEMPLATE_FILE, 'utf8');
+async function readModuleTemplateDefs() {
+  const content = await fs.readFile(TYPE_TEMPLATE_FILE, 'utf8');
   const entries = new Map();
   const matcher = /([A-Za-z_][A-Za-z0-9_]*)\s*:\s*{[\s\S]*?templateSource\s*:\s*['"]([^'"]+)['"]/g;
 
@@ -44,8 +46,8 @@ function readModuleTemplateDefs() {
   return entries;
 }
 
-function parseTemplateFields(filePath) {
-  const text = fs.readFileSync(filePath, 'utf8');
+async function parseTemplateFields(filePath) {
+  const text = await fs.readFile(filePath, 'utf8');
   const keys = new Set();
   const nestedHints = new Set([
     '名称',
@@ -114,8 +116,8 @@ function parseTemplateFields(filePath) {
   return keys;
 }
 
-function collectTemplateSourceMap() {
-  const dirs = fs.readdirSync(DATA_TEMPLATE_DIR, { withFileTypes: true });
+async function collectTemplateSourceMap() {
+  const dirs = await fs.readdir(DATA_TEMPLATE_DIR, { withFileTypes: true });
   const entries = [];
 
   for (const dir of dirs) {
@@ -124,7 +126,7 @@ function collectTemplateSourceMap() {
     }
 
     const dirPath = path.join(DATA_TEMPLATE_DIR, dir.name);
-    const files = fs.readdirSync(dirPath).filter((name) => name.includes('模板'));
+    const files = (await fs.readdir(dirPath)).filter((name) => name.includes('模板'));
     if (files.length === 0) {
       continue;
     }
@@ -137,52 +139,51 @@ function collectTemplateSourceMap() {
       category: DATA_TEMPLATE_DIR_TO_CATEGORY[dir.name],
       sourceRelative,
       sourceAbsolute,
-      sourceFields: parseTemplateFields(sourceAbsolute),
+      sourceFields: await parseTemplateFields(sourceAbsolute),
     });
   }
 
   return entries;
 }
 
-function collectStandardFieldStats() {
+async function fileExists(filePath) {
+  try {
+    const stat = await fs.stat(filePath);
+    return stat.isFile();
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return false;
+    }
+    throw error;
+  }
+}
+
+async function collectStandardFieldStats() {
   const docsRoot = path.join(STANDARD_ROOT, 'design-data');
   const stats = new Map();
   const counts = new Map();
+  const files = await collectFilesRecursive(docsRoot, {
+    relativeBase: '',
+    acceptedExtensions: new Set(['.json']),
+  });
+  for (const relativePath of files) {
+    const absolute = path.join(docsRoot, relativePath);
+    const raw = await fs.readFile(absolute, 'utf8');
+    const doc = JSON.parse(raw);
+    const category = doc?.meta?.category || 'other';
+    const fields = doc?.fields || {};
 
-  const walk = (folder) => {
-    const entries = fs.readdirSync(folder, { withFileTypes: true });
-    for (const entry of entries) {
-      const absolute = path.join(folder, entry.name);
-      if (entry.isDirectory()) {
-        if (!entry.name.startsWith('.')) {
-          walk(absolute);
-        }
+    const keyMap = stats.get(category) || new Map();
+    for (const [key, value] of Object.entries(fields)) {
+      if (key === '_header') {
         continue;
       }
-
-      if (!entry.name.endsWith('.json')) {
-        continue;
-      }
-
-      const raw = fs.readFileSync(absolute, 'utf8');
-      const doc = JSON.parse(raw);
-      const category = doc?.meta?.category || 'other';
-      const fields = doc?.fields || {};
-
-      const keyMap = stats.get(category) || new Map();
-      for (const [key, value] of Object.entries(fields)) {
-        if (key === '_header') {
-          continue;
-        }
-        keyMap.set(key, (keyMap.get(key) || 0) + 1);
-      }
-
-      stats.set(category, keyMap);
-      counts.set(category, (counts.get(category) || 0) + 1);
+      keyMap.set(key, (keyMap.get(key) || 0) + 1);
     }
-  };
 
-  walk(docsRoot);
+    stats.set(category, keyMap);
+    counts.set(category, (counts.get(category) || 0) + 1);
+  }
   return { stats, counts };
 }
 
@@ -190,10 +191,10 @@ function pickTop(list, maxCount = 12) {
   return list.slice(0, maxCount).map((item) => `${item.key}(${item.count})`).join('、');
 }
 
-function main() {
-  const moduleDefs = readModuleTemplateDefs();
-  const templateSourceMap = collectTemplateSourceMap();
-  const { stats, counts } = collectStandardFieldStats();
+async function main() {
+  const moduleDefs = await readModuleTemplateDefs();
+  const templateSourceMap = await collectTemplateSourceMap();
+  const { stats, counts } = await collectStandardFieldStats();
 
   let hasError = false;
   let hasWarning = false;
@@ -219,7 +220,7 @@ function main() {
       continue;
     }
 
-    if (!fs.existsSync(sourceAbsolute)) {
+    if (!(await fileExists(sourceAbsolute))) {
       reportLine('ERROR', `app-type-templates 映射文件不存在: ${sourceRelative}`);
       continue;
     }
@@ -262,7 +263,7 @@ function main() {
     }
 
     const normalized = source.split('/').join(path.sep);
-    if (!fs.existsSync(path.join(PROJECT_ROOT, normalized))) {
+    if (!(await fileExists(path.join(PROJECT_ROOT, normalized)))) {
       reportLine('ERROR', `app-type-templates.js 声明源不存在: ${source} (${category})`);
       continue;
     }
@@ -290,4 +291,7 @@ function main() {
   }
 }
 
-main();
+main().catch((error) => {
+  console.error(error.message || error);
+  process.exitCode = 1;
+});

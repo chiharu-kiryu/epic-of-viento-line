@@ -1,10 +1,8 @@
-import path from 'node:path';
+import { PROJECT_ROOT, STANDARD_ROOT } from '../lib/paths.mjs';
 
-const PROJECT_ROOT = process.cwd();
 const cliArgs = process.argv.slice(2);
 const cliOptions = new Set(cliArgs.filter((arg) => arg.startsWith('-')));
 
-const STANDARD_ROOT = path.join(PROJECT_ROOT, 'docs-standard');
 const MERGE_BACKSTORY = cliOptions.has('--merge-backstory') && !cliOptions.has('--no-merge-backstory');
 
 const TARGET_EXTENSIONS = new Set(['.md', '.txt', '.json', '.yml', '.yaml']);

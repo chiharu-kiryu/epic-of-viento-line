@@ -1,8 +1,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { DOC_ROOT } from './lib/paths.mjs';
+import { runTextNormalizationBatch } from './lib/normalize-runner.mjs';
+import { normalizeForCompare, toUnixLineEndings } from './lib/normalize-text-utils.mjs';
 
-const PROJECT_ROOT = process.cwd();
-const BUILDING_ROOT = path.join(PROJECT_ROOT, 'design-data', 'design-building');
+const BUILDING_ROOT = path.join(DOC_ROOT, 'design-building');
 const WRITE = process.argv.includes('--write');
 
 const CORE_ORDER = [
@@ -28,10 +30,6 @@ const BLOCK_KEY_ALIASES = new Map([
   ['特殊效果', '特殊效果'],
 ]);
 
-function normalizeLineEndings(text) {
-  return text.replace(/\r\n?/g, '\n');
-}
-
 function parseKvLine(line) {
   const match = line.match(/^(.{1,60}?)\s*[:：]\s*(.*)$/);
   if (!match) {
@@ -40,13 +38,10 @@ function parseKvLine(line) {
   return { key: match[1].trim(), value: match[2].trim() };
 }
 
-function normalizeTextForCompare(text) {
-  return normalizeLineEndings(text)
-    .replace(/\uFEFF/g, '')
-    .replace(/[ \t]+\n/g, '\n')
-    .replace(/\n+$/, '')
-    .trimEnd();
-}
+const normalizeForDiff = (text) => normalizeForCompare(text, {
+  stripBomMode: 'all',
+  trimMode: 'trimEnd',
+});
 
 function isSpecialEffectLine(text) {
   return /真视|视野|获得\d+范围内/.test(text);
@@ -78,7 +73,7 @@ function splitSpecialFromPassive(lines) {
 }
 
 function normalizeBuildingText(filePath, text) {
-  const lines = normalizeLineEndings(text).split('\n');
+  const lines = toUnixLineEndings(text).split('\n');
   const titleLineIndex = lines.findIndex((line) => line.trim().length > 0);
   if (titleLineIndex < 0) {
     throw new Error(`${filePath}: 无标题`);
@@ -170,32 +165,16 @@ async function listBuildingFiles() {
 
 async function main() {
   const files = await listBuildingFiles();
-  const normalized = [];
-  let changedCount = 0;
+  const buildingResult = await runTextNormalizationBatch({
+    files,
+    normalizeItem: normalizeBuildingText,
+    compareValue: normalizeForDiff,
+    shouldWrite: WRITE,
+    formatWriteValue: (normalized) => `${normalized}\n`,
+  });
 
-  for (const file of files) {
-    const raw = await fs.readFile(file, 'utf8');
-    const rawNormalized = normalizeTextForCompare(raw);
-    const normalizedText = normalizeBuildingText(file, raw);
-    const normalizedCompare = normalizeTextForCompare(normalizedText);
-
-    if (rawNormalized !== normalizedCompare) {
-      changedCount += 1;
-      normalized.push({ file, normalizedText, changed: true });
-    } else {
-      normalized.push({ file, normalizedText, changed: false });
-    }
-  }
-
-  if (WRITE) {
-    for (const item of normalized) {
-      if (!item.changed) continue;
-      await fs.writeFile(item.file, `${item.normalizedText}\n`, 'utf8');
-    }
-  }
-
-  console.log(`normalize-building-data: would ${WRITE ? 'normalize' : 'update'} ${changedCount}/${files.length} building files`);
-  for (const item of normalized.filter((item) => item.changed)) {
+  console.log(`normalize-building-data: would ${WRITE ? 'normalize' : 'update'} ${buildingResult.changed}/${buildingResult.total} building files`);
+  for (const item of buildingResult.results.filter((item) => item.shouldUpdate)) {
     console.log(item.file);
   }
 }

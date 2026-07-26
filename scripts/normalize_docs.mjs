@@ -1,12 +1,21 @@
-import fs from "node:fs";
 import path from "node:path";
-
-const root = process.cwd();
-const designRoot = path.join(root, "design-data");
+import { normalizeForCompare, toUnixLineEndings } from './lib/normalize-text-utils.mjs';
+import { runTextNormalizationBatch } from './lib/normalize-runner.mjs';
+import { collectFilesRecursive } from "./lib/scan-files.mjs";
+import { PROJECT_ROOT, DOC_ROOT, toPosix } from "./lib/paths.mjs";
 
 const skipFiles = new Set([
-  path.join("design-data", "design-heros", "智力", "审查官"),
+  toPosix(path.join('design-data', 'design-heros', '智力', '审查官')),
 ]);
+
+const HERO_PREFIX = 'design-data/design-heros';
+const TEMPLATE_PREFIX = 'design-data/design-template';
+const ITEM_PREFIX = 'design-data/design-item';
+const SKILL_PREFIX = 'design-data/design-skills';
+const UNIT_PREFIX = 'design-data/design-units';
+const BUILDING_PREFIX = 'design-data/design-building';
+const SCENE_PREFIX = 'design-data/design-scenes';
+const SHOULD_WRITE = !process.argv.includes('--dry-run');
 
 const heroSectionHeaders = new Set([
   "天生技能：",
@@ -72,22 +81,12 @@ const labelMap = new Map([
   ["物品描述", "物品描述："],
 ]);
 
-function listFiles(dir) {
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-  const files = [];
-  for (const entry of entries) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...listFiles(full));
-    } else {
-      files.push(full);
-    }
-  }
-  return files;
-}
-
-function normalizeText(text) {
-  return text.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
+function normalizeTextForCompare(text) {
+  return normalizeForCompare(text, {
+    stripBomMode: 'leading',
+    collapseLineTailSpaces: false,
+    trimMode: 'none',
+  });
 }
 
 function normalizeGrowth(value) {
@@ -331,26 +330,24 @@ function normalizeStructuredDoc(lines) {
 }
 
 function normalizeByKind(relPath, raw) {
-  const lines = normalizeText(raw).split("\n").map((line) => line.trimEnd());
+  const lines = toUnixLineEndings(raw).replace(/^\uFEFF/, '').split("\n").map((line) => line.trimEnd());
 
-  if (relPath.startsWith(path.join("design-data", "design-heros")) || relPath.startsWith(path.join("design-data", "design-template"))) {
+  if (relPath.startsWith(HERO_PREFIX) || relPath.startsWith(TEMPLATE_PREFIX)) {
     return `${normalizeHeroDoc(lines).join("\n")}\n`;
   }
 
-  if (
-    relPath.startsWith(path.join("design-data", "design-item"))
-  ) {
+  if (relPath.startsWith(ITEM_PREFIX)) {
     return `${normalizeItemDoc(lines).join("\n")}\n`;
   }
 
-  if (relPath.startsWith(path.join("design-data", "design-skills"))) {
+  if (relPath.startsWith(SKILL_PREFIX)) {
     return `${normalizeSkillDoc(lines).join("\n")}\n`;
   }
 
   if (
-    relPath.startsWith(path.join("design-data", "design-units")) ||
-    relPath.startsWith(path.join("design-data", "design-building")) ||
-    relPath.startsWith(path.join("design-data", "design-scenes"))
+    relPath.startsWith(UNIT_PREFIX) ||
+    relPath.startsWith(BUILDING_PREFIX) ||
+    relPath.startsWith(SCENE_PREFIX)
   ) {
     return `${normalizeStructuredDoc(lines).join("\n")}\n`;
   }
@@ -358,20 +355,34 @@ function normalizeByKind(relPath, raw) {
   return `${collapseBlankLines(lines.map((line) => line.trim())).join("\n")}\n`;
 }
 
-const files = listFiles(designRoot).filter((file) => {
-  const relPath = path.relative(root, file);
+const FILES = (await collectFilesRecursive(DOC_ROOT, {
+  relativeBase: "design-data",
+  acceptedExtensions: new Set(["", ".md", ".txt", ".json", ".yml", ".yaml"]),
+})).filter((file) => {
+  const relPath = toPosix(path.posix.normalize(file));
   if (skipFiles.has(relPath)) return false;
   if (relPath.endsWith(".json")) return false;
   if (relPath.endsWith(".md")) return false;
   if (path.basename(relPath) === ".DS_Store") return false;
   return true;
+}).map((relativePath) => path.join(PROJECT_ROOT, relativePath));
+
+function normalizeLegacyDocFile(filePath, rawText) {
+  const relPath = toPosix(path.relative(PROJECT_ROOT, filePath));
+  return normalizeByKind(relPath, rawText);
+}
+
+const normalizeResult = await runTextNormalizationBatch({
+  files: FILES,
+  normalizeItem: normalizeLegacyDocFile,
+  compareValue: normalizeTextForCompare,
+  shouldWrite: SHOULD_WRITE,
 });
 
-for (const file of files) {
-  const relPath = path.relative(root, file);
-  const current = fs.readFileSync(file, "utf8");
-  const next = normalizeByKind(relPath, current);
-  if (next !== normalizeText(current)) {
-    fs.writeFileSync(file, next, "utf8");
+for (const file of normalizeResult.results) {
+  if (file.shouldUpdate) {
+    console.log(file.file);
   }
 }
+
+console.log(`normalize_docs: ${SHOULD_WRITE ? 'normalized' : 'would normalize'} ${normalizeResult.changed}/${normalizeResult.total} files`);

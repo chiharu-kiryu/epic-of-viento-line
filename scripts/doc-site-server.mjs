@@ -2,7 +2,20 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createServer } from 'node:http';
 import { createReadStream } from 'node:fs';
-import { spawn } from 'node:child_process';
+import { runNodeScript } from './lib/process.mjs';
+import { collectHeroImages } from './lib/image-index.mjs';
+import { collectFilesRecursive } from './lib/scan-files.mjs';
+import { inferCategory } from './lib/category.mjs';
+import {
+  PROJECT_ROOT,
+  DOC_ROOT,
+  WEB_ROOT,
+  STANDARDIZE_SCRIPT,
+  BUILD_STATIC_SCRIPT,
+  trimName,
+  toPosix,
+} from './lib/paths.mjs';
+import { resolveBackstoryModeFromEnv, resolveStandardizeArgs } from './lib/rebuild-config.mjs';
 
 function resolvePort(argv = process.argv.slice(2)) {
   const envPort = process.env.PORT;
@@ -22,15 +35,6 @@ function resolvePort(argv = process.argv.slice(2)) {
 }
 
 const PORT = resolvePort();
-const PROJECT_ROOT = process.cwd();
-const DOC_ROOT = path.join(PROJECT_ROOT, 'design-data');
-const ASSET_ROOT = path.join(PROJECT_ROOT, 'assets');
-const WEB_ROOT = path.join(PROJECT_ROOT, 'web');
-const STANDARDIZE_SCRIPT = path.join(PROJECT_ROOT, 'scripts', 'standardize-docs.mjs');
-const BUILD_STATIC_SCRIPT = path.join(PROJECT_ROOT, 'scripts', 'build-static-doc-site.mjs');
-
-const TEXT_EXTENSIONS = new Set(['.md', '.txt', '.json', '.yml', '.yaml']);
-const IGNORE_DIRS = new Set(['.git', '.DS_Store', '.tmp', 'node_modules']);
 
 const MIME_TYPES = new Map([
   ['.html', 'text/html; charset=utf-8'],
@@ -46,38 +50,8 @@ const MIME_TYPES = new Map([
 ]);
 const EDIT_ROOT_PREFIXES = ['design-data/', 'docs-standard/design-data/'];
 let rebuildInProgress = false;
-
-function resolveBackstoryModeFromEnv() {
-  const mode = process.env.DOCS_BACKSTORY_MODE;
-  if (mode === 'on') {
-    return 'enabled';
-  }
-  if (mode === 'off') {
-    return 'disabled';
-  }
-  return 'disabled (default)';
-}
-
-function resolveStandardizeArgs(modeLabel) {
-  if (modeLabel === 'enabled') {
-    return ['--merge-backstory'];
-  }
-  if (modeLabel === 'disabled' || modeLabel.startsWith('disabled')) {
-    return ['--no-merge-backstory'];
-  }
-  return [];
-}
-
 const BACKSTORY_MERGE_MODE = resolveBackstoryModeFromEnv();
 const STANDARDIZE_ARGS = resolveStandardizeArgs(BACKSTORY_MERGE_MODE);
-
-function normalizeSeparator(filePath) {
-  return filePath.split(path.sep).join('/');
-}
-
-function trimExt(name) {
-  return name.replace(/\.md$|\.txt$/i, '').replace(/\.json$/i, '');
-}
 
 function normalizeStandardizeSourceFilter(rawPath = '') {
   const safePath = safePathFromQuery(rawPath);
@@ -99,200 +73,41 @@ function normalizeStandardizeSourceFilter(rawPath = '') {
   return '';
 }
 
-function runNodeScript(scriptPath, args = []) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, [scriptPath, ...args], {
-      cwd: PROJECT_ROOT,
-      stdio: ['ignore', 'pipe', 'pipe'],
-      env: process.env,
-    });
-
-    let stdout = '';
-    let stderr = '';
-
-    child.stdout.on('data', (chunk) => {
-      stdout += chunk.toString();
-    });
-    child.stderr.on('data', (chunk) => {
-      stderr += chunk.toString();
-    });
-
-    child.on('error', (error) => {
-      reject(error);
-    });
-
-    child.on('close', (code, signal) => {
-      if (signal) {
-        reject(new Error(`${path.basename(scriptPath)} interrupted: ${signal}`));
-        return;
-      }
-      if (code !== 0) {
-        const details = (stderr || stdout || 'no output').trim();
-        reject(new Error(`${path.basename(scriptPath)} failed with exit code ${code}. ${details}`));
-        return;
-      }
-      resolve({ code, stdout: stdout.trim(), stderr: stderr.trim() });
-    });
-  });
-}
-
 function classifyEntry(relativePath) {
-  const parts = relativePath.split('/');
-  if (parts[0] !== 'design-data') {
-    return {
-      category: 'other',
-      group: '其他',
-      name: parts.at(-1) || relativePath,
-    };
-  }
-
-  if (parts[1] === 'design-heros' && parts.length >= 4) {
-    return {
-      category: 'hero',
-      group: `英雄 / ${parts[2]}`,
-      meta: {
-        attribute: parts[2],
-        hero: parts[3],
-      },
-    };
-  }
-
-  if (parts[1] === 'design-item' && parts.length >= 4) {
-    return {
-      category: 'item',
-      group: `物品 / ${parts[2]} / ${parts[3]}`,
-    };
-  }
-
-  if (parts[1] === 'design-skills' && parts.length >= 4) {
-    return {
-      category: 'skill',
-      group: `技能 / ${parts[2]} / ${parts[3]}`,
-    };
-  }
-
-  if (parts[1] === 'design-units' && parts.length >= 3) {
-    const unitType = parts[2] || '';
-    const subtype = parts[3] || '';
-    return {
-      category: 'unit',
-      group: subtype ? `单位 / ${unitType} / ${subtype}` : `单位 / ${unitType}`,
-    };
-  }
-
-  if (parts[1] === 'backstory' && parts.length >= 3) {
-    return {
-      category: 'backstory',
-      group: `背景故事 / ${parts[2]}`,
-    };
-  }
-
-  if (parts[1] === 'design-rules' && parts.length >= 3) {
-    return {
-      category: 'rule',
-      group: '规则',
-    };
-  }
-
-  if (parts[1] === 'design-building' && parts.length >= 3) {
-    return {
-      category: 'building',
-      group: `建筑 / ${parts[2]}`,
-    };
-  }
-
-  if (parts[1] === 'design-scenes' && parts.length >= 3) {
-    return {
-      category: 'scene',
-      group: '场景',
-    };
-  }
-
-  if (parts[1] === 'design-template') {
-    return {
-      category: 'template',
-      group: '模板',
-    };
-  }
-
+  const inferred = inferCategory(relativePath);
   return {
-    category: 'other',
-    group: '其他',
+    ...inferred,
+    name: trimName(path.basename(relativePath)),
   };
-}
-
-function isTextFile(fileName) {
-  const ext = path.extname(fileName).toLowerCase();
-  return ext === '' || TEXT_EXTENSIONS.has(ext);
-}
-
-async function safeReadDir(dir, relativeBase = '') {
-  try {
-    const entries = await fs.readdir(dir, { withFileTypes: true });
-    const files = [];
-    for (const entry of entries) {
-      if (entry.name.startsWith('.')) {
-        continue;
-      }
-      if (IGNORE_DIRS.has(entry.name)) {
-        continue;
-      }
-      const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        const child = await safeReadDir(full);
-        files.push(...child);
-      } else if (entry.isFile()) {
-        if (isTextFile(entry.name)) {
-          files.push(full);
-        }
-      }
-    }
-    return files;
-  } catch (err) {
-    return [];
-  }
-}
-
-async function findHeroImages(attribute, hero) {
-  const heroImageDir = path.join(ASSET_ROOT, 'images', 'heros', attribute, hero);
-  try {
-    const files = await fs.readdir(heroImageDir);
-    return files
-      .filter((item) => path.extname(item).toLowerCase() === '.png')
-      .sort()
-      .map((item) => normalizeSeparator(path.relative(PROJECT_ROOT, path.join(heroImageDir, item))));
-  } catch {
-    return [];
-  }
 }
 
 async function buildDocIndex() {
   const result = [];
-  const fileList = await safeReadDir(DOC_ROOT);
+  const fileList = await collectFilesRecursive(DOC_ROOT, { relativeBase: '' });
 
   for (const filePath of fileList) {
-    const rel = normalizeSeparator(path.relative(PROJECT_ROOT, filePath));
-    const parts = rel.split('/');
+    const rel = toPosix(path.join('design-data', filePath));
+    const absolutePath = path.join(PROJECT_ROOT, rel);
     const classification = classifyEntry(rel);
-    const baseName = path.basename(filePath);
+    const baseName = path.basename(absolutePath);
 
     const entry = {
       path: rel,
-      title: trimExt(baseName),
+      title: trimName(baseName),
       category: classification.category,
       group: classification.group,
-      name: trimExt(baseName),
+      name: trimName(baseName),
       fullPath: rel,
       lastModified: '',
       heroImages: [],
     };
 
     if (classification.category === 'hero') {
-      entry.heroImages = await findHeroImages(classification.meta.attribute, classification.meta.hero);
+      entry.heroImages = await collectHeroImages(classification.meta.attribute, classification.meta.hero);
     }
 
     try {
-      const stats = await fs.stat(filePath);
+      const stats = await fs.stat(absolutePath);
       entry.lastModified = stats.mtime.toISOString();
     } catch {
       entry.lastModified = '';
@@ -308,7 +123,7 @@ async function buildDocIndex() {
       .access(abs)
       .then(() => true)
       .catch(() => false)) {
-      const rel = normalizeSeparator(readme);
+      const rel = toPosix(readme);
       if (!result.some((item) => item.path === rel)) {
         result.unshift({
           path: rel,
@@ -361,7 +176,7 @@ function safePathFromQuery(rawPath) {
     return '';
   }
 
-  const normalized = normalizeSeparator(rawPath.replace(/\\/g, '/'));
+  const normalized = toPosix(rawPath.replace(/\\/g, '/'));
   const segments = normalized.split('/').filter((segment) => segment.length > 0);
 
   if (!segments.length) {
@@ -584,7 +399,7 @@ const server = createServer(async (req, res) => {
       createApiResponse(res, {
         path: resolved.relativePath,
         type,
-        title: trimExt(path.basename(resolved.relativePath)),
+        title: trimName(path.basename(resolved.relativePath)),
         content,
         lastModified: modifiedAt,
         version,
@@ -718,11 +533,11 @@ const server = createServer(async (req, res) => {
 
     try {
       if (sourceFilter) {
-        await runNodeScript(STANDARDIZE_SCRIPT, [...STANDARDIZE_ARGS, sourceFilter]);
+        await runNodeScript(STANDARDIZE_SCRIPT, [...STANDARDIZE_ARGS, sourceFilter], { cwd: PROJECT_ROOT });
       } else {
-        await runNodeScript(STANDARDIZE_SCRIPT, STANDARDIZE_ARGS);
+        await runNodeScript(STANDARDIZE_SCRIPT, STANDARDIZE_ARGS, { cwd: PROJECT_ROOT });
       }
-      const standardResult = await runNodeScript(BUILD_STATIC_SCRIPT, []);
+      const standardResult = await runNodeScript(BUILD_STATIC_SCRIPT, [], { cwd: PROJECT_ROOT });
 
       const elapsedMs = Date.now() - startedAt;
       createApiResponse(res, {

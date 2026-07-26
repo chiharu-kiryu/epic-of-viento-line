@@ -14,6 +14,8 @@ import {
   splitAbilityKeyName,
   collectAbilitySegmentsFromSections,
   collectHeroAbilitySegmentsFromSections,
+  getNameAvatarDataUrl,
+  getHeroFallbackPath,
   toDisplayValue,
   sanitizeList,
 } from './app-helpers.js';
@@ -620,10 +622,47 @@ function renderHeroBanner(doc) {
     image.loading = 'lazy';
     image.src = new URL(coverImage, ASSET_BASE_URL).href;
     image.alt = `${title} 图像`;
+    const fallbackPath = getHeroFallbackPath(doc);
+    const fallbackDataUrl = getNameAvatarDataUrl(title || categoryLabel);
+    if (fallbackPath) {
+      image.onerror = () => {
+        if (image.dataset.placeholderLoaded === '1') {
+          return;
+        }
+        image.dataset.placeholderLoaded = '1';
+        image.src = new URL(fallbackPath, ASSET_BASE_URL).href;
+        image.onerror = () => {
+          if (image.dataset.fallbackTried === '1') {
+            return;
+          }
+          image.dataset.fallbackTried = '1';
+          image.src = fallbackDataUrl;
+        };
+      };
+    }
     banner.style.setProperty('--hero-cover', `url("${image.src}")`);
     cover.appendChild(image);
   } else {
-    cover.textContent = `${categoryLabel}封面`;
+    const placeholder = document.createElement('img');
+    placeholder.loading = 'lazy';
+    placeholder.className = 'hero-cover-placeholder';
+    const fallbackDataUrl = getNameAvatarDataUrl(title || categoryLabel);
+    const fallbackPath = getHeroFallbackPath(doc);
+    if (fallbackPath) {
+      const fallbackSrc = new URL(fallbackPath, ASSET_BASE_URL).href;
+      placeholder.src = fallbackSrc;
+      placeholder.onerror = () => {
+        if (placeholder.dataset.placeholderLoaded === '1') {
+          return;
+        }
+        placeholder.dataset.placeholderLoaded = '1';
+        placeholder.src = fallbackDataUrl;
+      };
+    } else {
+      placeholder.src = fallbackDataUrl;
+    }
+    placeholder.alt = `${title || categoryLabel} 封面占位图`;
+    cover.appendChild(placeholder);
   }
 
   const info = document.createElement('div');
