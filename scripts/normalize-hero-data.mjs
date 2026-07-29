@@ -7,7 +7,7 @@ const HERO_ROOT = path.join(DOC_ROOT, 'design-heros');
 const WRITE = process.argv.includes('--write');
 
 const CORE_ORDER = [
-  '别名',
+  '姓名',
   '英文名',
   '攻击类型',
   '攻击距离',
@@ -252,14 +252,14 @@ function parseCore(filePath, coreLines) {
   }
 
   const inferredAlias = splitAlias(unresolved[0] || '');
-  if (!fields['别名']) {
-    fields['别名'] = inferredAlias.alias;
+  if (!fields['姓名']) {
+    fields['姓名'] = inferredAlias.alias;
   }
   if (!fields['英文名']) {
     fields['英文名'] = inferredAlias.englishName;
   }
 
-  const required = CORE_ORDER.filter((key) => !['别名', '英文名'].includes(key));
+  const required = CORE_ORDER.filter((key) => !['姓名', '英文名'].includes(key));
   const missing = required.filter((key) => !fields[key]);
   if (missing.length > 0) {
     throw new Error(`${filePath}: 缺少核心字段 ${missing.join(', ')}`);

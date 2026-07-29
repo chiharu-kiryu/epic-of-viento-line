@@ -106,7 +106,7 @@ function validateContract(contract, issues) {
 function checkTextMarkers(fileText, markers, prefix, issues) {
   const normalized = normalizeTextForMatch(fileText);
   for (const marker of markers) {
-    check(normalized.includes(marker), `${prefix}-${String(markers.indexOf(marker) + 1).padStart(3, '0')}`, 'frontend marker', `缺少关键引用 ${marker}`, `请确认引用未被重构为更高层别名或替代路径`, issues);
+    check(normalized.includes(marker), `${prefix}-${String(markers.indexOf(marker) + 1).padStart(3, '0')}`, 'frontend marker', `缺少关键引用 ${marker}`, `请确认引用未被重构为更高层姓名或替代路径`, issues);
   }
 }
 

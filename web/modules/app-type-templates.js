@@ -6,7 +6,7 @@ export const DOC_TYPE_TEMPLATE_DEFS = {
         title: '英雄信息',
         fields: [
           { label: '英雄名', keys: ['_header', '名称', '英雄名', '角色名', 'title'] },
-          { label: '别名', keys: ['别名', '别称'] },
+          { label: '姓名', keys: ['姓名', '别称'] },
           { label: '英文名', keys: ['英文名', '英文名称'] },
           { label: '主属性', keys: ['主属性'] },
           { label: '攻击类型', keys: ['攻击类型'] },
