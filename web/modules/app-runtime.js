@@ -3,6 +3,7 @@ import {
   domElements,
   DATA_INDEX_URL,
   DOC_CAPABILITIES_URL,
+  DOC_HEALTH_URL,
   DOC_API_URL,
   DOC_REBUILD_URL,
   CATEGORY_LABELS,
@@ -20,6 +21,7 @@ import {
   getHeroImagesForDisplay,
   getNameAvatarDataUrl,
   getHeroSkillImagePlaceholderPath,
+  applyImageFallbackChain,
   createDetailsGroup,
   renderTabs,
   markActiveItem,
@@ -107,12 +109,17 @@ let rebuildProgressStart = 0;
 let searchDebounceTimer = null;
 let lastSearchQuery = '';
 let listRenderToken = 0;
+let dataLoadToken = 0;
+let renderedDocSignature = '';
+let lastStatusText = '';
+let lastListText = '';
 let cachedTabCounts = null;
 let blockDraftSourcePath = '';
 let editSessionVersion = '';
 let saveConflictResolver = null;
 let renderedDocRef = null;
 const createTemplateCache = new Map();
+const createTemplateLoadErrorCache = new Map();
 const createTypeOrder = ['hero', 'item', 'unit', 'skill', 'building', 'backstory', 'scene', 'rule', 'template'];
 let cachedListRenderState = {
   filtered: null,
@@ -133,15 +140,31 @@ const cachedListGroups = {
 };
 let cachedGroupedDocs = new WeakMap();
 let editSessionBaselineContent = '';
+let renderedContentDocPath = '';
+let renderedContentSignature = '';
 const docByPathCache = new Map();
 const docBySourcePathCache = new Map();
 
-function showLoadRetry(statusMessage, listMessage, mode = 'normal') {
-  if (statusEl) {
-    statusEl.textContent = statusMessage;
+function setStatusText(message = '') {
+  const normalized = normalizeDisplayValue(message);
+  if (statusEl && statusEl.textContent !== normalized) {
+    statusEl.textContent = normalized;
   }
-  if (listEl && listMessage) {
-    listEl.textContent = listMessage;
+  lastStatusText = normalized;
+}
+
+function setListText(message = '') {
+  const normalized = normalizeDisplayValue(message);
+  if (listEl && listEl.textContent !== normalized) {
+    listEl.textContent = normalized;
+  }
+  lastListText = normalized;
+}
+
+function showLoadRetry(statusMessage, listMessage, mode = 'normal') {
+  setStatusText(statusMessage);
+  if (listMessage) {
+    setListText(listMessage);
   }
   if (loadRetryBtnEl) {
     const isForceMode = mode === 'force';
@@ -164,11 +187,9 @@ function hideLoadRetry() {
 }
 
 function setLoadingState(stateText, listText) {
-  if (statusEl) {
-    statusEl.textContent = stateText;
-  }
-  if (listEl && listText) {
-    listEl.textContent = listText;
+  setStatusText(stateText);
+  if (listText) {
+    setListText(listText);
   }
 }
 
@@ -234,12 +255,108 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 10000, timeoutMes
   }
 }
 
-function getFriendlyLoadErrorMessage(error) {
-  if (!error) {
-    return '未知错误';
+function extractPayloadErrorMessage(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return '';
   }
-  return error.message || '请求失败';
+  if (typeof payload.error === 'string' && payload.error.trim()) {
+    return payload.error.trim();
+  }
+  if (typeof payload.message === 'string' && payload.message.trim()) {
+    return payload.message.trim();
+  }
+  if (typeof payload.msg === 'string' && payload.msg.trim()) {
+    return payload.msg.trim();
+  }
+  if (Array.isArray(payload.errors) && payload.errors.length > 0) {
+    const first = payload.errors[0];
+    if (typeof first === 'string' && first.trim()) {
+      return first.trim();
+    }
+    if (first && typeof first === 'object' && typeof first.message === 'string' && first.message.trim()) {
+      return first.message.trim();
+    }
+  }
+  return '';
 }
+
+function makeRequestError(response, payload, requestLabel) {
+  const responseError = extractPayloadErrorMessage(payload);
+  const label = requestLabel || '请求';
+  const suffix = responseError ? `${response.status}：${responseError}` : `${response.status}`;
+  const error = new Error(`${label}失败（${suffix}）`);
+  error.status = response.status;
+  error.payload = payload;
+  return error;
+}
+
+async function safeParseJsonResponse(response) {
+  try {
+    if (!response.body) {
+      return null;
+    }
+    const rawText = await response.text();
+    const trimmedText = rawText.trim();
+    if (!trimmedText) {
+      return null;
+    }
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('application/json') && !/^[\[{]/.test(trimmedText)) {
+      return null;
+    }
+    return JSON.parse(trimmedText);
+  } catch {
+    return null;
+  }
+}
+
+async function fetchJsonApiRequest(
+  url,
+  options = {},
+  timeoutMs = 10000,
+  requestLabel = '请求',
+  requireJson = true,
+) {
+  const response = await fetchWithTimeout(
+    url,
+    options,
+    timeoutMs,
+    requestLabel,
+  );
+  const payload = await safeParseJsonResponse(response);
+  if (!response.ok) {
+    throw makeRequestError(response, payload, requestLabel);
+  }
+  if (requireJson && payload === null) {
+    const error = new Error(APP_ERROR_MESSAGES.requestInvalidResponse);
+    error.status = response.status;
+    error.payload = payload;
+    return Promise.reject(error);
+  }
+
+  return {
+    response,
+    payload,
+  };
+}
+
+function getFriendlyRequestError(error) {
+  if (!error) {
+    return APP_ERROR_MESSAGES.serviceUnavailable;
+  }
+  if (error.name === 'AbortError') {
+    return APP_ERROR_MESSAGES.requestTimeout;
+  }
+  if (error.name === 'TypeError') {
+    return APP_ERROR_MESSAGES.serviceUnavailable;
+  }
+  return error.message || APP_ERROR_MESSAGES.requestInvalidResponse;
+}
+
+function getFriendlyLoadErrorMessage(error) {
+  return getFriendlyRequestError(error);
+}
+
 
 function getStoredCreateType(defaultType = 'hero') {
   try {
@@ -641,25 +758,35 @@ function setMode(requestedMode, options = {}) {
 
 async function detectEditBackend() {
   state.editBackendAvailable = false;
-  try {
-    const response = await fetchWithTimeout(
-      DOC_CAPABILITIES_URL,
+
+  const checkHealthApi = async (url) => {
+    const { payload } = await fetchJsonApiRequest(
+      url,
       { cache: 'no-store' },
       CAPABILITIES_REQUEST_TIMEOUT_MS,
       '检测编辑能力',
     );
-    if (!response.ok) {
-      return;
-    }
-    const payload = await response.json();
+    return payload;
+  };
+
+  try {
+    const payload = await checkHealthApi(DOC_CAPABILITIES_URL);
     if (typeof payload === 'object' && payload !== null) {
       const direct = Boolean(payload?.capabilities?.edit);
       const legacy = payload?.editMode === 'edit';
       const modeFlag = direct || legacy;
       state.editBackendAvailable = Boolean(modeFlag || payload?.ok);
+      return;
     }
   } catch {
-    state.editBackendAvailable = false;
+    try {
+      const payload = await checkHealthApi(DOC_HEALTH_URL);
+      if (typeof payload === 'object' && payload !== null) {
+        state.editBackendAvailable = Boolean(payload?.ok || payload?.alive || payload !== null);
+      }
+    } catch {
+      state.editBackendAvailable = false;
+    }
   }
 }
 
@@ -905,20 +1032,30 @@ async function loadCreateTypeTemplate(type = '') {
   }
 
   try {
-    const response = await fetch(templatePath);
+    const response = await fetchWithTimeout(
+      templatePath,
+      {},
+      DATA_INDEX_REQUEST_TIMEOUT_MS,
+      '模板加载',
+    );
     if (!response.ok) {
+      const contentTypePayload = await safeParseJsonResponse(response);
+      createTemplateLoadErrorCache.set(templatePath, getFriendlyRequestError(makeRequestError(response, contentTypePayload, '模板加载')));
       createTemplateCache.set(templatePath, '');
       return '';
     }
     const contentType = response.headers.get('content-type') || '';
     if (/text\/html/i.test(contentType)) {
+      createTemplateLoadErrorCache.set(templatePath, '模板内容不合法（返回了 HTML）');
       createTemplateCache.set(templatePath, '');
       return '';
     }
     const content = await response.text();
     createTemplateCache.set(templatePath, content);
+    createTemplateLoadErrorCache.delete(templatePath);
     return content;
-  } catch {
+  } catch (error) {
+    createTemplateLoadErrorCache.set(templatePath, getFriendlyRequestError(error));
     createTemplateCache.set(templatePath, '');
     return '';
   }
@@ -929,6 +1066,7 @@ async function applyCreateTemplate(type = '') {
     return;
   }
   const normalizedType = normalizeCreateType(type);
+  const templatePath = getCreateTemplateContentPath(normalizedType);
   const templateContent = await loadCreateTypeTemplate(normalizedType);
   editEditorEl.value = templateContent;
   syncEditSessionBaseline();
@@ -936,6 +1074,10 @@ async function applyCreateTemplate(type = '') {
     createTypeSelectEl.value = normalizedType;
   }
   state.activeCreateType = normalizedType;
+
+  if (templateContent === '' && createTemplateLoadErrorCache.has(templatePath) && isInEditSession()) {
+    setEditorStatus(`模板加载失败，已使用空模板：${createTemplateLoadErrorCache.get(templatePath)}`);
+  }
 }
 
 async function setCreateTypeState(type = '', options = {}) {
@@ -2026,6 +2168,9 @@ function renderSectionCards(doc) {
 }
 
 function renderGallery(images, fallbackLabel = '媒体') {
+  if (!galleryEl) {
+    return;
+  }
   galleryEl.innerHTML = '';
   if (!images || images.length === 0) {
     return;
@@ -2034,16 +2179,8 @@ function renderGallery(images, fallbackLabel = '媒体') {
   for (const url of images) {
     const img = document.createElement('img');
     img.loading = 'lazy';
-    img.src = new URL(url, ASSET_BASE_URL).href;
     img.alt = url;
-    img.onerror = () => {
-      if (img.dataset.placeholderLoaded === '1') {
-        return;
-      }
-      img.dataset.placeholderLoaded = '1';
-      img.src = getNameAvatarDataUrl(fallbackLabel);
-      img.alt = `${fallbackLabel} 占位图`;
-    };
+    applyImageFallbackChain(img, [url], fallbackLabel);
     galleryEl.appendChild(img);
   }
 }
@@ -2103,10 +2240,12 @@ function setEditorPanelVisibility(visible) {
 }
 
 function setEditorStatus(message = '') {
-  if (editStatusEl) {
-    editStatusEl.textContent = message;
-    editStatusEl.className = message ? 'doc-edit-status is-visible' : 'doc-edit-status';
+  const normalizedMessage = normalizeDisplayValue(message);
+  if (!editStatusEl || editStatusEl.textContent === normalizedMessage) {
+    return;
   }
+  editStatusEl.textContent = normalizedMessage;
+  editStatusEl.className = normalizedMessage ? 'doc-edit-status is-visible' : 'doc-edit-status';
 }
 
 function setEditButtons({ isEditing, isCreating, canEdit }) {
@@ -2301,19 +2440,24 @@ async function fetchEditableSource(pathValue) {
   if (!isEditModeActive()) {
     return { error: APP_ERROR_MESSAGES.noEditablePath };
   }
-  const response = await fetch(`${DOC_API_URL}?path=${encodeURIComponent(pathValue)}`);
-  if (!response.ok) {
-    const message = `读取源码失败（HTTP ${response.status}）`;
-    return { error: message };
+  try {
+    const { payload } = await fetchJsonApiRequest(
+      `${DOC_API_URL}?path=${encodeURIComponent(pathValue)}`,
+      {},
+      DATA_INDEX_REQUEST_TIMEOUT_MS,
+      '读取源码',
+    );
+    if (typeof payload?.content !== 'string') {
+      return { error: APP_ERROR_MESSAGES.requestInvalidResponse };
+    }
+    return {
+      content: payload.content,
+      lastModified: typeof payload?.lastModified === 'string' ? payload.lastModified : '',
+      version: normalizeEditSessionVersion(payload?.version),
+    };
+  } catch (error) {
+    return { error: getFriendlyRequestError(error) };
   }
-
-  const payload = await response.json();
-  const content = typeof payload?.content === 'string' ? payload.content : '';
-  return {
-    content,
-    lastModified: typeof payload?.lastModified === 'string' ? payload.lastModified : '',
-    version: normalizeEditSessionVersion(payload?.version),
-  };
 }
 
 function fillSourcePreview(doc, sourcePath, options = {}) {
@@ -2411,34 +2555,25 @@ async function saveNewDoc() {
   }
 
   try {
-    const response = await fetch(DOC_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const { payload } = await fetchJsonApiRequest(
+      DOC_API_URL,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          [API_REQUEST_KEYS.path]: sourcePath,
+          [API_REQUEST_KEYS.content]: content,
+          [API_REQUEST_KEYS.create]: true,
+        }),
       },
-      body: JSON.stringify({
-        [API_REQUEST_KEYS.path]: sourcePath,
-        [API_REQUEST_KEYS.content]: content,
-        [API_REQUEST_KEYS.create]: true,
-      }),
-    });
+      DATA_INDEX_REQUEST_TIMEOUT_MS,
+      '创建',
+    );
 
-    if (!response.ok) {
-      const payload = await response.json().catch(() => null);
-      const extra = payload?.error ? `：${payload.error}` : '';
-      setEditorStatus(`新建失败（HTTP ${response.status}）${extra}`);
-      if (editSaveBtnEl) {
-        editSaveBtnEl.disabled = false;
-      }
-      if (editRebuildBtnEl) {
-        editRebuildBtnEl.disabled = false;
-      }
-      return;
-    }
-
-    const saved = await response.json();
     const createdSource = sourcePath;
-    const createdVersion = normalizeEditSessionVersion(saved?.version);
+    const createdVersion = normalizeEditSessionVersion(payload?.version);
     setEditSessionClean(content, createdVersion);
     state.activeCreatePath = createdSource;
     state.isCreating = false;
@@ -2459,7 +2594,14 @@ async function saveNewDoc() {
       preferredSourcePath: createdSource,
     });
   } catch (error) {
-    setEditorStatus(`新建失败：${error?.message || '未知错误'}`);
+    setEditorStatus(`新建失败：${getFriendlyRequestError(error)}`);
+    if (editSaveBtnEl) {
+      editSaveBtnEl.disabled = false;
+    }
+    if (editRebuildBtnEl) {
+      editRebuildBtnEl.disabled = false;
+    }
+    return;
   } finally {
     if (editSaveBtnEl) {
       editSaveBtnEl.disabled = state.isRebuilding;
@@ -2501,83 +2643,36 @@ async function saveExistingDoc(options = {}) {
     if (!expectedVersion) {
       throw new Error('未获取到当前文件的编辑锁版本，请刷新后重试');
     }
-    const response = await fetch(DOC_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const { payload } = await fetchJsonApiRequest(
+      DOC_API_URL,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          [API_REQUEST_KEYS.path]: sourcePath,
+          [API_REQUEST_KEYS.content]: content,
+          [API_REQUEST_KEYS.expectedVersion]: expectedVersion,
+          [API_REQUEST_KEYS.force]: forceOverwrite,
+        }),
       },
-      body: JSON.stringify({
-        [API_REQUEST_KEYS.path]: sourcePath,
-        [API_REQUEST_KEYS.content]: content,
-        [API_REQUEST_KEYS.expectedVersion]: expectedVersion,
-        [API_REQUEST_KEYS.force]: forceOverwrite,
-      }),
-    });
+      DATA_INDEX_REQUEST_TIMEOUT_MS,
+      '保存',
+    );
 
-    if (!response.ok) {
-      const payload = await response.json().catch(() => null);
-      const extra = payload?.error ? `：${payload.error}` : '';
-      let message = response.status === 409
-        ? `${APP_ERROR_MESSAGES.saveConflict}（HTTP ${response.status}）${extra}`
-        : `保存失败（HTTP ${response.status}）${extra}`;
-      if (payload?.currentVersion) {
-        const latestVersion = normalizeEditSessionVersion(payload.currentVersion);
-        if (latestVersion) {
-          state.activeEditSourceVersion = latestVersion;
-        }
+    if (payload?.currentVersion) {
+      const latestVersion = normalizeEditSessionVersion(payload.currentVersion);
+      if (latestVersion) {
+        state.activeEditSourceVersion = latestVersion;
       }
-      if (response.status === 409 && !forceOverwrite && payload?.currentVersion) {
-        const conflictAction = await handleSaveConflict(doc, payload);
-        if (conflictAction === 'reload' || conflictAction === 'keep') {
-          if (editSaveBtnEl) {
-            editSaveBtnEl.disabled = false;
-          }
-          if (editRebuildBtnEl) {
-            editRebuildBtnEl.disabled = false;
-          }
-          return;
-        }
-        if (conflictAction === 'force') {
-          if (payload?.currentVersion) {
-            state.activeEditSourceVersion = normalizeEditSessionVersion(payload.currentVersion);
-          }
-          if (editSaveBtnEl) {
-            editSaveBtnEl.disabled = true;
-          }
-          if (editRebuildBtnEl) {
-            editRebuildBtnEl.disabled = true;
-          }
-          await saveExistingDoc({ forceOverwrite: true });
-          return;
-        }
-        if (conflictAction === 'cancel') {
-          message = '已取消保存：版本冲突处理已中止。';
-          setEditorStatus(message);
-          if (editSaveBtnEl) {
-            editSaveBtnEl.disabled = false;
-          }
-          if (editRebuildBtnEl) {
-            editRebuildBtnEl.disabled = false;
-          }
-          return;
-        }
-      }
-      setEditorStatus(message);
-      if (editSaveBtnEl) {
-        editSaveBtnEl.disabled = false;
-      }
-      if (editRebuildBtnEl) {
-        editRebuildBtnEl.disabled = false;
-      }
-      return;
     }
-
-    const saved = await response.json();
     doc._sourceCachedText = content;
     doc._sourceRenderedText = content;
+    doc._renderSignature = makeDocRenderSignature(doc);
     setEditorStatus(APP_ERROR_MESSAGES.saveSuccess);
-    setEditSessionClean(content, saved?.version);
-    doc._sourceVersion = normalizeEditSessionVersion(saved?.version);
+    setEditSessionClean(content, payload?.version);
+    doc._sourceVersion = normalizeEditSessionVersion(payload?.version);
     state.activeEditSource = getSourcePath(doc);
 
     if (editSaveBtnEl) {
@@ -2591,7 +2686,45 @@ async function saveExistingDoc(options = {}) {
     renderMeta(doc);
     await rebuildIndexForDoc(doc);
   } catch (error) {
-    const message = `保存失败：${error?.message || '未知错误'}`;
+    const payload = error?.payload || null;
+    if (error?.status === 409 && !forceOverwrite && payload?.currentVersion) {
+      const conflictAction = await handleSaveConflict(doc, payload);
+      if (conflictAction === 'reload' || conflictAction === 'keep') {
+        if (editSaveBtnEl) {
+          editSaveBtnEl.disabled = false;
+        }
+        if (editRebuildBtnEl) {
+          editRebuildBtnEl.disabled = false;
+        }
+        return;
+      }
+      if (conflictAction === 'force') {
+        if (payload?.currentVersion) {
+          state.activeEditSourceVersion = normalizeEditSessionVersion(payload.currentVersion);
+        }
+        if (editSaveBtnEl) {
+          editSaveBtnEl.disabled = true;
+        }
+        if (editRebuildBtnEl) {
+          editRebuildBtnEl.disabled = true;
+        }
+        await saveExistingDoc({ forceOverwrite: true });
+        return;
+      }
+      if (conflictAction === 'cancel') {
+        setEditorStatus('已取消保存：版本冲突处理已中止。');
+        if (editSaveBtnEl) {
+          editSaveBtnEl.disabled = false;
+        }
+        if (editRebuildBtnEl) {
+          editRebuildBtnEl.disabled = false;
+        }
+        return;
+      }
+    }
+    const message = error?.status === 409
+      ? `${APP_ERROR_MESSAGES.saveConflict}：${getFriendlyRequestError(error)}`
+      : `保存失败：${getFriendlyRequestError(error)}`;
     setEditorStatus(message);
     if (editSaveBtnEl) {
       editSaveBtnEl.disabled = false;
@@ -2627,26 +2760,21 @@ async function rebuildIndexForDoc(doc, options = {}) {
   startRebuildProgressIndicator();
 
   try {
-    const response = await fetch(DOC_REBUILD_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    await fetchJsonApiRequest(
+      DOC_REBUILD_URL,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          [API_REQUEST_KEYS.source]: rebuildFilter,
+        }),
       },
-      body: JSON.stringify({
-        [API_REQUEST_KEYS.source]: rebuildFilter,
-      }),
-    });
+      DATA_INDEX_REQUEST_TIMEOUT_MS,
+      '重建索引',
+    );
 
-    if (!response.ok) {
-      const message = `重建失败（HTTP ${response.status}）`;
-      const payload = await response.json().catch(() => null);
-      const extra = payload?.error ? `：${payload.error}` : '';
-      setEditorStatus(`${message}${extra}`);
-      stopRebuildProgressIndicator();
-      return;
-    }
-
-    await response.json();
     await loadData(preferredPath, {
       preferredSourcePath: options.preferredSourcePath || '',
     });
@@ -2665,7 +2793,7 @@ async function rebuildIndexForDoc(doc, options = {}) {
     const elapsed = formatElapsedSeconds(rebuildProgressStart);
     setEditorStatus(`${APP_ERROR_MESSAGES.rebuildSuccess}（耗时 ${elapsed}）`);
   } catch (error) {
-    setEditorStatus(`重建失败：${error?.message || '未知错误'}`);
+    setEditorStatus(`重建失败：${getFriendlyRequestError(error)}`);
   } finally {
     stopRebuildProgressIndicator();
     state.isRebuilding = false;
@@ -2721,6 +2849,7 @@ async function syncDocEditorSource(doc) {
   doc._sourceCachedText = sourceInfo.content;
   doc._sourceLastModified = sourceInfo.lastModified || '';
   doc._sourceVersion = sourceInfo.version || '';
+  doc._renderSignature = makeDocRenderSignature(doc);
   return { sourcePath, content: sourceInfo.content };
 }
 
@@ -2908,73 +3037,117 @@ function syncDocListEditPermissions() {
 }
 
 function renderContent(doc) {
+  if (!doc || !contentEl) {
+    return;
+  }
+
+  const contentPath = normalizeDisplayValue(doc.path);
+  const mode = getContentRenderMode(doc);
+  const contentSignature = `${mode}::${getDocRenderSignature(doc)}`;
+
+  if (
+    renderedContentDocPath === contentPath
+    && renderedContentSignature === contentSignature
+  ) {
+    if (mode === 'card-only') {
+      contentEl.classList.add('is-empty');
+      contentEl.style.display = 'none';
+    } else {
+      contentEl.style.display = '';
+      contentEl.classList.remove('is-empty');
+    }
+    return;
+  }
+
   if (typeof doc?._sourceRenderedText === 'string') {
     contentEl.classList.remove('is-empty');
     contentEl.style.display = '';
     contentEl.textContent = doc._sourceRenderedText;
+    renderedContentDocPath = contentPath;
+    renderedContentSignature = contentSignature;
     return;
   }
 
-  const mode = getContentRenderMode(doc);
-  contentEl.style.display = '';
-  contentEl.innerHTML = '';
+  try {
+    contentEl.style.display = '';
+    contentEl.innerHTML = '';
 
-  if (mode === 'card-only') {
-    contentEl.classList.add('is-empty');
-    contentEl.style.display = 'none';
-    return;
-  }
-
-  contentEl.classList.remove('is-empty');
-
-  if (Array.isArray(doc.blocks) && doc.blocks.length > 0) {
-    const dedupeFieldKeys = new Set(Object.keys(doc.fields || {}));
-    if (doc._contentDedupeKeys instanceof Set) {
-      for (const key of doc._contentDedupeKeys) {
-        dedupeFieldKeys.add(key);
-      }
-    }
-    const dedupeTextValues = collectDedupeValuesByUsedKeys(doc, dedupeFieldKeys);
-    const rendered = renderStructuredBlocks(doc.blocks, {
-      dedupeKeys: dedupeFieldKeys,
-      dedupeText: dedupeTextValues,
-      renderMode: mode,
-    });
-
-    if (rendered) {
-      contentEl.appendChild(rendered);
-    } else if (mode === 'full') {
+    if (mode === 'card-only') {
       contentEl.classList.add('is-empty');
       contentEl.style.display = 'none';
+      renderedContentDocPath = contentPath;
+      renderedContentSignature = contentSignature;
       return;
     }
-  } else {
-    const content = typeof doc.content === 'string' ? doc.content : '';
-    const dedupeText = collectDedupeValuesByUsedKeys(doc, new Set(Object.keys(doc.fields || {})));
-    const contentText = content
-      .split(/\n{2,}/)
-      .map((line) => line.trim())
-      .filter((line) => {
-        if (!hasRenderableToken(line)) {
-          return false;
-        }
-        const signature = normalizeContentFingerprint(line);
-        if (!signature || dedupeText.has(signature)) {
-          return false;
-        }
-        dedupeText.add(signature);
-        return true;
-      })
-      .join('\n\n');
-    contentEl.textContent = contentText;
-  }
 
-  if (!normalizeDisplayValue(contentEl.textContent || '').trim() && contentEl.children.length === 0) {
-    contentEl.textContent = '';
-    contentEl.classList.add('is-empty');
-    contentEl.style.display = 'none';
+    contentEl.classList.remove('is-empty');
+
+    if (Array.isArray(doc.blocks) && doc.blocks.length > 0) {
+      const dedupeFieldKeys = new Set(Object.keys(doc.fields || {}));
+      if (doc._contentDedupeKeys instanceof Set) {
+        for (const key of doc._contentDedupeKeys) {
+          dedupeFieldKeys.add(key);
+        }
+      }
+      const dedupeTextValues = collectDedupeValuesByUsedKeys(doc, dedupeFieldKeys);
+      const rendered = renderStructuredBlocks(doc.blocks, {
+        dedupeKeys: dedupeFieldKeys,
+        dedupeText: dedupeTextValues,
+        renderMode: mode,
+      });
+
+      if (rendered) {
+        contentEl.appendChild(rendered);
+      } else if (mode === 'full') {
+        contentEl.classList.add('is-empty');
+        contentEl.style.display = 'none';
+        renderedContentDocPath = contentPath;
+        renderedContentSignature = contentSignature;
+        return;
+      }
+    } else {
+      const content = typeof doc.content === 'string' ? doc.content : '';
+      const dedupeText = collectDedupeValuesByUsedKeys(doc, new Set(Object.keys(doc.fields || {})));
+      const contentText = content
+        .split(/\n{2,}/)
+        .map((line) => line.trim())
+        .filter((line) => {
+          if (!hasRenderableToken(line)) {
+            return false;
+          }
+          const signature = normalizeContentFingerprint(line);
+          if (!signature || dedupeText.has(signature)) {
+            return false;
+          }
+          dedupeText.add(signature);
+          return true;
+        })
+        .join('\n\n');
+      contentEl.textContent = contentText;
+    }
+
+    if (!normalizeDisplayValue(contentEl.textContent || '').trim() && contentEl.children.length === 0) {
+      contentEl.textContent = '';
+      contentEl.classList.add('is-empty');
+      contentEl.style.display = 'none';
+      renderedContentDocPath = contentPath;
+      renderedContentSignature = contentSignature;
+      return;
+    }
+
+    contentEl.classList.remove('is-empty');
+    renderedContentDocPath = contentPath;
+    renderedContentSignature = contentSignature;
+  } catch (error) {
+    contentEl.classList.remove('is-empty');
+    contentEl.style.display = '';
+    contentEl.textContent = `文档内容渲染失败：${getFriendlyRequestError(error)}`;
+    renderedContentDocPath = '';
+    renderedContentSignature = '';
+    setEditorStatus(`渲染失败：${getFriendlyRequestError(error)}`);
   }
 }
+
 
 function renderList(groups) {
   const currentRenderId = ++listRenderToken;
@@ -2988,6 +3161,13 @@ function renderList(groups) {
     return;
   }
 
+  const renderNodeError = (context = '列表项', error) => {
+    const node = document.createElement('div');
+    node.className = 'doc-item doc-item-error';
+    node.textContent = `${context}加载失败：${getFriendlyRequestError(error)}`;
+    return node;
+  };
+
   const categoryNames = [...groups.keys()].sort((a, b) => {
     const aOrder = CATEGORY_ORDER_INDEX.has(a) ? CATEGORY_ORDER_INDEX.get(a) : Number.MAX_SAFE_INTEGER;
     const bOrder = CATEGORY_ORDER_INDEX.has(b) ? CATEGORY_ORDER_INDEX.get(b) : Number.MAX_SAFE_INTEGER;
@@ -2998,27 +3178,50 @@ function renderList(groups) {
   });
 
   const categoryNodes = [];
+  const totalCountByCategory = (categoryMap) => [...categoryMap.values()]
+    .reduce((acc, arr) => acc + (Array.isArray(arr) ? arr.length : 0), 0);
 
-  for (const categoryName of categoryNames) {
-    const categoryMap = groups.get(categoryName) || new Map();
-    const totalCount = [...categoryMap.values()].reduce((acc, arr) => acc + arr.length, 0);
-    const categoryNode = createDetailsGroup(`分类 ${CATEGORY_LABELS[categoryName] || categoryName}`, totalCount, true);
-
-    const groupNames = [...categoryMap.keys()].sort((a, b) => a.localeCompare(b, 'zh-CN'));
-    for (const groupName of groupNames) {
-      const docsInGroup = categoryMap.get(groupName);
-      const groupNode = createDetailsGroup(groupName, docsInGroup.length, true);
-      for (const doc of docsInGroup) {
-        const button = createDocButton(doc, selectDoc, {
-          showEditAccess: isEditModeActive(),
-          isEditable: canUserEditDoc(doc),
-        });
-        groupNode.appendChild(button);
+  try {
+    for (const categoryName of categoryNames) {
+      const categoryMap = groups.get(categoryName);
+      if (!(categoryMap instanceof Map)) {
+        categoryNodes.push(renderNodeError(`分类 ${CATEGORY_LABELS[categoryName] || categoryName}`, new Error('分类数据异常')));
+        continue;
       }
-      categoryNode.appendChild(groupNode);
-    }
 
-    categoryNodes.push(categoryNode);
+      const totalCount = totalCountByCategory(categoryMap);
+      const categoryNode = createDetailsGroup(`分类 ${CATEGORY_LABELS[categoryName] || categoryName}`, totalCount, true);
+
+      const groupNames = [...categoryMap.keys()].sort((a, b) => a.localeCompare(b, 'zh-CN'));
+      for (const groupName of groupNames) {
+        const docsInGroup = categoryMap.get(groupName);
+        if (!Array.isArray(docsInGroup)) {
+          categoryNode.appendChild(renderNodeError(`分组 ${groupName}`, new Error('分组数据异常')));
+          continue;
+        }
+
+        const groupNode = createDetailsGroup(groupName, docsInGroup.length, true);
+        for (const doc of docsInGroup) {
+          try {
+            const button = createDocButton(doc, selectDoc, {
+              showEditAccess: isEditModeActive(),
+              isEditable: canUserEditDoc(doc),
+            });
+            groupNode.appendChild(button);
+          } catch (error) {
+            groupNode.appendChild(renderNodeError(doc?.name || doc?.path || '未知条目', error));
+          }
+        }
+        categoryNode.appendChild(groupNode);
+      }
+
+      categoryNodes.push(categoryNode);
+    }
+  } catch (error) {
+    setStatusText(`文档列表渲染失败：${getFriendlyRequestError(error)}`);
+    listEl.textContent = `文档列表渲染失败：${getFriendlyRequestError(error)}`;
+    markActiveItem();
+    return;
   }
 
   let cursor = 0;
@@ -3033,12 +3236,18 @@ function renderList(groups) {
 
     const fragment = document.createDocumentFragment();
     const end = Math.min(cursor + LIST_RENDER_BATCH_SIZE, categoryNodes.length);
-    for (let i = cursor; i < end; i += 1) {
-      fragment.appendChild(categoryNodes[i]);
+    try {
+      for (let i = cursor; i < end; i += 1) {
+        fragment.appendChild(categoryNodes[i]);
+      }
+      cursor = end;
+      listEl.appendChild(fragment);
+      requestAnimationFrame(flushNodes);
+    } catch (error) {
+      setStatusText(`文档列表渲染失败：${getFriendlyRequestError(error)}`);
+      listEl.textContent = `文档列表渲染失败：${getFriendlyRequestError(error)}`;
+      markActiveItem();
     }
-    cursor = end;
-    listEl.appendChild(fragment);
-    requestAnimationFrame(flushNodes);
   };
 
   requestAnimationFrame(flushNodes);
@@ -3100,7 +3309,7 @@ function renderFilteredDocs(preferredPath = '', options = {}) {
 
   if (!filtered.length) {
     const hasKeyword = Boolean(searchQuery);
-    statusEl.textContent = `${hasKeyword ? '未匹配到文档' : '当前标签暂无文档'} ${state.generatedStatus}`;
+    setStatusText(`${hasKeyword ? '未匹配到文档' : '当前标签暂无文档'} ${state.generatedStatus}`);
     if (!skipTabs) {
       renderTabsNow();
     }
@@ -3109,7 +3318,7 @@ function renderFilteredDocs(preferredPath = '', options = {}) {
 
   const displayText = `当前显示 ${filtered.length} 个文档（共 ${state.docs.length} 个）`;
   const tabText = searchQuery ? '（已按关键词筛选）' : '';
-  statusEl.textContent = `${displayText} ${tabText} ${state.generatedStatus}`;
+  setStatusText(`${displayText} ${tabText} ${state.generatedStatus}`);
 
   const filteredPathSet = new Set(filtered.map((doc) => doc.path));
   let desiredPath = preferredPath;
@@ -3150,8 +3359,11 @@ function selectDoc(pathValue) {
     return;
   }
 
+  const targetSignature = getDocRenderSignature(doc);
   const isDifferentDoc = state.activePath !== pathValue;
-  const shouldRefreshContent = isDifferentDoc || renderedDocRef !== doc;
+  const shouldRefreshContent = isDifferentDoc
+    || renderedDocRef !== doc
+    || renderedDocSignature !== targetSignature;
   if (isDifferentDoc && isInEditSession() && !confirmDiscardUnsavedChanges('当前有未保存内容，切换文档将丢失这些修改，是否继续？')) {
     return;
   }
@@ -3185,22 +3397,32 @@ function selectDoc(pathValue) {
         })
         .catch((error) => {
           if (state.activePath === doc.path) {
-            setEditorStatus(`读取源码失败：${error?.message || '未知错误'}`);
+            setEditorStatus(`读取源码失败：${getFriendlyRequestError(error)}`);
           }
         });
     }
   }
 
-  renderHeroBanner(doc);
-  renderMeta(doc);
-  renderSectionCards(doc);
-  const heroImages = getHeroImagesForDisplay(doc, doc.heroSkills || []);
-  renderGallery(heroImages, doc.meta?.title || doc.title || doc.name || doc.path);
-  renderContent(doc);
-  updateEditorForDoc(doc);
-  setModeUi();
-  markActiveItem();
-  renderedDocRef = doc;
+  try {
+    renderHeroBanner(doc);
+    renderMeta(doc);
+    renderSectionCards(doc);
+    const heroImages = getHeroImagesForDisplay(doc, doc.heroSkills || []);
+    renderGallery(heroImages, doc.meta?.title || doc.title || doc.name || doc.path);
+    renderContent(doc);
+    updateEditorForDoc(doc);
+    setModeUi();
+    markActiveItem();
+    renderedDocRef = doc;
+    renderedDocSignature = targetSignature;
+  } catch (error) {
+    setEditorStatus(`渲染失败：${getFriendlyRequestError(error)}`);
+    if (contentEl) {
+      contentEl.classList.remove('is-empty');
+      contentEl.style.display = '';
+      contentEl.textContent = `文档渲染失败：${getFriendlyRequestError(error)}`;
+    }
+  }
 }
 
 function collectSearchText(doc) {
@@ -3219,6 +3441,90 @@ function collectSearchText(doc) {
   return `${base} ${fields} ${sections} ${blocks} ${outline}`.toLowerCase();
 }
 
+function makeStableSignature(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => makeStableSignature(item)).join('|')}]`;
+  }
+  if (typeof value === 'object') {
+    const keys = Object.keys(value).sort();
+    return `{${keys
+      .map((key) => `${key}:${makeStableSignature(value[key])}`)
+      .join(',')}}`;
+  }
+  return '';
+}
+
+function makeDocRenderSignature(doc) {
+  const sections = Array.isArray(doc.sections)
+    ? doc.sections.map((item) => ({
+      key: item?.key || '',
+      value: item?.value || '',
+    }))
+    : [];
+  const blocks = Array.isArray(doc.blocks)
+    ? doc.blocks.map((item) => ({
+      type: item?.type || '',
+      title: item?.title || '',
+      key: item?.key || '',
+      value: item?.value || '',
+      text: item?.text || '',
+    }))
+    : [];
+
+  return [
+    normalizeMatchValue(doc.path || ''),
+    normalizeMatchValue(doc.meta?.title || doc.title || doc.name || ''),
+    normalizeMatchValue(getSourcePath(doc)),
+    normalizeMatchValue(doc.category || ''),
+    normalizeMatchValue(doc.group || ''),
+    normalizeMatchValue(doc.type || ''),
+    normalizeMatchValue(doc._sourceVersion || doc._sourceLastModified || doc.lastModified || ''),
+    normalizeMatchValue(typeof doc.content === 'string' ? doc.content : ''),
+    normalizeMatchValue(makeStableSignature(doc.fields || {})),
+    normalizeMatchValue(makeStableSignature(sections)),
+    normalizeMatchValue(makeStableSignature(blocks)),
+    normalizeMatchValue(makeStableSignature(doc.outline || [])),
+  ].join('||');
+}
+
+function getDocRenderSignature(doc) {
+  if (!doc || typeof doc !== 'object') {
+    return '';
+  }
+  if (!doc._renderSignature) {
+    doc._renderSignature = makeDocRenderSignature(doc);
+  }
+  return doc._renderSignature;
+}
+
+function normalizeDocFromIndex(doc) {
+  if (!doc || typeof doc !== 'object') {
+    return null;
+  }
+  doc._searchText = collectSearchText(doc);
+  doc.meta = doc.meta || {};
+  doc.sourcePath = getSourcePath(doc);
+  doc.fields = doc.fields || {};
+  doc.sections = doc.sections || [];
+  doc.outline = doc.outline || [];
+  doc.blocks = doc.blocks || [];
+  doc.parser = doc.parser || {};
+  doc.heroSkills = doc.heroSkills || [];
+  doc._heroImagesOrdered = undefined;
+  doc._sourceRenderedText = undefined;
+  doc._sourceCachedText = doc._sourceCachedText === undefined ? undefined : doc._sourceCachedText;
+  doc._sourceVersion = normalizeEditSessionVersion(doc._sourceVersion || doc.lastModified || doc._sourceLastModified || '');
+  doc._sourceLastModified = doc._sourceLastModified || doc.lastModified || '';
+  doc._renderSignature = makeDocRenderSignature(doc);
+  return doc;
+}
+
 async function loadData(preferredPath = '', options = {}) {
   const loadArgs = typeof preferredPath === 'object' && preferredPath !== null
     ? preferredPath
@@ -3230,61 +3536,55 @@ async function loadData(preferredPath = '', options = {}) {
   const preferredSourcePath = normalizeDisplayValue(loadArgs.preferredSourcePath || '');
   const isRetryAttempt = Boolean(loadArgs.isRetryAttempt);
   const forceCacheBust = Boolean(loadArgs.forceCacheBust);
+  const currentLoadToken = ++dataLoadToken;
 
   try {
-    if (statusEl) {
-      statusEl.textContent = '正在加载文档索引…';
-    }
-    if (listEl) {
-      listEl.textContent = '加载文档列表…';
-    }
+    setLoadingState('正在加载文档索引…', '加载文档列表…');
     hideLoadRetry();
     const indexUrls = getDataIndexUrlCandidates();
     let payload = null;
     let lastError = null;
 
     for (const candidateUrl of indexUrls) {
+      if (currentLoadToken !== dataLoadToken) {
+        return;
+      }
       try {
-        const response = await fetchWithTimeout(
+        const response = await fetchJsonApiRequest(
           withCacheBust(candidateUrl, forceCacheBust),
           { cache: 'no-store' },
           DATA_INDEX_REQUEST_TIMEOUT_MS,
           '加载文档索引',
+          true,
         );
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        payload = await response.json();
+        payload = response.payload;
         break;
       } catch (error) {
         lastError = error;
+        if (error?.status === 404 || error?.status === 403) {
+          continue;
+        }
       }
     }
 
     if (!payload) {
       throw lastError || new Error('未成功获取文档索引');
     }
+
+    if (currentLoadToken !== dataLoadToken) {
+      return;
+    }
+
     state.docs = payload?.docs || payload?.state?.docs || [];
     if (!Array.isArray(state.docs)) {
       throw new Error('文档索引格式异常');
     }
+    state.docs = state.docs.map((doc) => normalizeDocFromIndex(doc)).filter(Boolean);
     hideLoadRetry();
-    state.docs.forEach((doc) => {
-      doc._searchText = collectSearchText(doc);
-      doc.meta = doc.meta || {};
-      doc.sourcePath = getSourcePath(doc);
-      doc.fields = doc.fields || {};
-      doc.sections = doc.sections || [];
-      doc.outline = doc.outline || [];
-      doc.blocks = doc.blocks || [];
-      doc.parser = doc.parser || {};
-      doc.heroSkills = doc.heroSkills || [];
-      doc._heroImagesOrdered = undefined;
-      doc._sourceRenderedText = undefined;
-      doc._sourceCachedText = undefined;
-      doc._sourceVersion = normalizeEditSessionVersion(doc._sourceVersion || doc.lastModified || doc._sourceLastModified || '');
-      doc._sourceLastModified = doc._sourceLastModified || doc.lastModified || '';
-    });
+    if (currentLoadToken !== dataLoadToken) {
+      return;
+    }
+
     rebuildDocPathCaches(state.docs);
     getSearchIndex(state.docs, true);
 
@@ -3294,6 +3594,9 @@ async function loadData(preferredPath = '', options = {}) {
       activeTab: '',
       groups: null,
     };
+    renderedDocSignature = '';
+    renderedContentDocPath = '';
+    renderedContentSignature = '';
     renderedDocRef = null;
     cachedListGroups.source = null;
     cachedListGroups.activeTab = '';
@@ -3307,6 +3610,9 @@ async function loadData(preferredPath = '', options = {}) {
     lastSearchQuery = getSearchQuery();
     updateSearchClearState();
   } catch (error) {
+    if (currentLoadToken !== dataLoadToken) {
+      return;
+    }
     showLoadRetry(
       `加载失败：${getFriendlyLoadErrorMessage(error)}`,
       `文档列表加载失败：${getFriendlyLoadErrorMessage(error)}。请确认服务运行正常并重试。`,
@@ -3316,12 +3622,8 @@ async function loadData(preferredPath = '', options = {}) {
 }
 
 async function initApp() {
-  if (statusEl) {
-    statusEl.textContent = '正在初始化文档站...';
-  }
-  if (listEl) {
-    listEl.textContent = '初始化中…';
-  }
+  setStatusText('正在初始化文档站...');
+  setListText('初始化中…');
 
   searchInput.addEventListener('input', () => {
     updateSearchClearState();
@@ -3591,12 +3893,8 @@ async function initApp() {
     setMode(resolveInitialMode());
     await loadData();
   } catch (error) {
-    if (statusEl) {
-      statusEl.textContent = `初始化失败：${error?.message || '未知错误'}`;
-    }
-    if (listEl) {
-      listEl.textContent = '初始化失败，请刷新页面后重试。';
-    }
+    setStatusText(`初始化失败：${getFriendlyRequestError(error)}`);
+    setListText('初始化失败，请刷新页面后重试。');
     if (modeStateEl) {
       modeStateEl.textContent = '初始化失败';
     }

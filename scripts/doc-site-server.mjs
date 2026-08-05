@@ -8,17 +8,18 @@ import {
   resolvePort,
   EDIT_ROOT_PREFIXES,
 } from './lib/doc-server.mjs';
+import { createDocumentService } from './lib/doc-api-service.mjs';
 import { handleApiRequest } from './lib/doc-server-routes.mjs';
 import { handleStaticRequest } from './lib/doc-server-static-routes.mjs';
 
 const PORT = resolvePort();
 const BACKSTORY_MERGE_MODE = resolveBackstoryModeFromEnv();
 const apiState = { rebuildInProgress: false };
-const apiDeps = {
+const docService = createDocumentService({
   editablePrefixes: EDIT_ROOT_PREFIXES,
   backstoryMergeMode: BACKSTORY_MERGE_MODE,
   state: apiState,
-};
+});
 
 const server = createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
@@ -29,7 +30,7 @@ const server = createServer(async (req, res) => {
     request: req,
     response: res,
     requestUrl: url,
-    ...apiDeps,
+    service: docService,
   });
   if (handledByApi) {
     return;

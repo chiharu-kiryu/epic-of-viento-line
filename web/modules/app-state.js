@@ -4,6 +4,7 @@ export const PAGE_BASE = new URL('./', location.href);
 export const DATA_INDEX_URL = new URL('data/index.json', PAGE_BASE).href;
 export const ASSET_BASE_URL = new URL('../', PAGE_BASE).href;
 export const DOC_CAPABILITIES_URL = new URL(API_PATHS.CAPABILITIES, PAGE_BASE).href;
+export const DOC_HEALTH_URL = new URL(API_PATHS.HEALTH, PAGE_BASE).href;
 export const DOC_API_URL = new URL(API_PATHS.DOC, PAGE_BASE).href;
 export const DOC_REBUILD_URL = new URL(API_PATHS.REBUILD, PAGE_BASE).href;
 
@@ -88,6 +89,9 @@ export const APP_ERROR_MESSAGES = {
   noEditablePath: '该文档当前未绑定到可编辑源文件',
   loadingSource: '正在读取源文档...',
   savingSource: '正在保存源码...',
+  requestTimeout: '请求超时，请稍后重试',
+  requestInvalidResponse: '后端返回了非预期响应格式',
+  serviceUnavailable: '服务当前不可用，请稍后重试',
   saveConflict: '保存失败：该文档已被其他会话更新，已触发编辑锁冲突，请先刷新文档后重试',
   saveSuccess: '保存成功，正在重建索引...',
   createSuccess: '新建成功，正在重建索引...',

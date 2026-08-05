@@ -11,10 +11,12 @@
 - `lib/`
   - `paths.mjs`：路径常量（项目根、scripts、assets、web、标准化根目录等）
   - `process.mjs`：运行外部命令、打开浏览器、命令探测的通用工具
+  - `doc-api-service.mjs`：新增服务层（文档查询/编辑/重建能力、索引缓存、重建并发控制）
   - `category.mjs`：文档分类/用途推断、字段归类等纯逻辑（可被多个脚本共享）
   - `static-index.mjs`：标准化文档索引构建核心逻辑（数据提取、分类、图片归集），供静态索引脚本复用
   - `doc-server.mjs`：编辑服务器通用能力（安全路径、API payload 解析、索引构建、文件读写辅助、路径规范化）
-  - `doc-server-routes.mjs`：API 路由分发与实现（`/api/index`、`/api/doc`、`/api/rebuild`、`/api/capabilities`）
+  - `doc-server-routes.mjs`：API 路由分发与实现（`/api/index`、`/api/doc`、`/api/rebuild`、`/api/capabilities`、`/api/health`、`/api/metrics`）
+  - `doc-api-metrics.mjs`：API 请求级监控（请求数、成功率、平均耗时、路由维度快照）
   - `doc-server-static-routes.mjs`：静态资源路由（favicon、静态文件、SPA 回退）
   - `doc-api-contract.mjs`：API 入口、方法、参数与响应字段约定
   - `site-options.mjs`：启动命令行参数解析和帮助文案
@@ -48,3 +50,11 @@
 - 前端模块是否仍引用约定入口（`/web/modules/app-state.js`、`/web/modules/app-runtime.js`）
 
 若预检失败，启动将直接中止，避免边改边跑导致的前后端约定不一致。
+
+### API 监控与健康能力
+
+- 新增内部诊断接口：
+  - `/api/health`：返回服务健康状态、重建状态、运行时配置与请求统计快照
+  - `/api/metrics`：返回接口请求的运行时指标（请求数、错误、状态码分布、路由级耗时）
+
+- `doc-api-service.mjs` 会在每次请求开始/结束时记录监控指标，并在 `getDiagnosticSnapshot()` 中同时返回 `requestMetrics`。

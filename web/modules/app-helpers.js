@@ -558,6 +558,81 @@ function getNameAvatarDataUrl(rawLabel) {
   return dataUrl;
 }
 
+function resolveImageUrl(rawImagePath = '') {
+  const imagePath = normalizeDisplayValue(rawImagePath);
+  if (!imagePath) {
+    return '';
+  }
+
+  if (
+    /^([a-z][a-z\d+\-.]*:)?\/\//i.test(imagePath)
+    || imagePath.startsWith('data:')
+    || imagePath.startsWith('blob:')
+    || imagePath.startsWith('assets/')
+    || imagePath.startsWith('/')
+  ) {
+    return imagePath;
+  }
+
+  try {
+    return new URL(imagePath, ASSET_BASE_URL).href;
+  } catch {
+    return imagePath;
+  }
+}
+
+function applyImageFallbackChain(imageEl, fallbackPaths = [], fallbackLabel = '媒体') {
+  if (!imageEl || typeof imageEl.setAttribute !== 'function') {
+    return;
+  }
+
+  const normalizedPaths = [];
+  const seen = new Set();
+  const candidates = Array.isArray(fallbackPaths) ? fallbackPaths : [fallbackPaths];
+
+  for (const candidate of candidates) {
+    const resolved = resolveImageUrl(candidate);
+    if (!resolved || seen.has(resolved)) {
+      continue;
+    }
+    seen.add(resolved);
+    normalizedPaths.push(resolved);
+  }
+
+  const fallbackDataUrl = getNameAvatarDataUrl(fallbackLabel);
+  imageEl.dataset.fallbackState = '';
+  imageEl.dataset.fallbackIndex = '0';
+
+  const handleImageError = () => {
+    if (imageEl.dataset.fallbackState === 'resolved') {
+      return;
+    }
+
+    const nextIndex = Number.parseInt(imageEl.dataset.fallbackIndex || '0', 10);
+    if (!Number.isFinite(nextIndex) || nextIndex >= normalizedPaths.length) {
+      imageEl.dataset.fallbackState = 'resolved';
+      if (imageEl.src !== fallbackDataUrl) {
+        imageEl.src = fallbackDataUrl;
+      }
+      return;
+    }
+
+    imageEl.dataset.fallbackIndex = String(nextIndex + 1);
+    imageEl.src = normalizedPaths[nextIndex];
+  };
+
+  imageEl.onerror = handleImageError;
+
+  if (normalizedPaths.length === 0) {
+    imageEl.dataset.fallbackState = 'resolved';
+    imageEl.src = fallbackDataUrl;
+    return;
+  }
+
+  imageEl.src = normalizedPaths[0];
+  imageEl.dataset.fallbackIndex = '1';
+}
+
 function normalizePlaceholderSegment(rawValue) {
   const text = String(rawValue || '')
     .normalize('NFKC')
@@ -1163,15 +1238,12 @@ function createDocButton(doc, onSelect = () => {}, options = {}) {
     avatar.className = 'doc-item-avatar';
     const img = document.createElement('img');
     img.loading = 'lazy';
-    img.src = new URL(orderedHeroImages[0], ASSET_BASE_URL).href;
+    const fallbackChain = [
+      orderedHeroImages[0],
+      getHeroFallbackPath(doc),
+    ];
+    applyImageFallbackChain(img, fallbackChain, doc.name || doc.title || categoryLabel);
     img.alt = `${doc.name} 缩略图`;
-    img.onerror = () => {
-      if (img.dataset.placeholderLoaded === '1') {
-        return;
-      }
-      img.dataset.placeholderLoaded = '1';
-      img.src = getNameAvatarDataUrl(doc.name || doc.title || categoryLabel);
-    };
     avatar.appendChild(img);
     button.appendChild(avatar);
   } else if (shouldShowThumbnail) {
@@ -1181,15 +1253,7 @@ function createDocButton(doc, onSelect = () => {}, options = {}) {
     const image = document.createElement('img');
     image.loading = 'lazy';
     const localPlaceholder = getDocImagePlaceholderPath(doc, doc.name || doc.title || categoryLabel);
-    const dataUrlPlaceholder = getNameAvatarDataUrl(fallbackLabel);
-    if (localPlaceholder) {
-      image.src = new URL(localPlaceholder, ASSET_BASE_URL).href;
-      image.onerror = () => {
-        image.src = dataUrlPlaceholder;
-      };
-    } else {
-      image.src = dataUrlPlaceholder;
-    }
+    applyImageFallbackChain(image, localPlaceholder ? [localPlaceholder] : [], fallbackLabel);
     image.alt = `${normalizeValue(doc.name) || categoryLabel} 缩略图`;
     avatar.appendChild(image);
     button.appendChild(avatar);
@@ -1549,4 +1613,6 @@ export {
   hasVisibleValue,
   toDisplayValue,
   sanitizeList,
+  applyImageFallbackChain,
+  resolveImageUrl,
 };

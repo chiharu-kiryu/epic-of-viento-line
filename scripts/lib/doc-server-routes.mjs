@@ -1,197 +1,128 @@
-import path from 'node:path';
-import fs from 'node:fs/promises';
-import { trimName } from './paths.mjs';
-import {
-  safePathFromQuery,
-  normalizeLockVersion,
-  normalizeStandardizeSourceFilter,
-  isAllowedEditPath,
-  resolveEditableFilePath,
-  readRequestJsonBody,
-  readTextFile,
-  buildEditableDocIndex,
-  sendApiResponse,
-  sendApiError,
-} from './doc-server.mjs';
-import { rebuildIndex } from './rebuild-workflow.mjs';
 import {
   API_PATHS,
   API_METHODS,
-  API_ERRORS,
-  normalizeRebuildRequest,
-  normalizeDocWriteRequest,
   makeCapabilitiesPayload,
   makeRebuildResponse,
 } from './doc-api-contract.mjs';
+import {
+  readRequestJsonBody,
+  sendApiResponse,
+  sendApiError,
+} from './doc-server.mjs';
 
 function methodNotAllowed(response, allow = 'GET') {
   response.statusCode = 405;
   response.setHeader('Allow', allow);
   response.end('method not allowed');
+  return 405;
 }
 
-async function handleApiIndex(response) {
-  const indexData = await buildEditableDocIndex();
-  sendApiResponse(response, indexData);
+function isHttpStatus(value, fallback = 500) {
+  return Number.isInteger(value) && value >= 100 && value < 600
+    ? value
+    : fallback;
 }
 
-async function handleApiDocGet(response, requestUrl) {
-  const filePath = safePathFromQuery(requestUrl.searchParams.get('path') || '');
-  if (!filePath || !isAllowedEditPath(filePath)) {
-    await sendApiError(response, 400, API_ERRORS.badPath);
-    return;
+function mapServiceErrorToHttp(error, response) {
+  if (error?.statusCode) {
+    const statusCode = isHttpStatus(error.statusCode, 400);
+    sendApiError(response, statusCode, error.message || 'request rejected', error.payload || {});
+    return statusCode;
   }
 
-  const resolved = await resolveEditableFilePath(filePath);
-  if (!resolved) {
-    await sendApiError(response, 404, API_ERRORS.docNotFound);
-    return;
-  }
+  const statusCode = 500;
+  sendApiError(response, statusCode, error?.message || 'internal error');
+  return statusCode;
+}
 
-  const content = await readTextFile(resolved.absolutePath);
-  if (content === null) {
-    await sendApiError(response, 404, API_ERRORS.docNotFound);
-    return;
-  }
-
-  const type = path.extname(resolved.relativePath).replace('.', '') || 'txt';
-  let modifiedAt = '';
-  let version = '';
+async function handleApiIndex(response, service) {
   try {
-    const stats = await fs.stat(resolved.absolutePath);
-    modifiedAt = stats.mtime.toISOString();
-    version = String(stats.mtimeMs);
-  } catch {
-    // keep defaults
-  }
-
-  sendApiResponse(response, {
-    path: resolved.relativePath,
-    type,
-    title: trimName(path.basename(resolved.relativePath)),
-    content,
-    lastModified: modifiedAt,
-    version,
-  });
-}
-
-async function handleApiDocWrite(response, request) {
-  let payload;
-  try {
-    payload = await readRequestJsonBody(request);
+    const indexData = await service.getDocIndex();
+    sendApiResponse(response, indexData);
+    return isHttpStatus(response.statusCode, 200);
   } catch (error) {
-    await sendApiError(response, 400, `invalid json: ${error?.message || 'parse error'}`);
-    return;
-  }
-
-  const normalized = normalizeDocWriteRequest(payload);
-  if (!normalized.path) {
-    await sendApiError(response, 400, API_ERRORS.missingPath);
-    return;
-  }
-
-  const filePath = safePathFromQuery(normalized.path);
-  if (!filePath || !isAllowedEditPath(filePath)) {
-    await sendApiError(response, 400, API_ERRORS.badPath);
-    return;
-  }
-
-  if (typeof normalized.content !== 'string') {
-    await sendApiError(response, 400, API_ERRORS.missingContent);
-    return;
-  }
-
-  const createMode = normalized.create === true;
-  const forceOverwrite = normalized.force === true;
-  const expectedVersion = normalizeLockVersion(normalized.expectedVersion);
-  const resolved = await resolveEditableFilePath(filePath, { allowCreate: createMode });
-  if (!resolved) {
-    await sendApiError(response, 404, API_ERRORS.docNotFound);
-    return;
-  }
-  if (!createMode && !resolved.exists) {
-    await sendApiError(response, 404, API_ERRORS.docNotFound);
-    return;
-  }
-  if (createMode && resolved.exists) {
-    await sendApiError(response, 409, API_ERRORS.alreadyExists);
-    return;
-  }
-
-  const { absolutePath, relativePath } = resolved;
-  if (!createMode && !expectedVersion && !forceOverwrite) {
-    await sendApiError(response, 409, API_ERRORS.missingExpectedVersion);
-    return;
-  }
-
-  if (!createMode && expectedVersion && !forceOverwrite) {
-    try {
-      const stats = await fs.stat(absolutePath);
-      const currentVersion = String(stats.mtimeMs);
-      if (currentVersion !== expectedVersion) {
-        await sendApiError(response, 409, 'document was modified by another client', {
-          currentVersion,
-          lastModified: stats.mtime.toISOString(),
-        });
-        return;
-      }
-    } catch (error) {
-      if (error?.code === 'ENOENT') {
-        await sendApiError(response, 404, API_ERRORS.docNotFound);
-        return;
-      }
-      await sendApiError(response, 500, error?.message || 'failed to check version');
-      return;
-    }
-  }
-
-  try {
-    await fs.mkdir(path.dirname(absolutePath), { recursive: true });
-    await fs.writeFile(absolutePath, normalized.content, 'utf8');
-    const stats = await fs.stat(absolutePath);
-    sendApiResponse(response, {
-      ok: true,
-      path: relativePath,
-      lastModified: stats.mtime.toISOString(),
-      version: String(stats.mtimeMs),
-    });
-  } catch (error) {
-    await sendApiError(response, 500, error?.message || 'failed to save');
+    return mapServiceErrorToHttp(error, response);
   }
 }
 
-async function handleApiRebuild(response, request, {
-  backstoryMergeMode,
-  state,
-}) {
-  if (state.rebuildInProgress) {
-    await sendApiError(response, 409, API_ERRORS.rebuildInProgress);
-    return;
-  }
-  state.rebuildInProgress = true;
-
+async function handleApiCapabilities(response, service) {
   try {
-    let payload;
-    try {
-      payload = await readRequestJsonBody(request);
-    } catch (error) {
-      await sendApiError(response, 400, `invalid json: ${error?.message || 'parse error'}`);
-      return;
-    }
+    const { editablePrefixes, backstoryMergeMode } = service.getRuntimeConfig();
+    sendApiResponse(response, makeCapabilitiesPayload(editablePrefixes, backstoryMergeMode));
+    return isHttpStatus(response.statusCode, 200);
+  } catch (error) {
+    return mapServiceErrorToHttp(error, response);
+  }
+}
 
-    const rebuildRequest = normalizeRebuildRequest(payload);
-    const sourceFilter = normalizeStandardizeSourceFilter(rebuildRequest.source);
-    const result = await rebuildIndex({
-      backstoryMode: backstoryMergeMode,
-      sourceFilter,
-      runStandardize: rebuildRequest.runStandardize,
-      runBuild: rebuildRequest.runBuild,
-    });
+async function handleApiDocGet(response, requestUrl, service) {
+  const rawPath = requestUrl.searchParams.get('path') || '';
+  try {
+    const data = await service.getDocByPath(rawPath);
+    sendApiResponse(response, data);
+    return isHttpStatus(response.statusCode, 200);
+  } catch (error) {
+    return mapServiceErrorToHttp(error, response);
+  }
+}
+
+async function handleApiDocWrite(response, request, service) {
+  try {
+    const payload = await readRequestJsonBody(request);
+    const data = await service.writeDoc(payload);
+    sendApiResponse(response, data);
+    return isHttpStatus(response.statusCode, 200);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      const statusCode = 400;
+      sendApiError(response, statusCode, `invalid json: ${error?.message || 'parse error'}`);
+      return statusCode;
+    }
+    return mapServiceErrorToHttp(error, response);
+  }
+}
+
+async function handleApiRebuild(response, request, service) {
+  try {
+    const payload = await readRequestJsonBody(request);
+    const { result, sourceFilter } = await service.runRebuild(payload);
     sendApiResponse(response, makeRebuildResponse(result, sourceFilter));
+    return isHttpStatus(response.statusCode, 200);
   } catch (error) {
-    await sendApiError(response, 500, error?.message || 'rebuild failed');
-  } finally {
-    state.rebuildInProgress = false;
+    if (error instanceof SyntaxError) {
+      const statusCode = 400;
+      sendApiError(response, statusCode, `invalid json: ${error?.message || 'parse error'}`);
+      return statusCode;
+    }
+    return mapServiceErrorToHttp(error, response);
+  }
+}
+
+async function handleApiHealth(response, service) {
+  try {
+    const health = typeof service.getHealth === 'function'
+      ? service.getHealth()
+      : {
+        ok: false,
+        status: 'unavailable',
+        timestamp: new Date().toISOString(),
+      };
+    sendApiResponse(response, health);
+    return isHttpStatus(response.statusCode, 200);
+  } catch (error) {
+    return mapServiceErrorToHttp(error, response);
+  }
+}
+
+async function handleApiMetrics(response, service) {
+  try {
+    const metrics = typeof service.getRequestMetricsSnapshot === 'function'
+      ? service.getRequestMetricsSnapshot()
+      : {};
+    sendApiResponse(response, metrics);
+    return isHttpStatus(response.statusCode, 200);
+  } catch (error) {
+    return mapServiceErrorToHttp(error, response);
   }
 }
 
@@ -200,54 +131,62 @@ async function handleApiRequest({
   request,
   response,
   requestUrl,
-  editablePrefixes,
-  backstoryMergeMode,
-  state,
+  service,
 }) {
-  if (pathname === API_PATHS.INDEX) {
-    try {
-      await handleApiIndex(response);
-    } catch (error) {
-      await sendApiError(response, 500, error?.message || 'failed to build index');
-    }
-    return true;
+  const route = {
+    [API_PATHS.INDEX]: {
+      [API_METHODS.GET]: () => handleApiIndex(response, service),
+    },
+    [API_PATHS.CAPABILITIES]: {
+      [API_METHODS.GET]: () => handleApiCapabilities(response, service),
+    },
+    [API_PATHS.HEALTH]: {
+      [API_METHODS.GET]: () => handleApiHealth(response, service),
+    },
+    [API_PATHS.METRICS]: {
+      [API_METHODS.GET]: () => handleApiMetrics(response, service),
+    },
+    [API_PATHS.DOC]: {
+      [API_METHODS.GET]: () => handleApiDocGet(response, requestUrl, service),
+      [API_METHODS.POST]: () => handleApiDocWrite(response, request, service),
+      [API_METHODS.PUT]: () => handleApiDocWrite(response, request, service),
+    },
+    [API_PATHS.REBUILD]: {
+      [API_METHODS.POST]: () => handleApiRebuild(response, request, service),
+    },
+  };
+
+  const handlers = route[pathname];
+  if (!handlers) {
+    return false;
   }
 
-  if (pathname === API_PATHS.CAPABILITIES) {
-    if (request.method !== API_METHODS.GET) {
-      methodNotAllowed(response, API_METHODS.GET);
+  const trace = (service && typeof service.startRequest === 'function')
+    ? service.startRequest(pathname, request.method)
+    : null;
+  let statusCode = 200;
+  try {
+    const methodHandler = handlers[request.method];
+    if (!methodHandler) {
+      const allow = Object.keys(handlers).join(', ');
+      statusCode = methodNotAllowed(response, allow);
       return true;
     }
-    sendApiResponse(response, makeCapabilitiesPayload(editablePrefixes, backstoryMergeMode));
-    return true;
+    statusCode = await methodHandler();
+  } catch (error) {
+    if (!response.writableEnded) {
+      statusCode = 500;
+      sendApiError(response, 500, error?.message || 'internal error');
+    } else {
+      statusCode = isHttpStatus(response.statusCode, 500);
+    }
+  } finally {
+    if (service && typeof service.finishRequest === 'function') {
+      service.finishRequest(trace, isHttpStatus(statusCode, response.statusCode));
+    }
   }
 
-  if (pathname === API_PATHS.DOC) {
-    if (request.method === API_METHODS.GET) {
-      await handleApiDocGet(response, requestUrl);
-      return true;
-    }
-    if (request.method === API_METHODS.POST || request.method === API_METHODS.PUT) {
-      await handleApiDocWrite(response, request);
-      return true;
-    }
-    methodNotAllowed(response, `${API_METHODS.GET}, ${API_METHODS.POST}, ${API_METHODS.PUT}`);
-    return true;
-  }
-
-  if (pathname === API_PATHS.REBUILD) {
-    if (request.method !== API_METHODS.POST) {
-      methodNotAllowed(response, API_METHODS.POST);
-      return true;
-    }
-    await handleApiRebuild(response, request, {
-      backstoryMergeMode,
-      state,
-    });
-    return true;
-  }
-
-  return false;
+  return true;
 }
 
 export {

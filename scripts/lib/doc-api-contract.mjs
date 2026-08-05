@@ -1,7 +1,9 @@
 export const API_PATHS = Object.freeze({
   CAPABILITIES: '/api/capabilities',
+  HEALTH: '/api/health',
   INDEX: '/api/index',
   DOC: '/api/doc',
+  METRICS: '/api/metrics',
   REBUILD: '/api/rebuild',
 });
 
@@ -48,6 +50,9 @@ export const API_RESPONSE = Object.freeze({
   elapsedMs: 'elapsedMs',
   stdout: 'stdout',
   generatedAt: 'generatedAt',
+  status: 'status',
+  metrics: 'metrics',
+  startedAt: 'startedAt',
   message: 'message',
 });
 
@@ -112,10 +117,12 @@ export function makeCapabilitiesPayload(editablePrefixes, backstoryMergeMode, ve
     [DOC_CAPABILITIES_FIELDS.mode]: DOC_CAPABILITIES_FIELDS.modeValue,
     [DOC_CAPABILITIES_FIELDS.editablePrefixes]: editablePrefixes,
     [DOC_CAPABILITIES_FIELDS.endpoints]: [
+      API_PATHS.CAPABILITIES,
+      API_PATHS.HEALTH,
+      API_PATHS.METRICS,
       API_PATHS.DOC,
       API_PATHS.REBUILD,
       API_PATHS.INDEX,
-      API_PATHS.CAPABILITIES,
     ],
     [DOC_CAPABILITIES_FIELDS.backstoryMergeMode]: backstoryMergeMode,
     [DOC_CAPABILITIES_FIELDS.version]: version,

@@ -80,11 +80,19 @@ function validateContract(contract, issues) {
   if (!isNonEmptyString(contract.API_PATHS?.REBUILD)) {
     issues.push(createIssue('DOCAPI-CONTRACT-014', 'contract/API_PATHS/REBUILD', 'REBUILD 为空或类型错误', '应为 "/api/rebuild" 字符串'));
   }
+  if (!isNonEmptyString(contract.API_PATHS?.HEALTH)) {
+    issues.push(createIssue('DOCAPI-CONTRACT-015', 'contract/API_PATHS/HEALTH', 'HEALTH 为空或类型错误', '应为 "/api/health" 字符串'));
+  }
+  if (!isNonEmptyString(contract.API_PATHS?.METRICS)) {
+    issues.push(createIssue('DOCAPI-CONTRACT-016', 'contract/API_PATHS/METRICS', 'METRICS 为空或类型错误', '应为 "/api/metrics" 字符串'));
+  }
 
   check(contract.API_PATHS?.CAPABILITIES === '/api/capabilities', 'DOCAPI-CONTRACT-021', 'contract/API_PATHS/CAPABILITIES', '路径值不匹配', '应为 "/api/capabilities"', issues);
   check(contract.API_PATHS?.INDEX === '/api/index', 'DOCAPI-CONTRACT-022', 'contract/API_PATHS/INDEX', '路径值不匹配', '应为 "/api/index"', issues);
   check(contract.API_PATHS?.DOC === '/api/doc', 'DOCAPI-CONTRACT-023', 'contract/API_PATHS/DOC', '路径值不匹配', '应为 "/api/doc"', issues);
   check(contract.API_PATHS?.REBUILD === '/api/rebuild', 'DOCAPI-CONTRACT-024', 'contract/API_PATHS/REBUILD', '路径值不匹配', '应为 "/api/rebuild"', issues);
+  check(contract.API_PATHS?.HEALTH === '/api/health', 'DOCAPI-CONTRACT-025', 'contract/API_PATHS/HEALTH', '路径值不匹配', '应为 "/api/health"', issues);
+  check(contract.API_PATHS?.METRICS === '/api/metrics', 'DOCAPI-CONTRACT-026', 'contract/API_PATHS/METRICS', '路径值不匹配', '应为 "/api/metrics"', issues);
 
   check(isNonEmptyString(contract.API_METHODS?.GET), 'DOCAPI-CONTRACT-031', 'contract/API_METHODS/GET', '缺少 GET', '确保包含 GET 方法字符串', issues);
   check(isNonEmptyString(contract.API_METHODS?.POST), 'DOCAPI-CONTRACT-032', 'contract/API_METHODS/POST', '缺少 POST', '确保包含 POST 方法字符串', issues);
@@ -115,6 +123,8 @@ function validateRoute(contract, routeText, issues) {
   const markers = [
     'API_PATHS.INDEX',
     'API_PATHS.CAPABILITIES',
+    'API_PATHS.HEALTH',
+    'API_PATHS.METRICS',
     'API_PATHS.DOC',
     'API_PATHS.REBUILD',
     'API_METHODS.GET',
