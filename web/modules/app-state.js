@@ -81,6 +81,9 @@ export const domElements = {
   leftTotalStatEl: document.getElementById('leftTotalStat'),
   leftVisibleStatEl: document.getElementById('leftVisibleStat'),
   leftLegendBodyEl: document.getElementById('leftLegendBody'),
+  runtimeErrorPanelEl: document.getElementById('runtimeErrorPanel'),
+  runtimeErrorListEl: document.getElementById('runtimeErrorList'),
+  runtimeErrorClearBtnEl: document.getElementById('runtimeErrorClearBtn'),
 };
 
 export const EDITABLE_SOURCE_PREFIXES = ['design-data/', 'docs-standard/design-data/'];

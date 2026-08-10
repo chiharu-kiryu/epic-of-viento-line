@@ -13,7 +13,6 @@ import {
   EDITABLE_SOURCE_PREFIXES,
   APP_ERROR_MESSAGES,
 } from './app-state.js';
-import { API_REQUEST_KEYS } from '../../scripts/lib/doc-api-contract.mjs';
 import {
   getHeroDisplayDocs,
   getVisibleDocs,
@@ -39,6 +38,14 @@ import {
 import { renderHeroBanner, buildCommonCards, getHeroCardsByCategory } from './app-render.js';
 import { renderStructuredBlocks, hasRenderableToken } from './app-structured.js';
 import { getDocTemplate, DOC_TYPE_TEMPLATE_DEFS } from './app-type-templates.js';
+import {
+  detectEditBackendAvailability,
+  loadDocIndexPayload,
+  readDocSource,
+  loadTemplateContent,
+  rebuildDocIndex,
+  writeDoc,
+} from './app-doc-service.js';
 
 const {
   statusEl,
@@ -91,13 +98,19 @@ const {
   leftTotalStatEl,
   leftVisibleStatEl,
   leftLegendBodyEl,
+  runtimeErrorPanelEl,
+  runtimeErrorListEl,
+  runtimeErrorClearBtnEl,
 } = domElements;
 
 const REBUILD_TEXT = '重建索引';
 const SEARCH_INPUT_DEBOUNCE_MS = 180;
 const LIST_RENDER_BATCH_SIZE = 120;
+const LIST_ERROR_SUMMARY_VISIBLE_ENTRIES = 3;
+const LIST_ERROR_SUMMARY_AUTO_OPEN_THRESHOLD = 8;
 const DATA_INDEX_REQUEST_TIMEOUT_MS = 12000;
 const CAPABILITIES_REQUEST_TIMEOUT_MS = 5000;
+const RUNTIME_ERROR_PANEL_LIMIT = 12;
 const CATEGORY_ORDER_INDEX = new Map(
   CATEGORY_ORDER.map((category, index) => [category, index]),
 );
@@ -109,6 +122,8 @@ let rebuildProgressStart = 0;
 let searchDebounceTimer = null;
 let lastSearchQuery = '';
 let listRenderToken = 0;
+let listRenderFrameId = 0;
+let listSkeletonRenderState = null;
 let dataLoadToken = 0;
 let renderedDocSignature = '';
 let lastStatusText = '';
@@ -144,6 +159,7 @@ let renderedContentDocPath = '';
 let renderedContentSignature = '';
 const docByPathCache = new Map();
 const docBySourcePathCache = new Map();
+let runtimeErrorLog = [];
 
 function setStatusText(message = '') {
   const normalized = normalizeDisplayValue(message);
@@ -159,6 +175,98 @@ function setListText(message = '') {
     listEl.textContent = normalized;
   }
   lastListText = normalized;
+}
+
+function renderListSkeletonMarkup(message = '') {
+  const safeMessage = normalizeDisplayValue(message) || '正在加载文档列表…';
+  const rowsHtml = `
+    <div class="doc-list-skeleton" role="status" aria-live="polite">
+      <div class="doc-list-skeleton-message">${safeMessage}</div>
+      ${Array.from({ length: 4 }).map(() => '<div class="doc-skeleton-row"><span class="doc-skeleton-line doc-skeleton-line-title"></span><span class="doc-skeleton-line doc-skeleton-line-sub"></span></div>').join('')}
+    </div>
+  `;
+  return rowsHtml;
+}
+
+function setListSkeletonState(message = '') {
+  if (!listEl) {
+    return;
+  }
+  listSkeletonRenderState = normalizeDisplayValue(message) || '正在加载文档列表…';
+  listEl.innerHTML = renderListSkeletonMarkup(listSkeletonRenderState);
+}
+
+function clearListSkeletonState() {
+  listSkeletonRenderState = null;
+}
+
+function formatListRenderErrorSummary(totalErrorCount, errorCountsByContext, topCount = 3) {
+  if (!totalErrorCount) {
+    return '';
+  }
+  const topContexts = [...errorCountsByContext.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, topCount)
+    .map(([context, count]) => `${context}（${count}）`)
+    .join('、');
+  return `列表渲染异常：${totalErrorCount}处问题${topContexts ? `，集中在：${topContexts}` : ''}`;
+}
+
+function createListErrorSummaryNode(totalErrorCount, errorCountsByContext) {
+  if (!totalErrorCount) {
+    return null;
+  }
+  const detailsNode = document.createElement('details');
+  const summaryNode = document.createElement('summary');
+  const bodyNode = document.createElement('div');
+  const listNode = document.createElement('ul');
+  const maxVisibleEntries = LIST_ERROR_SUMMARY_VISIBLE_ENTRIES;
+
+  detailsNode.className = 'doc-list-error-summary';
+  summaryNode.className = 'doc-list-error-summary-title';
+  summaryNode.textContent = `列表渲染异常：${totalErrorCount}处问题`;
+  bodyNode.className = 'doc-list-error-summary-body';
+
+  const sortedEntries = [...errorCountsByContext.entries()].sort((a, b) => b[1] - a[1]);
+  const visibleEntries = sortedEntries.slice(0, maxVisibleEntries);
+  const hiddenEntries = sortedEntries.slice(maxVisibleEntries);
+
+  for (const [context, count] of visibleEntries) {
+    const listItem = document.createElement('li');
+    listItem.textContent = `${context}：${count}次`;
+    listNode.appendChild(listItem);
+  }
+
+  if (hiddenEntries.length) {
+    const moreItem = document.createElement('li');
+    const moreNode = document.createElement('details');
+    const moreSummary = document.createElement('summary');
+    const moreList = document.createElement('ul');
+
+    moreNode.className = 'doc-list-error-summary-more';
+    moreSummary.className = 'doc-list-error-summary-more-title';
+    moreSummary.textContent = `更多 ${hiddenEntries.length} 项（展开）`;
+
+    for (const [context, count] of hiddenEntries) {
+      const listItem = document.createElement('li');
+      listItem.textContent = `${context}：${count}次`;
+      moreList.appendChild(listItem);
+    }
+
+    moreNode.appendChild(moreSummary);
+    moreNode.appendChild(moreList);
+    moreItem.className = 'doc-list-error-summary-more-item';
+    moreItem.appendChild(moreNode);
+    listNode.appendChild(moreItem);
+  }
+
+  bodyNode.appendChild(listNode);
+  detailsNode.appendChild(summaryNode);
+  detailsNode.appendChild(bodyNode);
+  if (totalErrorCount <= LIST_ERROR_SUMMARY_AUTO_OPEN_THRESHOLD) {
+    detailsNode.open = true;
+  }
+  return detailsNode;
 }
 
 function showLoadRetry(statusMessage, listMessage, mode = 'normal') {
@@ -193,20 +301,6 @@ function setLoadingState(stateText, listText) {
   }
 }
 
-function withCacheBust(url, forceCacheBust = false) {
-  if (!forceCacheBust) {
-    return url;
-  }
-
-  try {
-    const urlObject = new URL(url);
-    urlObject.searchParams.set('_cacheBust', String(Date.now()));
-    return urlObject.toString();
-  } catch {
-    return `${url}${url.includes('?') ? '&' : '?'}_cacheBust=${Date.now()}`;
-  }
-}
-
 async function retryLoadData({ forceCacheBust = false } = {}) {
   if (loadRetryBtnEl) {
     loadRetryBtnEl.disabled = true;
@@ -235,112 +329,15 @@ function getDataIndexUrlCandidates() {
   return candidates;
 }
 
-async function fetchWithTimeout(url, options = {}, timeoutMs = 10000, timeoutMessage = '请求') {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    });
-    return response;
-  } catch (error) {
-    if (error?.name === 'AbortError') {
-      throw new Error(`${timeoutMessage}超时（${Math.round(timeoutMs / 1000)} 秒）`);
-    }
-    throw error;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-function extractPayloadErrorMessage(payload) {
-  if (!payload || typeof payload !== 'object') {
-    return '';
-  }
-  if (typeof payload.error === 'string' && payload.error.trim()) {
-    return payload.error.trim();
-  }
-  if (typeof payload.message === 'string' && payload.message.trim()) {
-    return payload.message.trim();
-  }
-  if (typeof payload.msg === 'string' && payload.msg.trim()) {
-    return payload.msg.trim();
-  }
-  if (Array.isArray(payload.errors) && payload.errors.length > 0) {
-    const first = payload.errors[0];
-    if (typeof first === 'string' && first.trim()) {
-      return first.trim();
-    }
-    if (first && typeof first === 'object' && typeof first.message === 'string' && first.message.trim()) {
-      return first.message.trim();
-    }
-  }
-  return '';
-}
-
-function makeRequestError(response, payload, requestLabel) {
-  const responseError = extractPayloadErrorMessage(payload);
-  const label = requestLabel || '请求';
-  const suffix = responseError ? `${response.status}：${responseError}` : `${response.status}`;
-  const error = new Error(`${label}失败（${suffix}）`);
-  error.status = response.status;
-  error.payload = payload;
-  return error;
-}
-
-async function safeParseJsonResponse(response) {
-  try {
-    if (!response.body) {
-      return null;
-    }
-    const rawText = await response.text();
-    const trimmedText = rawText.trim();
-    if (!trimmedText) {
-      return null;
-    }
-    const contentType = response.headers.get('content-type') || '';
-    if (!contentType.includes('application/json') && !/^[\[{]/.test(trimmedText)) {
-      return null;
-    }
-    return JSON.parse(trimmedText);
-  } catch {
-    return null;
-  }
-}
-
-async function fetchJsonApiRequest(
-  url,
-  options = {},
-  timeoutMs = 10000,
-  requestLabel = '请求',
-  requireJson = true,
-) {
-  const response = await fetchWithTimeout(
-    url,
-    options,
-    timeoutMs,
-    requestLabel,
-  );
-  const payload = await safeParseJsonResponse(response);
-  if (!response.ok) {
-    throw makeRequestError(response, payload, requestLabel);
-  }
-  if (requireJson && payload === null) {
-    const error = new Error(APP_ERROR_MESSAGES.requestInvalidResponse);
-    error.status = response.status;
-    error.payload = payload;
-    return Promise.reject(error);
-  }
-
-  return {
-    response,
-    payload,
-  };
-}
-
 function getFriendlyRequestError(error) {
+  if (typeof error === 'string' || typeof error === 'number' || typeof error === 'boolean') {
+    return normalizeDisplayValue(error);
+  }
+
+  const payloadMessage = extractRequestErrorPayloadMessage(error);
+  if (error?.name === 'SyntaxError') {
+    return APP_ERROR_MESSAGES.requestInvalidResponse;
+  }
   if (!error) {
     return APP_ERROR_MESSAGES.serviceUnavailable;
   }
@@ -350,11 +347,157 @@ function getFriendlyRequestError(error) {
   if (error.name === 'TypeError') {
     return APP_ERROR_MESSAGES.serviceUnavailable;
   }
-  return error.message || APP_ERROR_MESSAGES.requestInvalidResponse;
+  const message = normalizeDisplayValue(error.message || '');
+  if (!message) {
+    return APP_ERROR_MESSAGES.requestInvalidResponse;
+  }
+  if (!payloadMessage || message.includes(payloadMessage)) {
+    return message;
+  }
+  return `${message}（${payloadMessage}）`;
 }
 
 function getFriendlyLoadErrorMessage(error) {
   return getFriendlyRequestError(error);
+}
+
+function logRuntimeError(context, error) {
+  const contextText = normalizeDisplayValue(context) || '运行时';
+  const message = getFriendlyRequestError(error);
+  if (!message || !runtimeErrorPanelEl || !runtimeErrorListEl) {
+    return message;
+  }
+
+  const statusText = typeof error?.status === 'number'
+    ? `HTTP ${error.status}`
+    : (typeof error?.status === 'string' && error.status.trim() ? error.status : '');
+  const payloadMessage = extractRequestErrorPayloadMessage(error);
+  const details = [];
+  if (statusText) {
+    details.push(statusText);
+  }
+  if (error?.statusText) {
+    details.push(error.statusText);
+  }
+  if (payloadMessage) {
+    details.push(payloadMessage);
+  }
+  if (error?.message && !String(error.message).includes(message)) {
+    details.push(error.message);
+  }
+
+  const fingerprint = `${contextText}||${message}`;
+  const existingIndex = runtimeErrorLog.findIndex((item) => item.fingerprint === fingerprint);
+  const now = new Date().toISOString();
+
+  if (existingIndex >= 0) {
+    const existing = runtimeErrorLog.splice(existingIndex, 1)[0];
+    runtimeErrorLog.unshift({
+      ...existing,
+      count: (existing.count || 1) + 1,
+      lastAt: now,
+      details: details.join('；') || existing.details,
+    });
+  } else {
+    runtimeErrorLog.unshift({
+      context: contextText,
+      message,
+      details: details.join('；'),
+      count: 1,
+      at: now,
+      lastAt: now,
+      fingerprint,
+    });
+    if (runtimeErrorLog.length > RUNTIME_ERROR_PANEL_LIMIT) {
+      runtimeErrorLog = runtimeErrorLog.slice(0, RUNTIME_ERROR_PANEL_LIMIT);
+    }
+  }
+
+  renderRuntimeErrorPanel();
+  return message;
+}
+
+function renderRuntimeErrorPanel() {
+  if (!runtimeErrorPanelEl || !runtimeErrorListEl) {
+    return;
+  }
+  if (!runtimeErrorLog.length) {
+    runtimeErrorPanelEl.hidden = true;
+    runtimeErrorPanelEl.classList.add('is-hidden');
+    runtimeErrorListEl.textContent = '';
+    if (runtimeErrorClearBtnEl) {
+      runtimeErrorClearBtnEl.disabled = true;
+    }
+    return;
+  }
+
+  runtimeErrorPanelEl.hidden = false;
+  runtimeErrorPanelEl.classList.remove('is-hidden');
+  if (runtimeErrorClearBtnEl) {
+    runtimeErrorClearBtnEl.disabled = false;
+  }
+
+  runtimeErrorListEl.innerHTML = '';
+  const fragment = document.createDocumentFragment();
+
+  for (const item of runtimeErrorLog) {
+    const node = document.createElement('div');
+    const summary = document.createElement('div');
+    const context = document.createElement('div');
+    const detail = document.createElement('div');
+    const countText = item.count > 1 ? `（x${item.count}）` : '';
+    const timeText = item.lastAt ? ` · ${item.lastAt.replace('T', ' ').replace(/\..*$/, '')}` : '';
+
+    node.className = 'runtime-error-item';
+    summary.className = 'runtime-error-item-summary';
+    summary.textContent = `${item.context}: ${item.message}${countText}${timeText}`;
+    context.className = 'runtime-error-item-context';
+    context.textContent = item.context;
+    detail.className = 'runtime-error-item-detail';
+    detail.textContent = item.details || '';
+
+    node.appendChild(context);
+    node.appendChild(summary);
+    node.appendChild(detail);
+    fragment.appendChild(node);
+  }
+
+  runtimeErrorListEl.appendChild(fragment);
+}
+
+function clearRuntimeErrors() {
+  runtimeErrorLog = [];
+  renderRuntimeErrorPanel();
+}
+
+function logRuntimeErrorOrMessage(context, error) {
+  return error ? logRuntimeError(context, error) : '';
+}
+
+function extractRequestErrorPayloadMessage(error) {
+  const payload = error?.payload;
+  if (!payload || typeof payload !== 'object') {
+    return '';
+  }
+  if (typeof payload?.error === 'string' && payload.error.trim()) {
+    return payload.error.trim();
+  }
+  if (typeof payload?.message === 'string' && payload.message.trim()) {
+    return payload.message.trim();
+  }
+  if (typeof payload?.msg === 'string' && payload.msg.trim()) {
+    return payload.msg.trim();
+  }
+  if (Array.isArray(payload.errors) && payload.errors.length > 0) {
+    const firstError = payload.errors[0];
+    if (typeof firstError === 'string' && firstError.trim()) {
+      return firstError.trim();
+    }
+    if (firstError && typeof firstError === 'object' && typeof firstError?.message === 'string' && firstError.message.trim()) {
+      return firstError.message.trim();
+    }
+  }
+  return '';
 }
 
 
@@ -757,37 +900,12 @@ function setMode(requestedMode, options = {}) {
 }
 
 async function detectEditBackend() {
-  state.editBackendAvailable = false;
-
-  const checkHealthApi = async (url) => {
-    const { payload } = await fetchJsonApiRequest(
-      url,
-      { cache: 'no-store' },
-      CAPABILITIES_REQUEST_TIMEOUT_MS,
-      '检测编辑能力',
-    );
-    return payload;
-  };
-
-  try {
-    const payload = await checkHealthApi(DOC_CAPABILITIES_URL);
-    if (typeof payload === 'object' && payload !== null) {
-      const direct = Boolean(payload?.capabilities?.edit);
-      const legacy = payload?.editMode === 'edit';
-      const modeFlag = direct || legacy;
-      state.editBackendAvailable = Boolean(modeFlag || payload?.ok);
-      return;
-    }
-  } catch {
-    try {
-      const payload = await checkHealthApi(DOC_HEALTH_URL);
-      if (typeof payload === 'object' && payload !== null) {
-        state.editBackendAvailable = Boolean(payload?.ok || payload?.alive || payload !== null);
-      }
-    } catch {
-      state.editBackendAvailable = false;
-    }
-  }
+  state.editBackendAvailable = await detectEditBackendAvailability({
+    capabilitiesUrl: DOC_CAPABILITIES_URL,
+    healthUrl: DOC_HEALTH_URL,
+    requestTimeoutMs: CAPABILITIES_REQUEST_TIMEOUT_MS,
+    requestLabel: '检测编辑能力',
+  });
 }
 
 function resolveInitialMode() {
@@ -1032,30 +1150,16 @@ async function loadCreateTypeTemplate(type = '') {
   }
 
   try {
-    const response = await fetchWithTimeout(
+    const content = await loadTemplateContent({
       templatePath,
-      {},
-      DATA_INDEX_REQUEST_TIMEOUT_MS,
-      '模板加载',
-    );
-    if (!response.ok) {
-      const contentTypePayload = await safeParseJsonResponse(response);
-      createTemplateLoadErrorCache.set(templatePath, getFriendlyRequestError(makeRequestError(response, contentTypePayload, '模板加载')));
-      createTemplateCache.set(templatePath, '');
-      return '';
-    }
-    const contentType = response.headers.get('content-type') || '';
-    if (/text\/html/i.test(contentType)) {
-      createTemplateLoadErrorCache.set(templatePath, '模板内容不合法（返回了 HTML）');
-      createTemplateCache.set(templatePath, '');
-      return '';
-    }
-    const content = await response.text();
+      requestTimeoutMs: DATA_INDEX_REQUEST_TIMEOUT_MS,
+      requestLabel: '模板加载',
+    });
     createTemplateCache.set(templatePath, content);
     createTemplateLoadErrorCache.delete(templatePath);
     return content;
   } catch (error) {
-    createTemplateLoadErrorCache.set(templatePath, getFriendlyRequestError(error));
+    createTemplateLoadErrorCache.set(templatePath, logRuntimeErrorOrMessage('模板加载', error));
     createTemplateCache.set(templatePath, '');
     return '';
   }
@@ -2441,12 +2545,12 @@ async function fetchEditableSource(pathValue) {
     return { error: APP_ERROR_MESSAGES.noEditablePath };
   }
   try {
-    const { payload } = await fetchJsonApiRequest(
-      `${DOC_API_URL}?path=${encodeURIComponent(pathValue)}`,
-      {},
-      DATA_INDEX_REQUEST_TIMEOUT_MS,
-      '读取源码',
-    );
+    const payload = await readDocSource({
+      docApiUrl: DOC_API_URL,
+      pathValue,
+      requestTimeoutMs: DATA_INDEX_REQUEST_TIMEOUT_MS,
+      requestLabel: '读取源码',
+    });
     if (typeof payload?.content !== 'string') {
       return { error: APP_ERROR_MESSAGES.requestInvalidResponse };
     }
@@ -2456,7 +2560,7 @@ async function fetchEditableSource(pathValue) {
       version: normalizeEditSessionVersion(payload?.version),
     };
   } catch (error) {
-    return { error: getFriendlyRequestError(error) };
+    return { error: logRuntimeErrorOrMessage('读取源码', error) };
   }
 }
 
@@ -2555,22 +2659,14 @@ async function saveNewDoc() {
   }
 
   try {
-    const { payload } = await fetchJsonApiRequest(
-      DOC_API_URL,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          [API_REQUEST_KEYS.path]: sourcePath,
-          [API_REQUEST_KEYS.content]: content,
-          [API_REQUEST_KEYS.create]: true,
-        }),
-      },
-      DATA_INDEX_REQUEST_TIMEOUT_MS,
-      '创建',
-    );
+    const payload = await writeDoc({
+      docApiUrl: DOC_API_URL,
+      pathValue: sourcePath,
+      content,
+      isCreate: true,
+      requestTimeoutMs: DATA_INDEX_REQUEST_TIMEOUT_MS,
+      requestLabel: '创建',
+    });
 
     const createdSource = sourcePath;
     const createdVersion = normalizeEditSessionVersion(payload?.version);
@@ -2594,7 +2690,8 @@ async function saveNewDoc() {
       preferredSourcePath: createdSource,
     });
   } catch (error) {
-    setEditorStatus(`新建失败：${getFriendlyRequestError(error)}`);
+    const message = logRuntimeErrorOrMessage('新建文档', error) || getFriendlyRequestError(error);
+    setEditorStatus(`新建失败：${message}`);
     if (editSaveBtnEl) {
       editSaveBtnEl.disabled = false;
     }
@@ -2643,23 +2740,15 @@ async function saveExistingDoc(options = {}) {
     if (!expectedVersion) {
       throw new Error('未获取到当前文件的编辑锁版本，请刷新后重试');
     }
-    const { payload } = await fetchJsonApiRequest(
-      DOC_API_URL,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          [API_REQUEST_KEYS.path]: sourcePath,
-          [API_REQUEST_KEYS.content]: content,
-          [API_REQUEST_KEYS.expectedVersion]: expectedVersion,
-          [API_REQUEST_KEYS.force]: forceOverwrite,
-        }),
-      },
-      DATA_INDEX_REQUEST_TIMEOUT_MS,
-      '保存',
-    );
+    const payload = await writeDoc({
+      docApiUrl: DOC_API_URL,
+      pathValue: sourcePath,
+      content,
+      expectedVersion,
+      force: forceOverwrite,
+      requestTimeoutMs: DATA_INDEX_REQUEST_TIMEOUT_MS,
+      requestLabel: '保存',
+    });
 
     if (payload?.currentVersion) {
       const latestVersion = normalizeEditSessionVersion(payload.currentVersion);
@@ -2722,9 +2811,10 @@ async function saveExistingDoc(options = {}) {
         return;
       }
     }
+    const requestMessage = getFriendlyRequestError(error);
     const message = error?.status === 409
-      ? `${APP_ERROR_MESSAGES.saveConflict}：${getFriendlyRequestError(error)}`
-      : `保存失败：${getFriendlyRequestError(error)}`;
+      ? `${APP_ERROR_MESSAGES.saveConflict}：${requestMessage}`
+      : `保存失败：${logRuntimeErrorOrMessage('保存文档', error) || requestMessage}`;
     setEditorStatus(message);
     if (editSaveBtnEl) {
       editSaveBtnEl.disabled = false;
@@ -2760,20 +2850,12 @@ async function rebuildIndexForDoc(doc, options = {}) {
   startRebuildProgressIndicator();
 
   try {
-    await fetchJsonApiRequest(
-      DOC_REBUILD_URL,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          [API_REQUEST_KEYS.source]: rebuildFilter,
-        }),
-      },
-      DATA_INDEX_REQUEST_TIMEOUT_MS,
-      '重建索引',
-    );
+    await rebuildDocIndex({
+      rebuildUrl: DOC_REBUILD_URL,
+      sourceFilter: rebuildFilter,
+      requestTimeoutMs: DATA_INDEX_REQUEST_TIMEOUT_MS,
+      requestLabel: '重建索引',
+    });
 
     await loadData(preferredPath, {
       preferredSourcePath: options.preferredSourcePath || '',
@@ -2793,7 +2875,8 @@ async function rebuildIndexForDoc(doc, options = {}) {
     const elapsed = formatElapsedSeconds(rebuildProgressStart);
     setEditorStatus(`${APP_ERROR_MESSAGES.rebuildSuccess}（耗时 ${elapsed}）`);
   } catch (error) {
-    setEditorStatus(`重建失败：${getFriendlyRequestError(error)}`);
+    const message = logRuntimeErrorOrMessage('重建索引', error) || getFriendlyRequestError(error);
+    setEditorStatus(`重建失败：${message}`);
   } finally {
     stopRebuildProgressIndicator();
     state.isRebuilding = false;
@@ -3139,12 +3222,13 @@ function renderContent(doc) {
     renderedContentDocPath = contentPath;
     renderedContentSignature = contentSignature;
   } catch (error) {
+    const message = logRuntimeErrorOrMessage('内容渲染', error) || getFriendlyRequestError(error);
     contentEl.classList.remove('is-empty');
     contentEl.style.display = '';
-    contentEl.textContent = `文档内容渲染失败：${getFriendlyRequestError(error)}`;
+    contentEl.textContent = `文档内容渲染失败：${message}`;
     renderedContentDocPath = '';
     renderedContentSignature = '';
-    setEditorStatus(`渲染失败：${getFriendlyRequestError(error)}`);
+    setEditorStatus(`渲染失败：${message}`);
   }
 }
 
@@ -3152,20 +3236,146 @@ function renderContent(doc) {
 function renderList(groups) {
   const currentRenderId = ++listRenderToken;
   resetDocListButtonCache();
+  if (listRenderFrameId) {
+    cancelAnimationFrame(listRenderFrameId);
+    listRenderFrameId = 0;
+  }
+  if (!listEl) {
+    listRenderFrameId = 0;
+    return {
+      errorCount: 0,
+      errorSummary: '',
+    };
+  }
+  clearListSkeletonState();
   listEl.innerHTML = '';
+  const renderedErrorOccurrence = new Map();
+  const errorCountsByContext = new Map();
+  let listRenderErrorCount = 0;
+
+  const countListError = (context) => {
+    const contextKey = normalizeDisplayValue(context) || '未知条目';
+    const contextStat = errorCountsByContext.get(contextKey) || 0;
+    errorCountsByContext.set(contextKey, contextStat + 1);
+    listRenderErrorCount += 1;
+  };
 
   if (!(groups instanceof Map) || !groups.size) {
     const msg = lastSearchQuery ? '未匹配到文档' : '当前标签暂无文档';
     listEl.innerHTML = `<div class="doc-group">${msg}</div>`;
     markActiveItem();
-    return;
+    return {
+      errorCount: 0,
+      errorSummary: '',
+    };
   }
 
   const renderNodeError = (context = '列表项', error) => {
+    logRuntimeErrorOrMessage(`文档列表项：${context}`, error);
+    const createRetryButton = () => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'doc-btn-small doc-item-retry-btn';
+      button.textContent = '重试加载';
+      button.title = '重新加载文档索引并刷新列表';
+      button.setAttribute('aria-label', button.title);
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setStatusText('正在重试加载文档索引…');
+        void loadData(state.activePath, {
+          isRetryAttempt: true,
+          forceCacheBust: true,
+        });
+      });
+      return button;
+    };
+
     const node = document.createElement('div');
+    const message = document.createElement('div');
+    const retryBtn = createRetryButton();
+    const details = document.createElement('details');
+    const detailsSummary = document.createElement('summary');
+    const detailsBody = document.createElement('pre');
+    const detailsText = [];
+    const requestErrorText = getFriendlyRequestError(error);
+    const statusText = typeof error?.status === 'number'
+      ? error.status
+      : (typeof error?.status === 'string' && error.status.trim() ? error.status : '');
+    const errorFingerprint = `${statusText || ''}||${error?.statusText || ''}||${requestErrorText}`;
+    countListError(context);
+    const errorOccurrence = renderedErrorOccurrence.get(errorFingerprint);
+
+    if (errorOccurrence) {
+      errorOccurrence.count += 1;
+      if (errorOccurrence.messageEl) {
+        errorOccurrence.messageEl.textContent = `重复错误省略（已出现${errorOccurrence.count}次）`;
+      }
+      return null;
+    }
+
+    renderedErrorOccurrence.set(errorFingerprint, { count: 1, node: null, messageEl: message });
+
     node.className = 'doc-item doc-item-error';
-    node.textContent = `${context}加载失败：${getFriendlyRequestError(error)}`;
+    message.className = 'doc-item-error-message';
+    message.textContent = `${context}加载失败：${requestErrorText}`;
+
+    details.className = 'doc-item-error-details';
+    detailsSummary.className = 'doc-item-error-summary';
+    detailsSummary.textContent = '最近一次错误码/状态（展开）';
+    details.appendChild(detailsSummary);
+
+    if (statusText) {
+      detailsText.push(`错误码：${statusText}`);
+    }
+    if (error?.statusText) {
+      detailsText.push(`状态：${error.statusText}`);
+    }
+    if (error?.message && error.message !== requestErrorText) {
+      detailsText.push(`原始信息：${error.message}`);
+    }
+    if (Array.isArray(error?.errors) && error.errors.length > 0) {
+      const firstError = error.errors[0];
+      if (typeof firstError === 'string' && firstError) {
+        detailsText.push(`错误详情：${firstError}`);
+      } else if (firstError && typeof firstError.message === 'string' && firstError.message) {
+        detailsText.push(`错误详情：${firstError.message}`);
+      }
+    } else if (error?.payload?.error) {
+      detailsText.push(`错误详情：${error.payload.error}`);
+    } else if (typeof error?.payload === 'string' && error.payload) {
+      detailsText.push(`错误详情：${error.payload}`);
+    }
+    if (!detailsText.length) {
+      detailsText.push(`错误描述：${requestErrorText}`);
+    }
+    detailsBody.className = 'doc-item-error-body';
+    detailsBody.textContent = detailsText.join('\n');
+    details.appendChild(detailsBody);
+
+    node.appendChild(message);
+    node.appendChild(retryBtn);
+    node.appendChild(details);
+    renderedErrorOccurrence.set(errorFingerprint, {
+      count: 1,
+      node,
+      messageEl: message,
+    });
     return node;
+  };
+
+  const appendListNode = (nodes, context, error) => {
+    const node = renderNodeError(context, error);
+    if (node) {
+      nodes.push(node);
+    }
+  };
+
+  const appendNode = (parentNode, context, error) => {
+    const node = renderNodeError(context, error);
+    if (node) {
+      parentNode.appendChild(node);
+    }
   };
 
   const categoryNames = [...groups.keys()].sort((a, b) => {
@@ -3185,7 +3395,11 @@ function renderList(groups) {
     for (const categoryName of categoryNames) {
       const categoryMap = groups.get(categoryName);
       if (!(categoryMap instanceof Map)) {
-        categoryNodes.push(renderNodeError(`分类 ${CATEGORY_LABELS[categoryName] || categoryName}`, new Error('分类数据异常')));
+        appendListNode(
+          categoryNodes,
+          `分类 ${CATEGORY_LABELS[categoryName] || categoryName}`,
+          new Error('分类数据异常'),
+        );
         continue;
       }
 
@@ -3196,7 +3410,7 @@ function renderList(groups) {
       for (const groupName of groupNames) {
         const docsInGroup = categoryMap.get(groupName);
         if (!Array.isArray(docsInGroup)) {
-          categoryNode.appendChild(renderNodeError(`分组 ${groupName}`, new Error('分组数据异常')));
+          appendNode(categoryNode, `分组 ${groupName}`, new Error('分组数据异常'));
           continue;
         }
 
@@ -3209,7 +3423,7 @@ function renderList(groups) {
             });
             groupNode.appendChild(button);
           } catch (error) {
-            groupNode.appendChild(renderNodeError(doc?.name || doc?.path || '未知条目', error));
+            appendNode(groupNode, doc?.name || doc?.path || '未知条目', error);
           }
         }
         categoryNode.appendChild(groupNode);
@@ -3218,19 +3432,48 @@ function renderList(groups) {
       categoryNodes.push(categoryNode);
     }
   } catch (error) {
+    logRuntimeErrorOrMessage('文档列表渲染', error);
     setStatusText(`文档列表渲染失败：${getFriendlyRequestError(error)}`);
     listEl.textContent = `文档列表渲染失败：${getFriendlyRequestError(error)}`;
     markActiveItem();
-    return;
+    listRenderFrameId = 0;
+    return {
+      errorCount: listRenderErrorCount,
+      errorSummary: formatListRenderErrorSummary(listRenderErrorCount, errorCountsByContext),
+    };
+  }
+
+  const listErrorSummaryNode = createListErrorSummaryNode(
+    listRenderErrorCount,
+    errorCountsByContext,
+  );
+  if (listErrorSummaryNode) {
+    categoryNodes.unshift(listErrorSummaryNode);
+  }
+
+  if (categoryNodes.length <= LIST_RENDER_BATCH_SIZE) {
+    const fragment = document.createDocumentFragment();
+    for (const node of categoryNodes) {
+      fragment.appendChild(node);
+    }
+    listEl.appendChild(fragment);
+    markActiveItem();
+    listRenderFrameId = 0;
+    return {
+      errorCount: listRenderErrorCount,
+      errorSummary: formatListRenderErrorSummary(listRenderErrorCount, errorCountsByContext),
+    };
   }
 
   let cursor = 0;
   const flushNodes = () => {
     if (currentRenderId !== listRenderToken) {
+      listRenderFrameId = 0;
       return;
     }
     if (cursor >= categoryNodes.length) {
       markActiveItem();
+      listRenderFrameId = 0;
       return;
     }
 
@@ -3242,15 +3485,22 @@ function renderList(groups) {
       }
       cursor = end;
       listEl.appendChild(fragment);
-      requestAnimationFrame(flushNodes);
+      listRenderFrameId = requestAnimationFrame(flushNodes);
     } catch (error) {
+      logRuntimeErrorOrMessage('文档列表渲染', error);
       setStatusText(`文档列表渲染失败：${getFriendlyRequestError(error)}`);
       listEl.textContent = `文档列表渲染失败：${getFriendlyRequestError(error)}`;
       markActiveItem();
+      listRenderFrameId = 0;
+      return;
     }
   };
 
-  requestAnimationFrame(flushNodes);
+  listRenderFrameId = requestAnimationFrame(flushNodes);
+  return {
+    errorCount: listRenderErrorCount,
+    errorSummary: formatListRenderErrorSummary(listRenderErrorCount, errorCountsByContext),
+  };
 }
 
 function renderTabsNow() {
@@ -3294,8 +3544,10 @@ function renderFilteredDocs(preferredPath = '', options = {}) {
   if (shouldRenderStats) {
     updateLeftPanelStatsFromGroups(groups, filtered.length);
   }
+  let listRenderInfo = null;
   if (shouldRenderList) {
-    renderList(groups);
+    setListSkeletonState(`正在渲染文档列表…`);
+    listRenderInfo = renderList(groups);
   } else if (state.activePath && state.activePath !== (renderedDocRef && renderedDocRef.path)) {
     // Keep active marker aligned when active path changes but list structure unchanged.
     markActiveItem();
@@ -3318,7 +3570,8 @@ function renderFilteredDocs(preferredPath = '', options = {}) {
 
   const displayText = `当前显示 ${filtered.length} 个文档（共 ${state.docs.length} 个）`;
   const tabText = searchQuery ? '（已按关键词筛选）' : '';
-  setStatusText(`${displayText} ${tabText} ${state.generatedStatus}`);
+  const listErrorSummary = listRenderInfo && listRenderInfo.errorSummary ? listRenderInfo.errorSummary : '';
+  setStatusText(`${displayText} ${tabText} ${state.generatedStatus}${listErrorSummary ? ` ${listErrorSummary}` : ''}`);
 
   const filteredPathSet = new Set(filtered.map((doc) => doc.path));
   let desiredPath = preferredPath;
@@ -3397,7 +3650,8 @@ function selectDoc(pathValue) {
         })
         .catch((error) => {
           if (state.activePath === doc.path) {
-            setEditorStatus(`读取源码失败：${getFriendlyRequestError(error)}`);
+            const message = logRuntimeErrorOrMessage('读取源码', error) || getFriendlyRequestError(error);
+            setEditorStatus(`读取源码失败：${message}`);
           }
         });
     }
@@ -3416,11 +3670,12 @@ function selectDoc(pathValue) {
     renderedDocRef = doc;
     renderedDocSignature = targetSignature;
   } catch (error) {
-    setEditorStatus(`渲染失败：${getFriendlyRequestError(error)}`);
+    const message = logRuntimeErrorOrMessage('文档切换渲染', error) || getFriendlyRequestError(error);
+    setEditorStatus(`渲染失败：${message}`);
     if (contentEl) {
       contentEl.classList.remove('is-empty');
       contentEl.style.display = '';
-      contentEl.textContent = `文档渲染失败：${getFriendlyRequestError(error)}`;
+      contentEl.textContent = `文档渲染失败：${message}`;
     }
   }
 }
@@ -3540,38 +3795,22 @@ async function loadData(preferredPath = '', options = {}) {
 
   try {
     setLoadingState('正在加载文档索引…', '加载文档列表…');
+    setListSkeletonState('正在加载文档索引…');
     hideLoadRetry();
     const indexUrls = getDataIndexUrlCandidates();
-    let payload = null;
-    let lastError = null;
-
-    for (const candidateUrl of indexUrls) {
-      if (currentLoadToken !== dataLoadToken) {
-        return;
-      }
-      try {
-        const response = await fetchJsonApiRequest(
-          withCacheBust(candidateUrl, forceCacheBust),
-          { cache: 'no-store' },
-          DATA_INDEX_REQUEST_TIMEOUT_MS,
-          '加载文档索引',
-          true,
-        );
-        payload = response.payload;
-        break;
-      } catch (error) {
-        lastError = error;
-        if (error?.status === 404 || error?.status === 403) {
-          continue;
-        }
-      }
-    }
+    const { payload, lastError } = await loadDocIndexPayload({
+      indexUrlCandidates: indexUrls,
+      forceCacheBust,
+      requestTimeoutMs: DATA_INDEX_REQUEST_TIMEOUT_MS,
+      requestLabel: '加载文档索引',
+    });
 
     if (!payload) {
       throw lastError || new Error('未成功获取文档索引');
     }
 
     if (currentLoadToken !== dataLoadToken) {
+      clearListSkeletonState();
       return;
     }
 
@@ -3582,6 +3821,7 @@ async function loadData(preferredPath = '', options = {}) {
     state.docs = state.docs.map((doc) => normalizeDocFromIndex(doc)).filter(Boolean);
     hideLoadRetry();
     if (currentLoadToken !== dataLoadToken) {
+      clearListSkeletonState();
       return;
     }
 
@@ -3611,6 +3851,7 @@ async function loadData(preferredPath = '', options = {}) {
     updateSearchClearState();
   } catch (error) {
     if (currentLoadToken !== dataLoadToken) {
+      clearListSkeletonState();
       return;
     }
     showLoadRetry(
@@ -3618,6 +3859,7 @@ async function loadData(preferredPath = '', options = {}) {
       `文档列表加载失败：${getFriendlyLoadErrorMessage(error)}。请确认服务运行正常并重试。`,
       isRetryAttempt && forceCacheBust ? 'force' : (isRetryAttempt ? 'force' : 'normal'),
     );
+    logRuntimeErrorOrMessage('加载文档索引', error);
   }
 }
 
@@ -3659,6 +3901,12 @@ async function initApp() {
   if (loadRetryBtnEl) {
     loadRetryBtnEl.addEventListener('click', () => {
       void retryLoadData();
+    });
+  }
+
+  if (runtimeErrorClearBtnEl) {
+    runtimeErrorClearBtnEl.addEventListener('click', () => {
+      clearRuntimeErrors();
     });
   }
 
@@ -3851,6 +4099,15 @@ async function initApp() {
   }
 
   if (typeof window !== 'undefined') {
+    window.addEventListener('error', (event) => {
+      const error = event.error || event.message || event.type;
+      logRuntimeErrorOrMessage('前端全局错误', error);
+    });
+
+    window.addEventListener('unhandledrejection', (event) => {
+      logRuntimeErrorOrMessage('未处理的Promise错误', event?.reason);
+    });
+
     window.addEventListener('keydown', (event) => {
       if (!saveConflictDialogEl || saveConflictDialogEl.classList.contains('is-hidden')) {
         return;
@@ -3893,7 +4150,8 @@ async function initApp() {
     setMode(resolveInitialMode());
     await loadData();
   } catch (error) {
-    setStatusText(`初始化失败：${getFriendlyRequestError(error)}`);
+    const message = logRuntimeErrorOrMessage('初始化', error) || getFriendlyRequestError(error);
+    setStatusText(`初始化失败：${message}`);
     setListText('初始化失败，请刷新页面后重试。');
     if (modeStateEl) {
       modeStateEl.textContent = '初始化失败';

@@ -44,6 +44,13 @@
                 <div id="status" class="status">正在加载文档索引...</div>
                 <button id="docLoadRetryBtn" type="button" class="doc-btn doc-btn-ghost doc-btn-small is-hidden" hidden>重试加载</button>
               </div>
+              <div id="runtimeErrorPanel" class="runtime-error-panel is-hidden" hidden>
+                <div class="runtime-error-panel-head">
+                  <span>最近错误</span>
+                  <button id="runtimeErrorClearBtn" type="button" class="doc-btn doc-btn-ghost doc-btn-small" aria-label="清空错误记录">清空</button>
+                </div>
+                <div id="runtimeErrorList" class="runtime-error-list"></div>
+              </div>
             </div>
             <div class="left-stats" aria-label="列表统计">
               <article class="left-stat-card">
