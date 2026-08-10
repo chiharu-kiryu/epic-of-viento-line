@@ -14,6 +14,7 @@ import { rebuildIndex } from './rebuild-workflow.mjs';
 import {
   makeCapabilitiesPayload,
   API_ERRORS,
+  API_RESPONSE_DEFAULTS,
   normalizeRebuildRequest,
   normalizeDocWriteRequest,
   normalizeRequestId,
@@ -219,8 +220,8 @@ function createDocumentService(options = {}) {
       throw createError(409, API_ERRORS.alreadyExists, {}, API_ERRORS.alreadyExists);
     }
     if (!createMode && !expectedVersion && !forceOverwrite) {
-      throw createError(409, API_ERRORS.missingExpectedVersion, {}, API_ERRORS.missingExpectedVersion);
-    }
+        throw createError(409, API_ERRORS.missingExpectedVersion, {}, API_ERRORS.missingExpectedVersion);
+      }
 
     if (!createMode && expectedVersion && !forceOverwrite) {
       try {
@@ -239,7 +240,7 @@ function createDocumentService(options = {}) {
         if (error?.code === 'ENOENT') {
           throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
         }
-        throw createError(500, error?.message || 'failed to check version');
+        throw createError(500, 'failed to check version', {}, API_RESPONSE_DEFAULTS.internalErrorPrefix);
       }
     }
 
@@ -255,7 +256,7 @@ function createDocumentService(options = {}) {
         version: String(stats.mtimeMs),
       };
     } catch (error) {
-      throw createError(500, error?.message || 'failed to save');
+      throw createError(500, 'failed to save', {}, API_RESPONSE_DEFAULTS.internalErrorPrefix);
     }
   }
 

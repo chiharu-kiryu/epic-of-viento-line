@@ -5,7 +5,10 @@ import { collectHeroImages } from './image-index.mjs';
 import { collectFilesRecursive } from './scan-files.mjs';
 import { inferCategory } from './category.mjs';
 import { PROJECT_ROOT, DOC_ROOT, WEB_ROOT, trimName, toPosix } from './paths.mjs';
-import { API_RESPONSE } from './doc-api-contract.mjs';
+import {
+  API_RESPONSE,
+  API_RESPONSE_DEFAULTS,
+} from './doc-api-contract.mjs';
 
 const EDIT_ROOT_PREFIXES = ['design-data/', 'docs-standard/design-data/'];
 
@@ -21,6 +24,25 @@ const MIME_TYPES = new Map([
   ['.jpeg', 'image/jpeg'],
   ['.webp', 'image/webp'],
 ]);
+
+const PROJECT_ROOT_REAL = path.resolve(PROJECT_ROOT);
+
+function normalizeNumericConfigValue(name, fallback, min = 0) {
+  const raw = process.env[name];
+  if (!raw) {
+    return fallback;
+  }
+
+  const parsed = Number(raw);
+  if (!Number.isInteger(parsed) || parsed <= min) {
+    return fallback;
+  }
+
+  return parsed;
+}
+
+const DEFAULT_MAX_JSON_BODY_BYTES = 1024 * 1024;
+const MAX_JSON_BODY_BYTES = normalizeNumericConfigValue('DOC_API_MAX_BODY_BYTES', DEFAULT_MAX_JSON_BODY_BYTES);
 
 function resolvePort(argv = process.argv.slice(2)) {
   const envPort = process.env.PORT;
@@ -165,23 +187,89 @@ async function resolveEditableFilePath(relativePath, options = {}) {
 
 async function readRequestJsonBody(request) {
   return await new Promise((resolve, reject) => {
-    let body = '';
-    request.on('data', (chunk) => {
-      body += chunk;
-    });
-    request.on('end', () => {
+    const bodyChunks = [];
+    let bodyBytes = 0;
+    let finished = false;
+
+    const finishError = (error) => {
+      if (finished) {
+        return;
+      }
+      finished = true;
+      reject(error);
+    };
+
+    const onError = (error) => finishError(error || new Error('request stream error'));
+
+    const onData = (chunk) => {
+      if (finished) {
+        return;
+      }
+
+      bodyBytes += chunk.length;
+      if (bodyBytes > MAX_JSON_BODY_BYTES) {
+        const error = new Error('request body too large');
+        error.statusCode = 413;
+        error.errorCode = API_RESPONSE_DEFAULTS.payloadTooLargeErrorPrefix;
+        error.payload = {
+          receivedBytes: bodyBytes,
+          maxBytes: MAX_JSON_BODY_BYTES,
+        };
+        finishError(error);
+        request.pause();
+        return;
+      }
+
+      bodyChunks.push(chunk);
+    };
+
+    const onEnd = () => {
+      if (finished) {
+        return;
+      }
+
+      const body = Buffer.concat(bodyChunks).toString('utf8');
       if (!body.trim()) {
         resolve({});
         return;
       }
+
       try {
         resolve(JSON.parse(body));
       } catch (error) {
-        reject(error);
+        finishError(error);
       }
-    });
-    request.on('error', reject);
+    };
+
+    request.on('data', onData);
+    request.on('end', onEnd);
+    request.on('error', onError);
   });
+}
+
+function setSecurityHeaders(response = {}) {
+  if (!response || typeof response.setHeader !== 'function') {
+    return;
+  }
+
+  response.setHeader('Content-Security-Policy', [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "script-src 'self'",
+    "style-src 'self'",
+    "img-src 'self' data:",
+    "connect-src 'self'",
+    "font-src 'self'",
+    "object-src 'none'",
+    "media-src 'self'",
+    "frame-ancestors 'none'",
+  ].join('; '));
+  response.setHeader('X-Content-Type-Options', 'nosniff');
+  response.setHeader('Referrer-Policy', 'no-referrer');
+  response.setHeader('X-Frame-Options', 'DENY');
+  response.setHeader('X-Download-Options', 'noopen');
+  response.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  response.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
 }
 
 async function readTextFile(filePath) {
@@ -278,6 +366,7 @@ function getMime(filePath) {
 }
 
 async function sendFile(filePath, response) {
+  setSecurityHeaders(response);
   response.statusCode = 200;
   response.setHeader('Content-Type', getMime(filePath));
   const stream = createReadStream(filePath);
@@ -295,6 +384,7 @@ function normalizeApiPayload(payload) {
 }
 
 function sendApiResponse(response, data, requestId = '') {
+  setSecurityHeaders(response);
   response.statusCode = 200;
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
   const normalizedRequestId = typeof requestId === 'string' ? requestId.trim() : '';
@@ -309,6 +399,7 @@ function sendApiResponse(response, data, requestId = '') {
 }
 
 async function sendApiError(response, statusCode, message, extra = {}, requestId = '') {
+  setSecurityHeaders(response);
   response.statusCode = statusCode;
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
   const normalizedRequestId = typeof requestId === 'string' ? requestId.trim() : '';
@@ -332,12 +423,19 @@ function getWebRootIndexPath() {
 }
 
 function getProjectFilePath(relativePath) {
-  const rel = relativePath.startsWith('/') ? relativePath.slice(1) : relativePath;
-  return path.join(PROJECT_ROOT, rel);
+  const sanitizedPath = typeof relativePath === 'string'
+    ? relativePath.replace(/^\/+/, '')
+    : '';
+  return path.resolve(PROJECT_ROOT_REAL, sanitizedPath);
 }
 
 function isProjectFilePathSafe(candidatePath) {
-  return candidatePath.startsWith(PROJECT_ROOT);
+  const absoluteCandidate = path.resolve(candidatePath);
+  const relativeToProject = path.relative(PROJECT_ROOT_REAL, absoluteCandidate);
+  return relativeToProject === '' || (
+    !relativeToProject.startsWith('..')
+    && !path.isAbsolute(relativeToProject)
+  );
 }
 
 export {

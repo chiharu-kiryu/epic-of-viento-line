@@ -564,20 +564,57 @@ function resolveImageUrl(rawImagePath = '') {
     return '';
   }
 
-  if (
-    /^([a-z][a-z\d+\-.]*:)?\/\//i.test(imagePath)
-    || imagePath.startsWith('data:')
-    || imagePath.startsWith('blob:')
-    || imagePath.startsWith('assets/')
-    || imagePath.startsWith('/')
-  ) {
+  if (imagePath.startsWith('data:image/svg+xml')) {
     return imagePath;
   }
 
+  if (
+    /^([a-z][a-z\d+\-.]*:)?\/\//i.test(imagePath)
+    || imagePath.startsWith('blob:')
+    || imagePath.startsWith('javascript:')
+    || imagePath.startsWith('data:')
+  ) {
+    return '';
+  }
+
+  const safePrefixes = [
+    'assets/',
+    '/assets/',
+    '/web/',
+    'web/',
+    '/data/',
+    'data/',
+    '/data-template/',
+    'data-template/',
+    '/design-data/',
+    'design-data/',
+    '/docs-standard/',
+    'docs-standard/',
+  ];
+
+  const hasSafePrefix = safePrefixes.some((prefix) => imagePath.startsWith(prefix));
+  if (!hasSafePrefix) {
+    return '';
+  }
+
+  const normalizedRelativePath = imagePath.replace(/^\/+/, '');
+  if (normalizedRelativePath.includes('..') || normalizedRelativePath.includes('\\')) {
+    return '';
+  }
+
   try {
-    return new URL(imagePath, ASSET_BASE_URL).href;
+    const resolved = new URL(`./${normalizedRelativePath}`, ASSET_BASE_URL);
+    if (resolved.origin !== location.origin) {
+      return '';
+    }
+
+    if (!hasSafePrefix.some((prefix) => resolved.pathname.startsWith(prefix.startsWith('/') ? prefix : `/${prefix}`))) {
+      return '';
+    }
+
+    return resolved.href;
   } catch {
-    return imagePath;
+    return '';
   }
 }
 

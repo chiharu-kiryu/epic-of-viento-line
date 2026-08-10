@@ -181,6 +181,7 @@ let renderedContentSignature = '';
 const docByPathCache = new Map();
 const docBySourcePathCache = new Map();
 let runtimeErrorLog = [];
+let runtimeErrorCodeFilter = '';
 
 function setStatusText(message = '') {
   const normalized = normalizeDisplayValue(message);
@@ -220,7 +221,7 @@ function normalizeEditBackendState(rawState = {}) {
     source: normalizeDisplayValue(rawState.source || 'unavailable'),
     reason: normalizeDisplayValue(rawState.reason || 'service_unreachable'),
     reasonText: normalizeDisplayValue(rawState.reasonText || ''),
-    status: typeof rawState.status === 'number' ? rawState.status : 0,
+    status: parseStatusCodeAsNumber(rawState.status),
     payload: rawState.payload || null,
     attempts: Array.isArray(rawState.attempts) ? rawState.attempts : [],
   };
@@ -328,13 +329,41 @@ function extractRequestErrorMetadata(error = null) {
 
   const requestId = normalizeDisplayValue(error?.requestId || error?.payload?.[API_RESPONSE.requestId] || '');
   const errorCode = normalizeDisplayValue(error?.code || error?.payload?.[API_RESPONSE.errorCode] || '');
-  const status = typeof error?.status === 'number' ? String(error.status) : '';
+  const status = parseStatusCode(error?.status);
 
   return {
     requestId,
     errorCode,
     status,
   };
+}
+
+function parseStatusCode(status = null) {
+  if (typeof status === 'number') {
+    if (!Number.isFinite(status) || !Number.isInteger(status) || status < 100 || status > 999) {
+      return '';
+    }
+    return String(status);
+  }
+  const normalizedStatus = normalizeDisplayValue(status);
+  if (!normalizedStatus) {
+    return '';
+  }
+  const trimmedStatus = normalizedStatus.trim();
+  if (/^\d+$/.test(trimmedStatus)) {
+    return trimmedStatus;
+  }
+  const matched = trimmedStatus.match(/\b\d{3}\b/);
+  return matched ? matched[0] : '';
+}
+
+function parseStatusCodeAsNumber(status = null) {
+  const normalized = parseStatusCode(status);
+  if (!normalized) {
+    return 0;
+  }
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function formatRuntimeErrorTimestamp(timestamp = '') {
@@ -345,10 +374,10 @@ function formatRuntimeErrorTimestamp(timestamp = '') {
   return normalized.replace('T', ' ').replace(/\..*$/, '');
 }
 
-function getRuntimeErrorFingerprint(contextText, message, errorCode) {
+function getRuntimeErrorFingerprint(contextText, message, errorCode, statusText) {
   return errorCode
     ? `errorCode:${errorCode}`
-    : `${contextText}||${message}`;
+    : `${contextText}||${message}||${statusText || ''}`;
 }
 
 function mergeRuntimeErrorContexts(newContextText, existing = {}) {
@@ -402,7 +431,37 @@ function getRuntimeErrorDisplayCode(item = {}) {
   return '未标记';
 }
 
-function buildRuntimeErrorCodeSummary(runtimeErrors = []) {
+function createRuntimeErrorCodeFilterButton(code = '', label = '') {
+  const normalizedCode = normalizeDisplayValue(code);
+  const normalizedLabel = normalizeDisplayValue(label) || (normalizedCode ? `错误码：${normalizedCode}` : '');
+  if (!normalizedCode || !normalizedLabel) {
+    return null;
+  }
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'runtime-error-filter-tag';
+  button.dataset.runtimeErrorFilter = normalizedCode;
+  button.textContent = normalizedLabel;
+  button.title = `按${normalizedLabel}筛选`;
+  return button;
+}
+
+function setRuntimeErrorCodeFilter(code = '') {
+  const nextFilter = normalizeDisplayValue(code);
+  const previousFilter = normalizeDisplayValue(runtimeErrorCodeFilter);
+  if (!nextFilter) {
+    if (!previousFilter) {
+      return;
+    }
+    runtimeErrorCodeFilter = '';
+    renderRuntimeErrorPanel();
+    return;
+  }
+  runtimeErrorCodeFilter = previousFilter === nextFilter ? '' : nextFilter;
+  renderRuntimeErrorPanel();
+}
+
+function buildRuntimeErrorCodeSummary(runtimeErrors = [], currentFilter = '') {
   if (!Array.isArray(runtimeErrors) || !runtimeErrors.length) {
     return null;
   }
@@ -423,6 +482,25 @@ function buildRuntimeErrorCodeSummary(runtimeErrors = []) {
   const summaryTitle = document.createElement('div');
   const summaryBody = document.createElement('div');
   const summaryList = document.createElement('ul');
+  const createCodeButton = (code, count) => {
+    const codeItem = document.createElement('button');
+    const isActive = normalizeDisplayValue(code) === normalizeDisplayValue(currentFilter);
+    codeItem.type = 'button';
+    codeItem.className = `runtime-error-code-summary-item${isActive ? ' is-active' : ''}`;
+    codeItem.textContent = `${code}（${count}）`;
+    codeItem.dataset.runtimeErrorFilter = normalizeDisplayValue(code);
+    codeItem.title = isActive ? '取消筛选' : '按该错误码筛选';
+    return codeItem;
+  };
+  const clearFilterButton = document.createElement('button');
+  const hasFilter = normalizeDisplayValue(currentFilter);
+  if (hasFilter) {
+    clearFilterButton.type = 'button';
+    clearFilterButton.className = 'runtime-error-code-summary-clear';
+    clearFilterButton.textContent = `清除筛选：${hasFilter}`;
+    clearFilterButton.dataset.runtimeErrorFilter = '';
+    clearFilterButton.title = '取消筛选';
+  }
 
   wrapper.className = 'runtime-error-code-summary';
   summaryTitle.className = 'runtime-error-code-summary-title';
@@ -434,12 +512,16 @@ function buildRuntimeErrorCodeSummary(runtimeErrors = []) {
   const renderItems = (entries, targetList = summaryList) => {
     for (const [code, count] of entries) {
       const listItem = document.createElement('li');
-      listItem.textContent = `${code}（${count}）`;
+      const codeButton = createCodeButton(code, count);
+      listItem.appendChild(codeButton);
       targetList.appendChild(listItem);
     }
   };
 
   renderItems(visibleEntries);
+  if (hasFilter) {
+    summaryBody.appendChild(clearFilterButton);
+  }
 
   summaryBody.appendChild(summaryList);
 
@@ -793,7 +875,7 @@ function summarizeRequestAttempts(attempts = [], options = {}) {
         return '';
       }
       const statusText = normalizeDisplayValue(normalizedEntry.statusText || '');
-      const status = typeof normalizedEntry.status === 'number' ? String(normalizedEntry.status) : '';
+      const status = parseStatusCode(normalizedEntry.status);
       const attemptTime = normalizeDisplayValue(normalizedEntry.timestamp || '');
       const suffixParts = [status, statusText, normalizedEntry.message || '', attemptTime]
         .map((item) => normalizeDisplayValue(item))
@@ -842,13 +924,14 @@ function getFriendlyRequestError(error, options = {}) {
   if (error.name === 'TypeError') {
     return APP_ERROR_MESSAGES.serviceUnavailable;
   }
-  if (typeof error?.status === 'number') {
-    const status = error.status;
+  const normalizedStatus = parseStatusCode(error?.status);
+  if (normalizedStatus) {
+    const status = Number(normalizedStatus);
     const withMeta = (text = '') => {
       const normalized = normalizeDisplayValue(text);
       const suffixes = [];
       const requestId = normalizeDisplayValue(error?.requestId || error?.payload?.[API_RESPONSE.requestId] || '');
-      const payloadErrorCode = normalizeDisplayValue(error?.code || error?.payload?.[API_RESPONSE.errorCode] || '');
+      const payloadErrorCode = normalizeDisplayValue(error?.code || error?.payload?.[API_RESPONSE.errorCode] || '').toLowerCase();
       const attemptSummary = summarizeRequestAttempts(error?.attempts, options);
       if (requestId) {
         suffixes.push(`请求ID：${requestId}`);
@@ -864,13 +947,34 @@ function getFriendlyRequestError(error, options = {}) {
     };
 
     if (status === 401) {
-      const details = APP_ERROR_MESSAGES.requestUnauthorizedHint;
-      const baseText = details ? `${APP_ERROR_MESSAGES.requestUnauthorized}，${details}` : APP_ERROR_MESSAGES.requestUnauthorized;
+      const hasAuthRequiredHint = payloadErrorCode === 'auth_required';
+      const details = hasAuthRequiredHint && APP_ERROR_MESSAGES.requestMissingToken
+        ? APP_ERROR_MESSAGES.requestMissingToken
+        : APP_ERROR_MESSAGES.requestUnauthorizedHint;
+      const baseText = details
+        ? `${APP_ERROR_MESSAGES.requestUnauthorized}，${details}`
+        : APP_ERROR_MESSAGES.requestUnauthorized;
       return withMeta(baseText);
     }
     if (status === 403) {
-      const details = APP_ERROR_MESSAGES.requestForbiddenHint;
-      const baseText = details ? `${APP_ERROR_MESSAGES.requestForbidden}，${details}` : APP_ERROR_MESSAGES.requestForbidden;
+      const details = (payloadErrorCode === 'forbidden' && APP_ERROR_MESSAGES.requestInvalidToken)
+        ? APP_ERROR_MESSAGES.requestInvalidToken
+        : APP_ERROR_MESSAGES.requestForbiddenHint;
+      const baseText = details
+        ? `${APP_ERROR_MESSAGES.requestForbidden}，${details}`
+        : APP_ERROR_MESSAGES.requestForbidden;
+      return withMeta(baseText);
+    }
+    if (status === 405) {
+      return withMeta('该接口不支持当前请求方法，请核对调用方式');
+    }
+    if (status === 415) {
+      const details = APP_ERROR_MESSAGES.requestUnsupportedMediaTypeHint
+        ? APP_ERROR_MESSAGES.requestUnsupportedMediaTypeHint()
+        : '';
+      const baseText = details
+        ? `${APP_ERROR_MESSAGES.requestUnsupportedMediaType}，${details}`
+        : APP_ERROR_MESSAGES.requestUnsupportedMediaType;
       return withMeta(baseText);
     }
     if (status === 429) {
@@ -929,10 +1033,10 @@ function logRuntimeError(context, error) {
   }
 
   const requestMetadata = extractRequestErrorMetadata(error);
-
-  const statusText = typeof error?.status === 'number'
-    ? `HTTP ${error.status}`
-    : (typeof error?.status === 'string' && error.status.trim() ? error.status : '');
+  const requestStatusCode = parseStatusCode(error?.status);
+  const statusText = requestStatusCode
+    ? `HTTP ${requestStatusCode}`
+    : (typeof error?.status === 'string' && error?.status.trim() ? normalizeDisplayValue(error?.status) : '');
   const payloadMessage = extractRequestErrorPayloadMessage(error);
   const details = [];
   if (statusText) {
@@ -956,7 +1060,12 @@ function logRuntimeError(context, error) {
     details.push(retrySummary);
   }
 
-  const fingerprint = getRuntimeErrorFingerprint(contextText, message, requestMetadata.errorCode);
+  const fingerprint = getRuntimeErrorFingerprint(
+    contextText,
+    message,
+    requestMetadata.errorCode,
+    requestMetadata.status,
+  );
   const existingIndex = runtimeErrorLog.findIndex((item) => item.fingerprint === fingerprint);
   const now = new Date().toISOString();
   const recentFailures = getRuntimeErrorRecentFailures(
@@ -1022,6 +1131,9 @@ function renderRuntimeErrorPanel() {
     }
     return;
   }
+  const filteredLog = runtimeErrorCodeFilter
+    ? runtimeErrorLog.filter((item) => normalizeDisplayValue(getRuntimeErrorDisplayCode(item)) === normalizeDisplayValue(runtimeErrorCodeFilter))
+    : runtimeErrorLog;
 
   runtimeErrorPanelEl.hidden = false;
   runtimeErrorPanelEl.classList.remove('is-hidden');
@@ -1031,64 +1143,82 @@ function renderRuntimeErrorPanel() {
 
   runtimeErrorListEl.innerHTML = '';
   const fragment = document.createDocumentFragment();
-  const summaryNode = buildRuntimeErrorCodeSummary(runtimeErrorLog);
+  const summaryNode = buildRuntimeErrorCodeSummary(runtimeErrorLog, runtimeErrorCodeFilter);
   if (summaryNode) {
     fragment.appendChild(summaryNode);
   }
 
-  for (const item of runtimeErrorLog) {
-    const sourceContext = Array.isArray(item.contexts) && item.contexts.length ? item.contexts : [item.context];
-    const sourceContextText = sourceContext.join('，') || APP_ERROR_MESSAGES.runtimeContextDefault;
-    const timeWindowText = getRuntimeErrorTimeWindowText(item.at, item.lastAt);
-    const node = document.createElement('div');
-    const summary = document.createElement('div');
-    const context = document.createElement('div');
-    const detail = document.createElement('div');
-    const countText = item.count > 1 ? `（x${item.count}）` : '';
-    const requestMetaParts = [];
-    if (item.requestId) {
-      requestMetaParts.push(`请求ID：${item.requestId}`);
-    }
-    if (item.errorCode) {
-      requestMetaParts.push(`错误码：${item.errorCode}`);
-    } else if (item.status) {
-      requestMetaParts.push(`状态：HTTP ${item.status}`);
-    }
-    const requestMetaText = requestMetaParts.length
-      ? `（${requestMetaParts.join('；')}）`
-      : '';
-    const recentFailures = formatRuntimeErrorRecentFailures(item.recentFailures);
+  if (!filteredLog.length) {
+    const emptyNode = document.createElement('div');
+    const emptySummary = document.createElement('div');
+    const emptyContext = document.createElement('div');
+    emptyNode.className = 'runtime-error-item';
+    emptySummary.className = 'runtime-error-item-summary';
+    emptyContext.className = 'runtime-error-item-context';
+    emptySummary.textContent = `当前筛选“${runtimeErrorCodeFilter}”暂无匹配错误`;
+    emptyContext.textContent = '可点“清除筛选”重新查看全部';
+    emptyNode.appendChild(emptyContext);
+    emptyNode.appendChild(emptySummary);
+    fragment.appendChild(emptyNode);
+  } else {
+    for (const item of filteredLog) {
+      const sourceContext = Array.isArray(item.contexts) && item.contexts.length ? item.contexts : [item.context];
+      const sourceContextText = sourceContext.join('，') || APP_ERROR_MESSAGES.runtimeContextDefault;
+      const timeWindowText = getRuntimeErrorTimeWindowText(item.at, item.lastAt);
+      const node = document.createElement('div');
+      const summary = document.createElement('div');
+      const context = document.createElement('div');
+      const detail = document.createElement('div');
+      const countText = item.count > 1 ? `（x${item.count}）` : '';
+      const itemCode = getRuntimeErrorDisplayCode(item);
+      const requestMetaParts = [];
+      if (item.requestId) {
+        requestMetaParts.push(`请求ID：${item.requestId}`);
+      }
+      if (item.status) {
+        requestMetaParts.push(`状态：HTTP ${item.status}`);
+      }
+      const requestMetaText = requestMetaParts.length
+        ? `（${requestMetaParts.join('；')}）`
+        : '';
+      const recentFailures = formatRuntimeErrorRecentFailures(item.recentFailures);
 
-    node.className = 'runtime-error-item';
-    summary.className = 'runtime-error-item-summary';
-    summary.textContent = `${item.message}${countText}${timeWindowText ? ` · ${timeWindowText}` : ''}${requestMetaText}`;
-    context.className = 'runtime-error-item-context';
-    context.textContent = `来源：${sourceContextText}`;
-    detail.className = 'runtime-error-item-detail';
-    const detailParts = [];
-    if (sourceContextText) {
-      detailParts.push(`来源：${sourceContextText}`);
-    }
-    if (timeWindowText) {
-      detailParts.push(timeWindowText);
-    }
-    if (item.errorCode) {
-      detailParts.push(`错误码：${item.errorCode}`);
-    } else if (item.status) {
-      detailParts.push(`状态：HTTP ${item.status}`);
-    }
-    if (item.details) {
-      detailParts.push(item.details);
-    }
-    if (recentFailures) {
-      detailParts.push(recentFailures);
-    }
-    detail.textContent = detailParts.filter(Boolean).join('；');
+      node.className = 'runtime-error-item';
+      summary.className = 'runtime-error-item-summary';
+      summary.textContent = `${item.message}${countText}${timeWindowText ? ` · ${timeWindowText}` : ''}${requestMetaText}`;
+      context.className = 'runtime-error-item-context';
+      context.textContent = `来源：${sourceContextText}`;
+      detail.className = 'runtime-error-item-detail';
+      const detailParts = [];
+      if (sourceContextText) {
+        detailParts.push(`来源：${sourceContextText}`);
+      }
+      if (timeWindowText) {
+        detailParts.push(timeWindowText);
+      }
+      if (item.details) {
+        detailParts.push(item.details);
+      }
+      if (recentFailures) {
+        detailParts.push(recentFailures);
+      }
+      detail.textContent = detailParts.filter(Boolean).join('；');
 
-    node.appendChild(context);
-    node.appendChild(summary);
-    node.appendChild(detail);
-    fragment.appendChild(node);
+      const detailFilterCode = itemCode;
+      const detailFilterLabel = item.errorCode ? `错误码：${item.errorCode}` : (item.status ? `状态：HTTP ${item.status}` : `代码：${itemCode}`);
+      const filterTag = createRuntimeErrorCodeFilterButton(detailFilterCode, detailFilterLabel);
+      if (filterTag) {
+        if (detail.textContent) {
+          detail.appendChild(document.createTextNode('；'));
+        }
+        detail.appendChild(filterTag);
+      }
+
+      node.appendChild(context);
+      node.appendChild(summary);
+      node.appendChild(detail);
+      fragment.appendChild(node);
+    }
   }
 
   runtimeErrorListEl.appendChild(fragment);
@@ -1096,7 +1226,17 @@ function renderRuntimeErrorPanel() {
 
 function clearRuntimeErrors() {
   runtimeErrorLog = [];
+  runtimeErrorCodeFilter = '';
   renderRuntimeErrorPanel();
+}
+
+function handleRuntimeErrorPanelClick(event) {
+  const target = event?.target?.closest('[data-runtime-error-filter]');
+  if (!target) {
+    return;
+  }
+  const nextCode = target.dataset.runtimeErrorFilter;
+  setRuntimeErrorCodeFilter(nextCode);
 }
 
 function logRuntimeErrorOrMessage(context, error) {
@@ -3308,6 +3448,7 @@ async function saveNewDoc() {
       preferredSourcePath: createdSource,
     });
   } catch (error) {
+    const errorStatus = parseStatusCodeAsNumber(error?.status);
     const payload = error?.payload || null;
     const payloadErrorCode = getWriteErrorCode(payload?.error || payload?.message || '')
       || getApiErrorCodeFromPayload(payload);
@@ -3316,7 +3457,7 @@ async function saveNewDoc() {
       ? APP_ERROR_MESSAGES.createPathExists
       : payloadErrorCode === DOC_WRITE_ERROR_MISSING_CONTENT
         ? APP_ERROR_MESSAGES.saveMissingContent
-        : payloadErrorCode === DOC_WRITE_ERROR_BAD_PATH || error?.status === 400
+        : payloadErrorCode === DOC_WRITE_ERROR_BAD_PATH || errorStatus === 400
           ? `${APP_REQUEST_LABELS.createDoc}失败：${requestMessage}`
           : `${APP_REQUEST_LABELS.createDoc}失败：${logRuntimeErrorOrMessage(APP_REQUEST_LABELS.createDoc, error) || requestMessage}`;
     setEditorStatus(message);
@@ -3403,11 +3544,12 @@ async function saveExistingDoc(options = {}) {
     renderMeta(doc);
     await rebuildIndexForDoc(doc);
   } catch (error) {
+    const statusCode = parseStatusCodeAsNumber(error?.status);
     const payload = error?.payload || null;
     const payloadErrorCode = getWriteErrorCode(payload?.error || payload?.message || '')
       || getApiErrorCodeFromPayload(payload);
     if (
-      error?.status === 409
+      statusCode === 409
       && !forceOverwrite
       && payloadErrorCode === DOC_WRITE_ERROR_CONFLICT
       && payload?.currentVersion
@@ -3446,7 +3588,7 @@ async function saveExistingDoc(options = {}) {
         return;
       }
     }
-    if (error?.status === 409 && !forceOverwrite && payloadErrorCode === DOC_WRITE_ERROR_MISSING_EXPECTED_VERSION) {
+    if (statusCode === 409 && !forceOverwrite && payloadErrorCode === DOC_WRITE_ERROR_MISSING_EXPECTED_VERSION) {
       setEditorStatus(APP_ERROR_MESSAGES.lockVersionMissing);
       if (editSaveBtnEl) {
         editSaveBtnEl.disabled = false;
@@ -3456,7 +3598,7 @@ async function saveExistingDoc(options = {}) {
       }
       return;
     }
-    if (error?.status === 404 && payloadErrorCode === DOC_WRITE_ERROR_DOC_NOT_FOUND) {
+    if (statusCode === 404 && payloadErrorCode === DOC_WRITE_ERROR_DOC_NOT_FOUND) {
       setEditorStatus(APP_ERROR_MESSAGES.saveDocMissing);
       if (editSaveBtnEl) {
         editSaveBtnEl.disabled = false;
@@ -3466,7 +3608,7 @@ async function saveExistingDoc(options = {}) {
       }
       return;
     }
-    if (error?.status === 400 && payloadErrorCode === DOC_WRITE_ERROR_MISSING_CONTENT) {
+    if (statusCode === 400 && payloadErrorCode === DOC_WRITE_ERROR_MISSING_CONTENT) {
       setEditorStatus(APP_ERROR_MESSAGES.saveMissingContent);
       if (editSaveBtnEl) {
         editSaveBtnEl.disabled = false;
@@ -3477,7 +3619,7 @@ async function saveExistingDoc(options = {}) {
       return;
     }
     const requestMessage = getFriendlyRequestError(error);
-    const message = error?.status === 409
+    const message = statusCode === 409
       ? `${APP_ERROR_MESSAGES.saveConflict}：${requestMessage}`
         : `${APP_REQUEST_LABELS.saveDoc}失败：${logRuntimeErrorOrMessage(APP_REQUEST_LABELS.saveDoc, error) || requestMessage}`;
     setEditorStatus(message);
@@ -3964,9 +4106,10 @@ function renderList(groups) {
     const detailsBody = document.createElement('pre');
     const detailsText = [];
     const requestErrorText = getFriendlyRequestError(error);
-    const statusText = typeof error?.status === 'number'
-      ? error.status
-      : (typeof error?.status === 'string' && error.status.trim() ? error.status : '');
+    const statusCode = parseStatusCode(error?.status);
+    const statusText = statusCode
+      ? statusCode
+      : (typeof error?.status === 'string' && error.status.trim() ? normalizeDisplayValue(error?.status) : '');
     const errorFingerprint = `${statusText || ''}||${error?.statusText || ''}||${requestErrorText}`;
     countListError(context);
     const errorOccurrence = renderedErrorOccurrence.get(errorFingerprint);
@@ -4578,6 +4721,12 @@ async function initApp() {
   if (runtimeErrorClearBtnEl) {
     runtimeErrorClearBtnEl.addEventListener('click', () => {
       clearRuntimeErrors();
+    });
+  }
+
+  if (runtimeErrorListEl) {
+    runtimeErrorListEl.addEventListener('click', (event) => {
+      handleRuntimeErrorPanelClick(event);
     });
   }
 

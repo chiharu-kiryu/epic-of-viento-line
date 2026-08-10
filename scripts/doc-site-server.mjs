@@ -13,6 +13,7 @@ import { handleApiRequest } from './lib/doc-server-routes.mjs';
 import { handleStaticRequest } from './lib/doc-server-static-routes.mjs';
 
 const PORT = resolvePort();
+const HOST = process.env.DOC_API_HOST || '127.0.0.1';
 const BACKSTORY_MERGE_MODE = resolveBackstoryModeFromEnv();
 const apiState = { rebuildInProgress: false };
 const docService = createDocumentService({
@@ -41,13 +42,14 @@ const server = createServer(async (req, res) => {
     response: res,
     projectRoot: PROJECT_ROOT,
     webRoot: WEB_ROOT,
+    requestMethod: req.method,
   });
   if (handledByStatic) {
     return;
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`Doc viewer running at http://localhost:${PORT}`);
+server.listen(PORT, HOST, () => {
+  console.log(`Doc viewer running at http://${HOST}:${PORT}`);
   console.log(`Backstory merge mode: ${BACKSTORY_MERGE_MODE}`);
 });

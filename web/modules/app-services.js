@@ -2,6 +2,23 @@ import { API_RESPONSE } from '../../scripts/lib/doc-api-contract.mjs';
 
 export const DEFAULT_INVALID_RESPONSE_MESSAGE = '后端返回了非预期响应格式';
 
+function parseStatusCode(status = null) {
+  if (typeof status === 'number' && Number.isInteger(status) && status >= 100 && status <= 999) {
+    return status;
+  }
+  const normalizedStatus = (status || '').toString().trim();
+  if (!normalizedStatus) {
+    return 0;
+  }
+  if (/^\d{3}$/.test(normalizedStatus)) {
+    const numericStatus = Number(normalizedStatus);
+    return numericStatus >= 100 && numericStatus <= 999 ? numericStatus : 0;
+  }
+  const matched = normalizedStatus.match(/\b(\d{3})\b/);
+  const matchedStatus = matched?.[1] ? Number(matched[1]) : 0;
+  return matchedStatus >= 100 && matchedStatus <= 999 ? matchedStatus : 0;
+}
+
 function normalizeRequestUrl(value = '') {
   if (!value) {
     return '';
@@ -11,7 +28,7 @@ function normalizeRequestUrl(value = '') {
 }
 
 function toRequestAttemptRecord(url = '', errorOrResponse = {}, ok = false) {
-  const status = typeof errorOrResponse?.status === 'number' ? errorOrResponse.status : 0;
+  const status = parseStatusCode(errorOrResponse?.status);
 
   return {
     url: normalizeRequestUrl(url),

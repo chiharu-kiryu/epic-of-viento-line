@@ -554,6 +554,66 @@ pre {
 
 .runtime-error-code-summary-list li {
   line-height: 1.35;
+  list-style: none;
+}
+
+.runtime-error-code-summary-item {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid rgba(255, 196, 143, 0.48);
+  border-radius: 999px;
+  background: rgba(88, 44, 8, 0.58);
+  color: #ffe6ca;
+  font-size: 10px;
+  padding: 2px 8px;
+  cursor: pointer;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.runtime-error-code-summary-item:hover,
+.runtime-error-code-summary-item:focus-visible {
+  background: rgba(130, 74, 15, 0.7);
+  outline: none;
+}
+
+.runtime-error-code-summary-item.is-active {
+  background: rgba(196, 112, 33, 0.76);
+  border-color: rgba(255, 189, 124, 0.95);
+  color: #2e1000;
+}
+
+.runtime-error-filter-tag {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid rgba(255, 194, 140, 0.58);
+  border-radius: 8px;
+  background: rgba(86, 48, 24, 0.68);
+  color: #ffe6c7;
+  font-size: 10px;
+  padding: 0 6px;
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+.runtime-error-filter-tag:hover,
+.runtime-error-filter-tag:focus-visible {
+  background: rgba(132, 78, 24, 0.78);
+  outline: none;
+}
+
+.runtime-error-code-summary-clear {
+  appearance: none;
+  -webkit-appearance: none;
+  justify-self: start;
+  border: 1px solid rgba(255, 189, 122, 0.62);
+  border-radius: 999px;
+  background: rgba(88, 44, 8, 0.58);
+  color: #ffdab0;
+  font-size: 10px;
+  padding: 1px 8px;
+  line-height: 1.4;
+  cursor: pointer;
 }
 
 .runtime-error-code-summary-more {

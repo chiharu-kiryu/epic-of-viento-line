@@ -2,12 +2,72 @@ import { API_PATHS, API_REQUEST_KEYS, DOC_CAPABILITIES_FIELDS } from '../../scri
 import { fetchJsonApiRequest, fetchTextApiRequest, withCacheBust } from './app-services.js';
 import { APP_ERROR_MESSAGES, APP_REQUEST_LABELS } from './app-state.js';
 
+const DOC_API_TOKEN_STORAGE_KEY = 'doc-api-token';
+
+function normalizeApiToken(value = '') {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  const token = value
+    .trim()
+    .replace(/[\u0000-\u001F\u007F]/g, '');
+  return token;
+}
+
+function getStoredApiToken() {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return '';
+  }
+
+  return normalizeApiToken(localStorage.getItem(DOC_API_TOKEN_STORAGE_KEY));
+}
+
+function withAuthHeaders(options = {}) {
+  const token = getStoredApiToken();
+  if (!token) {
+    return options;
+  }
+
+  const headers = options.headers && typeof options.headers === 'object'
+    ? { ...options.headers }
+    : {};
+  if (!headers.Authorization && !headers.authorization) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return {
+    ...options,
+    headers,
+  };
+}
+
 const DETECT_SOURCE_CAPABILITIES = 'capabilities';
 const DETECT_SOURCE_HEALTH = 'health';
 const DETECT_SOURCE_UNAVAILABLE = 'unavailable';
 
 function toNormalizedString(value = '') {
   return (value || '').toString().trim();
+}
+
+function normalizeStatusCode(status = null) {
+  if (typeof status === 'number' && Number.isInteger(status) && status >= 100 && status <= 999) {
+    return status;
+  }
+
+  const normalizedStatus = toNormalizedString(status);
+  if (!normalizedStatus) {
+    return 0;
+  }
+
+  if (/^\d{3}$/.test(normalizedStatus)) {
+    const numericStatus = Number(normalizedStatus);
+    return numericStatus >= 100 && numericStatus <= 999 ? numericStatus : 0;
+  }
+
+  const matched = normalizedStatus.match(/\b(\d{3})\b/);
+  const matchedStatus = matched?.[1] ? Number(matched[1]) : 0;
+  return matchedStatus >= 100 && matchedStatus <= 999 ? matchedStatus : 0;
 }
 
 function createEditBackendDetectionResult({
@@ -45,7 +105,7 @@ function toAttemptRecord(url, errorOrResponse, succeeded = false) {
     };
   }
 
-  const status = typeof errorOrResponse?.status === 'number' ? errorOrResponse.status : 0;
+  const status = normalizeStatusCode(errorOrResponse?.status);
   return {
     url,
     ok: false,
@@ -180,16 +240,19 @@ export async function detectEditBackendAvailability({
     };
   } catch (error) {
     attempts.push(toAttemptRecord(healthUrl, error, false));
-    if (firstError && firstError?.status === 404 && (!error || error?.status !== 404)) {
+    const firstErrorStatus = normalizeStatusCode(firstError?.status);
+    const currentStatus = normalizeStatusCode(error?.status);
+
+    if (firstErrorStatus === 404 && currentStatus !== 404) {
       return createEditBackendDetectionResult({
         reason: 'capabilities_http_404',
         reasonText: '编辑能力接口不可达，可能未启动可写服务',
         source: DETECT_SOURCE_UNAVAILABLE,
-        status: typeof firstError.status === 'number' ? firstError.status : 404,
+        status: firstErrorStatus || 404,
         attempts,
       });
     }
-    const status = typeof error?.status === 'number' ? error.status : 0;
+    const status = normalizeStatusCode(error?.status);
     if (status === 404) {
       return createEditBackendDetectionResult({
         reason: 'capabilities_http_404',
@@ -260,7 +323,9 @@ export async function readDocSource({
   }
   const { payload } = await fetchJsonApiRequest(
     `${docApiUrl}?path=${encodeURIComponent(pathValue)}`,
-    {},
+    withAuthHeaders({
+      method: 'GET',
+    }),
     requestTimeoutMs,
     requestLabel,
   );
@@ -320,13 +385,13 @@ export async function writeDoc({
 
   const { payload } = await fetchJsonApiRequest(
     docApiUrl,
-    {
+    withAuthHeaders({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
-    },
+    }),
     requestTimeoutMs,
     requestLabel,
   );
@@ -349,13 +414,13 @@ export async function rebuildDocIndex({
 
   await fetchJsonApiRequest(
     rebuildUrl,
-    {
+    withAuthHeaders({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
-    },
+    }),
     requestTimeoutMs,
     requestLabel,
   );

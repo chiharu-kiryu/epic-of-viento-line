@@ -66,6 +66,11 @@ export const API_RESPONSE_DEFAULTS = Object.freeze({
   notFoundErrorPrefix: 'not_found',
   internalErrorPrefix: 'internal_error',
   invalidJsonErrorPrefix: 'invalid_json',
+  unsupportedMediaTypeErrorPrefix: 'unsupported_media_type',
+  payloadTooLargeErrorPrefix: 'payload_too_large',
+  authRequiredErrorPrefix: 'auth_required',
+  forbiddenErrorPrefix: 'forbidden',
+  rateLimitErrorPrefix: 'rate_limited',
 });
 
 export const REBUILD_REQUEST_DEFAULTS = Object.freeze({

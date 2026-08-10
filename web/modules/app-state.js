@@ -122,6 +122,8 @@ export const APP_ERROR_MESSAGES = {
   savingSource: '正在保存源码...',
   requestTimeout: '请求超时，请稍后重试',
   requestUnauthorized: '未登录或授权已失效，请重新登录后重试',
+  requestMissingToken: '未检测到编辑令牌，保存编辑前请先配置令牌',
+  requestInvalidToken: '编辑令牌无效或已失效，请检查并更新令牌',
   requestUnauthorizedHint: '请确认当前页面登录状态已刷新，或重新打开编辑页面后再试',
   requestForbidden: '当前账号没有写入文档的权限',
   requestForbiddenHint: '请使用具备文档写权限的账号后重试，或联系管理员授予权限',
@@ -129,6 +131,10 @@ export const APP_ERROR_MESSAGES = {
   requestRateLimitedHint: (retryAfterText) => retryAfterText
     ? `服务限制中，建议 ${retryAfterText} 秒后重试`
     : '服务限制中，请稍后再试',
+  requestUnsupportedMediaType: '请求体类型不支持，请使用 application/json',
+  requestUnsupportedMediaTypeHint: (pathHint = '') => pathHint
+    ? `请检查 ${pathHint} 接口请求头是否包含正确的 Content-Type`
+    : '请检查请求头是否包含正确的 Content-Type',
   requestPayloadTooLarge: '提交内容过大，请减少内容后重试',
   requestServerError: '服务端异常，请稍后再试',
   requestServerErrorHint: '服务端可能在重启或部署窗口，稍后请再尝试',
