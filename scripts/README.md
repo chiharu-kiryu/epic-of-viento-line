@@ -25,8 +25,16 @@
 
 - 业务脚本
   - `standardize-docs.mjs`：原始文档标准化
+  - `reorder-source-metadata-fields.mjs`：扫描识别手动新增/改动源文件，并可直接写回原元数据文件
   - `build-static-doc-site.mjs`：静态索引构建入口（读取 docs-standard，生成 `web/data/index.json`）
   - `doc-site-server.mjs`：编辑模式 API + 文件服务
+
+元数据字段修复示例：
+
+- 扫描单个文件并回写：`node scripts/reorder-source-metadata-fields.mjs --write design-data/design-item/xxx.md`
+- 按类型扫描并回写：`node scripts/reorder-source-metadata-fields.mjs --write --type item --path design-data/design-item`
+- 扫描目录：`node scripts/reorder-source-metadata-fields.mjs --path design-data/design-item --path design-data/design-units`
+- 扫描默认全量并包含手动路径：`node scripts/reorder-source-metadata-fields.mjs --all --path /abs/path/to/newfile.md`
 
 ## 使用入口
 
@@ -50,6 +58,8 @@
 - 前端模块是否仍引用约定入口（`/web/modules/app-state.js`、`/web/modules/app-runtime.js`）
 
 若预检失败，启动将直接中止，避免边改边跑导致的前后端约定不一致。
+
+- 服务架构全图和链路说明可见：`/Users/Shared/chroot/dev/epic-of-viento-line/docs/ARCHITECTURE.md`
 
 ### API 监控与健康能力
 

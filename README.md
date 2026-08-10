@@ -21,6 +21,11 @@
 2. 新增英雄或单位资料时，优先参考 [design-data/design-template/README.md](/Users/Shared/chroot/dev/epic-of-viento-line/design-data/design-template/README.md) 与现有模板文件。
 3. 资源素材尽量与策划命名保持一致，方便按名称互相检索。
 
+### 架构与运维参考
+
+- 系统整体架构：[`docs/ARCHITECTURE.md`](/Users/Shared/chroot/dev/epic-of-viento-line/docs/ARCHITECTURE.md)
+- 脚本职责说明：[`scripts/README.md`](/Users/Shared/chroot/dev/epic-of-viento-line/scripts/README.md)
+
 ## 文档网页化预览（HTML5）
 
 新增了文档仓库站点，主页面位于 [web/index.html](/Users/Shared/chroot/dev/epic-of-viento-line/web/index.html)。

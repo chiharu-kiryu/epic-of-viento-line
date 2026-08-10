@@ -5,6 +5,7 @@ import { collectHeroImages } from './image-index.mjs';
 import { collectFilesRecursive } from './scan-files.mjs';
 import { inferCategory } from './category.mjs';
 import { PROJECT_ROOT, DOC_ROOT, WEB_ROOT, trimName, toPosix } from './paths.mjs';
+import { API_RESPONSE } from './doc-api-contract.mjs';
 
 const EDIT_ROOT_PREFIXES = ['design-data/', 'docs-standard/design-data/'];
 
@@ -283,16 +284,47 @@ async function sendFile(filePath, response) {
   stream.pipe(response);
 }
 
-function sendApiResponse(response, data) {
-  response.statusCode = 200;
-  response.setHeader('Content-Type', 'application/json; charset=utf-8');
-  response.end(JSON.stringify(data));
+function normalizeApiPayload(payload) {
+  if (payload && typeof payload === 'object' && Object.prototype.hasOwnProperty.call(payload, API_RESPONSE.ok)) {
+    return payload;
+  }
+  return {
+    [API_RESPONSE.ok]: true,
+    [API_RESPONSE.data]: payload,
+  };
 }
 
-async function sendApiError(response, statusCode, message, extra = {}) {
+function sendApiResponse(response, data, requestId = '') {
+  response.statusCode = 200;
+  response.setHeader('Content-Type', 'application/json; charset=utf-8');
+  const normalizedRequestId = typeof requestId === 'string' ? requestId.trim() : '';
+  if (normalizedRequestId) {
+    response.setHeader('X-Request-Id', normalizedRequestId);
+  }
+  const payload = normalizeApiPayload(data);
+  if (normalizedRequestId && !Object.prototype.hasOwnProperty.call(payload, API_RESPONSE.requestId)) {
+    payload[API_RESPONSE.requestId] = normalizedRequestId;
+  }
+  response.end(JSON.stringify(payload));
+}
+
+async function sendApiError(response, statusCode, message, extra = {}, requestId = '') {
   response.statusCode = statusCode;
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
-  response.end(JSON.stringify({ error: message, ...extra }));
+  const normalizedRequestId = typeof requestId === 'string' ? requestId.trim() : '';
+  if (normalizedRequestId) {
+    response.setHeader('X-Request-Id', normalizedRequestId);
+  }
+
+  const payload = {
+    [API_RESPONSE.ok]: false,
+    [API_RESPONSE.error]: typeof message === 'string' ? message : 'request failed',
+    ...(extra && typeof extra === 'object' ? extra : {}),
+  };
+  if (normalizedRequestId) {
+    payload[API_RESPONSE.requestId] = normalizedRequestId;
+  }
+  response.end(JSON.stringify(payload));
 }
 
 function getWebRootIndexPath() {

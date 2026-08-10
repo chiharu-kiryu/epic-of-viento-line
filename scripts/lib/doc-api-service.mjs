@@ -16,15 +16,23 @@ import {
   API_ERRORS,
   normalizeRebuildRequest,
   normalizeDocWriteRequest,
+  normalizeRequestId,
 } from './doc-api-contract.mjs';
 import { createApiMetrics } from './doc-api-metrics.mjs';
 
 const DEFAULT_INDEX_CACHE_TTL_MS = 5000;
+let requestSequence = 0;
 
-function createError(statusCode, message, extra = {}) {
+function createRequestId() {
+  requestSequence += 1;
+  return normalizeRequestId(`${Date.now()}-${requestSequence}`);
+}
+
+function createError(statusCode, message, extra = {}, errorCode = '') {
   const error = new Error(message);
   error.statusCode = statusCode;
   error.payload = extra;
+  error.errorCode = typeof errorCode === 'string' && errorCode ? errorCode : '';
   return error;
 }
 
@@ -99,10 +107,27 @@ function createDocumentService(options = {}) {
   }
 
   function startRequest(route, method) {
+    const requestId = createRequestId();
     if (requestMetrics && typeof requestMetrics.startRequest === 'function') {
-      return requestMetrics.startRequest(route, method);
+      return {
+        ...requestMetrics.startRequest(route, method),
+        requestId,
+      };
     }
-    return null;
+    return {
+      requestId,
+      route,
+      method,
+      startedAtPerf: process.hrtime.bigint(),
+      routeBucket: {
+        count: 0,
+        errorCount: 0,
+        totalResponseTimeMs: 0,
+        lastStatusCode: 0,
+        lastDurationMs: 0,
+        lastAt: 0,
+      },
+    };
   }
 
   function finishRequest(trace, statusCode) {
@@ -130,17 +155,17 @@ function createDocumentService(options = {}) {
   async function getDocByPath(rawPath = '') {
     const filePath = safePathFromQuery(rawPath);
     if (!filePath || !isAllowedEditPath(filePath)) {
-      throw createError(400, API_ERRORS.badPath);
+      throw createError(400, API_ERRORS.badPath, {}, API_ERRORS.badPath);
     }
 
     const resolved = await resolveEditableFilePath(filePath);
     if (!resolved) {
-      throw createError(404, API_ERRORS.docNotFound);
+      throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
     }
 
     const content = await readTextFile(resolved.absolutePath);
     if (content === null) {
-      throw createError(404, API_ERRORS.docNotFound);
+      throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
     }
 
     let lastModified = '';
@@ -167,16 +192,16 @@ function createDocumentService(options = {}) {
   async function writeDoc(rawPayload = {}) {
     const normalized = normalizeDocWriteRequest(rawPayload);
     if (!normalized.path) {
-      throw createError(400, API_ERRORS.missingPath);
+      throw createError(400, API_ERRORS.missingPath, {}, API_ERRORS.missingPath);
     }
 
     const filePath = safePathFromQuery(normalized.path);
     if (!filePath || !isAllowedEditPath(filePath)) {
-      throw createError(400, API_ERRORS.badPath);
+      throw createError(400, API_ERRORS.badPath, {}, API_ERRORS.badPath);
     }
 
     if (typeof normalized.content !== 'string') {
-      throw createError(400, API_ERRORS.missingContent);
+      throw createError(400, API_ERRORS.missingContent, {}, API_ERRORS.missingContent);
     }
 
     const createMode = normalized.create === true;
@@ -184,17 +209,17 @@ function createDocumentService(options = {}) {
     const expectedVersion = normalizeLockVersion(normalized.expectedVersion);
     const resolved = await resolveEditableFilePath(filePath, { allowCreate: createMode });
     if (!resolved) {
-      throw createError(404, API_ERRORS.docNotFound);
+      throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
     }
 
     if (!createMode && !resolved.exists) {
-      throw createError(404, API_ERRORS.docNotFound);
+      throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
     }
     if (createMode && resolved.exists) {
-      throw createError(409, API_ERRORS.alreadyExists);
+      throw createError(409, API_ERRORS.alreadyExists, {}, API_ERRORS.alreadyExists);
     }
     if (!createMode && !expectedVersion && !forceOverwrite) {
-      throw createError(409, API_ERRORS.missingExpectedVersion);
+      throw createError(409, API_ERRORS.missingExpectedVersion, {}, API_ERRORS.missingExpectedVersion);
     }
 
     if (!createMode && expectedVersion && !forceOverwrite) {
@@ -202,17 +227,17 @@ function createDocumentService(options = {}) {
         const stats = await fs.stat(resolved.absolutePath);
         const currentVersion = String(stats.mtimeMs);
         if (currentVersion !== expectedVersion) {
-          throw createError(409, 'document was modified by another client', {
+          throw createError(409, API_ERRORS.conflict, {
             currentVersion,
             lastModified: stats.mtime.toISOString(),
-          });
+          }, API_ERRORS.conflict);
         }
       } catch (error) {
         if (error?.statusCode) {
           throw error;
         }
         if (error?.code === 'ENOENT') {
-          throw createError(404, API_ERRORS.docNotFound);
+          throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
         }
         throw createError(500, error?.message || 'failed to check version');
       }
@@ -236,7 +261,7 @@ function createDocumentService(options = {}) {
 
   async function runRebuild(rawPayload = {}) {
     if (state.rebuildInProgress) {
-      throw createError(409, API_ERRORS.rebuildInProgress);
+      throw createError(409, API_ERRORS.rebuildInProgress, {}, API_ERRORS.rebuildInProgress);
     }
 
     state.rebuildInProgress = true;

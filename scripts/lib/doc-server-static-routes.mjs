@@ -7,6 +7,7 @@ import {
   getProjectFilePath,
   isProjectFilePathSafe,
 } from './doc-server.mjs';
+import { API_RESPONSE } from './doc-api-contract.mjs';
 
 function safeDecodePath(pathname) {
   if (/%2f|%2F|%5c|%5C/.test(pathname)) {
@@ -46,6 +47,14 @@ function isManagedAssetPath(pathname) {
     || pathname.startsWith('/docs-standard/');
 }
 
+function sendStaticJsonError(response, statusCode, message, errorCode = '') {
+  const payload = {};
+  if (errorCode && typeof errorCode === 'string') {
+    payload[API_RESPONSE.errorCode] = errorCode;
+  }
+  sendApiError(response, statusCode, message, payload);
+}
+
 function buildFaviconCandidates(projectRoot, webRoot) {
   return [
     path.join(projectRoot, 'favicon.ico'),
@@ -66,20 +75,20 @@ async function handleFavicon({ response, projectRoot, webRoot }) {
     }
   }
 
-  await sendApiError(response, 404, 'favicon not found');
+  await sendStaticJsonError(response, 404, 'favicon not found', 'favicon_not_found');
   return true;
 }
 
 async function handleProjectFileRequest({ response, pathname, projectRoot }) {
   const decodedPath = safeDecodePath(pathname);
   if (!decodedPath) {
-    await sendApiError(response, 400, 'bad path');
+    await sendStaticJsonError(response, 400, 'bad path', 'bad_path');
     return true;
   }
 
   const candidatePath = path.normalize(getProjectFilePath(decodedPath));
   if (!isProjectFilePathSafe(candidatePath)) {
-    await sendApiError(response, 403, 'forbidden');
+    await sendStaticJsonError(response, 403, 'forbidden', 'path_forbidden');
     return true;
   }
 
@@ -91,8 +100,7 @@ async function handleProjectFileRequest({ response, pathname, projectRoot }) {
         await sendFile(indexPath, response);
         return true;
       }
-      response.statusCode = 403;
-      response.end('Directory access disabled');
+      await sendStaticJsonError(response, 403, 'directory access disabled', 'directory_access_disabled');
       return true;
     }
 
@@ -101,8 +109,7 @@ async function handleProjectFileRequest({ response, pathname, projectRoot }) {
   } catch {
     const normalizedPath = decodedPath || pathname;
     if (isWebAssetPath(normalizedPath) || isManagedAssetPath(normalizedPath)) {
-      response.statusCode = 404;
-      response.end('Not found');
+      await sendStaticJsonError(response, 404, 'Not found', 'not_found');
       return true;
     }
 
@@ -118,7 +125,7 @@ async function handleStaticRequest({ pathname, response, projectRoot, webRoot })
   }
 
   if (isApiPath(pathname)) {
-    await sendApiError(response, 404, 'not found');
+    await sendStaticJsonError(response, 404, 'not found', 'api_not_found');
     return true;
   }
 

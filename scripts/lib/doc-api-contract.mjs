@@ -42,6 +42,9 @@ export const DOC_CAPABILITIES_FIELDS = Object.freeze({
 
 export const API_RESPONSE = Object.freeze({
   error: 'error',
+  errorCode: 'errorCode',
+  requestId: 'requestId',
+  data: 'data',
   ok: 'ok',
   source: 'source',
   mode: 'mode',
@@ -54,6 +57,15 @@ export const API_RESPONSE = Object.freeze({
   metrics: 'metrics',
   startedAt: 'startedAt',
   message: 'message',
+});
+
+export const API_RESPONSE_DEFAULTS = Object.freeze({
+  ok: true,
+  requestIdPrefix: 'req_',
+  methodErrorPrefix: 'method_not_allowed',
+  notFoundErrorPrefix: 'not_found',
+  internalErrorPrefix: 'internal_error',
+  invalidJsonErrorPrefix: 'invalid_json',
 });
 
 export const REBUILD_REQUEST_DEFAULTS = Object.freeze({
@@ -109,6 +121,52 @@ export function makeErrorPayload(errorMessage, extra = {}) {
     [API_RESPONSE.error]: errorMessage,
     ...extra,
   };
+}
+
+export function makeResponseEnvelope(payload, requestId = '', ok = true, extra = {}) {
+  const normalizedRequestId = typeof requestId === 'string'
+    ? requestId.trim()
+    : '';
+  const hasData = extra && Object.prototype.hasOwnProperty.call(extra, API_RESPONSE.data);
+  const hasError = extra && Object.prototype.hasOwnProperty.call(extra, API_RESPONSE.error);
+  const normalizedExtra = extra && typeof extra === 'object' ? extra : {};
+
+  if (hasData || hasError) {
+    return {
+      [API_RESPONSE.ok]: ok,
+      ...(normalizedRequestId ? { [API_RESPONSE.requestId]: normalizedRequestId } : {}),
+      ...normalizedExtra,
+    };
+  }
+
+  return {
+    [API_RESPONSE.ok]: ok,
+    [API_RESPONSE.data]: payload,
+    ...(normalizedRequestId ? { [API_RESPONSE.requestId]: normalizedRequestId } : {}),
+    ...normalizedExtra,
+  };
+}
+
+export function normalizeRequestId(seed = '') {
+  const normalized = typeof seed === 'string' ? seed.trim() : '';
+  if (normalized) {
+    return normalized;
+  }
+  return `${API_RESPONSE_DEFAULTS.requestIdPrefix}${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export function extractApiDataPayload(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return null;
+  }
+
+  if (payload[API_RESPONSE.ok] !== true) {
+    return null;
+  }
+
+  return Object.prototype.hasOwnProperty.call(payload, API_RESPONSE.data)
+    ? payload[API_RESPONSE.data]
+    : payload;
 }
 
 export function makeCapabilitiesPayload(editablePrefixes, backstoryMergeMode, version = (typeof process === 'object' && process !== null && typeof process.version === 'string' ? process.version : 'node')) {

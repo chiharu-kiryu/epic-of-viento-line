@@ -40,7 +40,7 @@ import {
 import { renderHeroBanner, buildCommonCards, getHeroCardsByCategory } from './app-render.js';
 import { renderStructuredBlocks, hasRenderableToken } from './app-structured.js';
 import { getDocTemplate, DOC_TYPE_TEMPLATE_DEFS } from './app-type-templates.js';
-import { API_ERRORS } from '../../scripts/lib/doc-api-contract.mjs';
+import { API_ERRORS, API_RESPONSE } from '../../scripts/lib/doc-api-contract.mjs';
 import {
   detectEditBackendAvailability,
   loadDocIndexPayload,
@@ -117,6 +117,7 @@ const PAGE_UI_TEXTS = APP_RUNTIME_TEXTS.pageShell;
 const DATA_INDEX_REQUEST_TIMEOUT_MS = 12000;
 const CAPABILITIES_REQUEST_TIMEOUT_MS = 5000;
 const RUNTIME_ERROR_PANEL_LIMIT = 12;
+const RUNTIME_ERROR_CODE_SUMMARY_VISIBLE_ENTRIES = 4;
 const CATEGORY_ORDER_INDEX = new Map(
   CATEGORY_ORDER.map((category, index) => [category, index]),
 );
@@ -226,6 +227,9 @@ function normalizeEditBackendState(rawState = {}) {
 }
 
 function getWriteErrorCode(rawError = '') {
+  if (typeof rawError !== 'string') {
+    return '';
+  }
   const normalized = normalizeDisplayValue(rawError).toLowerCase();
   if (!normalized) {
     return '';
@@ -244,6 +248,18 @@ function getWriteErrorCode(rawError = '') {
     return normalized === normalizedCode || normalized.includes(normalizedCode);
   });
   return matched || '';
+}
+
+function getApiErrorCodeFromPayload(payload = null) {
+  if (!payload || typeof payload !== 'object') {
+    return '';
+  }
+  const rawCode = payload?.[API_RESPONSE.errorCode];
+  if (typeof rawCode !== 'string') {
+    return '';
+  }
+  const normalized = rawCode.trim().toLowerCase();
+  return normalized;
 }
 
 function getEditModeUnavailableText() {
@@ -299,6 +315,165 @@ function summarizeAttemptFailureMeta(attempts = []) {
     chunks.push(`最近失败：${lastAt}`);
   }
   return chunks.join('；');
+}
+
+function extractRequestErrorMetadata(error = null) {
+  if (!error || typeof error !== 'object') {
+    return {
+      errorCode: '',
+      requestId: '',
+      status: '',
+    };
+  }
+
+  const requestId = normalizeDisplayValue(error?.requestId || error?.payload?.[API_RESPONSE.requestId] || '');
+  const errorCode = normalizeDisplayValue(error?.code || error?.payload?.[API_RESPONSE.errorCode] || '');
+  const status = typeof error?.status === 'number' ? String(error.status) : '';
+
+  return {
+    requestId,
+    errorCode,
+    status,
+  };
+}
+
+function formatRuntimeErrorTimestamp(timestamp = '') {
+  const normalized = normalizeDisplayValue(timestamp);
+  if (!normalized) {
+    return '';
+  }
+  return normalized.replace('T', ' ').replace(/\..*$/, '');
+}
+
+function getRuntimeErrorFingerprint(contextText, message, errorCode) {
+  return errorCode
+    ? `errorCode:${errorCode}`
+    : `${contextText}||${message}`;
+}
+
+function mergeRuntimeErrorContexts(newContextText, existing = {}) {
+  const normalizedNewContext = normalizeDisplayValue(newContextText);
+  const baseContexts = Array.isArray(existing.contexts)
+    ? existing.contexts.filter((context) => normalizeDisplayValue(context))
+    : [];
+  const nextContexts = normalizedNewContext
+    ? [normalizedNewContext, ...baseContexts]
+    : [...baseContexts];
+  const uniq = [];
+
+  for (const context of nextContexts) {
+    if (!context || uniq.includes(context)) {
+      continue;
+    }
+    uniq.push(context);
+    if (uniq.length >= 3) {
+      break;
+    }
+  }
+
+  return uniq;
+}
+
+function getRuntimeErrorRecentFailures(existingWindow = [], now = '') {
+  const nextWindow = Array.isArray(existingWindow)
+    ? existingWindow
+      .map((value) => normalizeDisplayValue(value))
+      .filter(Boolean)
+    : [];
+  const nextNow = normalizeDisplayValue(now);
+  return (nextNow ? [nextNow, ...nextWindow] : nextWindow).slice(0, 3);
+}
+
+function formatRuntimeErrorRecentFailures(window = []) {
+  if (!Array.isArray(window) || window.length === 0) {
+    return '';
+  }
+  return `最近${window.length}次失败：${window.map(formatRuntimeErrorTimestamp).join(' | ')}`;
+}
+
+function getRuntimeErrorDisplayCode(item = {}) {
+  const errorCode = normalizeDisplayValue(item.errorCode);
+  if (errorCode) {
+    return errorCode;
+  }
+  if (item.status) {
+    return `HTTP ${normalizeDisplayValue(item.status)}`;
+  }
+  return '未标记';
+}
+
+function buildRuntimeErrorCodeSummary(runtimeErrors = []) {
+  if (!Array.isArray(runtimeErrors) || !runtimeErrors.length) {
+    return null;
+  }
+  const counts = new Map();
+  for (const item of runtimeErrors) {
+    const key = getRuntimeErrorDisplayCode(item);
+    counts.set(key, (counts.get(key) || 0) + 1);
+  }
+  if (!counts.size) {
+    return null;
+  }
+
+  const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  const visibleEntries = sorted.slice(0, RUNTIME_ERROR_CODE_SUMMARY_VISIBLE_ENTRIES);
+  const hiddenEntries = sorted.slice(RUNTIME_ERROR_CODE_SUMMARY_VISIBLE_ENTRIES);
+
+  const wrapper = document.createElement('div');
+  const summaryTitle = document.createElement('div');
+  const summaryBody = document.createElement('div');
+  const summaryList = document.createElement('ul');
+
+  wrapper.className = 'runtime-error-code-summary';
+  summaryTitle.className = 'runtime-error-code-summary-title';
+  summaryBody.className = 'runtime-error-code-summary-body';
+  summaryList.className = 'runtime-error-code-summary-list';
+
+  summaryTitle.textContent = `错误码统计（${runtimeErrors.length}）`;
+
+  const renderItems = (entries, targetList = summaryList) => {
+    for (const [code, count] of entries) {
+      const listItem = document.createElement('li');
+      listItem.textContent = `${code}（${count}）`;
+      targetList.appendChild(listItem);
+    }
+  };
+
+  renderItems(visibleEntries);
+
+  summaryBody.appendChild(summaryList);
+
+  if (hiddenEntries.length) {
+    const moreNode = document.createElement('details');
+    const moreSummary = document.createElement('summary');
+    const moreList = document.createElement('ul');
+
+    moreNode.className = 'runtime-error-code-summary-more';
+    moreSummary.className = 'runtime-error-code-summary-more-title';
+    moreSummary.textContent = `其余 ${hiddenEntries.length} 项`;
+    moreList.className = 'runtime-error-code-summary-list';
+
+    renderItems(hiddenEntries, moreList);
+
+    moreNode.appendChild(moreSummary);
+    moreNode.appendChild(moreList);
+    summaryBody.appendChild(moreNode);
+  }
+  wrapper.appendChild(summaryTitle);
+  wrapper.appendChild(summaryBody);
+  return wrapper;
+}
+
+function getRuntimeErrorTimeWindowText(firstAt = '', lastAt = '') {
+  const firstText = formatRuntimeErrorTimestamp(firstAt);
+  const lastText = formatRuntimeErrorTimestamp(lastAt);
+  if (!lastText) {
+    return '';
+  }
+  if (!firstText || firstText === lastText) {
+    return `首次：${lastText}；最近：${lastText}`;
+  }
+  return `首次：${firstText}；最近：${lastText}`;
 }
 
 function setListText(message = '') {
@@ -669,13 +844,34 @@ function getFriendlyRequestError(error, options = {}) {
   }
   if (typeof error?.status === 'number') {
     const status = error.status;
+    const withMeta = (text = '') => {
+      const normalized = normalizeDisplayValue(text);
+      const suffixes = [];
+      const requestId = normalizeDisplayValue(error?.requestId || error?.payload?.[API_RESPONSE.requestId] || '');
+      const payloadErrorCode = normalizeDisplayValue(error?.code || error?.payload?.[API_RESPONSE.errorCode] || '');
+      const attemptSummary = summarizeRequestAttempts(error?.attempts, options);
+      if (requestId) {
+        suffixes.push(`请求ID：${requestId}`);
+      }
+      if (payloadErrorCode) {
+        suffixes.push(`错误码：${payloadErrorCode}`);
+      }
+      if (attemptSummary) {
+        suffixes.push(attemptSummary);
+      }
+      const suffix = suffixes.length ? `（${suffixes.join('；')}）` : '';
+      return `${normalized}${suffix}`;
+    };
+
     if (status === 401) {
       const details = APP_ERROR_MESSAGES.requestUnauthorizedHint;
-      return details ? `${APP_ERROR_MESSAGES.requestUnauthorized}，${details}` : APP_ERROR_MESSAGES.requestUnauthorized;
+      const baseText = details ? `${APP_ERROR_MESSAGES.requestUnauthorized}，${details}` : APP_ERROR_MESSAGES.requestUnauthorized;
+      return withMeta(baseText);
     }
     if (status === 403) {
       const details = APP_ERROR_MESSAGES.requestForbiddenHint;
-      return details ? `${APP_ERROR_MESSAGES.requestForbidden}，${details}` : APP_ERROR_MESSAGES.requestForbidden;
+      const baseText = details ? `${APP_ERROR_MESSAGES.requestForbidden}，${details}` : APP_ERROR_MESSAGES.requestForbidden;
+      return withMeta(baseText);
     }
     if (status === 429) {
       const retryAfterText = parseRetryAfterSeconds(error?.retryAfter);
@@ -683,29 +879,42 @@ function getFriendlyRequestError(error, options = {}) {
       const hint = typeof rateLimitedTemplate === 'function'
         ? rateLimitedTemplate(retryAfterText)
         : APP_ERROR_MESSAGES.requestRateLimitedHint;
-      return `${APP_ERROR_MESSAGES.requestRateLimited}，${hint}`;
+      return withMeta(`${APP_ERROR_MESSAGES.requestRateLimited}，${hint}`);
     }
     if (status === 413) {
-      return APP_ERROR_MESSAGES.requestPayloadTooLarge;
+      return withMeta(APP_ERROR_MESSAGES.requestPayloadTooLarge);
     }
     if (status >= 500 && status < 600) {
       const hint = APP_ERROR_MESSAGES.requestServerErrorHint;
-      return hint ? `${APP_ERROR_MESSAGES.requestServerError}，${hint}` : APP_ERROR_MESSAGES.requestServerError;
+      const baseText = hint ? `${APP_ERROR_MESSAGES.requestServerError}，${hint}` : APP_ERROR_MESSAGES.requestServerError;
+      return withMeta(baseText);
     }
   }
   const message = normalizeDisplayValue(error.message || '');
+  const requestId = normalizeDisplayValue(error?.requestId || error?.payload?.[API_RESPONSE.requestId] || '');
+  const payloadErrorCode = normalizeDisplayValue(error?.code || error?.payload?.[API_RESPONSE.errorCode] || '');
   const attemptSummary = summarizeRequestAttempts(error?.attempts, options);
+  const requestMetadataParts = [];
+  if (requestId) {
+    requestMetadataParts.push(`请求ID：${requestId}`);
+  }
+  if (payloadErrorCode) {
+    requestMetadataParts.push(`错误码：${payloadErrorCode}`);
+  }
+  if (attemptSummary) {
+    requestMetadataParts.push(attemptSummary);
+  }
+  const requestMetadataText = requestMetadataParts.length ? `（${requestMetadataParts.join('；')}）` : '';
+
+  const withMeta = (text = '') => `${normalizeDisplayValue(text)}${requestMetadataText}`;
+
   if (!message) {
-    return attemptSummary
-      ? `${APP_ERROR_MESSAGES.requestInvalidResponse}（${attemptSummary}）`
-      : APP_ERROR_MESSAGES.requestInvalidResponse;
+    return withMeta(APP_ERROR_MESSAGES.requestInvalidResponse);
   }
   if (!payloadMessage || message.includes(payloadMessage)) {
-    return attemptSummary ? `${message}（${attemptSummary}）` : message;
+    return withMeta(message);
   }
-  return attemptSummary
-    ? `${message}（${payloadMessage}；${attemptSummary}）`
-    : `${message}（${payloadMessage}）`;
+  return `${message}（${payloadMessage}${requestMetadataText ? `；${requestMetadataText.slice(1, -1)}` : ''}）`;
 }
 
 function getFriendlyLoadErrorMessage(error) {
@@ -718,6 +927,8 @@ function logRuntimeError(context, error) {
   if (!message || !runtimeErrorPanelEl || !runtimeErrorListEl) {
     return message;
   }
+
+  const requestMetadata = extractRequestErrorMetadata(error);
 
   const statusText = typeof error?.status === 'number'
     ? `HTTP ${error.status}`
@@ -745,26 +956,48 @@ function logRuntimeError(context, error) {
     details.push(retrySummary);
   }
 
-  const fingerprint = `${contextText}||${message}`;
+  const fingerprint = getRuntimeErrorFingerprint(contextText, message, requestMetadata.errorCode);
   const existingIndex = runtimeErrorLog.findIndex((item) => item.fingerprint === fingerprint);
   const now = new Date().toISOString();
+  const recentFailures = getRuntimeErrorRecentFailures(
+    runtimeErrorLog[existingIndex]?.recentFailures,
+    now,
+  );
 
   if (existingIndex >= 0) {
     const existing = runtimeErrorLog.splice(existingIndex, 1)[0];
+    const contexts = mergeRuntimeErrorContexts(contextText, existing);
+    const requestId = requestMetadata.requestId || existing.requestId;
+    const errorCode = requestMetadata.errorCode || existing.errorCode;
+    const status = requestMetadata.status || existing.status;
+    const contextTextForSummary = contexts.join('，') || contextText;
+    const detailsText = details.join('；') || existing.details;
     runtimeErrorLog.unshift({
       ...existing,
+      context: contextTextForSummary,
+      contexts,
+      errorCode,
+      requestId,
+      status,
       count: (existing.count || 1) + 1,
       lastAt: now,
-      details: details.join('；') || existing.details,
+      details: detailsText,
+      recentFailures,
     });
   } else {
+    const contextList = mergeRuntimeErrorContexts(contextText, {});
     runtimeErrorLog.unshift({
-      context: contextText,
+      context: contextList.join('，') || contextText,
+      contexts: contextList,
       message,
       details: details.join('；'),
+      errorCode: requestMetadata.errorCode,
+      requestId: requestMetadata.requestId,
+      status: requestMetadata.status,
       count: 1,
       at: now,
       lastAt: now,
+      recentFailures,
       fingerprint,
     });
     if (runtimeErrorLog.length > RUNTIME_ERROR_PANEL_LIMIT) {
@@ -798,22 +1031,59 @@ function renderRuntimeErrorPanel() {
 
   runtimeErrorListEl.innerHTML = '';
   const fragment = document.createDocumentFragment();
+  const summaryNode = buildRuntimeErrorCodeSummary(runtimeErrorLog);
+  if (summaryNode) {
+    fragment.appendChild(summaryNode);
+  }
 
   for (const item of runtimeErrorLog) {
+    const sourceContext = Array.isArray(item.contexts) && item.contexts.length ? item.contexts : [item.context];
+    const sourceContextText = sourceContext.join('，') || APP_ERROR_MESSAGES.runtimeContextDefault;
+    const timeWindowText = getRuntimeErrorTimeWindowText(item.at, item.lastAt);
     const node = document.createElement('div');
     const summary = document.createElement('div');
     const context = document.createElement('div');
     const detail = document.createElement('div');
     const countText = item.count > 1 ? `（x${item.count}）` : '';
-    const timeText = item.lastAt ? ` · ${item.lastAt.replace('T', ' ').replace(/\..*$/, '')}` : '';
+    const requestMetaParts = [];
+    if (item.requestId) {
+      requestMetaParts.push(`请求ID：${item.requestId}`);
+    }
+    if (item.errorCode) {
+      requestMetaParts.push(`错误码：${item.errorCode}`);
+    } else if (item.status) {
+      requestMetaParts.push(`状态：HTTP ${item.status}`);
+    }
+    const requestMetaText = requestMetaParts.length
+      ? `（${requestMetaParts.join('；')}）`
+      : '';
+    const recentFailures = formatRuntimeErrorRecentFailures(item.recentFailures);
 
     node.className = 'runtime-error-item';
     summary.className = 'runtime-error-item-summary';
-    summary.textContent = `${item.context}: ${item.message}${countText}${timeText}`;
+    summary.textContent = `${item.message}${countText}${timeWindowText ? ` · ${timeWindowText}` : ''}${requestMetaText}`;
     context.className = 'runtime-error-item-context';
-    context.textContent = item.context;
+    context.textContent = `来源：${sourceContextText}`;
     detail.className = 'runtime-error-item-detail';
-    detail.textContent = item.details || '';
+    const detailParts = [];
+    if (sourceContextText) {
+      detailParts.push(`来源：${sourceContextText}`);
+    }
+    if (timeWindowText) {
+      detailParts.push(timeWindowText);
+    }
+    if (item.errorCode) {
+      detailParts.push(`错误码：${item.errorCode}`);
+    } else if (item.status) {
+      detailParts.push(`状态：HTTP ${item.status}`);
+    }
+    if (item.details) {
+      detailParts.push(item.details);
+    }
+    if (recentFailures) {
+      detailParts.push(recentFailures);
+    }
+    detail.textContent = detailParts.filter(Boolean).join('；');
 
     node.appendChild(context);
     node.appendChild(summary);
@@ -846,6 +1116,9 @@ function extractRequestErrorPayloadMessage(error) {
   }
   if (typeof payload?.msg === 'string' && payload.msg.trim()) {
     return payload.msg.trim();
+  }
+  if (typeof payload?.[API_RESPONSE.errorCode] === 'string' && payload[API_RESPONSE.errorCode].trim()) {
+    return payload[API_RESPONSE.errorCode].trim();
   }
   if (Array.isArray(payload.errors) && payload.errors.length > 0) {
     const firstError = payload.errors[0];
@@ -3036,7 +3309,8 @@ async function saveNewDoc() {
     });
   } catch (error) {
     const payload = error?.payload || null;
-    const payloadErrorCode = getWriteErrorCode(payload?.error || payload?.message || '');
+    const payloadErrorCode = getWriteErrorCode(payload?.error || payload?.message || '')
+      || getApiErrorCodeFromPayload(payload);
     const requestMessage = getFriendlyRequestError(error);
     const message = payloadErrorCode === DOC_WRITE_ERROR_ALREADY_EXISTS
       ? APP_ERROR_MESSAGES.createPathExists
@@ -3130,7 +3404,8 @@ async function saveExistingDoc(options = {}) {
     await rebuildIndexForDoc(doc);
   } catch (error) {
     const payload = error?.payload || null;
-    const payloadErrorCode = getWriteErrorCode(payload?.error || payload?.message || '');
+    const payloadErrorCode = getWriteErrorCode(payload?.error || payload?.message || '')
+      || getApiErrorCodeFromPayload(payload);
     if (
       error?.status === 409
       && !forceOverwrite

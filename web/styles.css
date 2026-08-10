@@ -526,6 +526,45 @@ pre {
   font-size: 11px;
 }
 
+.runtime-error-code-summary {
+  border-radius: 8px;
+  border: 1px solid rgba(255, 191, 122, 0.35);
+  background: rgba(34, 22, 8, 0.56);
+  padding: 6px 8px;
+  display: grid;
+  gap: 4px;
+}
+
+.runtime-error-code-summary-title {
+  color: #ffe4bd;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.runtime-error-code-summary-body {
+  color: #ffd5a4;
+}
+
+.runtime-error-code-summary-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 2px;
+}
+
+.runtime-error-code-summary-list li {
+  line-height: 1.35;
+}
+
+.runtime-error-code-summary-more {
+  margin-top: 2px;
+}
+
+.runtime-error-code-summary-more-title {
+  color: #ffd5a4;
+  cursor: pointer;
+}
+
 .runtime-error-item {
   border-radius: 8px;
   border: 1px dashed rgba(255, 170, 140, 0.32);

@@ -1,3 +1,5 @@
+import { API_RESPONSE } from '../../scripts/lib/doc-api-contract.mjs';
+
 export const DEFAULT_INVALID_RESPONSE_MESSAGE = '后端返回了非预期响应格式';
 
 function normalizeRequestUrl(value = '') {
@@ -33,6 +35,20 @@ function attachAttemptRecordToError(error = null, url = '') {
 
   error.attempts = [toRequestAttemptRecord(url, error, false)];
   return error;
+}
+
+function isApiResponseEnvelope(payload = null) {
+  return payload && typeof payload === 'object' && Object.prototype.hasOwnProperty.call(payload, API_RESPONSE.ok);
+}
+
+function unwrapApiPayload(payload = null) {
+  if (!isApiResponseEnvelope(payload)) {
+    return payload;
+  }
+  if (payload?.ok === true && Object.prototype.hasOwnProperty.call(payload, API_RESPONSE.data)) {
+    return payload[API_RESPONSE.data];
+  }
+  return payload;
 }
 
 export function withCacheBust(url, forceCacheBust = false) {
@@ -83,6 +99,9 @@ export function extractPayloadErrorMessage(payload) {
   if (typeof payload.msg === 'string' && payload.msg.trim()) {
     return payload.msg.trim();
   }
+  if (typeof payload?.[API_RESPONSE.errorCode] === 'string' && payload[API_RESPONSE.errorCode].trim()) {
+    return payload[API_RESPONSE.errorCode].trim();
+  }
   if (Array.isArray(payload.errors) && payload.errors.length > 0) {
     const first = payload.errors[0];
     if (typeof first === 'string' && first.trim()) {
@@ -99,9 +118,24 @@ export function makeRequestError(response, payload, requestLabel) {
   const responseError = extractPayloadErrorMessage(payload);
   const label = requestLabel || '请求';
   const suffix = responseError ? `${response.status}：${responseError}` : `${response.status}`;
+  const headerRequestId = typeof response?.headers?.get === 'function'
+    ? response.headers.get('x-request-id')
+    : '';
+  const payloadRequestId = payload && typeof payload === 'object'
+    ? payload[API_RESPONSE.requestId]
+    : '';
+  const payloadErrorCode = payload && typeof payload === 'object'
+    ? payload[API_RESPONSE.errorCode]
+    : '';
   const error = new Error(`${label}失败（${suffix}）`);
   error.status = response.status;
   error.payload = payload;
+  error.requestId = typeof payloadRequestId === 'string' && payloadRequestId.trim()
+    ? payloadRequestId.trim()
+    : (typeof headerRequestId === 'string' ? headerRequestId.trim() : '');
+  error.code = typeof payloadErrorCode === 'string'
+    ? payloadErrorCode
+    : '';
   error.statusText = response.statusText;
   error.retryAfter = response.headers && typeof response.headers.get === 'function'
     ? response.headers.get('retry-after')
@@ -145,10 +179,14 @@ export async function fetchJsonApiRequest(
     requestLabel,
   );
   const payload = await safeParseJsonResponse(response);
+  const normalizedPayload = unwrapApiPayload(payload);
   if (!response.ok) {
     throw makeRequestError(response, payload, requestLabel);
   }
-  if (requireJson && payload === null) {
+  if (isApiResponseEnvelope(payload) && payload?.ok === false) {
+    throw makeRequestError(response, payload, requestLabel);
+  }
+  if (requireJson && normalizedPayload === null) {
     const error = new Error(invalidResponseMessage);
     error.status = response.status;
     error.payload = payload;
@@ -158,7 +196,7 @@ export async function fetchJsonApiRequest(
 
   return {
     response,
-    payload,
+    payload: normalizedPayload,
   };
 }
 
