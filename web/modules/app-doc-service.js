@@ -1,11 +1,12 @@
 import { API_REQUEST_KEYS } from '../../scripts/lib/doc-api-contract.mjs';
 import { fetchJsonApiRequest, fetchTextApiRequest, withCacheBust } from './app-services.js';
+import { APP_ERROR_MESSAGES, APP_REQUEST_LABELS } from './app-state.js';
 
 export async function detectEditBackendAvailability({
   capabilitiesUrl = '',
   healthUrl = '',
   requestTimeoutMs = 5000,
-  requestLabel = '检测编辑能力',
+  requestLabel = APP_REQUEST_LABELS.detectEditCapability,
 }) {
   const checkApi = async (url) => {
     const { payload } = await fetchJsonApiRequest(
@@ -45,7 +46,7 @@ export async function loadDocIndexPayload({
   indexUrlCandidates = [],
   forceCacheBust = false,
   requestTimeoutMs = 10000,
-  requestLabel = '加载文档索引',
+  requestLabel = APP_REQUEST_LABELS.loadDocIndex,
 }) {
   let payload = null;
   let lastError = null;
@@ -76,10 +77,10 @@ export async function readDocSource({
   docApiUrl = '',
   pathValue = '',
   requestTimeoutMs = 10000,
-  requestLabel = '读取源码',
+  requestLabel = APP_REQUEST_LABELS.readSource,
 }) {
   if (!docApiUrl || !pathValue) {
-    throw new Error('读取源码请求参数不完整');
+    throw new Error(APP_ERROR_MESSAGES.readDocSourceParamsInvalid);
   }
   const { payload } = await fetchJsonApiRequest(
     `${docApiUrl}?path=${encodeURIComponent(pathValue)}`,
@@ -93,10 +94,10 @@ export async function readDocSource({
 export async function loadTemplateContent({
   templatePath = '',
   requestTimeoutMs = 10000,
-  requestLabel = '加载模板',
+  requestLabel = APP_REQUEST_LABELS.loadTemplate,
 }) {
   if (!templatePath) {
-    throw new Error('模板路径不能为空');
+    throw new Error(APP_ERROR_MESSAGES.templatePathRequired);
   }
 
   const normalizedTemplatePath = templatePath.startsWith('/') ? templatePath : `/${templatePath}`;
@@ -108,7 +109,7 @@ export async function loadTemplateContent({
   );
   const contentType = response.headers.get('content-type') || '';
   if (/text\/html/i.test(contentType)) {
-    throw new Error('模板内容不合法（返回了 HTML）');
+    throw new Error(APP_ERROR_MESSAGES.templateInvalidContentType);
   }
   return text;
 }
@@ -121,10 +122,10 @@ export async function writeDoc({
   expectedVersion = '',
   force = false,
   requestTimeoutMs = 10000,
-  requestLabel = '保存',
+  requestLabel = APP_REQUEST_LABELS.saveDoc,
 }) {
   if (!docApiUrl || !pathValue) {
-    throw new Error('保存请求参数不完整');
+    throw new Error(APP_ERROR_MESSAGES.saveDocParamsInvalid);
   }
 
   const body = {
@@ -160,10 +161,10 @@ export async function rebuildDocIndex({
   rebuildUrl = '',
   sourceFilter = '',
   requestTimeoutMs = 10000,
-  requestLabel = '重建索引',
+  requestLabel = APP_REQUEST_LABELS.rebuildIndex,
 }) {
   if (!rebuildUrl) {
-    throw new Error('重建请求参数不完整');
+    throw new Error(APP_ERROR_MESSAGES.rebuildIndexParamsInvalid);
   }
 
   const body = {

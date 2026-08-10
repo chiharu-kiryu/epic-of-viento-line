@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Epic of Viento Line 文档站</title>
+    <title>Epic of Viento Line</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="stylesheet" href="/web/styles.css" />
   </head>
@@ -14,20 +14,20 @@
           <div class="brand">
             <div class="brand-badge">EVL</div>
             <div class="brand-copy">
-              <h1>Epic of Viento Line 文档站</h1>
-              <p>Dota2 风格档案浏览 · 统一由 docs-standard 渲染</p>
+              <h1 id="siteTitle">Epic of Viento Line</h1>
+              <p id="siteSubtitle">Dota2 style archive · rendered by docs-standard</p>
             </div>
           </div>
-            <nav class="topbar-nav" aria-label="主导航">
-              <a href="#" aria-current="page">文档库</a>
-              <a href="#">英雄</a>
-              <a href="#">物品</a>
-              <a href="#">单位</a>
+            <nav id="topbarNav" class="topbar-nav" aria-label="—">
+              <a id="navCatalogLink" href="#" aria-current="page">—</a>
+              <a id="navHeroLink" href="#">—</a>
+              <a id="navItemLink" href="#">—</a>
+              <a id="navUnitLink" href="#">—</a>
             </nav>
-            <div id="modeSwitch" class="topbar-mode" role="group" aria-label="模式切换">
-              <button id="modeBrowseBtn" type="button" class="mode-btn mode-btn-active" data-mode="browse">浏览</button>
-              <button id="modeEditBtn" type="button" class="mode-btn" data-mode="edit">编辑</button>
-              <span id="modeStateChip" class="mode-state" aria-live="polite">浏览模式</span>
+            <div id="modeSwitch" class="topbar-mode" role="group" aria-label="—">
+              <button id="modeBrowseBtn" type="button" class="mode-btn mode-btn-active" data-mode="browse">—</button>
+              <button id="modeEditBtn" type="button" class="mode-btn" data-mode="edit">—</button>
+              <span id="modeStateChip" class="mode-state" aria-live="polite">—</span>
             </div>
           </div>
         </header>
@@ -36,78 +36,78 @@
           <div class="left-shell">
             <div class="toolbar">
               <div class="search-wrap">
-                <input id="searchInput" type="text" placeholder="搜索文档名 / 标签" />
-                <button id="searchClear" type="button" class="search-clear" aria-label="清空搜索" title="清空搜索">×</button>
+                <input id="searchInput" type="text" placeholder="—" />
+                <button id="searchClear" type="button" class="search-clear" aria-label="—" title="—">×</button>
               </div>
-              <div id="categoryTabs" class="tabs" role="tablist" aria-label="文档分类选项卡"></div>
+              <div id="categoryTabs" class="tabs" role="tablist" aria-label="—"></div>
               <div class="status-row">
-                <div id="status" class="status">正在加载文档索引...</div>
-                <button id="docLoadRetryBtn" type="button" class="doc-btn doc-btn-ghost doc-btn-small is-hidden" hidden>重试加载</button>
+                <div id="status" class="status">—</div>
+                <button id="docLoadRetryBtn" type="button" class="doc-btn doc-btn-ghost doc-btn-small is-hidden" hidden>—</button>
               </div>
               <div id="runtimeErrorPanel" class="runtime-error-panel is-hidden" hidden>
                 <div class="runtime-error-panel-head">
-                  <span>最近错误</span>
-                  <button id="runtimeErrorClearBtn" type="button" class="doc-btn doc-btn-ghost doc-btn-small" aria-label="清空错误记录">清空</button>
+                  <span id="runtimeErrorPanelTitle">—</span>
+                  <button id="runtimeErrorClearBtn" type="button" class="doc-btn doc-btn-ghost doc-btn-small" aria-label="—">—</button>
                 </div>
                 <div id="runtimeErrorList" class="runtime-error-list"></div>
               </div>
             </div>
-            <div class="left-stats" aria-label="列表统计">
+            <div id="leftStats" class="left-stats" aria-label="—">
               <article class="left-stat-card">
                 <div id="leftTotalStat" class="left-stat-value">—</div>
-                <div class="left-stat-label">库内文档</div>
+                <div id="leftTotalStatLabel" class="left-stat-label">—</div>
               </article>
               <article class="left-stat-card">
                 <div id="leftVisibleStat" class="left-stat-value">—</div>
-                <div class="left-stat-label">当前展示</div>
+                <div id="leftVisibleStatLabel" class="left-stat-label">—</div>
               </article>
             </div>
-            <div id="leftLegend" class="left-legend" aria-label="分类分布">
-              <div class="left-legend-title">分类分布</div>
+            <div id="leftLegend" class="left-legend" aria-label="—">
+              <div id="leftLegendTitle" class="left-legend-title">—</div>
               <div id="leftLegendBody" class="left-legend-body"></div>
             </div>
           </div>
-          <div id="docList" class="doc-list">加载中…</div>
+          <div id="docList" class="doc-list">—</div>
         </aside>
         <section class="right">
           <div class="content-frame">
             <div class="doc-meta">
               <div id="docMetaStrip" class="doc-meta-strip">
-                <span id="docTypeChip" class="doc-chip">未选择类型</span>
-                <span id="docGroupChip" class="doc-chip">未选择分组</span>
-                <span id="docPathChip" class="doc-chip">路径：—</span>
+                <span id="docTypeChip" class="doc-chip">—</span>
+                <span id="docGroupChip" class="doc-chip">—</span>
+                <span id="docPathChip" class="doc-chip">—</span>
               </div>
-              <div id="docTitle" class="doc-title">未选择文档</div>
-              <div id="docSubtitle" class="doc-subtitle">请选择左侧文档后查看细节</div>
+              <div id="docTitle" class="doc-title">—</div>
+              <div id="docSubtitle" class="doc-subtitle">—</div>
                 <div id="docEditPanel" class="doc-edit-panel is-hidden">
                   <div class="doc-edit-meta">
-                    <div id="docEditPath" class="doc-edit-path muted">可编辑源：—</div>
-                    <span id="docEditDirtyIndicator" class="doc-edit-dirty-indicator is-hidden" aria-live="polite">未保存</span>
+                    <div id="docEditPath" class="doc-edit-path muted">—</div>
+                    <span id="docEditDirtyIndicator" class="doc-edit-dirty-indicator is-hidden" aria-live="polite">—</span>
                 <div id="docEditActions" class="doc-edit-actions">
-                    <button id="docCreateBtn" type="button" class="doc-btn doc-btn-ghost">新建文档</button>
-                    <button id="docEditBtn" type="button" class="doc-btn">编辑</button>
-                    <button id="docSaveBtn" type="button" class="doc-btn doc-btn-success">保存</button>
-                    <button id="docCancelBtn" type="button" class="doc-btn doc-btn-ghost">取消</button>
-                    <button id="docRebuildBtn" type="button" class="doc-btn doc-btn-ghost">重建索引</button>
+                    <button id="docCreateBtn" type="button" class="doc-btn doc-btn-ghost">—</button>
+                    <button id="docEditBtn" type="button" class="doc-btn">—</button>
+                    <button id="docSaveBtn" type="button" class="doc-btn doc-btn-success">—</button>
+                    <button id="docCancelBtn" type="button" class="doc-btn doc-btn-ghost">—</button>
+                    <button id="docRebuildBtn" type="button" class="doc-btn doc-btn-ghost">—</button>
                   </div>
                 </div>
                 <div id="docCreateTypeWrap" class="doc-create-type-wrap is-hidden">
-                  <label for="docCreateTypeSelect" class="doc-create-type-label">新建类型</label>
+                  <label id="docCreateTypeLabel" for="docCreateTypeSelect" class="doc-create-type-label">—</label>
                   <select id="docCreateTypeSelect" class="doc-create-type-select">
-                    <option value="hero">英雄</option>
+                    <option value="hero">Hero</option>
                   </select>
                 </div>
                 <div id="docCreatePathWrap" class="doc-create-path-wrap is-hidden">
-                  <label for="docCreatePathInput" class="doc-create-path-label">新建路径（例如: design-data/xxx.txt）</label>
-                  <input id="docCreatePathInput" class="doc-create-path-input" type="text" placeholder="design-data/xxx.txt" />
+                  <label id="docCreatePathLabel" for="docCreatePathInput" class="doc-create-path-label">—</label>
+                  <input id="docCreatePathInput" class="doc-create-path-input" type="text" placeholder="—" />
                 </div>
                 <div id="docEditModeBar" class="doc-edit-mode-bar is-hidden">
-                  <button id="docEditSourceModeBtn" type="button" class="doc-btn doc-btn-ghost doc-btn-active" data-mode="source">源码</button>
-                  <button id="docEditBlockModeBtn" type="button" class="doc-btn doc-btn-ghost" data-mode="blocks">区块</button>
+                  <button id="docEditSourceModeBtn" type="button" class="doc-btn doc-btn-ghost doc-btn-active" data-mode="source">—</button>
+                  <button id="docEditBlockModeBtn" type="button" class="doc-btn doc-btn-ghost" data-mode="blocks">—</button>
                 </div>
                 <div id="docBlockEditor" class="doc-block-editor is-hidden" aria-live="polite"></div>
                 <div id="docEditorWrap" class="doc-editor-wrap">
-                  <textarea id="docSourceEditor" class="doc-editor" rows="14" spellcheck="false" placeholder="编辑文档内容"></textarea>
+                  <textarea id="docSourceEditor" class="doc-editor" rows="14" spellcheck="false" placeholder="—"></textarea>
                 </div>
                 <div id="docEditStatus" class="doc-edit-status"></div>
               </div>
@@ -116,22 +116,22 @@
             <div id="metaCards" class="meta-grid"></div>
             <div id="sectionCards" class="meta-grid"></div>
             <div id="heroGallery" class="gallery"></div>
-            <pre id="docContent" class="content">请先在左侧选择一份文档。</pre>
+            <pre id="docContent" class="content">—</pre>
           </div>
         </section>
       </main>
     </div>
     <div id="docSaveConflictDialog" class="doc-conflict-overlay is-hidden" role="dialog" aria-modal="true" aria-labelledby="docSaveConflictDialogTitle" aria-describedby="docSaveConflictDialogMessage">
       <div class="doc-conflict-backdrop"></div>
-      <div class="doc-conflict-dialog" role="document">
-        <h3 id="docSaveConflictDialogTitle" class="doc-conflict-title">保存冲突</h3>
+        <div class="doc-conflict-dialog" role="document">
+        <h3 id="docSaveConflictDialogTitle" class="doc-conflict-title">—</h3>
         <p id="docSaveConflictDialogMessage" class="doc-conflict-message"></p>
         <div id="docSaveConflictDialogWarning" class="doc-conflict-warning is-hidden" aria-live="polite"></div>
         <div class="doc-conflict-actions">
-          <button id="docSaveConflictReloadBtn" type="button" class="doc-btn doc-btn-ghost" data-save-conflict-action="1">载入最新（放弃草稿）</button>
-          <button id="docSaveConflictKeepBtn" type="button" class="doc-btn" data-save-conflict-action="2">保留草稿</button>
-          <button id="docSaveConflictForceBtn" type="button" class="doc-btn doc-btn-danger" data-save-conflict-action="3">强制覆盖</button>
-          <button id="docSaveConflictCancelBtn" type="button" class="doc-btn doc-btn-ghost" data-save-conflict-action="cancel">取消</button>
+          <button id="docSaveConflictReloadBtn" type="button" class="doc-btn doc-btn-ghost" data-save-conflict-action="1">—</button>
+          <button id="docSaveConflictKeepBtn" type="button" class="doc-btn" data-save-conflict-action="2">—</button>
+          <button id="docSaveConflictForceBtn" type="button" class="doc-btn doc-btn-danger" data-save-conflict-action="3">—</button>
+          <button id="docSaveConflictCancelBtn" type="button" class="doc-btn doc-btn-ghost" data-save-conflict-action="cancel">—</button>
         </div>
       </div>
     </div>

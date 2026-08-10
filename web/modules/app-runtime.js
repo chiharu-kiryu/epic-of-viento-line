@@ -12,6 +12,8 @@ import {
   ASSET_BASE_URL,
   EDITABLE_SOURCE_PREFIXES,
   APP_ERROR_MESSAGES,
+  APP_REQUEST_LABELS,
+  APP_RUNTIME_TEXTS,
 } from './app-state.js';
 import {
   getHeroDisplayDocs,
@@ -103,11 +105,14 @@ const {
   runtimeErrorClearBtnEl,
 } = domElements;
 
-const REBUILD_TEXT = '重建索引';
 const SEARCH_INPUT_DEBOUNCE_MS = 180;
 const LIST_RENDER_BATCH_SIZE = 120;
 const LIST_ERROR_SUMMARY_VISIBLE_ENTRIES = 3;
 const LIST_ERROR_SUMMARY_AUTO_OPEN_THRESHOLD = 8;
+const LIST_UI_TEXT = APP_RUNTIME_TEXTS.list;
+const LIST_ERROR_SUMMARY_TEXTS = APP_RUNTIME_TEXTS.list.summary;
+const REBUILD_TEXT = APP_REQUEST_LABELS.rebuildIndex;
+const PAGE_UI_TEXTS = APP_RUNTIME_TEXTS.pageShell;
 const DATA_INDEX_REQUEST_TIMEOUT_MS = 12000;
 const CAPABILITIES_REQUEST_TIMEOUT_MS = 5000;
 const RUNTIME_ERROR_PANEL_LIMIT = 12;
@@ -178,7 +183,7 @@ function setListText(message = '') {
 }
 
 function renderListSkeletonMarkup(message = '') {
-  const safeMessage = normalizeDisplayValue(message) || '正在加载文档列表…';
+  const safeMessage = normalizeDisplayValue(message) || LIST_UI_TEXT.status.skeleton;
   const rowsHtml = `
     <div class="doc-list-skeleton" role="status" aria-live="polite">
       <div class="doc-list-skeleton-message">${safeMessage}</div>
@@ -192,7 +197,7 @@ function setListSkeletonState(message = '') {
   if (!listEl) {
     return;
   }
-  listSkeletonRenderState = normalizeDisplayValue(message) || '正在加载文档列表…';
+  listSkeletonRenderState = normalizeDisplayValue(message) || LIST_UI_TEXT.status.skeleton;
   listEl.innerHTML = renderListSkeletonMarkup(listSkeletonRenderState);
 }
 
@@ -200,7 +205,7 @@ function clearListSkeletonState() {
   listSkeletonRenderState = null;
 }
 
-function formatListRenderErrorSummary(totalErrorCount, errorCountsByContext, topCount = 3) {
+function formatListRenderErrorSummary(totalErrorCount, errorCountsByContext, topCount = LIST_ERROR_SUMMARY_VISIBLE_ENTRIES) {
   if (!totalErrorCount) {
     return '';
   }
@@ -209,7 +214,130 @@ function formatListRenderErrorSummary(totalErrorCount, errorCountsByContext, top
     .slice(0, topCount)
     .map(([context, count]) => `${context}（${count}）`)
     .join('、');
-  return `列表渲染异常：${totalErrorCount}处问题${topContexts ? `，集中在：${topContexts}` : ''}`;
+  return `${LIST_ERROR_SUMMARY_TEXTS.label}：${totalErrorCount}${LIST_ERROR_SUMMARY_TEXTS.unitLabel}${topContexts ? `${LIST_ERROR_SUMMARY_TEXTS.topLabel}${topContexts}` : ''}`;
+}
+
+function setTextContentById(elementId, value) {
+  const el = document.getElementById(elementId);
+  if (!el) {
+    return;
+  }
+  el.textContent = normalizeDisplayValue(value);
+}
+
+function setAttributeById(elementId, attrName, value) {
+  const el = document.getElementById(elementId);
+  if (!el) {
+    return;
+  }
+  const safeValue = normalizeDisplayValue(value);
+  if (!safeValue) {
+    el.removeAttribute(attrName);
+    return;
+  }
+  el.setAttribute(attrName, safeValue);
+}
+
+function setStaticUiTexts() {
+  const ui = PAGE_UI_TEXTS || {};
+  if (!ui || typeof ui !== 'object') {
+    return;
+  }
+
+  if (ui.documentTitle) {
+    document.title = ui.documentTitle;
+  }
+
+  setTextContentById('siteTitle', ui.siteTitle);
+  setTextContentById('siteSubtitle', ui.siteSubtitle);
+
+  setAttributeById('topbarNav', 'aria-label', ui.topbarNavAriaLabel);
+  setTextContentById('navCatalogLink', ui.navCatalog);
+  setTextContentById('navHeroLink', ui.navHero);
+  setTextContentById('navItemLink', ui.navItem);
+  setTextContentById('navUnitLink', ui.navUnit);
+
+  setAttributeById('modeSwitch', 'aria-label', ui.modeSwitchAriaLabel);
+  if (modeBrowseBtnEl) {
+    modeBrowseBtnEl.textContent = ui.modeBrowseBtn || APP_RUNTIME_TEXTS.modeState.browse;
+  }
+  if (modeEditBtnEl) {
+    modeEditBtnEl.textContent = ui.modeEditBtn || APP_RUNTIME_TEXTS.editButtons.editText;
+  }
+  setTextContentById('modeStateChip', APP_RUNTIME_TEXTS.modeState.browse);
+
+  if (searchInput) {
+    searchInput.placeholder = ui.searchPlaceholder || searchInput.placeholder;
+  }
+  setAttributeById('searchClear', 'aria-label', ui.searchClearAria || ui.searchClearText);
+  setAttributeById('searchClear', 'title', ui.searchClearText);
+
+  setAttributeById('categoryTabs', 'aria-label', ui.categoryTabsAriaLabel);
+  setTextContentById('status', LIST_UI_TEXT.status.loadingIndex);
+
+  setTextContentById('runtimeErrorPanelTitle', ui.runtimeErrorTitle);
+  if (runtimeErrorClearBtnEl) {
+    runtimeErrorClearBtnEl.textContent = ui.runtimeErrorClearText || runtimeErrorClearBtnEl.textContent;
+    setAttributeById('runtimeErrorClearBtn', 'aria-label', ui.runtimeErrorClearAria || ui.runtimeErrorClearText);
+  }
+  setTextContentById('docLoadRetryBtn', LIST_UI_TEXT.actions.retryText);
+  setAttributeById('docLoadRetryBtn', 'aria-label', LIST_UI_TEXT.actions.retryListTitle);
+
+  setAttributeById('leftStats', 'aria-label', ui.leftPanelAriaLabel);
+  setTextContentById('leftTotalStatLabel', ui.totalDocsLabel);
+  setTextContentById('leftVisibleStatLabel', ui.visibleDocsLabel);
+  setAttributeById('leftLegend', 'aria-label', ui.legendAriaLabel);
+  setTextContentById('leftLegendTitle', ui.legendTitle);
+
+  if (listEl) {
+    listEl.textContent = ui.docListLoadingPlaceholder || LIST_UI_TEXT.status.loadingList;
+  }
+  setTextContentById('docTypeChip', ui.docTypeChipPlaceholder);
+  setTextContentById('docGroupChip', ui.docGroupChipPlaceholder);
+  const docPathChipPrefix = ui.docPathChipPrefix || LIST_UI_TEXT.status.pathChipPrefix || '路径';
+  const docPathChipSuffix = ui.docPathChipSuffix || '—';
+  setTextContentById('docPathChip', `${docPathChipPrefix}：${docPathChipSuffix}`);
+  setTextContentById('docTitle', ui.docTitlePlaceholder);
+  setTextContentById('docSubtitle', ui.docSubtitlePlaceholder);
+  if (editPathEl) {
+    editPathEl.textContent = ui.editableSourcePrefixPlaceholder;
+  }
+  setTextContentById('docEditDirtyIndicator', ui.unsavedIndicatorText);
+
+  if (editCreateBtnEl) {
+    editCreateBtnEl.textContent = ui.createButtonText;
+  }
+  if (editBtnEl) {
+    editBtnEl.textContent = ui.editButtonText;
+  }
+  if (editSaveBtnEl) {
+    editSaveBtnEl.textContent = ui.saveButtonText;
+  }
+  if (editCancelBtnEl) {
+    editCancelBtnEl.textContent = ui.cancelButtonText;
+  }
+  if (editRebuildBtnEl) {
+    editRebuildBtnEl.textContent = ui.rebuildIndexButtonText;
+  }
+
+  setTextContentById('docCreateTypeLabel', ui.createTypeLabelText);
+  setTextContentById('docCreatePathLabel', ui.createPathLabelText);
+  setAttributeById('docCreatePathInput', 'placeholder', ui.createPathPlaceholder);
+
+  if (editSourceModeBtnEl) {
+    editSourceModeBtnEl.textContent = ui.sourceModeText;
+  }
+  if (editBlockModeBtnEl) {
+    editBlockModeBtnEl.textContent = ui.blockModeText;
+  }
+  setAttributeById('docSourceEditor', 'placeholder', ui.editorPlaceholderText);
+  setTextContentById('docContent', ui.contentPlaceholderText);
+
+  setTextContentById('docSaveConflictDialogTitle', ui.conflictDialogTitle);
+  setTextContentById('docSaveConflictReloadBtn', ui.conflictReloadActionText);
+  setTextContentById('docSaveConflictKeepBtn', ui.conflictKeepActionText);
+  setTextContentById('docSaveConflictForceBtn', ui.conflictForceActionText);
+  setTextContentById('docSaveConflictCancelBtn', ui.conflictCancelActionText);
 }
 
 function createListErrorSummaryNode(totalErrorCount, errorCountsByContext) {
@@ -224,7 +352,7 @@ function createListErrorSummaryNode(totalErrorCount, errorCountsByContext) {
 
   detailsNode.className = 'doc-list-error-summary';
   summaryNode.className = 'doc-list-error-summary-title';
-  summaryNode.textContent = `列表渲染异常：${totalErrorCount}处问题`;
+  summaryNode.textContent = `${LIST_ERROR_SUMMARY_TEXTS.label}：${totalErrorCount}${LIST_ERROR_SUMMARY_TEXTS.unitLabel}`;
   bodyNode.className = 'doc-list-error-summary-body';
 
   const sortedEntries = [...errorCountsByContext.entries()].sort((a, b) => b[1] - a[1]);
@@ -233,7 +361,7 @@ function createListErrorSummaryNode(totalErrorCount, errorCountsByContext) {
 
   for (const [context, count] of visibleEntries) {
     const listItem = document.createElement('li');
-    listItem.textContent = `${context}：${count}次`;
+    listItem.textContent = LIST_ERROR_SUMMARY_TEXTS.countTemplate(context, count);
     listNode.appendChild(listItem);
   }
 
@@ -245,11 +373,11 @@ function createListErrorSummaryNode(totalErrorCount, errorCountsByContext) {
 
     moreNode.className = 'doc-list-error-summary-more';
     moreSummary.className = 'doc-list-error-summary-more-title';
-    moreSummary.textContent = `更多 ${hiddenEntries.length} 项（展开）`;
+    moreSummary.textContent = `${LIST_ERROR_SUMMARY_TEXTS.moreLabel} ${hiddenEntries.length} ${LIST_ERROR_SUMMARY_TEXTS.moreSuffix}`;
 
     for (const [context, count] of hiddenEntries) {
       const listItem = document.createElement('li');
-      listItem.textContent = `${context}：${count}次`;
+      listItem.textContent = LIST_ERROR_SUMMARY_TEXTS.countTemplate(context, count);
       moreList.appendChild(listItem);
     }
 
@@ -281,7 +409,7 @@ function showLoadRetry(statusMessage, listMessage, mode = 'normal') {
     loadRetryBtnEl.disabled = false;
     loadRetryBtnEl.classList.remove('is-loading');
     loadRetryBtnEl.dataset.retryMode = isForceMode ? 'force' : 'normal';
-    loadRetryBtnEl.textContent = isForceMode ? '清缓存重试' : '重试加载';
+    loadRetryBtnEl.textContent = isForceMode ? LIST_UI_TEXT.actions.retryForceText : LIST_UI_TEXT.actions.retryText;
   }
 }
 
@@ -306,7 +434,7 @@ async function retryLoadData({ forceCacheBust = false } = {}) {
     loadRetryBtnEl.disabled = true;
     loadRetryBtnEl.classList.add('is-loading');
   }
-  setLoadingState('正在重试加载文档索引...', '重试加载中…');
+  setLoadingState(LIST_UI_TEXT.status.retryIndex, LIST_UI_TEXT.status.retryLoading);
   hideLoadRetry();
   await loadData({
     isRetryAttempt: true,
@@ -362,7 +490,7 @@ function getFriendlyLoadErrorMessage(error) {
 }
 
 function logRuntimeError(context, error) {
-  const contextText = normalizeDisplayValue(context) || '运行时';
+  const contextText = normalizeDisplayValue(context) || APP_ERROR_MESSAGES.runtimeContextDefault;
   const message = getFriendlyRequestError(error);
   if (!message || !runtimeErrorPanelEl || !runtimeErrorListEl) {
     return message;
@@ -629,10 +757,10 @@ function renderConflictMessagePayload(conflictPayload) {
     : formatVersionForConflict(currentVersion);
 
   return [
-    `保存冲突：文档已被其他会话更新（最新版本：${latestLabel}）。`,
-    '1) 载入服务器最新内容并放弃当前草稿',
-    '2) 保留当前草稿，放弃这次保存',
-    '3) 强制覆盖（会覆盖他人最新修改，存在风险）',
+    APP_ERROR_MESSAGES.saveConflictHeader(latestLabel),
+    APP_ERROR_MESSAGES.saveConflictOptions.loadLatest,
+    APP_ERROR_MESSAGES.saveConflictOptions.keepDraft,
+    APP_ERROR_MESSAGES.saveConflictOptions.forceSave,
   ].join('\n');
 }
 
@@ -644,10 +772,10 @@ function renderForceConfirmMessagePayload(conflictPayload) {
     : formatVersionForConflict(currentVersion);
 
   return [
-    `确定要执行“强制覆盖”吗？`,
-    `目标版本：${latestLabel}`,
-    '强制覆盖将覆盖该版本内容，可能覆盖其他编辑者的最新修改。',
-    '请再次确认，是否继续？',
+    APP_ERROR_MESSAGES.forceSaveConfirmMessages.confirmTitle,
+    `${APP_ERROR_MESSAGES.forceSaveConfirmMessages.versionLabelPrefix}${latestLabel}`,
+    APP_ERROR_MESSAGES.forceSaveConfirmMessages.overwriteWarn,
+    APP_ERROR_MESSAGES.forceSaveConfirmMessages.finalConfirm,
   ].join('\n');
 }
 
@@ -663,7 +791,9 @@ function setSaveConflictDialogMode(mode = 'default') {
   const isForceConfirm = mode === 'force';
   saveConflictDialogReloadBtnEl.classList.toggle('is-hidden', isForceConfirm);
   saveConflictDialogKeepBtnEl.classList.toggle('is-hidden', isForceConfirm);
-  saveConflictDialogForceBtnEl.textContent = isForceConfirm ? '确认覆盖' : '强制覆盖';
+  saveConflictDialogForceBtnEl.textContent = isForceConfirm
+    ? APP_ERROR_MESSAGES.forceSaveConfirmMessages.forceButton
+    : APP_ERROR_MESSAGES.forceSaveActionButton;
   saveConflictDialogEl.classList.toggle('doc-conflict-force', isForceConfirm);
   if (saveConflictDialogTitleEl) {
     saveConflictDialogTitleEl.classList.toggle('doc-conflict-dialog-title-danger', isForceConfirm);
@@ -671,7 +801,7 @@ function setSaveConflictDialogMode(mode = 'default') {
   if (saveConflictDialogWarningEl) {
     saveConflictDialogWarningEl.classList.toggle('is-hidden', !isForceConfirm);
     if (isForceConfirm) {
-      saveConflictDialogWarningEl.textContent = '⚠️ 危险操作：此操作会覆盖当前已存在的版本。请确认无误后再继续。';
+      saveConflictDialogWarningEl.textContent = APP_ERROR_MESSAGES.forceSaveConfirmMessages.forceWarning;
     }
   }
 }
@@ -706,7 +836,9 @@ function openSaveConflictDialog(conflictPayload, options = {}) {
     resolveSaveConflictAction('cancel');
   }
 
-  saveConflictDialogTitleEl.textContent = mode === 'force' ? '强制覆盖确认' : '保存冲突';
+  saveConflictDialogTitleEl.textContent = mode === 'force'
+    ? APP_ERROR_MESSAGES.forceSaveConfirmTitle
+    : APP_ERROR_MESSAGES.saveConflictTitle;
   saveConflictDialogMessageEl.textContent = mode === 'force'
     ? renderForceConfirmMessagePayload(conflictPayload)
     : renderConflictMessagePayload(conflictPayload);
@@ -729,7 +861,7 @@ async function handleSaveConflict(doc, conflictPayload) {
   if (normalizedAction === '1') {
     const reloaded = await syncDocEditorSource(doc);
     if (reloaded?.error) {
-      setEditorStatus(`读取最新内容失败：${reloaded.error}`);
+      setEditorStatus(`${APP_ERROR_MESSAGES.readLatestSourceFailure}：${reloaded.error}`);
       return 'cancel';
     }
     state.activeEditSourceVersion = currentVersion || state.activeEditSourceVersion;
@@ -741,12 +873,12 @@ async function handleSaveConflict(doc, conflictPayload) {
       forceSourceRefresh: true,
     });
     setEditSessionClean(editEditorEl ? editEditorEl.value : '', state.activeEditSourceVersion);
-    setEditorStatus('已加载服务器最新内容，你可以基于该内容继续编辑并保存。');
+    setEditorStatus(APP_ERROR_MESSAGES.conflictReloadMessage);
     return 'reload';
   }
 
   if (normalizedAction === '2') {
-    setEditorStatus('已保留当前草稿，请在确认内容后重试保存。');
+    setEditorStatus(APP_ERROR_MESSAGES.conflictKeepDraftMessage);
     return 'keep';
   }
 
@@ -789,7 +921,7 @@ function updateEditUnsavedUi() {
   }
 }
 
-function confirmDiscardUnsavedChanges(message = '放弃后，当前编辑未保存内容将丢失，是否继续？') {
+function confirmDiscardUnsavedChanges(message = APP_ERROR_MESSAGES.unsavedConfirmDefault) {
   if (!state.editHasUnsavedChanges) {
     return true;
   }
@@ -816,22 +948,22 @@ function setModeUi() {
   if (modeStateEl) {
     if (isEditMode) {
       if (!state.editBackendAvailable) {
-        modeStateEl.textContent = '编辑模式（后端未接入）';
+        modeStateEl.textContent = APP_RUNTIME_TEXTS.modeState.editBackendUnavailable;
       } else if (!activeDoc) {
-        modeStateEl.textContent = '编辑模式（请选择文档）';
+        modeStateEl.textContent = APP_RUNTIME_TEXTS.modeState.editNoDoc;
       } else if (activeDocEditable) {
-        modeStateEl.textContent = '编辑模式';
+        modeStateEl.textContent = APP_RUNTIME_TEXTS.modeState.editActive;
       } else {
-        modeStateEl.textContent = '编辑模式（当前文档不可编辑）';
+        modeStateEl.textContent = APP_RUNTIME_TEXTS.modeState.editDocReadonly;
       }
     } else if (state.editBackendAvailable) {
-      modeStateEl.textContent = '浏览模式';
+      modeStateEl.textContent = APP_RUNTIME_TEXTS.modeState.browse;
     } else {
-      modeStateEl.textContent = '浏览模式（编辑接口不可用）';
+      modeStateEl.textContent = APP_RUNTIME_TEXTS.modeState.browseNoEditApi;
     }
   }
   if (modeSwitchEl && !state.editBackendAvailable) {
-    modeEditBtnEl?.setAttribute('title', '编辑模式需要启动 /api 服务');
+    modeEditBtnEl?.setAttribute('title', APP_RUNTIME_TEXTS.modeState.editModeNeedBackendTitle);
   } else if (modeEditBtnEl) {
     modeEditBtnEl.removeAttribute('title');
   }
@@ -845,7 +977,7 @@ function setMode(requestedMode, options = {}) {
   const prevMode = state.mode;
 
   if (prevMode === 'edit' && finalMode === 'browse' && (state.isEditing || state.isCreating)) {
-    if (!confirmDiscardUnsavedChanges('当前有未保存内容，切换到浏览模式将丢失这些修改，是否继续？')) {
+    if (!confirmDiscardUnsavedChanges(APP_ERROR_MESSAGES.discardUnsavedModeExit)) {
       return;
     }
   }
@@ -904,7 +1036,7 @@ async function detectEditBackend() {
     capabilitiesUrl: DOC_CAPABILITIES_URL,
     healthUrl: DOC_HEALTH_URL,
     requestTimeoutMs: CAPABILITIES_REQUEST_TIMEOUT_MS,
-    requestLabel: '检测编辑能力',
+    requestLabel: APP_REQUEST_LABELS.detectEditCapability,
   });
 }
 
@@ -963,7 +1095,7 @@ function normalizeCreatePathValue(rawPath) {
 }
 
 function getCreateTypeLabel(type = '') {
-  return CATEGORY_LABELS[type] || type || '其他';
+  return CATEGORY_LABELS[type] || type || APP_RUNTIME_TEXTS.list.otherFallback;
 }
 
 function getCreateTypeDisplayList() {
@@ -977,38 +1109,14 @@ function getCreateTypeDisplayList() {
 function getCreateDefaultNameByType(type = '') {
   const template = getDocTemplate(type);
   if (!template) {
-    return '新建文档';
+    return APP_RUNTIME_TEXTS.create.defaultName;
   }
-  if (type === 'hero') {
-    return '新建英雄';
-  }
-  if (type === 'item') {
-    return '新建物品';
-  }
-  if (type === 'unit') {
-    return '新建单位';
-  }
-  if (type === 'skill') {
-    return '新建技能';
-  }
-  if (type === 'building') {
-    return '新建建筑';
-  }
-  if (type === 'backstory') {
-    return '新建背景故事';
-  }
-  if (type === 'scene') {
-    return '新建场景';
-  }
-  if (type === 'rule') {
-    return '新建规则';
-  }
-  if (type === 'template') {
-    return '新建模板';
+  if (APP_RUNTIME_TEXTS.create[type]) {
+    return APP_RUNTIME_TEXTS.create[type];
   }
   return template.templateSource && template.templateSource.includes('场景')
-    ? '新建场景'
-    : `新建${getCreateTypeLabel(type)}`;
+    ? APP_RUNTIME_TEXTS.create.fallbackSceneByTemplateSource
+    : `${APP_RUNTIME_TEXTS.create.prefix}${getCreateTypeLabel(type)}`;
 }
 
 function normalizeCreateType(rawType = '') {
@@ -1153,13 +1261,13 @@ async function loadCreateTypeTemplate(type = '') {
     const content = await loadTemplateContent({
       templatePath,
       requestTimeoutMs: DATA_INDEX_REQUEST_TIMEOUT_MS,
-      requestLabel: '模板加载',
+      requestLabel: APP_REQUEST_LABELS.templateLoad,
     });
     createTemplateCache.set(templatePath, content);
     createTemplateLoadErrorCache.delete(templatePath);
     return content;
   } catch (error) {
-    createTemplateLoadErrorCache.set(templatePath, logRuntimeErrorOrMessage('模板加载', error));
+    createTemplateLoadErrorCache.set(templatePath, logRuntimeErrorOrMessage(APP_REQUEST_LABELS.templateLoad, error));
     createTemplateCache.set(templatePath, '');
     return '';
   }
@@ -1180,7 +1288,7 @@ async function applyCreateTemplate(type = '') {
   state.activeCreateType = normalizedType;
 
   if (templateContent === '' && createTemplateLoadErrorCache.has(templatePath) && isInEditSession()) {
-    setEditorStatus(`模板加载失败，已使用空模板：${createTemplateLoadErrorCache.get(templatePath)}`);
+    setEditorStatus(`${APP_ERROR_MESSAGES.templateLoadFallback}：${createTemplateLoadErrorCache.get(templatePath)}`);
   }
 }
 
@@ -1200,7 +1308,7 @@ async function setCreateTypeState(type = '', options = {}) {
   const finalPath = setCreatePath(suggestedPath, '', true);
 
   if (editPathEl) {
-    editPathEl.textContent = `新建源（${getCreateTypeLabel(nextType)}）：${finalPath}`;
+    editPathEl.textContent = `${APP_RUNTIME_TEXTS.create.sourcePrefix}${getCreateTypeLabel(nextType)}${APP_RUNTIME_TEXTS.create.sourceTypeSuffix}${finalPath}`;
   }
   state.activeCreatePath = finalPath;
 
@@ -1246,21 +1354,21 @@ function isInvalidCreatePath(pathValue) {
     return APP_ERROR_MESSAGES.createPathRequired;
   }
   if (normalizedPath.startsWith('/') || /^[A-Za-z]:\//.test(normalizedPath)) {
-    return '路径不能是绝对路径';
+    return APP_ERROR_MESSAGES.createPathValidation.absolutePath;
   }
   const segments = normalizedPath.split('/').filter(Boolean);
   if (segments.some((segment) => segment === '.' || segment === '..')) {
-    return '路径不能包含 . 或 .. 路径段';
+    return APP_ERROR_MESSAGES.createPathValidation.dotSegment;
   }
   if (!normalizedPath.startsWith('design-data/')
     && !normalizedPath.startsWith('docs-standard/design-data/')) {
-    return '路径必须以 design-data/ 或 docs-standard/design-data/ 开头';
+    return APP_ERROR_MESSAGES.createPathValidation.basePrefix;
   }
   if (normalizedPath.endsWith('/')) {
-    return '路径不能以 / 结尾';
+    return APP_ERROR_MESSAGES.createPathValidation.trailingSlash;
   }
   if (/[<>:"|?*]/.test(normalizedPath)) {
-    return '路径包含非法字符';
+    return APP_ERROR_MESSAGES.createPathValidation.invalidChars;
   }
   return '';
 }
@@ -1335,7 +1443,7 @@ function startRebuildProgressIndicator() {
   const refreshProgress = () => {
     const elapsedText = formatElapsedSeconds(rebuildProgressStart);
     if (editRebuildBtnEl && editRebuildBtnEl.hidden === false) {
-      editRebuildBtnEl.textContent = `重建中 ${elapsedText}`;
+      editRebuildBtnEl.textContent = `${APP_ERROR_MESSAGES.rebuildInProgress} ${elapsedText}`;
     }
     setEditorStatus(`${APP_ERROR_MESSAGES.rebuildStarting} ${formatElapsedSeconds(rebuildProgressStart)}`);
   };
@@ -1629,7 +1737,7 @@ function renderBlockEditor(doc) {
     return;
   }
   if (!doc || !hasStructuredBlocks(doc)) {
-    editBlockEditorEl.innerHTML = '<div class="doc-edit-status">该文档暂无可编辑结构区块，可直接切到源码模式修改。</div>';
+    editBlockEditorEl.innerHTML = `<div class="doc-edit-status">${APP_RUNTIME_TEXTS.editBlock.noBlockHint}</div>`;
     state.editBlockDrafts = [];
     blockDraftSourcePath = '';
     return;
@@ -1643,7 +1751,7 @@ function renderBlockEditor(doc) {
     item.className = 'doc-block-editor-item';
     const label = document.createElement('div');
     label.className = 'doc-block-editor-label';
-    label.textContent = `区块 ${index + 1} · ${block.type || 'text'}`;
+    label.textContent = `${APP_RUNTIME_TEXTS.editBlock.blockTypePrefix} ${index + 1} ${APP_RUNTIME_TEXTS.editBlock.blockTypeSeparator} ${block.type || APP_RUNTIME_TEXTS.editBlock.defaultBlockType}`;
     const editor = document.createElement('textarea');
     editor.className = 'doc-block-editor-text';
     editor.rows = 6;
@@ -1807,7 +1915,7 @@ function resetDocEditorState() {
   if (editBtnEl) {
     editBtnEl.hidden = false;
     editBtnEl.disabled = false;
-    editBtnEl.textContent = '编辑';
+    editBtnEl.textContent = APP_RUNTIME_TEXTS.editButtons.editText;
   }
   if (editSaveBtnEl) {
     editSaveBtnEl.hidden = true;
@@ -1850,7 +1958,7 @@ function updateSearchClearState() {
 }
 
 function categoryLabel(category) {
-  return CATEGORY_LABELS[getDisplayCategory({ category })] || CATEGORY_LABELS[category] || category || '其他';
+  return CATEGORY_LABELS[getDisplayCategory({ category })] || CATEGORY_LABELS[category] || category || APP_RUNTIME_TEXTS.list.otherFallback;
 }
 
 function updateLeftPanelStatsFromGroups(groupMap, filteredCount = 0) {
@@ -1876,7 +1984,7 @@ function updateLeftPanelStatsFromGroups(groupMap, filteredCount = 0) {
   }
 
   if (countMap.size === 0) {
-    leftLegendBodyEl.innerHTML = '<span class="left-legend-item">暂无命中文档</span>';
+    leftLegendBodyEl.innerHTML = `<span class="left-legend-item">${APP_RUNTIME_TEXTS.listMeta.noMatchStatus}</span>`;
     return;
   }
 
@@ -2155,7 +2263,7 @@ function buildHeroSkillCards(doc) {
   card.className = 'meta-card';
 
   const heading = document.createElement('h3');
-  heading.textContent = '技能图标与说明';
+  heading.textContent = APP_RUNTIME_TEXTS.heroSkill.heading;
   card.appendChild(heading);
 
   const list = document.createElement('div');
@@ -2167,7 +2275,7 @@ function buildHeroSkillCards(doc) {
 
     const media = document.createElement('div');
     media.className = 'hero-skill-media';
-    const iconLabel = normalizeDisplayValue(item.name || item.key || '技能');
+    const iconLabel = normalizeDisplayValue(item.name || item.key || APP_RUNTIME_TEXTS.heroSkill.fallbackName);
     const fallbackIconPath = getHeroSkillImagePlaceholderPath(doc, iconLabel);
     const fallbackIconDataUrl = getNameAvatarDataUrl(iconLabel);
     const applyFallback = (imgEl) => {
@@ -2192,7 +2300,7 @@ function buildHeroSkillCards(doc) {
       const img = document.createElement('img');
       img.loading = 'lazy';
       img.src = new URL(item.icon, ASSET_BASE_URL).href;
-      img.alt = `${item.name || item.key || '技能'}图标`;
+      img.alt = `${item.name || item.key || APP_RUNTIME_TEXTS.heroSkill.fallbackName}${APP_RUNTIME_TEXTS.heroSkill.mediaImageAltSuffix}`;
       img.onerror = () => applyFallback(img);
       media.appendChild(img);
     } else {
@@ -2204,7 +2312,7 @@ function buildHeroSkillCards(doc) {
       } else {
         placeholder.src = fallbackIconDataUrl;
       }
-      placeholder.alt = `${iconLabel || '技能'} 占位图`;
+      placeholder.alt = `${iconLabel || APP_RUNTIME_TEXTS.heroSkill.fallbackName} ${APP_RUNTIME_TEXTS.heroSkill.mediaPlaceholderSuffix}`;
       placeholder.onerror = () => applyFallback(placeholder);
       media.appendChild(placeholder);
     }
@@ -2214,7 +2322,7 @@ function buildHeroSkillCards(doc) {
 
     const title = document.createElement('div');
     title.className = 'text-title';
-    title.textContent = `${item.key || '技能'}：${item.name}`;
+    title.textContent = `${item.key || APP_RUNTIME_TEXTS.heroSkill.sectionKeyDefault}：${item.name}`;
 
     const body = document.createElement('div');
     body.className = 'text-body';
@@ -2234,7 +2342,7 @@ function buildHeroSkillCards(doc) {
 }
 
 function removeDuplicateHeroSkillCards() {
-  const removeTitles = new Set(['技能树', '技能说明']);
+  const removeTitles = new Set(APP_RUNTIME_TEXTS.heroSkill.duplicateSectionTitles || []);
   const cards = sectionEl.querySelectorAll('.meta-card');
   for (const card of cards) {
     const title = card.querySelector('h3');
@@ -2271,7 +2379,7 @@ function renderSectionCards(doc) {
   }
 }
 
-function renderGallery(images, fallbackLabel = '媒体') {
+function renderGallery(images, fallbackLabel = APP_RUNTIME_TEXTS.heroSkill.mediaFallbackLabel) {
   if (!galleryEl) {
     return;
   }
@@ -2295,13 +2403,13 @@ function renderMeta(doc) {
   titleEl.textContent = doc.meta?.title || doc.title || doc.name;
 
   if (typeChipEl) {
-    typeChipEl.textContent = `类型：${CATEGORY_LABELS[category] || category || '其他'}`;
+    typeChipEl.textContent = `${APP_RUNTIME_TEXTS.listMeta.typeLabelPrefix}${CATEGORY_LABELS[category] || category || APP_RUNTIME_TEXTS.list.otherFallback}`;
     typeChipEl.className = `doc-chip ${CATEGORY_TAG[category] || 'other'}`;
   }
 
   if (groupChipEl) {
     if (doc.group) {
-      groupChipEl.textContent = `分组：${doc.group}`;
+      groupChipEl.textContent = `${LIST_UI_TEXT.status.groupChipPrefix}：${doc.group}`;
       groupChipEl.hidden = false;
     } else {
       groupChipEl.textContent = '';
@@ -2310,11 +2418,11 @@ function renderMeta(doc) {
   }
 
   if (pathChipEl) {
-    pathChipEl.textContent = `路径：${doc.path || '-'}`;
+    pathChipEl.textContent = `${LIST_UI_TEXT.status.pathChipPrefix}：${doc.path || '-'}`;
   }
 
   if (subtitleEl) {
-    const sourceCategory = CATEGORY_LABELS[category] || category || '其他';
+    const sourceCategory = CATEGORY_LABELS[category] || category || APP_RUNTIME_TEXTS.list.otherFallback;
     const parts = [sourceCategory];
     if (doc.group) {
       parts.push(doc.group);
@@ -2326,7 +2434,7 @@ function renderMeta(doc) {
   const tags = document.createElement('div');
   const tag = document.createElement('span');
   tag.className = `hero-tag ${CATEGORY_TAG[category] || 'other'}`;
-  tag.textContent = `类型：${CATEGORY_LABELS[category] || '其他'}`;
+  tag.textContent = `${APP_RUNTIME_TEXTS.listMeta.typeLabelPrefix}${CATEGORY_LABELS[category] || APP_RUNTIME_TEXTS.list.otherFallback}`;
   tags.appendChild(tag);
   metaEl.appendChild(tags);
 
@@ -2355,7 +2463,7 @@ function setEditorStatus(message = '') {
 function setEditButtons({ isEditing, isCreating, canEdit }) {
   const editModeAvailable = isEditModeActive();
   const isCreateMode = !!isCreating;
-  const saveText = isCreateMode ? '创建' : '保存';
+  const saveText = isCreateMode ? APP_REQUEST_LABELS.createDoc : APP_REQUEST_LABELS.saveDoc;
   const isEditorVisible = isEditing || isCreateMode;
 
   if (!editModeAvailable) {
@@ -2393,7 +2501,7 @@ function setEditButtons({ isEditing, isCreating, canEdit }) {
       editEditorEl.disabled = true;
     }
     if (editPathEl) {
-      editPathEl.textContent = '可编辑源：编辑模式未开启';
+      editPathEl.textContent = APP_RUNTIME_TEXTS.editPath.noBackend;
     }
     setEditorPanelVisibility(false);
     return;
@@ -2407,7 +2515,7 @@ function setEditButtons({ isEditing, isCreating, canEdit }) {
   if (editBtnEl) {
     editBtnEl.hidden = isCreateMode || !canEdit;
     editBtnEl.disabled = !canEdit;
-    editBtnEl.textContent = isEditing ? '返回' : '编辑';
+    editBtnEl.textContent = isEditing ? APP_RUNTIME_TEXTS.editButtons.returnText : APP_RUNTIME_TEXTS.editButtons.editText;
   }
 
   if (editSaveBtnEl) {
@@ -2502,7 +2610,7 @@ async function enterCreateMode() {
     return;
   }
   if (state.isEditing) {
-    if (!confirmDiscardUnsavedChanges('当前有未保存内容，进入新建将丢失这些修改，是否继续？')) {
+    if (!confirmDiscardUnsavedChanges(APP_ERROR_MESSAGES.discardUnsavedCreate)) {
       return;
     }
     exitEditMode();
@@ -2537,7 +2645,7 @@ async function enterCreateMode() {
   contentEl.classList.add('is-hidden');
   contentEl.hidden = true;
   contentEl.classList.toggle('is-empty', false);
-  setEditorStatus('输入新建路径与内容后，点击“创建”');
+  setEditorStatus(APP_ERROR_MESSAGES.createDocHintTemplate(APP_REQUEST_LABELS.createDoc));
 }
 
 async function fetchEditableSource(pathValue) {
@@ -2549,7 +2657,7 @@ async function fetchEditableSource(pathValue) {
       docApiUrl: DOC_API_URL,
       pathValue,
       requestTimeoutMs: DATA_INDEX_REQUEST_TIMEOUT_MS,
-      requestLabel: '读取源码',
+      requestLabel: APP_REQUEST_LABELS.readSource,
     });
     if (typeof payload?.content !== 'string') {
       return { error: APP_ERROR_MESSAGES.requestInvalidResponse };
@@ -2560,7 +2668,7 @@ async function fetchEditableSource(pathValue) {
       version: normalizeEditSessionVersion(payload?.version),
     };
   } catch (error) {
-    return { error: logRuntimeErrorOrMessage('读取源码', error) };
+    return { error: logRuntimeErrorOrMessage(APP_REQUEST_LABELS.readSource, error) };
   }
 }
 
@@ -2568,7 +2676,9 @@ function fillSourcePreview(doc, sourcePath, options = {}) {
   const sourceContent = typeof doc._sourceCachedText === 'string' ? doc._sourceCachedText : getEditableFallbackContent(doc);
   const sourceVersion = typeof doc._sourceVersion === 'string' ? doc._sourceVersion : '';
   if (editPathEl) {
-    editPathEl.textContent = sourcePath ? `可编辑源：${sourcePath}` : '可编辑源：—';
+    editPathEl.textContent = sourcePath
+      ? `${APP_RUNTIME_TEXTS.editPath.sourcePrefix}${sourcePath}`
+      : `${APP_RUNTIME_TEXTS.editPath.sourcePrefix}${APP_RUNTIME_TEXTS.editPath.sourceMissing}`;
   }
   if (editEditorEl) {
     editEditorEl.value = sourceContent || '';
@@ -2665,7 +2775,7 @@ async function saveNewDoc() {
       content,
       isCreate: true,
       requestTimeoutMs: DATA_INDEX_REQUEST_TIMEOUT_MS,
-      requestLabel: '创建',
+      requestLabel: APP_REQUEST_LABELS.createDoc,
     });
 
     const createdSource = sourcePath;
@@ -2690,8 +2800,8 @@ async function saveNewDoc() {
       preferredSourcePath: createdSource,
     });
   } catch (error) {
-    const message = logRuntimeErrorOrMessage('新建文档', error) || getFriendlyRequestError(error);
-    setEditorStatus(`新建失败：${message}`);
+    const message = logRuntimeErrorOrMessage(APP_REQUEST_LABELS.createDoc, error) || getFriendlyRequestError(error);
+    setEditorStatus(`${APP_REQUEST_LABELS.createDoc}失败：${message}`);
     if (editSaveBtnEl) {
       editSaveBtnEl.disabled = false;
     }
@@ -2738,7 +2848,7 @@ async function saveExistingDoc(options = {}) {
       state.activeEditSourceVersion || doc._sourceVersion || doc._sourceLastModified || doc.lastModified,
     );
     if (!expectedVersion) {
-      throw new Error('未获取到当前文件的编辑锁版本，请刷新后重试');
+      throw new Error(APP_ERROR_MESSAGES.lockVersionMissing);
     }
     const payload = await writeDoc({
       docApiUrl: DOC_API_URL,
@@ -2747,7 +2857,7 @@ async function saveExistingDoc(options = {}) {
       expectedVersion,
       force: forceOverwrite,
       requestTimeoutMs: DATA_INDEX_REQUEST_TIMEOUT_MS,
-      requestLabel: '保存',
+      requestLabel: APP_REQUEST_LABELS.saveDoc,
     });
 
     if (payload?.currentVersion) {
@@ -2801,7 +2911,7 @@ async function saveExistingDoc(options = {}) {
         return;
       }
       if (conflictAction === 'cancel') {
-        setEditorStatus('已取消保存：版本冲突处理已中止。');
+        setEditorStatus(APP_ERROR_MESSAGES.saveConflictCancelled);
         if (editSaveBtnEl) {
           editSaveBtnEl.disabled = false;
         }
@@ -2814,7 +2924,7 @@ async function saveExistingDoc(options = {}) {
     const requestMessage = getFriendlyRequestError(error);
     const message = error?.status === 409
       ? `${APP_ERROR_MESSAGES.saveConflict}：${requestMessage}`
-      : `保存失败：${logRuntimeErrorOrMessage('保存文档', error) || requestMessage}`;
+        : `${APP_REQUEST_LABELS.saveDoc}失败：${logRuntimeErrorOrMessage(APP_REQUEST_LABELS.saveDoc, error) || requestMessage}`;
     setEditorStatus(message);
     if (editSaveBtnEl) {
       editSaveBtnEl.disabled = false;
@@ -2854,7 +2964,7 @@ async function rebuildIndexForDoc(doc, options = {}) {
       rebuildUrl: DOC_REBUILD_URL,
       sourceFilter: rebuildFilter,
       requestTimeoutMs: DATA_INDEX_REQUEST_TIMEOUT_MS,
-      requestLabel: '重建索引',
+      requestLabel: APP_REQUEST_LABELS.rebuildIndex,
     });
 
     await loadData(preferredPath, {
@@ -2873,10 +2983,10 @@ async function rebuildIndexForDoc(doc, options = {}) {
       }
     }
     const elapsed = formatElapsedSeconds(rebuildProgressStart);
-    setEditorStatus(`${APP_ERROR_MESSAGES.rebuildSuccess}（耗时 ${elapsed}）`);
+    setEditorStatus(`${APP_ERROR_MESSAGES.rebuildSuccess}${APP_ERROR_MESSAGES.rebuildElapsedTemplate(elapsed)}`);
   } catch (error) {
-    const message = logRuntimeErrorOrMessage('重建索引', error) || getFriendlyRequestError(error);
-    setEditorStatus(`重建失败：${message}`);
+    const message = logRuntimeErrorOrMessage(APP_REQUEST_LABELS.rebuildIndex, error) || getFriendlyRequestError(error);
+    setEditorStatus(`${APP_REQUEST_LABELS.rebuildIndex}失败：${message}`);
   } finally {
     stopRebuildProgressIndicator();
     state.isRebuilding = false;
@@ -2893,7 +3003,7 @@ async function rebuildIndexForDoc(doc, options = {}) {
 }
 
 function exitEditMode(options = {}) {
-  if (!options.skipUnsavedConfirm && isInEditSession() && !confirmDiscardUnsavedChanges('当前有未保存内容，放弃编辑并返回浏览？')) {
+  if (!options.skipUnsavedConfirm && isInEditSession() && !confirmDiscardUnsavedChanges(APP_ERROR_MESSAGES.discardUnsavedEditExit)) {
     return;
   }
 
@@ -2946,7 +3056,7 @@ function updateEditorForDoc(doc) {
 
   if (!isEditModeActive()) {
     if (editPathEl) {
-      editPathEl.textContent = '可编辑源：当前为浏览模式';
+      editPathEl.textContent = APP_RUNTIME_TEXTS.editPath.browseMode;
     }
     if (editEditorEl) {
       editEditorEl.value = '';
@@ -2963,7 +3073,7 @@ function updateEditorForDoc(doc) {
     fillSourcePreview(doc, sourcePath);
   } else {
     if (editPathEl) {
-      editPathEl.textContent = '可编辑源：当前文档不可直接编辑';
+      editPathEl.textContent = APP_RUNTIME_TEXTS.editPath.nonEditableDoc;
     }
     if (editEditorEl) {
       editEditorEl.value = '';
@@ -3055,14 +3165,14 @@ function syncDocListEditPermissions() {
     if (cachedState === nextState) {
       if (permissionTag && editable) {
         const nextClassName = 'doc-item-edit-access is-editable';
-        const nextLabel = '可编辑';
+        const nextLabel = APP_RUNTIME_TEXTS.listMeta.permissionEditable;
         if (permissionTag.textContent !== nextLabel || permissionTag.className !== nextClassName) {
           permissionTag.textContent = nextLabel;
           permissionTag.className = nextClassName;
         }
       } else if (permissionTag && !editable) {
         const nextClassName = 'doc-item-edit-access is-readonly';
-        const nextLabel = '不可编辑';
+        const nextLabel = APP_RUNTIME_TEXTS.listMeta.permissionReadonly;
         if (permissionTag.textContent !== nextLabel || permissionTag.className !== nextClassName) {
           permissionTag.textContent = nextLabel;
           permissionTag.className = nextClassName;
@@ -3070,7 +3180,7 @@ function syncDocListEditPermissions() {
       } else if (!permissionTag && textWrap) {
         permissionTag = document.createElement('div');
         permissionTag.className = editable ? 'doc-item-edit-access is-editable' : 'doc-item-edit-access is-readonly';
-        permissionTag.textContent = editable ? '可编辑' : '不可编辑';
+        permissionTag.textContent = editable ? APP_RUNTIME_TEXTS.listMeta.permissionEditable : APP_RUNTIME_TEXTS.listMeta.permissionReadonly;
         textWrap.appendChild(permissionTag);
         setDocListButtonMeta(rawPath, { permissionTag });
       }
@@ -3092,12 +3202,12 @@ function syncDocListEditPermissions() {
     if (!permissionTag && textWrap) {
       permissionTag = document.createElement('div');
       permissionTag.className = editable ? 'doc-item-edit-access is-editable' : 'doc-item-edit-access is-readonly';
-      permissionTag.textContent = editable ? '可编辑' : '不可编辑';
+      permissionTag.textContent = editable ? APP_RUNTIME_TEXTS.listMeta.permissionEditable : APP_RUNTIME_TEXTS.listMeta.permissionReadonly;
       textWrap.appendChild(permissionTag);
       setDocListButtonMeta(rawPath, { permissionTag });
     } else if (permissionTag) {
       const nextClassName = editable ? 'doc-item-edit-access is-editable' : 'doc-item-edit-access is-readonly';
-      const nextLabel = editable ? '可编辑' : '不可编辑';
+      const nextLabel = editable ? APP_RUNTIME_TEXTS.listMeta.permissionEditable : APP_RUNTIME_TEXTS.listMeta.permissionReadonly;
       if (permissionTag.textContent !== nextLabel || permissionTag.className !== nextClassName) {
         permissionTag.textContent = nextLabel;
         permissionTag.className = nextClassName;
@@ -3222,13 +3332,13 @@ function renderContent(doc) {
     renderedContentDocPath = contentPath;
     renderedContentSignature = contentSignature;
   } catch (error) {
-    const message = logRuntimeErrorOrMessage('内容渲染', error) || getFriendlyRequestError(error);
+    const message = logRuntimeErrorOrMessage(APP_RUNTIME_TEXTS.runtimeContext.contentRender, error) || getFriendlyRequestError(error);
     contentEl.classList.remove('is-empty');
     contentEl.style.display = '';
-    contentEl.textContent = `文档内容渲染失败：${message}`;
+    contentEl.textContent = `${LIST_UI_TEXT.labels.pathSuffixError}：${message}`;
     renderedContentDocPath = '';
     renderedContentSignature = '';
-    setEditorStatus(`渲染失败：${message}`);
+    setEditorStatus(`${LIST_UI_TEXT.labels.renderFailedStatus}：${message}`);
   }
 }
 
@@ -3254,14 +3364,14 @@ function renderList(groups) {
   let listRenderErrorCount = 0;
 
   const countListError = (context) => {
-    const contextKey = normalizeDisplayValue(context) || '未知条目';
+    const contextKey = normalizeDisplayValue(context) || LIST_UI_TEXT.errors.unknownEntry;
     const contextStat = errorCountsByContext.get(contextKey) || 0;
     errorCountsByContext.set(contextKey, contextStat + 1);
     listRenderErrorCount += 1;
   };
 
   if (!(groups instanceof Map) || !groups.size) {
-    const msg = lastSearchQuery ? '未匹配到文档' : '当前标签暂无文档';
+    const msg = lastSearchQuery ? LIST_UI_TEXT.status.noDataByKeyword : LIST_UI_TEXT.status.noDataByTab;
     listEl.innerHTML = `<div class="doc-group">${msg}</div>`;
     markActiveItem();
     return {
@@ -3270,19 +3380,19 @@ function renderList(groups) {
     };
   }
 
-  const renderNodeError = (context = '列表项', error) => {
-    logRuntimeErrorOrMessage(`文档列表项：${context}`, error);
+  const renderNodeError = (context = LIST_UI_TEXT.errors.nodeDefaultContext, error) => {
+    logRuntimeErrorOrMessage(`${APP_RUNTIME_TEXTS.runtimeContext.listNode}：${context}`, error);
     const createRetryButton = () => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'doc-btn-small doc-item-retry-btn';
-      button.textContent = '重试加载';
-      button.title = '重新加载文档索引并刷新列表';
+      button.textContent = LIST_UI_TEXT.actions.retryText;
+      button.title = LIST_UI_TEXT.actions.retryListTitle;
       button.setAttribute('aria-label', button.title);
       button.addEventListener('click', (event) => {
         event.preventDefault();
         event.stopPropagation();
-        setStatusText('正在重试加载文档索引…');
+        setStatusText(LIST_UI_TEXT.status.retryIndex);
         void loadData(state.activePath, {
           isRetryAttempt: true,
           forceCacheBust: true,
@@ -3309,7 +3419,7 @@ function renderList(groups) {
     if (errorOccurrence) {
       errorOccurrence.count += 1;
       if (errorOccurrence.messageEl) {
-        errorOccurrence.messageEl.textContent = `重复错误省略（已出现${errorOccurrence.count}次）`;
+        errorOccurrence.messageEl.textContent = `${LIST_UI_TEXT.errors.duplicatePrefix}${errorOccurrence.count}${LIST_UI_TEXT.errors.duplicateSuffix}`;
       }
       return null;
     }
@@ -3318,36 +3428,36 @@ function renderList(groups) {
 
     node.className = 'doc-item doc-item-error';
     message.className = 'doc-item-error-message';
-    message.textContent = `${context}加载失败：${requestErrorText}`;
+    message.textContent = LIST_UI_TEXT.errors.contextLoadFailureTemplate(context, requestErrorText);
 
     details.className = 'doc-item-error-details';
     detailsSummary.className = 'doc-item-error-summary';
-    detailsSummary.textContent = '最近一次错误码/状态（展开）';
+    detailsSummary.textContent = LIST_UI_TEXT.errors.latestErrorLabel;
     details.appendChild(detailsSummary);
 
     if (statusText) {
-      detailsText.push(`错误码：${statusText}`);
+      detailsText.push(`${LIST_UI_TEXT.errors.requestCodeLabel}${statusText}`);
     }
     if (error?.statusText) {
-      detailsText.push(`状态：${error.statusText}`);
+      detailsText.push(`${LIST_UI_TEXT.errors.statusLabel}${error.statusText}`);
     }
     if (error?.message && error.message !== requestErrorText) {
-      detailsText.push(`原始信息：${error.message}`);
+      detailsText.push(`${LIST_UI_TEXT.errors.rawMessageLabel}${error.message}`);
     }
     if (Array.isArray(error?.errors) && error.errors.length > 0) {
       const firstError = error.errors[0];
       if (typeof firstError === 'string' && firstError) {
-        detailsText.push(`错误详情：${firstError}`);
+        detailsText.push(`${LIST_UI_TEXT.errors.detailLabel}${firstError}`);
       } else if (firstError && typeof firstError.message === 'string' && firstError.message) {
-        detailsText.push(`错误详情：${firstError.message}`);
+        detailsText.push(`${LIST_UI_TEXT.errors.detailLabel}${firstError.message}`);
       }
     } else if (error?.payload?.error) {
-      detailsText.push(`错误详情：${error.payload.error}`);
+      detailsText.push(`${LIST_UI_TEXT.errors.detailLabel}${error.payload.error}`);
     } else if (typeof error?.payload === 'string' && error.payload) {
-      detailsText.push(`错误详情：${error.payload}`);
+      detailsText.push(`${LIST_UI_TEXT.errors.detailLabel}${error.payload}`);
     }
     if (!detailsText.length) {
-      detailsText.push(`错误描述：${requestErrorText}`);
+      detailsText.push(`${LIST_UI_TEXT.errors.descriptionLabel}${requestErrorText}`);
     }
     detailsBody.className = 'doc-item-error-body';
     detailsBody.textContent = detailsText.join('\n');
@@ -3397,20 +3507,20 @@ function renderList(groups) {
       if (!(categoryMap instanceof Map)) {
         appendListNode(
           categoryNodes,
-          `分类 ${CATEGORY_LABELS[categoryName] || categoryName}`,
-          new Error('分类数据异常'),
+          `${LIST_UI_TEXT.status.categoryPrefix} ${CATEGORY_LABELS[categoryName] || categoryName}`,
+          new Error(APP_RUNTIME_TEXTS.runtimeContext.dataCategoryInvalid),
         );
         continue;
       }
 
       const totalCount = totalCountByCategory(categoryMap);
-      const categoryNode = createDetailsGroup(`分类 ${CATEGORY_LABELS[categoryName] || categoryName}`, totalCount, true);
+      const categoryNode = createDetailsGroup(`${LIST_UI_TEXT.status.categoryPrefix} ${CATEGORY_LABELS[categoryName] || categoryName}`, totalCount, true);
 
       const groupNames = [...categoryMap.keys()].sort((a, b) => a.localeCompare(b, 'zh-CN'));
       for (const groupName of groupNames) {
         const docsInGroup = categoryMap.get(groupName);
         if (!Array.isArray(docsInGroup)) {
-          appendNode(categoryNode, `分组 ${groupName}`, new Error('分组数据异常'));
+          appendNode(categoryNode, `${LIST_UI_TEXT.status.groupPrefix} ${groupName}`, new Error(APP_RUNTIME_TEXTS.runtimeContext.dataGroupInvalid));
           continue;
         }
 
@@ -3423,7 +3533,7 @@ function renderList(groups) {
             });
             groupNode.appendChild(button);
           } catch (error) {
-            appendNode(groupNode, doc?.name || doc?.path || '未知条目', error);
+            appendNode(groupNode, doc?.name || doc?.path || LIST_UI_TEXT.errors.unknownEntry, error);
           }
         }
         categoryNode.appendChild(groupNode);
@@ -3432,9 +3542,9 @@ function renderList(groups) {
       categoryNodes.push(categoryNode);
     }
   } catch (error) {
-    logRuntimeErrorOrMessage('文档列表渲染', error);
-    setStatusText(`文档列表渲染失败：${getFriendlyRequestError(error)}`);
-    listEl.textContent = `文档列表渲染失败：${getFriendlyRequestError(error)}`;
+    logRuntimeErrorOrMessage(APP_RUNTIME_TEXTS.runtimeContext.listRender, error);
+    setStatusText(`${LIST_UI_TEXT.errors.renderFailureText}：${getFriendlyRequestError(error)}`);
+    listEl.textContent = `${LIST_UI_TEXT.errors.renderFailureText}：${getFriendlyRequestError(error)}`;
     markActiveItem();
     listRenderFrameId = 0;
     return {
@@ -3487,9 +3597,9 @@ function renderList(groups) {
       listEl.appendChild(fragment);
       listRenderFrameId = requestAnimationFrame(flushNodes);
     } catch (error) {
-      logRuntimeErrorOrMessage('文档列表渲染', error);
-      setStatusText(`文档列表渲染失败：${getFriendlyRequestError(error)}`);
-      listEl.textContent = `文档列表渲染失败：${getFriendlyRequestError(error)}`;
+      logRuntimeErrorOrMessage(APP_RUNTIME_TEXTS.runtimeContext.listRender, error);
+      setStatusText(`${LIST_UI_TEXT.errors.renderFailureText}：${getFriendlyRequestError(error)}`);
+      listEl.textContent = `${LIST_UI_TEXT.errors.renderFailureText}：${getFriendlyRequestError(error)}`;
       markActiveItem();
       listRenderFrameId = 0;
       return;
@@ -3546,7 +3656,7 @@ function renderFilteredDocs(preferredPath = '', options = {}) {
   }
   let listRenderInfo = null;
   if (shouldRenderList) {
-    setListSkeletonState(`正在渲染文档列表…`);
+    setListSkeletonState(LIST_UI_TEXT.status.renderingList);
     listRenderInfo = renderList(groups);
   } else if (state.activePath && state.activePath !== (renderedDocRef && renderedDocRef.path)) {
     // Keep active marker aligned when active path changes but list structure unchanged.
@@ -3561,15 +3671,15 @@ function renderFilteredDocs(preferredPath = '', options = {}) {
 
   if (!filtered.length) {
     const hasKeyword = Boolean(searchQuery);
-    setStatusText(`${hasKeyword ? '未匹配到文档' : '当前标签暂无文档'} ${state.generatedStatus}`);
+    setStatusText(`${hasKeyword ? LIST_UI_TEXT.status.noDataByKeyword : LIST_UI_TEXT.status.noDataByTab} ${state.generatedStatus}`);
     if (!skipTabs) {
       renderTabsNow();
     }
     return;
   }
 
-  const displayText = `当前显示 ${filtered.length} 个文档（共 ${state.docs.length} 个）`;
-  const tabText = searchQuery ? '（已按关键词筛选）' : '';
+  const displayText = LIST_UI_TEXT.status.visibleCountTemplate(filtered.length, state.docs.length);
+  const tabText = searchQuery ? LIST_UI_TEXT.status.filteredTagText : '';
   const listErrorSummary = listRenderInfo && listRenderInfo.errorSummary ? listRenderInfo.errorSummary : '';
   setStatusText(`${displayText} ${tabText} ${state.generatedStatus}${listErrorSummary ? ` ${listErrorSummary}` : ''}`);
 
@@ -3617,7 +3727,7 @@ function selectDoc(pathValue) {
   const shouldRefreshContent = isDifferentDoc
     || renderedDocRef !== doc
     || renderedDocSignature !== targetSignature;
-  if (isDifferentDoc && isInEditSession() && !confirmDiscardUnsavedChanges('当前有未保存内容，切换文档将丢失这些修改，是否继续？')) {
+  if (isDifferentDoc && isInEditSession() && !confirmDiscardUnsavedChanges(APP_ERROR_MESSAGES.discardUnsavedSwitchDoc)) {
     return;
   }
   state.activePath = doc.path;
@@ -3650,8 +3760,8 @@ function selectDoc(pathValue) {
         })
         .catch((error) => {
           if (state.activePath === doc.path) {
-            const message = logRuntimeErrorOrMessage('读取源码', error) || getFriendlyRequestError(error);
-            setEditorStatus(`读取源码失败：${message}`);
+            const message = logRuntimeErrorOrMessage(APP_REQUEST_LABELS.readSource, error) || getFriendlyRequestError(error);
+            setEditorStatus(`${APP_REQUEST_LABELS.readSource}失败：${message}`);
           }
         });
     }
@@ -3670,12 +3780,12 @@ function selectDoc(pathValue) {
     renderedDocRef = doc;
     renderedDocSignature = targetSignature;
   } catch (error) {
-    const message = logRuntimeErrorOrMessage('文档切换渲染', error) || getFriendlyRequestError(error);
-    setEditorStatus(`渲染失败：${message}`);
+    const message = logRuntimeErrorOrMessage(APP_RUNTIME_TEXTS.runtimeContext.docSwitchRender, error) || getFriendlyRequestError(error);
+    setEditorStatus(`${LIST_UI_TEXT.labels.renderFailedStatus}：${message}`);
     if (contentEl) {
       contentEl.classList.remove('is-empty');
       contentEl.style.display = '';
-      contentEl.textContent = `文档渲染失败：${message}`;
+      contentEl.textContent = `${LIST_UI_TEXT.labels.genericRenderFailed}：${message}`;
     }
   }
 }
@@ -3794,19 +3904,19 @@ async function loadData(preferredPath = '', options = {}) {
   const currentLoadToken = ++dataLoadToken;
 
   try {
-    setLoadingState('正在加载文档索引…', '加载文档列表…');
-    setListSkeletonState('正在加载文档索引…');
+    setLoadingState(LIST_UI_TEXT.status.loadingIndex, LIST_UI_TEXT.status.loadingList);
+    setListSkeletonState(LIST_UI_TEXT.status.loadingIndex);
     hideLoadRetry();
     const indexUrls = getDataIndexUrlCandidates();
     const { payload, lastError } = await loadDocIndexPayload({
       indexUrlCandidates: indexUrls,
       forceCacheBust,
       requestTimeoutMs: DATA_INDEX_REQUEST_TIMEOUT_MS,
-      requestLabel: '加载文档索引',
+      requestLabel: APP_REQUEST_LABELS.loadDocIndex,
     });
 
     if (!payload) {
-      throw lastError || new Error('未成功获取文档索引');
+      throw lastError || new Error(APP_RUNTIME_TEXTS.runtimeContext.indexLoadFailed);
     }
 
     if (currentLoadToken !== dataLoadToken) {
@@ -3816,7 +3926,7 @@ async function loadData(preferredPath = '', options = {}) {
 
     state.docs = payload?.docs || payload?.state?.docs || [];
     if (!Array.isArray(state.docs)) {
-      throw new Error('文档索引格式异常');
+      throw new Error(APP_RUNTIME_TEXTS.runtimeContext.indexFormatInvalid);
     }
     state.docs = state.docs.map((doc) => normalizeDocFromIndex(doc)).filter(Boolean);
     hideLoadRetry();
@@ -3843,7 +3953,7 @@ async function loadData(preferredPath = '', options = {}) {
     cachedListGroups.filtered = null;
     cachedListGroups.groups = null;
     cachedGroupedDocs = new WeakMap();
-    state.generatedStatus = `（静态生成 ${formatTime(payload.generatedAt)}）`;
+    state.generatedStatus = APP_ERROR_MESSAGES.generatedStatusTemplate(formatTime(payload.generatedAt));
     renderTabsNow();
     renderFilteredDocs(normalizedPreferredPath || state.activePath, { preferredSourcePath });
     syncDocListEditPermissions();
@@ -3855,17 +3965,19 @@ async function loadData(preferredPath = '', options = {}) {
       return;
     }
     showLoadRetry(
-      `加载失败：${getFriendlyLoadErrorMessage(error)}`,
-      `文档列表加载失败：${getFriendlyLoadErrorMessage(error)}。请确认服务运行正常并重试。`,
+      `${LIST_UI_TEXT.errors.genericLoadFailureText}：${getFriendlyLoadErrorMessage(error)}`,
+      `${LIST_UI_TEXT.errors.loadFailureText}：${getFriendlyLoadErrorMessage(error)}${LIST_UI_TEXT.errors.loadFailureSuffix}`,
       isRetryAttempt && forceCacheBust ? 'force' : (isRetryAttempt ? 'force' : 'normal'),
     );
-    logRuntimeErrorOrMessage('加载文档索引', error);
+    logRuntimeErrorOrMessage(APP_REQUEST_LABELS.loadDocIndex, error);
   }
 }
 
 async function initApp() {
-  setStatusText('正在初始化文档站...');
-  setListText('初始化中…');
+  setStaticUiTexts();
+
+  setStatusText(LIST_UI_TEXT.status.initializing);
+  setListText(LIST_UI_TEXT.status.initializingList);
 
   searchInput.addEventListener('input', () => {
     updateSearchClearState();
@@ -3941,7 +4053,7 @@ async function initApp() {
       if (!state.isCreating) {
         return;
       }
-      if (state.editHasUnsavedChanges && !confirmDiscardUnsavedChanges('切换新建类型将重置当前内容，是否继续？')) {
+      if (state.editHasUnsavedChanges && !confirmDiscardUnsavedChanges(APP_RUNTIME_TEXTS.createTypeSwitchConfirm)) {
         createTypeSelectEl.value = state.activeCreateType;
         return;
       }
@@ -4101,11 +4213,11 @@ async function initApp() {
   if (typeof window !== 'undefined') {
     window.addEventListener('error', (event) => {
       const error = event.error || event.message || event.type;
-      logRuntimeErrorOrMessage('前端全局错误', error);
+      logRuntimeErrorOrMessage(APP_RUNTIME_TEXTS.runtimeContext.globalError, error);
     });
 
     window.addEventListener('unhandledrejection', (event) => {
-      logRuntimeErrorOrMessage('未处理的Promise错误', event?.reason);
+      logRuntimeErrorOrMessage(APP_RUNTIME_TEXTS.runtimeContext.unhandledPromise, event?.reason);
     });
 
     window.addEventListener('keydown', (event) => {
@@ -4150,11 +4262,11 @@ async function initApp() {
     setMode(resolveInitialMode());
     await loadData();
   } catch (error) {
-    const message = logRuntimeErrorOrMessage('初始化', error) || getFriendlyRequestError(error);
-    setStatusText(`初始化失败：${message}`);
-    setListText('初始化失败，请刷新页面后重试。');
+    const message = logRuntimeErrorOrMessage(APP_RUNTIME_TEXTS.runtimeContext.init, error) || getFriendlyRequestError(error);
+    setStatusText(`${LIST_UI_TEXT.status.initFailed}：${message}`);
+    setListText(LIST_UI_TEXT.status.initListFailure);
     if (modeStateEl) {
-      modeStateEl.textContent = '初始化失败';
+      modeStateEl.textContent = LIST_UI_TEXT.status.initFailed;
     }
     console.error('[doc-site] initApp failed', error);
   }
