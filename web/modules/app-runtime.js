@@ -40,6 +40,7 @@ import {
 import { renderHeroBanner, buildCommonCards, getHeroCardsByCategory } from './app-render.js';
 import { renderStructuredBlocks, hasRenderableToken } from './app-structured.js';
 import { getDocTemplate, DOC_TYPE_TEMPLATE_DEFS } from './app-type-templates.js';
+import { API_ERRORS } from '../../scripts/lib/doc-api-contract.mjs';
 import {
   detectEditBackendAvailability,
   loadDocIndexPayload,
@@ -122,6 +123,13 @@ const CATEGORY_ORDER_INDEX = new Map(
 const MODE_LOCAL_STORAGE_KEY = 'doc-site-mode';
 const CREATE_TYPE_LOCAL_STORAGE_KEY = 'doc-site-create-type';
 const DEFAULT_DOC_MODE = 'browse';
+const DOC_WRITE_ERROR_CONFLICT = API_ERRORS.conflict;
+const DOC_WRITE_ERROR_ALREADY_EXISTS = API_ERRORS.alreadyExists;
+const DOC_WRITE_ERROR_MISSING_EXPECTED_VERSION = API_ERRORS.missingExpectedVersion;
+const DOC_WRITE_ERROR_MISSING_PATH = API_ERRORS.missingPath;
+const DOC_WRITE_ERROR_MISSING_CONTENT = API_ERRORS.missingContent;
+const DOC_WRITE_ERROR_BAD_PATH = API_ERRORS.badPath;
+const DOC_WRITE_ERROR_DOC_NOT_FOUND = API_ERRORS.docNotFound;
 let rebuildProgressTimer = null;
 let rebuildProgressStart = 0;
 let searchDebounceTimer = null;
@@ -145,6 +153,13 @@ let cachedListRenderState = {
   filtered: null,
   activeTab: '',
   groups: null,
+};
+let detectedEditBackendState = {
+  source: 'not_checked',
+  reason: 'service_unreachable',
+  reasonText: '',
+  status: 0,
+  attempts: [],
 };
 let cachedEditPermissionSyncState = {
   showGranularEditState: false,
@@ -172,6 +187,118 @@ function setStatusText(message = '') {
     statusEl.textContent = normalized;
   }
   lastStatusText = normalized;
+}
+
+function normalizeEditBackendState(rawState = {}) {
+  if (typeof rawState === 'boolean') {
+    return {
+      available: rawState,
+      source: 'legacy',
+      reason: rawState ? 'available' : 'service_unreachable',
+      reasonText: '',
+      status: 0,
+      payload: null,
+      attempts: [],
+    };
+  }
+
+  if (!rawState || typeof rawState !== 'object') {
+    return {
+      available: false,
+      source: 'invalid',
+      reason: 'service_unreachable',
+      reasonText: '',
+      status: 0,
+      payload: null,
+      attempts: [],
+    };
+  }
+
+  return {
+    available: Boolean(rawState.available),
+    source: normalizeDisplayValue(rawState.source || 'unavailable'),
+    reason: normalizeDisplayValue(rawState.reason || 'service_unreachable'),
+    reasonText: normalizeDisplayValue(rawState.reasonText || ''),
+    status: typeof rawState.status === 'number' ? rawState.status : 0,
+    payload: rawState.payload || null,
+    attempts: Array.isArray(rawState.attempts) ? rawState.attempts : [],
+  };
+}
+
+function getWriteErrorCode(rawError = '') {
+  const normalized = normalizeDisplayValue(rawError).toLowerCase();
+  if (!normalized) {
+    return '';
+  }
+  const candidates = [
+    DOC_WRITE_ERROR_CONFLICT,
+    DOC_WRITE_ERROR_ALREADY_EXISTS,
+    DOC_WRITE_ERROR_MISSING_EXPECTED_VERSION,
+    DOC_WRITE_ERROR_MISSING_PATH,
+    DOC_WRITE_ERROR_MISSING_CONTENT,
+    DOC_WRITE_ERROR_BAD_PATH,
+    DOC_WRITE_ERROR_DOC_NOT_FOUND,
+  ];
+  const matched = candidates.find((code) => {
+    const normalizedCode = normalizeDisplayValue(code).toLowerCase();
+    return normalized === normalizedCode || normalized.includes(normalizedCode);
+  });
+  return matched || '';
+}
+
+function getEditModeUnavailableText() {
+  if (state.editBackendAvailable) {
+    return APP_ERROR_MESSAGES.editModeUnavailable;
+  }
+
+  const reason = detectedEditBackendState.reason;
+  const reasonHint = APP_ERROR_MESSAGES.editBackendUnavailableReasons?.[reason];
+  const messageDetail = reasonHint || detectedEditBackendState.reasonText || APP_ERROR_MESSAGES.editBackendUnavailableReasons?.service_unreachable;
+  const attemptSummary = summarizeRequestAttempts(detectedEditBackendState.attempts, {
+    label: '编辑能力检测',
+    maxEntries: 2,
+  });
+  if (!messageDetail && !attemptSummary) {
+    return APP_ERROR_MESSAGES.editModeUnavailable;
+  }
+  if (!attemptSummary) {
+    return `${APP_ERROR_MESSAGES.editModeUnavailable}（${messageDetail}）`;
+  }
+  if (!messageDetail) {
+    return `${APP_ERROR_MESSAGES.editModeUnavailable}（${attemptSummary}）`;
+  }
+  return `${APP_ERROR_MESSAGES.editModeUnavailable}（${messageDetail}；${attemptSummary}）`;
+}
+
+function summarizeAttemptFailureMeta(attempts = []) {
+  if (!Array.isArray(attempts) || attempts.length === 0) {
+    return '';
+  }
+  const failedAttempts = attempts.filter((attempt) => !attempt?.ok);
+  if (!failedAttempts.length) {
+    return '';
+  }
+  const retryCount = Math.max(0, failedAttempts.length - 1);
+  const firstFailure = failedAttempts[0];
+  const lastFailure = failedAttempts[failedAttempts.length - 1];
+  const reason = normalizeDisplayValue(failedAttempts[0]?.message || failedAttempts[0]?.statusText || failedAttempts[0]?.name || '');
+  const firstAt = normalizeDisplayValue(firstFailure?.timestamp);
+  const lastAt = normalizeDisplayValue(lastFailure?.timestamp);
+
+  const chunks = [`失败${failedAttempts.length}次`];
+  if (retryCount > 0) {
+    chunks.push(`可重试${retryCount}次`);
+  }
+  if (reason) {
+    chunks.push(`原因：${reason}`);
+  }
+  if (firstAt) {
+    chunks.push(`首次失败：${firstAt}`);
+  }
+  if (lastAt && lastAt !== firstAt) {
+    chunks.push(`最近失败：${lastAt}`);
+  }
+  return chunks.join('；');
 }
 
 function setListText(message = '') {
@@ -457,7 +584,72 @@ function getDataIndexUrlCandidates() {
   return candidates;
 }
 
-function getFriendlyRequestError(error) {
+function parseRetryAfterSeconds(rawRetryAfter = '') {
+  const normalized = normalizeDisplayValue(rawRetryAfter);
+  if (!normalized) {
+    return 0;
+  }
+
+  const numericValue = Number(normalized);
+  if (Number.isFinite(numericValue) && numericValue > 0) {
+    return Math.max(1, Math.floor(numericValue));
+  }
+
+  const timestamp = Date.parse(normalized);
+  if (!Number.isNaN(timestamp)) {
+    const deltaSeconds = Math.floor((timestamp - Date.now()) / 1000);
+    return Math.max(1, deltaSeconds);
+  }
+
+  return 0;
+}
+
+function summarizeRequestAttempts(attempts = [], options = {}) {
+  if (!Array.isArray(attempts) || attempts.length === 0) {
+    return '';
+  }
+  const maxEntries = Number.isFinite(options.maxEntries) ? Math.max(1, Math.floor(options.maxEntries)) : 3;
+  const label = normalizeDisplayValue(options.label || '请求尝试');
+  const normalizedItems = attempts
+    .map((entry) => {
+      const normalizedEntry = entry && typeof entry === 'object' ? entry : {};
+      const url = normalizeDisplayValue(normalizedEntry.url);
+      if (!url) {
+        return '';
+      }
+      const statusText = normalizeDisplayValue(normalizedEntry.statusText || '');
+      const status = typeof normalizedEntry.status === 'number' ? String(normalizedEntry.status) : '';
+      const attemptTime = normalizeDisplayValue(normalizedEntry.timestamp || '');
+      const suffixParts = [status, statusText, normalizedEntry.message || '', attemptTime]
+        .map((item) => normalizeDisplayValue(item))
+        .filter(Boolean);
+      const suffix = suffixParts.length ? `（${normalizedEntry.ok ? '成功' : '失败'}：${suffixParts.join(' ')}）` : `${normalizedEntry.ok ? '（成功）' : '（失败）'}`;
+      return `${url}${suffix}`;
+    })
+    .filter(Boolean)
+    .slice(0, maxEntries);
+
+  if (normalizedItems.length === 0) {
+    return '';
+  }
+  return `${label}：${normalizedItems.join('；')}${attempts.length > maxEntries ? `；…共${attempts.length}次` : ''}`;
+}
+
+function enrichRequestError(error, attempts = [], fallbackMessage = '') {
+  const fallback = normalizeDisplayValue(fallbackMessage);
+  const normalizedError = error && error instanceof Error
+    ? error
+    : new Error(fallback || APP_ERROR_MESSAGES.requestInvalidResponse);
+  if (Array.isArray(attempts) && attempts.length) {
+    normalizedError.attempts = attempts;
+  }
+  if (!normalizedError.message && fallback) {
+    normalizedError.message = fallback;
+  }
+  return normalizedError;
+}
+
+function getFriendlyRequestError(error, options = {}) {
   if (typeof error === 'string' || typeof error === 'number' || typeof error === 'boolean') {
     return normalizeDisplayValue(error);
   }
@@ -475,14 +667,45 @@ function getFriendlyRequestError(error) {
   if (error.name === 'TypeError') {
     return APP_ERROR_MESSAGES.serviceUnavailable;
   }
+  if (typeof error?.status === 'number') {
+    const status = error.status;
+    if (status === 401) {
+      const details = APP_ERROR_MESSAGES.requestUnauthorizedHint;
+      return details ? `${APP_ERROR_MESSAGES.requestUnauthorized}，${details}` : APP_ERROR_MESSAGES.requestUnauthorized;
+    }
+    if (status === 403) {
+      const details = APP_ERROR_MESSAGES.requestForbiddenHint;
+      return details ? `${APP_ERROR_MESSAGES.requestForbidden}，${details}` : APP_ERROR_MESSAGES.requestForbidden;
+    }
+    if (status === 429) {
+      const retryAfterText = parseRetryAfterSeconds(error?.retryAfter);
+      const rateLimitedTemplate = APP_ERROR_MESSAGES.requestRateLimitedHint;
+      const hint = typeof rateLimitedTemplate === 'function'
+        ? rateLimitedTemplate(retryAfterText)
+        : APP_ERROR_MESSAGES.requestRateLimitedHint;
+      return `${APP_ERROR_MESSAGES.requestRateLimited}，${hint}`;
+    }
+    if (status === 413) {
+      return APP_ERROR_MESSAGES.requestPayloadTooLarge;
+    }
+    if (status >= 500 && status < 600) {
+      const hint = APP_ERROR_MESSAGES.requestServerErrorHint;
+      return hint ? `${APP_ERROR_MESSAGES.requestServerError}，${hint}` : APP_ERROR_MESSAGES.requestServerError;
+    }
+  }
   const message = normalizeDisplayValue(error.message || '');
+  const attemptSummary = summarizeRequestAttempts(error?.attempts, options);
   if (!message) {
-    return APP_ERROR_MESSAGES.requestInvalidResponse;
+    return attemptSummary
+      ? `${APP_ERROR_MESSAGES.requestInvalidResponse}（${attemptSummary}）`
+      : APP_ERROR_MESSAGES.requestInvalidResponse;
   }
   if (!payloadMessage || message.includes(payloadMessage)) {
-    return message;
+    return attemptSummary ? `${message}（${attemptSummary}）` : message;
   }
-  return `${message}（${payloadMessage}）`;
+  return attemptSummary
+    ? `${message}（${payloadMessage}；${attemptSummary}）`
+    : `${message}（${payloadMessage}）`;
 }
 
 function getFriendlyLoadErrorMessage(error) {
@@ -512,6 +735,14 @@ function logRuntimeError(context, error) {
   }
   if (error?.message && !String(error.message).includes(message)) {
     details.push(error.message);
+  }
+  const attemptSummary = summarizeRequestAttempts(error?.attempts, { maxEntries: 5 });
+  if (attemptSummary) {
+    details.push(attemptSummary);
+  }
+  const retrySummary = summarizeAttemptFailureMeta(error?.attempts);
+  if (retrySummary) {
+    details.push(retrySummary);
   }
 
   const fingerprint = `${contextText}||${message}`;
@@ -943,12 +1174,13 @@ function setModeUi() {
   if (modeEditBtnEl) {
     modeEditBtnEl.classList.toggle('mode-btn-active', isEditMode);
     modeEditBtnEl.setAttribute('aria-pressed', isEditMode ? 'true' : 'false');
-    modeEditBtnEl.disabled = !state.editBackendAvailable;
+    modeEditBtnEl.disabled = false;
+    modeEditBtnEl.setAttribute('aria-disabled', state.editBackendAvailable ? 'false' : 'true');
   }
   if (modeStateEl) {
     if (isEditMode) {
       if (!state.editBackendAvailable) {
-        modeStateEl.textContent = APP_RUNTIME_TEXTS.modeState.editBackendUnavailable;
+        modeStateEl.textContent = getEditModeUnavailableText();
       } else if (!activeDoc) {
         modeStateEl.textContent = APP_RUNTIME_TEXTS.modeState.editNoDoc;
       } else if (activeDocEditable) {
@@ -959,11 +1191,11 @@ function setModeUi() {
     } else if (state.editBackendAvailable) {
       modeStateEl.textContent = APP_RUNTIME_TEXTS.modeState.browse;
     } else {
-      modeStateEl.textContent = APP_RUNTIME_TEXTS.modeState.browseNoEditApi;
+      modeStateEl.textContent = getEditModeUnavailableText();
     }
   }
   if (modeSwitchEl && !state.editBackendAvailable) {
-    modeEditBtnEl?.setAttribute('title', APP_RUNTIME_TEXTS.modeState.editModeNeedBackendTitle);
+    modeEditBtnEl?.setAttribute('title', getEditModeUnavailableText());
   } else if (modeEditBtnEl) {
     modeEditBtnEl.removeAttribute('title');
   }
@@ -1025,19 +1257,22 @@ function setMode(requestedMode, options = {}) {
   }
 
   if (resolvedMode === 'edit' && !state.editBackendAvailable && modeStateEl) {
-    modeStateEl.textContent = APP_ERROR_MESSAGES.editModeUnavailable;
+    modeStateEl.textContent = getEditModeUnavailableText();
   }
 
   syncDocListEditPermissions();
 }
 
 async function detectEditBackend() {
-  state.editBackendAvailable = await detectEditBackendAvailability({
+  const detection = await detectEditBackendAvailability({
     capabilitiesUrl: DOC_CAPABILITIES_URL,
     healthUrl: DOC_HEALTH_URL,
     requestTimeoutMs: CAPABILITIES_REQUEST_TIMEOUT_MS,
     requestLabel: APP_REQUEST_LABELS.detectEditCapability,
   });
+  const normalizedDetection = normalizeEditBackendState(detection);
+  detectedEditBackendState = normalizedDetection;
+  state.editBackendAvailable = Boolean(normalizedDetection.available);
 }
 
 function resolveInitialMode() {
@@ -2800,8 +3035,17 @@ async function saveNewDoc() {
       preferredSourcePath: createdSource,
     });
   } catch (error) {
-    const message = logRuntimeErrorOrMessage(APP_REQUEST_LABELS.createDoc, error) || getFriendlyRequestError(error);
-    setEditorStatus(`${APP_REQUEST_LABELS.createDoc}失败：${message}`);
+    const payload = error?.payload || null;
+    const payloadErrorCode = getWriteErrorCode(payload?.error || payload?.message || '');
+    const requestMessage = getFriendlyRequestError(error);
+    const message = payloadErrorCode === DOC_WRITE_ERROR_ALREADY_EXISTS
+      ? APP_ERROR_MESSAGES.createPathExists
+      : payloadErrorCode === DOC_WRITE_ERROR_MISSING_CONTENT
+        ? APP_ERROR_MESSAGES.saveMissingContent
+        : payloadErrorCode === DOC_WRITE_ERROR_BAD_PATH || error?.status === 400
+          ? `${APP_REQUEST_LABELS.createDoc}失败：${requestMessage}`
+          : `${APP_REQUEST_LABELS.createDoc}失败：${logRuntimeErrorOrMessage(APP_REQUEST_LABELS.createDoc, error) || requestMessage}`;
+    setEditorStatus(message);
     if (editSaveBtnEl) {
       editSaveBtnEl.disabled = false;
     }
@@ -2886,7 +3130,13 @@ async function saveExistingDoc(options = {}) {
     await rebuildIndexForDoc(doc);
   } catch (error) {
     const payload = error?.payload || null;
-    if (error?.status === 409 && !forceOverwrite && payload?.currentVersion) {
+    const payloadErrorCode = getWriteErrorCode(payload?.error || payload?.message || '');
+    if (
+      error?.status === 409
+      && !forceOverwrite
+      && payloadErrorCode === DOC_WRITE_ERROR_CONFLICT
+      && payload?.currentVersion
+    ) {
       const conflictAction = await handleSaveConflict(doc, payload);
       if (conflictAction === 'reload' || conflictAction === 'keep') {
         if (editSaveBtnEl) {
@@ -2920,6 +3170,36 @@ async function saveExistingDoc(options = {}) {
         }
         return;
       }
+    }
+    if (error?.status === 409 && !forceOverwrite && payloadErrorCode === DOC_WRITE_ERROR_MISSING_EXPECTED_VERSION) {
+      setEditorStatus(APP_ERROR_MESSAGES.lockVersionMissing);
+      if (editSaveBtnEl) {
+        editSaveBtnEl.disabled = false;
+      }
+      if (editRebuildBtnEl) {
+        editRebuildBtnEl.disabled = false;
+      }
+      return;
+    }
+    if (error?.status === 404 && payloadErrorCode === DOC_WRITE_ERROR_DOC_NOT_FOUND) {
+      setEditorStatus(APP_ERROR_MESSAGES.saveDocMissing);
+      if (editSaveBtnEl) {
+        editSaveBtnEl.disabled = false;
+      }
+      if (editRebuildBtnEl) {
+        editRebuildBtnEl.disabled = false;
+      }
+      return;
+    }
+    if (error?.status === 400 && payloadErrorCode === DOC_WRITE_ERROR_MISSING_CONTENT) {
+      setEditorStatus(APP_ERROR_MESSAGES.saveMissingContent);
+      if (editSaveBtnEl) {
+        editSaveBtnEl.disabled = false;
+      }
+      if (editRebuildBtnEl) {
+        editRebuildBtnEl.disabled = false;
+      }
+      return;
     }
     const requestMessage = getFriendlyRequestError(error);
     const message = error?.status === 409
@@ -3908,7 +4188,7 @@ async function loadData(preferredPath = '', options = {}) {
     setListSkeletonState(LIST_UI_TEXT.status.loadingIndex);
     hideLoadRetry();
     const indexUrls = getDataIndexUrlCandidates();
-    const { payload, lastError } = await loadDocIndexPayload({
+    const { payload, lastError, attempts } = await loadDocIndexPayload({
       indexUrlCandidates: indexUrls,
       forceCacheBust,
       requestTimeoutMs: DATA_INDEX_REQUEST_TIMEOUT_MS,
@@ -3916,7 +4196,11 @@ async function loadData(preferredPath = '', options = {}) {
     });
 
     if (!payload) {
-      throw lastError || new Error(APP_RUNTIME_TEXTS.runtimeContext.indexLoadFailed);
+      throw enrichRequestError(
+        lastError,
+        attempts,
+        APP_RUNTIME_TEXTS.runtimeContext.indexLoadFailed,
+      );
     }
 
     if (currentLoadToken !== dataLoadToken) {
@@ -4194,6 +4478,25 @@ async function initApp() {
 
   if (modeEditBtnEl) {
     modeEditBtnEl.addEventListener('click', () => {
+      if (!state.editBackendAvailable) {
+        void (async () => {
+          if (modeEditBtnEl) {
+            modeEditBtnEl.disabled = true;
+          }
+          setEditorStatus(getEditModeUnavailableText());
+          await detectEditBackend();
+          setModeUi();
+          if (state.editBackendAvailable) {
+            setMode('edit', { persist: true });
+          } else {
+            setEditorStatus(getEditModeUnavailableText());
+          }
+          if (modeEditBtnEl) {
+            modeEditBtnEl.disabled = false;
+          }
+        })();
+        return;
+      }
       setMode('edit', { persist: true });
     });
   }

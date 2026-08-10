@@ -1,5 +1,40 @@
 export const DEFAULT_INVALID_RESPONSE_MESSAGE = '后端返回了非预期响应格式';
 
+function normalizeRequestUrl(value = '') {
+  if (!value) {
+    return '';
+  }
+  const trimmed = value.toString().trim();
+  return trimmed;
+}
+
+function toRequestAttemptRecord(url = '', errorOrResponse = {}, ok = false) {
+  const status = typeof errorOrResponse?.status === 'number' ? errorOrResponse.status : 0;
+
+  return {
+    url: normalizeRequestUrl(url),
+    ok,
+    status,
+    statusText: errorOrResponse?.statusText || '',
+    name: errorOrResponse?.name || '',
+    message: errorOrResponse?.message || '',
+    timestamp: new Date().toISOString(),
+  };
+}
+
+function attachAttemptRecordToError(error = null, url = '') {
+  if (!error || typeof error !== 'object') {
+    return error;
+  }
+
+  if (Array.isArray(error.attempts) && error.attempts.length > 0) {
+    return error;
+  }
+
+  error.attempts = [toRequestAttemptRecord(url, error, false)];
+  return error;
+}
+
 export function withCacheBust(url, forceCacheBust = false) {
   if (!forceCacheBust) {
     return url;
@@ -25,8 +60,9 @@ export async function fetchWithTimeout(url, options = {}, timeoutMs = 10000, tim
     });
     return response;
   } catch (error) {
+    attachAttemptRecordToError(error, url);
     if (error?.name === 'AbortError') {
-      throw new Error(`${timeoutMessage}超时（${Math.round(timeoutMs / 1000)} 秒）`);
+      error.message = `${timeoutMessage}超时（${Math.round(timeoutMs / 1000)} 秒）`;
     }
     throw error;
   } finally {
@@ -66,6 +102,11 @@ export function makeRequestError(response, payload, requestLabel) {
   const error = new Error(`${label}失败（${suffix}）`);
   error.status = response.status;
   error.payload = payload;
+  error.statusText = response.statusText;
+  error.retryAfter = response.headers && typeof response.headers.get === 'function'
+    ? response.headers.get('retry-after')
+    : '';
+  error.attempts = [toRequestAttemptRecord(response?.url || response?.requestUrl || '', response, false)];
   return error;
 }
 
@@ -111,6 +152,7 @@ export async function fetchJsonApiRequest(
     const error = new Error(invalidResponseMessage);
     error.status = response.status;
     error.payload = payload;
+    error.attempts = [toRequestAttemptRecord(response?.url || '', response, false)];
     return Promise.reject(error);
   }
 

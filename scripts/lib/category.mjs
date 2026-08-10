@@ -37,9 +37,10 @@ function inferCategory(rawPath = '') {
       };
     }
     if (parts[1] === 'design-item' && parts.length >= 4) {
+      const itemSubType = normalizeValue(parts[3]).replace(/\.json$/i, '');
       return {
         category: 'item',
-        group: `物品 / ${parts[2]}/${parts[3]}`,
+        group: `物品 / ${parts[2]}/${itemSubType}`,
       };
     }
     if (parts[1] === 'design-skills' && parts.length >= 4) {

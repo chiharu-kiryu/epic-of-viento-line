@@ -33,6 +33,93 @@ function isTableRow(line) {
   return line.includes('|') && line.trim().replace(/\|/g, '').trim().length > 0;
 }
 
+function parseYamlScalar(value) {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) {
+    return '';
+  }
+  if ((trimmed.startsWith('"') && trimmed.endsWith('"'))
+    || (trimmed.startsWith('\'') && trimmed.endsWith('\''))) {
+    return trimmed.slice(1, -1);
+  }
+  return trimmed;
+}
+
+function countLeadingSpaces(line = '') {
+  let count = 0;
+  while (count < line.length && line[count] === ' ') {
+    count += 1;
+  }
+  return count;
+}
+
+function parseYamlLikeMap(rawText) {
+  const lines = rawText.replace(/\r/g, '').split('\n');
+  const result = {};
+  let activeList = null;
+
+  const ensureActiveList = (key) => {
+    if (!Object.prototype.hasOwnProperty.call(result, key) || !Array.isArray(result[key])) {
+      result[key] = [];
+    }
+  };
+
+  for (const rawLine of lines) {
+    const noCommentLine = rawLine.replace(/#.*$/, '').trimRight();
+    const line = noCommentLine.replace(/\t/g, '    ');
+    const trimmed = line.trim();
+    if (!trimmed || trimmed === '---' || trimmed === '...') {
+      continue;
+    }
+
+    const indent = countLeadingSpaces(line);
+    if (activeList && indent > activeList.indent && /^\s*-\s+/.test(line)) {
+      const listValue = parseYamlScalar(line.replace(/^\s*-\s*/, ''));
+      result[activeList.key].push(listValue);
+      continue;
+    }
+
+    if (activeList && indent <= activeList.indent) {
+      activeList = null;
+    }
+
+    const mapMatch = line.match(/^\s*([^:#\s][^:]*?)\s*:\s*(.*)$/);
+    if (!mapMatch) {
+      continue;
+    }
+
+    const key = mapMatch[1].trim();
+    const rawValue = mapMatch[2].trim();
+    if (key.length === 0) {
+      continue;
+    }
+
+    if (!rawValue) {
+      ensureActiveList(key);
+      activeList = { key, indent };
+      continue;
+    }
+
+    result[key] = parseYamlScalar(rawValue);
+    activeList = null;
+  }
+
+  return result;
+}
+
+function normalizeSectionValue(value) {
+  if (value == null) {
+    return '';
+  }
+  if (Array.isArray(value)) {
+    return value.join('\n');
+  }
+  if (typeof value === 'object') {
+    return JSON.stringify(value, null, 2);
+  }
+  return String(value);
+}
+
 const SKILL_HEADER_KEYS = new Set([
   '天生技能',
   '先天技能',
@@ -354,6 +441,42 @@ function parseTextContent(rawText, relPath) {
   };
 }
 
+function parseYamlContent(rawText, relPath) {
+  const parsed = parseTextContent(rawText, relPath);
+  const mapFields = parseYamlLikeMap(rawText);
+  if (!mapFields || Object.keys(mapFields).length === 0) {
+    return parsed;
+  }
+
+  const mergedFields = {
+    ...parsed.fields,
+    ...mapFields,
+  };
+
+  const existingSections = new Set(
+    Array.isArray(parsed.sections)
+      ? parsed.sections.map((item) => item.key)
+      : []
+  );
+
+  const yamlSections = Object.entries(mapFields).map(([key, value]) => ({
+    key,
+    value: normalizeSectionValue(value),
+  }));
+
+  for (const section of yamlSections) {
+    if (!existingSections.has(section.key)) {
+      parsed.sections.push(section);
+    }
+  }
+
+  parsed.fields = mergedFields;
+  parsed.format = 'yaml';
+  parsed.profile = 'yaml';
+  parsed.fieldCount = Object.keys(mergedFields).length;
+  return parsed;
+}
+
 function parseJsonContent(rawText, relPath) {
   const parsed = { title: trimName(path.basename(relPath)), type: 'json', sections: [] };
   const safeTitle = parsed.title || '未命名文档';
@@ -398,4 +521,4 @@ function parseJsonContent(rawText, relPath) {
   }
 }
 
-export { parseTextContent, parseJsonContent };
+export { parseTextContent, parseYamlContent, parseJsonContent };

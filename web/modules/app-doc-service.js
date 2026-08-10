@@ -1,6 +1,144 @@
-import { API_REQUEST_KEYS } from '../../scripts/lib/doc-api-contract.mjs';
+import { API_PATHS, API_REQUEST_KEYS, DOC_CAPABILITIES_FIELDS } from '../../scripts/lib/doc-api-contract.mjs';
 import { fetchJsonApiRequest, fetchTextApiRequest, withCacheBust } from './app-services.js';
 import { APP_ERROR_MESSAGES, APP_REQUEST_LABELS } from './app-state.js';
+
+const DETECT_SOURCE_CAPABILITIES = 'capabilities';
+const DETECT_SOURCE_HEALTH = 'health';
+const DETECT_SOURCE_UNAVAILABLE = 'unavailable';
+
+function toNormalizedString(value = '') {
+  return (value || '').toString().trim();
+}
+
+function createEditBackendDetectionResult({
+  available = false,
+  source = DETECT_SOURCE_UNAVAILABLE,
+  reason = '',
+  reasonText = '',
+  status = 0,
+  payload = null,
+  attempts = [],
+}) {
+  return {
+    available: Boolean(available),
+    source,
+    reason,
+    reasonText,
+    status,
+    payload,
+    attempts,
+  };
+}
+
+function isUrlUsable(value = '') {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function toAttemptRecord(url, errorOrResponse, succeeded = false) {
+  if (succeeded) {
+    return {
+      url,
+      ok: true,
+      status: errorOrResponse?.status || 200,
+      statusText: errorOrResponse?.statusText || '',
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  const status = typeof errorOrResponse?.status === 'number' ? errorOrResponse.status : 0;
+  return {
+    url,
+    ok: false,
+    status,
+    statusText: errorOrResponse?.statusText || '',
+    message: errorOrResponse?.message ? String(errorOrResponse.message) : '',
+    name: errorOrResponse?.name || '',
+    timestamp: new Date().toISOString(),
+  };
+}
+
+function normalizeEditBackendResultFromCapabilities(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return createEditBackendDetectionResult({
+      reason: 'capabilities_invalid',
+      reasonText: '编辑能力接口返回结构异常',
+      source: DETECT_SOURCE_CAPABILITIES,
+      payload,
+    });
+  }
+
+  const capabilities = payload?.[DOC_CAPABILITIES_FIELDS.capabilities];
+  if (capabilities && typeof capabilities === 'object' && Object.prototype.hasOwnProperty.call(capabilities, DOC_CAPABILITIES_FIELDS.edit)) {
+    const editEnabled = capabilities?.[DOC_CAPABILITIES_FIELDS.edit];
+    if (editEnabled === true) {
+      return createEditBackendDetectionResult({
+        available: true,
+        reason: 'available',
+        source: DETECT_SOURCE_CAPABILITIES,
+        payload,
+      });
+    }
+    return createEditBackendDetectionResult({
+      reason: 'capabilities_disabled',
+      reasonText: '服务已关闭编辑能力',
+      source: DETECT_SOURCE_CAPABILITIES,
+      payload,
+    });
+  }
+
+  const editMode = toNormalizedString(payload?.[DOC_CAPABILITIES_FIELDS.mode]);
+  const legacyEditMode = toNormalizedString(payload?.editMode || payload?.EditMode || payload?.MODE);
+  const endpoints = Array.isArray(payload?.[DOC_CAPABILITIES_FIELDS.endpoints]) ? payload[DOC_CAPABILITIES_FIELDS.endpoints] : [];
+  const hasDocEndpoint = endpoints.includes(API_PATHS.DOC);
+  const isOk = payload?.[DOC_CAPABILITIES_FIELDS.ok] === true;
+  const resolvedMode = editMode || legacyEditMode;
+
+  if ((resolvedMode === DOC_CAPABILITIES_FIELDS.modeValue && (isOk || hasDocEndpoint)) || (hasDocEndpoint && isOk)) {
+    return createEditBackendDetectionResult({
+      available: true,
+      reason: 'available',
+      source: DETECT_SOURCE_CAPABILITIES,
+      payload,
+    });
+  }
+
+  return createEditBackendDetectionResult({
+    reason: 'capabilities_missing_edit_flag',
+    reasonText: '能力字段缺失，无法确认是否支持编辑',
+    source: DETECT_SOURCE_CAPABILITIES,
+    payload,
+  });
+}
+
+function normalizeEditBackendResultFromHealth(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return createEditBackendDetectionResult({
+      reason: 'health_invalid',
+      reasonText: '健康检查返回格式异常',
+      source: DETECT_SOURCE_HEALTH,
+      payload,
+    });
+  }
+
+  const isHealthy = payload?.ok === true;
+  if (!isHealthy) {
+    return createEditBackendDetectionResult({
+      reason: 'health_unavailable',
+      reasonText: '后端健康检查不可用',
+      source: DETECT_SOURCE_HEALTH,
+      payload,
+      status: 200,
+    });
+  }
+
+  return createEditBackendDetectionResult({
+    reason: 'health_no_edit_info',
+    reasonText: '检测到健康服务，但未检测到编辑能力字段',
+    source: DETECT_SOURCE_HEALTH,
+    payload,
+    status: 200,
+  });
+}
 
 export async function detectEditBackendAvailability({
   capabilitiesUrl = '',
@@ -8,38 +146,67 @@ export async function detectEditBackendAvailability({
   requestTimeoutMs = 5000,
   requestLabel = APP_REQUEST_LABELS.detectEditCapability,
 }) {
+  let firstError = null;
+  const attempts = [];
+
   const checkApi = async (url) => {
-    const { payload } = await fetchJsonApiRequest(
+    const { response, payload } = await fetchJsonApiRequest(
       url,
       { cache: 'no-store' },
       requestTimeoutMs,
       requestLabel,
     );
+    attempts.push(toAttemptRecord(url, response, true));
     return payload;
   };
 
   try {
     const payload = await checkApi(capabilitiesUrl);
-    if (typeof payload === 'object' && payload !== null) {
-      const direct = Boolean(payload?.capabilities?.edit);
-      const legacy = payload?.editMode === 'edit';
-      const modeFlag = direct || legacy;
-      return Boolean(modeFlag || payload?.ok);
-    }
-  } catch {
+    return {
+      ...normalizeEditBackendResultFromCapabilities(payload),
+      attempts,
+    };
+  } catch (error) {
+    firstError = error || null;
+    attempts.push(toAttemptRecord(capabilitiesUrl, firstError, false));
     // fall back to health
   }
 
   try {
     const payload = await checkApi(healthUrl);
-    if (typeof payload === 'object' && payload !== null) {
-      return Boolean(payload?.ok || payload?.alive || payload !== null);
+    return {
+      ...normalizeEditBackendResultFromHealth(payload),
+      attempts,
+    };
+  } catch (error) {
+    attempts.push(toAttemptRecord(healthUrl, error, false));
+    if (firstError && firstError?.status === 404 && (!error || error?.status !== 404)) {
+      return createEditBackendDetectionResult({
+        reason: 'capabilities_http_404',
+        reasonText: '编辑能力接口不可达，可能未启动可写服务',
+        source: DETECT_SOURCE_UNAVAILABLE,
+        status: typeof firstError.status === 'number' ? firstError.status : 404,
+        attempts,
+      });
     }
-  } catch {
-    // keep false when fallback fails
+    const status = typeof error?.status === 'number' ? error.status : 0;
+    if (status === 404) {
+      return createEditBackendDetectionResult({
+        reason: 'capabilities_http_404',
+        reasonText: '编辑能力接口不可达，可能未启动可写服务',
+        source: DETECT_SOURCE_UNAVAILABLE,
+        status,
+        attempts,
+      });
+    }
+    return createEditBackendDetectionResult({
+      reason: 'service_unreachable',
+      reasonText: '文档服务不可达',
+      source: DETECT_SOURCE_UNAVAILABLE,
+      status,
+      attempts,
+    });
   }
-
-  return false;
 }
 
 export async function loadDocIndexPayload({
@@ -50,27 +217,36 @@ export async function loadDocIndexPayload({
 }) {
   let payload = null;
   let lastError = null;
+  const attempts = [];
 
-  for (const candidateUrl of indexUrlCandidates) {
+  const validCandidates = indexUrlCandidates.filter(isUrlUsable);
+  for (const candidateUrl of validCandidates) {
+    const requestUrl = withCacheBust(candidateUrl, forceCacheBust);
     try {
       const response = await fetchJsonApiRequest(
-        withCacheBust(candidateUrl, forceCacheBust),
+        requestUrl,
         { cache: 'no-store' },
         requestTimeoutMs,
         requestLabel,
       );
       payload = response.payload;
-      break;
+      attempts.push(toAttemptRecord(requestUrl, response, true));
+      return {
+        payload,
+        lastError,
+        attempts,
+      };
     } catch (error) {
       lastError = error;
-      if (error?.status === 404 || error?.status === 403) {
-        continue;
-      }
-      break;
+      attempts.push(toAttemptRecord(requestUrl, error, false));
     }
   }
 
-  return { payload, lastError };
+  return {
+    payload,
+    lastError,
+    attempts,
+  };
 }
 
 export async function readDocSource({
