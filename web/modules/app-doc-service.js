@@ -3,6 +3,7 @@ import { fetchJsonApiRequest, fetchTextApiRequest, withCacheBust } from './app-s
 import { APP_ERROR_MESSAGES, APP_REQUEST_LABELS } from './app-state.js';
 
 const DOC_API_TOKEN_STORAGE_KEY = 'doc-api-token';
+const DOC_API_TOKEN_MAX_LENGTH = 512;
 
 function normalizeApiToken(value = '') {
   if (typeof value !== 'string') {
@@ -12,7 +13,7 @@ function normalizeApiToken(value = '') {
   const token = value
     .trim()
     .replace(/[\u0000-\u001F\u007F]/g, '');
-  return token;
+  return token.slice(0, DOC_API_TOKEN_MAX_LENGTH);
 }
 
 function getStoredApiToken() {

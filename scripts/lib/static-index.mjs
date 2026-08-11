@@ -293,7 +293,7 @@ async function collectImagesForSourceDoc(standardDoc, sourcePath, sourceCategory
   const rawText = standardDoc.raw || '';
   const normalizedName = path.basename(sourcePath);
   const baseName = trimName(normalizedName);
-  const explicitPaths = collectAssetImageRefs(rawText, sourcePath);
+  const explicitPaths = collectAssetImageRefs(rawText, sourcePath, assetCatalog);
   const matched = new Set(explicitPaths);
 
   const cls = sourceCategory || 'other';

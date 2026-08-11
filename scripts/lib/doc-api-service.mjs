@@ -11,6 +11,7 @@ import {
 } from './doc-server.mjs';
 import { trimName } from './paths.mjs';
 import { rebuildIndex } from './rebuild-workflow.mjs';
+import { clearHeroImageCache } from './image-index.mjs';
 import {
   makeCapabilitiesPayload,
   API_ERRORS,
@@ -56,6 +57,7 @@ function createDocumentService(options = {}) {
     ...sharedState,
   };
   const indexCache = { value: null, fetchedAt: 0 };
+  let indexBuildInFlight = null;
   const requestMetrics = options.requestMetrics || createApiMetrics();
 
   async function getCapabilities() {
@@ -77,16 +79,28 @@ function createDocumentService(options = {}) {
   function invalidateIndexCache() {
     indexCache.value = null;
     indexCache.fetchedAt = 0;
+    clearHeroImageCache();
+  }
+
+  async function rebuildIndexCache() {
+    const index = await buildEditableDocIndex();
+    indexCache.value = index;
+    indexCache.fetchedAt = Date.now();
+    return index;
   }
 
   async function getDocIndex() {
     if (isIndexCacheValid()) {
       return indexCache.value;
     }
-    const index = await buildEditableDocIndex();
-    indexCache.value = index;
-    indexCache.fetchedAt = Date.now();
-    return index;
+    if (indexBuildInFlight) {
+      return indexBuildInFlight;
+    }
+
+    indexBuildInFlight = rebuildIndexCache().finally(() => {
+      indexBuildInFlight = null;
+    });
+    return indexBuildInFlight;
   }
 
   function getHealth() {

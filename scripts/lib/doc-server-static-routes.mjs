@@ -87,13 +87,13 @@ function buildFaviconCandidates(projectRoot, webRoot) {
   ];
 }
 
-async function handleFavicon({ response, projectRoot, webRoot }) {
+async function handleFavicon({ response, projectRoot, webRoot, request }) {
   const candidates = buildFaviconCandidates(projectRoot, webRoot);
 
   for (const candidate of candidates) {
     try {
       await fs.access(candidate);
-      await sendFile(candidate, response);
+      await sendFile(candidate, response, request);
       return true;
     } catch {
       // continue
@@ -104,7 +104,7 @@ async function handleFavicon({ response, projectRoot, webRoot }) {
   return true;
 }
 
-async function handleProjectFileRequest({ response, pathname, projectRoot }) {
+async function handleProjectFileRequest({ response, pathname, projectRoot, request }) {
   const decodedPath = safeDecodePath(pathname);
   if (!decodedPath) {
     await sendStaticJsonError(response, 400, 'bad path', 'bad_path');
@@ -131,7 +131,7 @@ async function handleProjectFileRequest({ response, pathname, projectRoot }) {
     if (stat.isDirectory()) {
       if (isIndexFallbackPath(pathname)) {
         const indexPath = getWebRootIndexPath();
-        await sendFile(indexPath, response);
+        await sendFile(indexPath, response, request);
         return true;
       }
       await sendStaticJsonError(response, 403, 'directory access disabled', 'directory_access_disabled');
@@ -143,7 +143,7 @@ async function handleProjectFileRequest({ response, pathname, projectRoot }) {
       return true;
     }
 
-    await sendFile(candidatePath, response);
+    await sendFile(candidatePath, response, request, stat);
     return true;
   } catch {
     const normalizedPath = decodedPath || pathname;
@@ -153,7 +153,7 @@ async function handleProjectFileRequest({ response, pathname, projectRoot }) {
     }
 
     const indexPath = getWebRootIndexPath();
-    await sendFile(indexPath, response);
+    await sendFile(indexPath, response, request);
     return true;
   }
 }
@@ -164,6 +164,7 @@ async function handleStaticRequest({
   projectRoot,
   webRoot,
   requestMethod = '',
+  request,
 }) {
   if (!isAllowedStaticMethod(requestMethod)) {
     response.setHeader('Allow', STATIC_ALLOWED_METHODS.join(', '));
@@ -172,7 +173,7 @@ async function handleStaticRequest({
   }
 
   if (isFaviconPath(pathname)) {
-    return handleFavicon({ response, projectRoot, webRoot });
+    return handleFavicon({ response, projectRoot, webRoot, request });
   }
 
   if (isApiPath(pathname)) {
@@ -182,11 +183,11 @@ async function handleStaticRequest({
 
   if (isRootPath(pathname)) {
     const indexPath = getWebRootIndexPath();
-    await sendFile(indexPath, response);
+    await sendFile(indexPath, response, request);
     return true;
   }
 
-  return handleProjectFileRequest({ response, pathname, projectRoot });
+  return handleProjectFileRequest({ response, pathname, projectRoot, request });
 }
 
 export {

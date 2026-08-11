@@ -11,6 +11,17 @@ import {
 } from './doc-api-contract.mjs';
 
 const EDIT_ROOT_PREFIXES = ['design-data/', 'docs-standard/design-data/'];
+const STATIC_CACHE_CONTROL_STATIC_EXTENSIONS = new Set([
+  '.css',
+  '.js',
+  '.json',
+  '.txt',
+  '.md',
+]);
+const STATIC_CACHE_CONTROL_HTML_EXTENSIONS = new Set([
+  '.html',
+]);
+const DEFAULT_STATIC_CACHE_SECONDS = 3600;
 
 const MIME_TYPES = new Map([
   ['.html', 'text/html; charset=utf-8'],
@@ -26,6 +37,8 @@ const MIME_TYPES = new Map([
 ]);
 
 const PROJECT_ROOT_REAL = path.resolve(PROJECT_ROOT);
+const README_PATHS = ['README.md', 'design-data/README.md'];
+const INDEX_BUILD_CONCURRENCY = normalizeNumericConfigValue('DOC_API_INDEX_BUILD_CONCURRENCY', 16, 1);
 
 function normalizeNumericConfigValue(name, fallback, min = 0) {
   const raw = process.env[name];
@@ -190,6 +203,20 @@ async function readRequestJsonBody(request) {
     const bodyChunks = [];
     let bodyBytes = 0;
     let finished = false;
+    const rawContentLength = request?.headers?.['content-length'] || request?.headers?.['Content-Length'];
+    const contentLength = Number(rawContentLength);
+    if (Number.isFinite(contentLength) && Number.isInteger(contentLength) && contentLength > MAX_JSON_BODY_BYTES) {
+      const error = new Error('request body too large');
+      error.statusCode = 413;
+      error.errorCode = API_RESPONSE_DEFAULTS.payloadTooLargeErrorPrefix;
+      error.payload = {
+        receivedBytes: contentLength,
+        maxBytes: MAX_JSON_BODY_BYTES,
+      };
+      reject(error);
+      request.pause();
+      return;
+    }
 
     const finishError = (error) => {
       if (finished) {
@@ -291,16 +318,37 @@ function classifyEntry(relativePath) {
   };
 }
 
-async function buildEditableDocIndex() {
-  const result = [];
-  const fileList = await collectFilesRecursive(DOC_ROOT, { relativeBase: '' });
+async function mapWithConcurrency(items = [], mapper, limit = 8) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return [];
+  }
 
-  for (const filePath of fileList) {
+  const result = new Array(items.length);
+  let cursor = 0;
+
+  const worker = async () => {
+    while (true) {
+      const index = cursor;
+      cursor += 1;
+      if (index >= items.length) {
+        return;
+      }
+      result[index] = await mapper(items[index], index, items.length);
+    }
+  };
+
+  const workers = Array.from({ length: Math.min(limit, items.length) }, worker);
+  await Promise.all(workers);
+  return result;
+}
+
+async function buildEditableDocIndex() {
+  const fileList = await collectFilesRecursive(DOC_ROOT, { relativeBase: '' });
+  const result = await mapWithConcurrency(fileList, async (filePath) => {
     const rel = toPosix(path.join('design-data', filePath));
     const absolutePath = path.join(PROJECT_ROOT, rel);
     const classification = classifyEntry(rel);
     const baseName = path.basename(absolutePath);
-
     const entry = {
       path: rel,
       title: trimName(baseName),
@@ -312,35 +360,59 @@ async function buildEditableDocIndex() {
       heroImages: [],
     };
 
-    if (classification.category === 'hero') {
-      entry.heroImages = await collectHeroImages(classification.meta.attribute, classification.meta.hero);
-    }
-
     try {
-      const stats = await fs.stat(absolutePath);
+      const [heroImages, stats] = await Promise.all([
+        classification.category === 'hero'
+          ? collectHeroImages(classification.meta.attribute, classification.meta.hero)
+          : Promise.resolve([]),
+        fs.stat(absolutePath),
+      ]);
+      if (Array.isArray(heroImages) && heroImages.length > 0) {
+        entry.heroImages = heroImages;
+      }
       entry.lastModified = stats.mtime.toISOString();
     } catch {
-      entry.lastModified = '';
+      // keep defaults
     }
 
-    result.push(entry);
+    return entry;
+  }, INDEX_BUILD_CONCURRENCY);
+
+  const readmeMeta = (await Promise.all(README_PATHS.map(async (readme) => {
+    const abs = path.join(PROJECT_ROOT, readme);
+    const rel = toPosix(readme);
+    try {
+      const stats = await fs.stat(abs);
+      return {
+        path: rel,
+        lastModified: stats.mtime.toISOString(),
+      };
+    } catch {
+      return null;
+    }
+  }))).filter(Boolean);
+
+  const readmeSet = new Set(readmeMeta.map((item) => item.path));
+  const existingPaths = new Set(result.map((item) => item.path));
+  for (const readme of readmeMeta) {
+    if (!existingPaths.has(readme.path)) {
+      result.unshift({
+        path: readme.path,
+        title: '项目说明文档',
+        category: 'root',
+        group: '根目录',
+        name: '项目说明文档',
+        lastModified: readme.lastModified,
+        heroImages: [],
+      });
+    }
   }
 
-  const readmePaths = ['README.md', 'design-data/README.md'];
-  for (const readme of readmePaths) {
-    const abs = path.join(PROJECT_ROOT, readme);
-    if (await fs.access(abs).then(() => true).catch(() => false)) {
-      const rel = toPosix(readme);
-      if (!result.some((item) => item.path === rel)) {
-        result.unshift({
-          path: rel,
-          title: '项目说明文档',
-          category: 'root',
-          group: '根目录',
-          name: '项目说明文档',
-          lastModified: '',
-          heroImages: [],
-        });
+  if (readmeSet.size) {
+    const readmeLatestByPath = new Map(readmeMeta.map((item) => [item.path, item.lastModified]));
+    for (const item of result) {
+      if (readmeSet.has(item.path)) {
+        item.lastModified = readmeLatestByPath.get(item.path) || '';
       }
     }
   }
@@ -365,10 +437,74 @@ function getMime(filePath) {
   return MIME_TYPES.get(ext) || 'application/octet-stream';
 }
 
-async function sendFile(filePath, response) {
+function generateEtag(stats) {
+  return `W/"${stats.size}-${Math.floor(stats.mtimeMs)}"`;
+}
+
+function resolveStaticCacheControl(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  if (STATIC_CACHE_CONTROL_HTML_EXTENSIONS.has(ext)) {
+    return 'no-cache, no-store, must-revalidate, max-age=0';
+  }
+  if (STATIC_CACHE_CONTROL_STATIC_EXTENSIONS.has(ext)) {
+    return `public, max-age=${DEFAULT_STATIC_CACHE_SECONDS}, immutable`;
+  }
+  return `public, max-age=${DEFAULT_STATIC_CACHE_SECONDS}, must-revalidate`;
+}
+
+function normalizeWeakEtag(rawEtag = '') {
+  return rawEtag.toString().trim().replace(/^W\//, '').replace(/^"(.+)"$/, '$1');
+}
+
+function isNotModifiedByCacheHeaders(request, stats, etag) {
+  const headers = request?.headers || {};
+  if (!headers || typeof headers !== 'object') {
+    return false;
+  }
+
+  const ifNoneMatch = headers['if-none-match'];
+  if (typeof ifNoneMatch === 'string' && ifNoneMatch.trim()) {
+    const candidates = ifNoneMatch.split(',').map((value) => normalizeWeakEtag(value));
+    const normalizedEtag = normalizeWeakEtag(etag);
+    if (candidates.includes('*') || candidates.includes(normalizedEtag)) {
+      return true;
+    }
+  }
+
+  const ifModifiedSince = headers['if-modified-since'];
+  if (typeof ifModifiedSince === 'string' && ifModifiedSince.trim()) {
+    const parsed = Date.parse(ifModifiedSince.trim());
+    if (Number.isFinite(parsed) && parsed >= stats.mtimeMs) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+async function sendFile(filePath, response, request = null, fileStats = null) {
   setSecurityHeaders(response);
-  response.statusCode = 200;
+  const stats = fileStats || await fs.stat(filePath);
+  const etag = generateEtag(stats);
+  const isHead = request?.method?.toUpperCase() === 'HEAD';
+
   response.setHeader('Content-Type', getMime(filePath));
+  response.setHeader('Content-Length', String(stats.size));
+  response.setHeader('ETag', etag);
+  response.setHeader('Last-Modified', stats.mtime.toUTCString());
+  response.setHeader('Cache-Control', resolveStaticCacheControl(filePath));
+  if (isNotModifiedByCacheHeaders(request, stats, etag)) {
+    response.statusCode = 304;
+    response.end();
+    return;
+  }
+
+  response.statusCode = 200;
+  if (isHead) {
+    response.end();
+    return;
+  }
+
   const stream = createReadStream(filePath);
   stream.pipe(response);
 }
@@ -387,6 +523,7 @@ function sendApiResponse(response, data, requestId = '') {
   setSecurityHeaders(response);
   response.statusCode = 200;
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
+  response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
   const normalizedRequestId = typeof requestId === 'string' ? requestId.trim() : '';
   if (normalizedRequestId) {
     response.setHeader('X-Request-Id', normalizedRequestId);
@@ -402,6 +539,7 @@ async function sendApiError(response, statusCode, message, extra = {}, requestId
   setSecurityHeaders(response);
   response.statusCode = statusCode;
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
+  response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
   const normalizedRequestId = typeof requestId === 'string' ? requestId.trim() : '';
   if (normalizedRequestId) {
     response.setHeader('X-Request-Id', normalizedRequestId);

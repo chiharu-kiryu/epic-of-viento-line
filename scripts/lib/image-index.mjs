@@ -1,8 +1,6 @@
-import fsSync from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {
-  PROJECT_ROOT,
   ASSET_ROOT,
   toPosix,
 } from './paths.mjs';
@@ -21,6 +19,14 @@ const CATEGORY_IMAGE_DIRS = {
   template: ['assets/images/template'],
 };
 const HERO_PORTRAIT_KEYWORDS = ['原画', '立绘', '封面', '头像', 'hero', 'portrait', 'cover', '原画图', '立绘图'];
+const HERO_IMAGE_CACHE_TTL_MS = 10 * 60 * 1000;
+const HERO_IMAGE_CACHE = new Map();
+const ASSET_REFERENCE_PATTERNS = [
+  /!\[[^\]]*\]\(([^)\s]+)\)/g,
+  /<img[^>]+src=['"]([^'"]+)['"][^>]*>/gi,
+  /\[(?:[^\]]*)\]\(([^)\s]+)\)/g,
+  /assets\/images\/.+?\.(?:png|jpg|jpeg|webp|gif|svg)/gi,
+];
 
 function toSourceDirPosix(relativePath) {
   return toPosix(path.dirname(relativePath));
@@ -68,6 +74,7 @@ async function buildAssetImageCatalog() {
     relativeBase: 'assets',
     isAccepted: (name) => IMAGE_EXTENSIONS.has(path.extname(name).toLowerCase()),
   });
+  const fileSet = new Set(files.map((filePath) => toPosix(filePath)));
   const byBaseName = new Map();
 
   for (const file of files) {
@@ -77,16 +84,56 @@ async function buildAssetImageCatalog() {
     byBaseName.set(baseName, list);
   }
 
-  return { files, byBaseName };
+  return {
+    files,
+    byBaseName,
+    fileSet,
+  };
 }
 
-function collectAssetImageRefs(rawText, sourcePath) {
+function normalizeCandidateImagePath(rawCandidate, sourceDir) {
+  if (!rawCandidate) {
+    return '';
+  }
+
+  let normalized = rawCandidate;
+  if (!normalized.includes('assets/')) {
+    return '';
+  }
+
+  if (normalized.startsWith('/')) {
+    normalized = normalized.slice(1);
+  }
+  if (normalized.startsWith('./') || normalized.startsWith('../')) {
+    normalized = toPosix(path.join(sourceDir, normalized));
+  }
+
+  const assetIndex = normalized.indexOf('assets/images/');
+  if (assetIndex > -1) {
+    normalized = normalized.slice(assetIndex);
+  }
+
+  normalized = normalized.replace(/^\.\//, '').replace(/\/+/g, '/');
+  if (!normalized.includes('assets/images/')) {
+    normalized = toPosix(path.join('assets', 'images', normalized));
+  }
+
+  if (!IMAGE_EXTENSIONS.has(path.extname(normalized).toLowerCase())) {
+    return '';
+  }
+
+  return toPosix(normalized);
+}
+
+function collectAssetImageRefs(rawText, sourcePath, assetCatalog = null) {
   if (!rawText) {
     return [];
   }
 
   const result = new Set();
   const relativeDir = toSourceDirPosix(sourcePath);
+  const fileSet = assetCatalog?.fileSet;
+  const hasFileSet = fileSet instanceof Set;
   const cleanPath = (url) => {
     if (!url) {
       return null;
@@ -101,14 +148,7 @@ function collectAssetImageRefs(rawText, sourcePath) {
     return withoutQuery;
   };
 
-  const patterns = [
-    /!\[[^\]]*\]\(([^\)\s]+)\)/g,
-    /<img[^>]+src=["']([^"']+)["'][^>]*>/gi,
-    /\[(?:[^\]]*)\]\(([^\)\s]+)\)/g,
-    /assets\/images\/.+?\.(?:png|jpg|jpeg|webp|gif|svg)/gi,
-  ];
-
-  for (const pattern of patterns) {
+  for (const pattern of ASSET_REFERENCE_PATTERNS) {
     const matches = rawText.matchAll(pattern);
     for (const match of matches) {
       const candidate = cleanPath(match[1] || match[0]);
@@ -116,36 +156,12 @@ function collectAssetImageRefs(rawText, sourcePath) {
         continue;
       }
 
-      let normalized = candidate;
-
-      if (!normalized.includes('assets/')) {
+      const normalized = normalizeCandidateImagePath(candidate, relativeDir);
+      if (!normalized) {
         continue;
       }
 
-      const assetIndex = candidate.indexOf('assets/images/');
-      if (assetIndex > -1) {
-        normalized = candidate.slice(assetIndex);
-      }
-
-      if (candidate.startsWith('/')) {
-        normalized = candidate.slice(1);
-      }
-      if (candidate.startsWith('./') || candidate.startsWith('../')) {
-        normalized = toPosix(path.join(relativeDir, candidate));
-      }
-
-      normalized = normalized.replace(/^\.\//, '').replace(/\/+/, '/');
-
-      if (!normalized.includes('assets/images/')) {
-        normalized = toPosix(path.join('assets', 'images', normalized));
-      }
-
-      if (!IMAGE_EXTENSIONS.has(path.extname(normalized).toLowerCase())) {
-        continue;
-      }
-
-      const absolutePath = path.join(PROJECT_ROOT, normalized);
-      if (fsSync.existsSync(absolutePath)) {
+      if (!hasFileSet || fileSet.has(normalized)) {
         result.add(toPosix(normalized));
       }
     }
@@ -305,16 +321,39 @@ function collectFromCatalog(category, name, assetMeta) {
 }
 
 async function collectHeroImages(attribute, hero) {
-  const heroDir = path.join(ASSET_ROOT, 'images', 'heros', attribute, hero);
+  const normalizedAttribute = typeof attribute === 'string' ? attribute.trim() : '';
+  const normalizedHero = typeof hero === 'string' ? hero.trim() : '';
+  if (!normalizedAttribute || !normalizedHero) {
+    return [];
+  }
+
+  const cacheKey = `${normalizedAttribute}::${normalizedHero}`;
+  const now = Date.now();
+  const cached = HERO_IMAGE_CACHE.get(cacheKey);
+  if (cached && cached.expiresAt > now) {
+    return cached.paths;
+  }
+
+  const heroDir = path.join(ASSET_ROOT, 'images', 'heros', normalizedAttribute, normalizedHero);
   try {
     const items = await fs.readdir(heroDir);
-    return items
+    const result = items
       .filter((name) => path.extname(name).toLowerCase() === '.png')
       .sort()
-      .map((name) => toPosix(path.join('assets', 'images', 'heros', attribute, hero, name)));
+      .map((name) => toPosix(path.join('assets', 'images', 'heros', normalizedAttribute, normalizedHero, name)));
+
+    HERO_IMAGE_CACHE.set(cacheKey, {
+      paths: result,
+      expiresAt: now + HERO_IMAGE_CACHE_TTL_MS,
+    });
+    return result;
   } catch {
     return [];
   }
+}
+
+function clearHeroImageCache() {
+  HERO_IMAGE_CACHE.clear();
 }
 
 export {
@@ -324,6 +363,7 @@ export {
   collectAssetImageRefs,
   collectFromCatalog,
   collectHeroImages,
+  clearHeroImageCache,
   sortHeroImagesForDisplay,
   extractHeroSkillImageNames,
   normalizeImageMatchValue,

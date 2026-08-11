@@ -20,6 +20,8 @@ const RATE_LIMIT_BUCKET_MAX = normalizeNumericConfigValue('DOC_API_RATE_BUCKET_M
 const WRITE_TOKENS = extractTokenList(process.env.DOC_API_TOKEN || process.env.DOC_API_WRITE_TOKEN);
 const SECURITY_AUDIT_LOG_FILE = process?.env?.DOC_API_SECURITY_AUDIT_LOG_FILE || '';
 const TRUST_PROXY_IP = process?.env?.DOC_API_TRUST_PROXY === '1';
+const REQUIRE_WRITE_AUTH = process?.env?.DOC_API_REQUIRE_WRITE_AUTH === '1'
+  || (process?.env?.NODE_ENV === 'production' && process?.env?.DOC_API_REQUIRE_WRITE_AUTH !== '0');
 const API_RATE_BUCKETS = new Map();
 const SECURITY_AUDIT_ENABLED = process?.env?.DOC_API_SECURITY_AUDIT === '1';
 const WRITE_METHODS = new Set([API_METHODS.POST, API_METHODS.PUT]);
@@ -264,7 +266,11 @@ function extractAuthToken(request) {
 }
 
 function isAuthEnabled() {
-  return WRITE_TOKENS.length > 0;
+  return REQUIRE_WRITE_AUTH || WRITE_TOKENS.length > 0;
+}
+
+if (REQUIRE_WRITE_AUTH && !WRITE_TOKENS.length) {
+  console.warn('[doc-security] write APIs are configured to require auth, but no token is configured');
 }
 
 function isTokenAllowed(rawToken) {
