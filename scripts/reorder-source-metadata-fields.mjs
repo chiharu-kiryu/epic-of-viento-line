@@ -1,16 +1,17 @@
 #!/usr/bin/env node
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { DOC_ROOT, toPosix } from './lib/paths.mjs';
+import { DOC_ROOT, PROJECT_ROOT, toPosix } from './lib/paths.mjs';
 import { collectFilesRecursive } from './lib/scan-files.mjs';
-import { toUnixLineEndings } from './lib/normalize-text-utils.mjs';
 
 const CLI_ARGS = process.argv.slice(2).filter((value) => value.trim() !== '');
 const WRITE = CLI_ARGS.includes('--write');
 const SHOW_HELP = CLI_ARGS.includes('-h') || CLI_ARGS.includes('--help');
 const FORCE_FULL_SCAN = CLI_ARGS.includes('--all');
 
-const ACCEPTED_EXTENSIONS = new Set(['', '.md', '.txt', '.json', '.yml', '.yaml']);
+// This operation moves text field blocks. Structured formats must not be split
+// by line: moving JSON properties this way can leave commas in invalid positions.
+const ACCEPTED_EXTENSIONS = new Set(['', '.md', '.txt']);
 
 const DEFAULT_TARGET_ROOTS = [
   'design-item',
@@ -54,10 +55,11 @@ function showUsage() {
   console.log('  3) 若路径不在 item/unit/building 下会被忽略。');
   console.log('  4) 写回时会直接回写到原始文件，不会改写标准化产物。');
   console.log('  5) --type 用于限制扫描范围，不传则处理全部。');
+  console.log('  6) 只排序无扩展名、.md 和 .txt 文本；JSON/YAML 保持原样。');
 }
 
 function resolvePath(raw) {
-  return path.isAbsolute(raw) ? raw : path.resolve(process.cwd(), raw);
+  return path.isAbsolute(raw) ? raw : path.resolve(PROJECT_ROOT, raw);
 }
 
 function toCategory(filePath) {
@@ -95,8 +97,7 @@ function parseArgs() {
     if (arg === '--path' || arg === '-p' || arg === '--paths') {
       const next = CLI_ARGS[i + 1];
       if (!next || next.startsWith('--')) {
-        console.error(`缺少路径参数：${arg}`);
-        continue;
+        throw new Error(`缺少路径参数：${arg}`);
       }
       pathArgs.push(next);
       i += 1;
@@ -106,17 +107,15 @@ function parseArgs() {
     if (arg === '--type' || arg === '-t') {
       const next = CLI_ARGS[i + 1];
       if (!next || next.startsWith('--')) {
-        console.error(`缺少类型参数：${arg}`);
-        continue;
+        throw new Error(`缺少类型参数：${arg}`);
       }
       typeArgs.push(next);
       i += 1;
       continue;
     }
 
-    if (arg.startsWith('--')) {
-      continue;
-    }
+    if (['--write', '--all', '--help', '-h'].includes(arg)) continue;
+    if (arg.startsWith('-')) throw new Error(`未知参数：${arg}`);
 
     explicitTargets.push(arg);
   }
@@ -139,21 +138,22 @@ function parseTypeFilter(rawTypeArgs = []) {
         continue;
       }
       if (token === 'item' || token === 'unit' || token === 'building') {
-        requested.add(`design-${token === 'item' ? 'item' : `${token}s`}`);
+        requested.add({ item: 'design-item', unit: 'design-units', building: 'design-building' }[token]);
         continue;
       }
 
-      const normalized = `design-${token}`;
+      const normalized = token.startsWith('design-') ? token : `design-${token}`;
       if (KNOWN_CATEGORIES.includes(normalized)) {
         requested.add(normalized);
+      } else {
+        throw new Error(`无效的 --type 值：${token}，支持 item、unit、building`);
       }
     }
   }
 
   const allKnown = KNOWN_CATEGORIES.slice();
   if (requested.size === 0) {
-    console.error(`无效的 --type 值，支持：item、unit、building；已回退为全部。`);
-    return allKnown;
+    throw new Error('无效的 --type 值，支持 item、unit、building');
   }
 
   return allKnown.filter((category) => requested.has(category));
@@ -228,18 +228,30 @@ function rewriteBody(lines, category) {
     return { changed: false, lines };
   }
 
-  const segments = splitSegments(lines);
   const [firstLabel, secondLabel] = rule;
-
-  const changed = moveFieldBefore(segments, firstLabel, secondLabel);
-  if (!changed) {
-    return { changed: false, lines };
-  }
-
-  return {
-    changed: true,
-    lines: segments.flatMap((seg) => seg.lines),
+  const output = [];
+  let chunk = [];
+  let changed = false;
+  let fence = null;
+  const flush = () => {
+    const segments = splitSegments(chunk);
+    changed = moveFieldBefore(segments, firstLabel, secondLabel) || changed;
+    output.push(...segments.flatMap((segment) => segment.lines));
+    chunk = [];
   };
+  for (const line of lines) {
+    const marker = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+    if (fence) {
+      output.push(line);
+      if (marker && marker[1][0] === fence[0] && marker[1].length >= fence.length && !marker[2].trim()) fence = null;
+    } else if (marker || /^ {0,3}#{1,6}\s/.test(line)) {
+      flush();
+      output.push(line);
+      if (marker) fence = marker[1];
+    } else chunk.push(line);
+  }
+  flush();
+  return { changed, lines: output };
 }
 
 async function collectFilesFromPaths(targetPaths = [], typeFilter = KNOWN_CATEGORIES) {
@@ -367,9 +379,11 @@ async function main() {
   for (const filePath of merged) {
     total += 1;
     const raw = await fs.readFile(filePath, 'utf8');
-    const unix = toUnixLineEndings(raw);
-    const normalizedText = unix.replace(/^\uFEFF/, '');
-    const lines = normalizedText.split('\n');
+    const bom = raw.startsWith('\uFEFF') ? '\uFEFF' : '';
+    const parts = raw.slice(bom.length).split(/(\r\n|\r|\n)/);
+    const lines = parts.filter((_, index) => index % 2 === 0);
+    const endings = parts.filter((_, index) => index % 2 === 1);
+    if (lines.at(-1) === '' && endings.length) lines.pop();
     const titleIndex = lines.findIndex((line) => line.trim() !== '');
     if (titleIndex < 0) {
       continue;
@@ -380,7 +394,8 @@ async function main() {
       continue;
     }
 
-    const bodyLines = lines.slice(titleIndex + 1);
+    const bodyStart = normalizeLabel(lines[titleIndex]) ? titleIndex : titleIndex + 1;
+    const bodyLines = lines.slice(bodyStart);
     const { changed, lines: normalizedBody } = rewriteBody(bodyLines, category);
 
     if (!changed) {
@@ -388,8 +403,8 @@ async function main() {
     }
 
     changedCount += 1;
-    const output = [...lines.slice(0, titleIndex + 1), ...normalizedBody];
-    const nextText = `${output.join('\n')}${normalizedText.endsWith('\n') ? '\n' : ''}`;
+    const output = [...lines.slice(0, bodyStart), ...normalizedBody];
+    const nextText = bom + output.map((line, index) => line + (endings[index] || '')).join('');
     if (WRITE) {
       await fs.writeFile(filePath, nextText, 'utf8');
     }

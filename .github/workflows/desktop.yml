@@ -1,0 +1,56 @@
+name: Build desktop installers
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            bundles: deb,appimage
+            artifact: linux
+          - os: windows-latest
+            bundles: nsis
+            artifact: windows
+          - os: macos-latest
+            bundles: dmg
+            artifact: macos
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+      - run: npm ci
+      - name: Read release version
+        id: release
+        run: >-
+          node --input-type=module -e "import fs from 'node:fs'; fs.appendFileSync(process.env.GITHUB_OUTPUT, 'version=' + fs.readFileSync('VERSION', 'utf8').trim() + '\n');"
+      - run: npm run check -- --app-only
+      - run: npm run desktop:prepare
+      - run: npm run desktop:test
+      - name: Build installers
+        run: npm run desktop:build -- --bundles ${{ matrix.bundles }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viento-studio-${{ steps.release.outputs.version }}-${{ matrix.artifact }}
+          if-no-files-found: error
+          path: |
+            src-tauri/target/release/bundle/**/*.deb
+            src-tauri/target/release/bundle/**/*.AppImage
+            src-tauri/target/release/bundle/**/*.exe
+            src-tauri/target/release/bundle/**/*.dmg

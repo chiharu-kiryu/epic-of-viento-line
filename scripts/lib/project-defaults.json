@@ -1,0 +1,20 @@
+{
+  "paths": { "documents": "documents", "templates": "templates", "metadata": "metadata" },
+  "assetStores": { "main": { "path": "assets" } },
+  "documentTypes": [
+    { "id": "document", "label": "档案", "directory": "", "parserProfile": "structured", "template": "document.md" },
+    { "id": "character", "label": "角色", "directory": "characters", "parserProfile": "structured", "template": "character.md" },
+    { "id": "story", "label": "故事", "directory": "stories", "parserProfile": "prose", "template": "story.md" },
+    { "id": "place", "label": "地点", "directory": "places", "parserProfile": "structured", "template": "place.md" },
+    { "id": "organization", "label": "组织", "directory": "organizations", "parserProfile": "structured", "template": "organization.md" },
+    { "id": "concept", "label": "设定", "directory": "concepts", "parserProfile": "structured", "template": "concept.md" }
+  ],
+  "templates": {
+    "document.md": "# 新建档案\n\n## 内容\n\n",
+    "character.md": "# 新建角色\n\n## 身份\n姓名：\n别称：\n\n## 外貌与性格\n\n## 背景与经历\n\n## 关系\n\n",
+    "story.md": "# 新建故事\n\n",
+    "place.md": "# 新建地点\n\n## 概况\n\n## 环境\n\n## 历史与关联\n\n",
+    "organization.md": "# 新建组织\n\n## 宗旨\n\n## 成员与关系\n\n## 历史\n\n",
+    "concept.md": "# 新建设定\n\n## 定义\n\n## 规则与边界\n\n## 关联\n\n"
+  }
+}

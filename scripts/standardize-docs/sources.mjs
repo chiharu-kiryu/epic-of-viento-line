@@ -10,11 +10,13 @@ async function collectSourcePaths(rootDir, {
   relativeBase = '',
   sourceFilters = [],
   skipDirs = SKIP_DIRS,
+  excludedRoots = [],
 } = {}) {
   const normalizedFilters = sourceFilters.map(normalizeFilterPath);
   const all = await collectFiles(rootDir, {
     relativeBase,
     skipDirs,
+    excludedRoots,
     isAccepted: (name) => isTextLike(name),
   });
   if (normalizedFilters.length === 0) {

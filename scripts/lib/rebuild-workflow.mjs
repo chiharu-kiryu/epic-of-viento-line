@@ -1,4 +1,5 @@
 import { runNodeScript } from './process.mjs';
+import path from 'node:path';
 import {
   STANDARDIZE_SCRIPT,
   BUILD_STATIC_SCRIPT,
@@ -20,13 +21,13 @@ function normalizeRebuildOptions(options = {}) {
     sourceFilter: normalizeRebuildSourceFilter(options.sourceFilter),
     runStandardize: options.runStandardize !== false,
     runBuild: options.runBuild !== false,
-    projectRoot: options.projectRoot || PROJECT_ROOT,
+    projectRoot: path.resolve(options.projectRoot || PROJECT_ROOT),
   };
 }
 
 function makeRebuildPlan({ backstoryMode, sourceFilter, runStandardize, runBuild }) {
   const performedStandardize = Boolean(runStandardize);
-  const shouldBuild = Boolean(runBuild || runStandardize);
+  const shouldBuild = Boolean(runBuild);
   const performedBuild = Boolean(shouldBuild);
 
   const standardizeArgs = resolveStandardizeArgs(backstoryMode);
@@ -47,13 +48,17 @@ function makeRebuildPlan({ backstoryMode, sourceFilter, runStandardize, runBuild
 async function runRebuildPlan({ projectRoot, standardizeArgs, runStandardize, runBuild }) {
   let standardizeResult = null;
   let buildResult = null;
+  const env = { ...process.env };
+  if (env.VIENTO_WORKSPACE_ROOT || path.resolve(projectRoot) !== PROJECT_ROOT) {
+    env.VIENTO_WORKSPACE_ROOT = path.resolve(projectRoot);
+  }
 
   if (runStandardize) {
-    standardizeResult = await runNodeScript(STANDARDIZE_SCRIPT, standardizeArgs, { cwd: projectRoot });
+    standardizeResult = await runNodeScript(STANDARDIZE_SCRIPT, standardizeArgs, { cwd: projectRoot, env });
   }
 
   if (runBuild) {
-    buildResult = await runNodeScript(BUILD_STATIC_SCRIPT, [], { cwd: projectRoot });
+    buildResult = await runNodeScript(BUILD_STATIC_SCRIPT, [], { cwd: projectRoot, env });
   }
 
   return {

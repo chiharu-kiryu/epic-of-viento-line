@@ -5,6 +5,8 @@ export const API_PATHS = Object.freeze({
   DOC: '/api/doc',
   METRICS: '/api/metrics',
   REBUILD: '/api/rebuild',
+  ASSETS: '/api/assets',
+  MEDIA_INSERT: '/api/assets/insert',
 });
 
 export const API_METHODS = Object.freeze({
@@ -20,6 +22,7 @@ export const API_REQUEST_KEYS = Object.freeze({
   expectedLockVersion: 'expectedVersion',
   force: 'force',
   create: 'create',
+  documentType: 'documentType',
   source: 'source',
   runStandardize: 'runStandardize',
   runBuild: 'runBuild',
@@ -111,6 +114,7 @@ export function normalizeDocWriteRequest(rawPayload = {}) {
     })(),
     force: payload[API_REQUEST_KEYS.force] === true,
     create: payload[API_REQUEST_KEYS.create] === true,
+    ...(payload[API_REQUEST_KEYS.documentType] !== undefined ? { documentType: payload[API_REQUEST_KEYS.documentType] } : {}),
   };
 }
 
@@ -186,6 +190,8 @@ export function makeCapabilitiesPayload(editablePrefixes, backstoryMergeMode, ve
       API_PATHS.DOC,
       API_PATHS.REBUILD,
       API_PATHS.INDEX,
+      API_PATHS.ASSETS,
+      API_PATHS.MEDIA_INSERT,
     ],
     [DOC_CAPABILITIES_FIELDS.backstoryMergeMode]: backstoryMergeMode,
     [DOC_CAPABILITIES_FIELDS.version]: version,
@@ -193,6 +199,7 @@ export function makeCapabilitiesPayload(editablePrefixes, backstoryMergeMode, ve
       [DOC_CAPABILITIES_FIELDS.edit]: true,
       [DOC_CAPABILITIES_FIELDS.create]: true,
       [DOC_CAPABILITIES_FIELDS.rebuild]: true,
+      media: true,
     },
   };
 }

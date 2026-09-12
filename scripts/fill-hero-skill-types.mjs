@@ -1,8 +1,9 @@
 #!/usr/bin/env node
+import { PROJECT_ROOT } from './lib/paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const ROOT = process.cwd();
+const ROOT = PROJECT_ROOT;
 const HERO_ROOT = path.join(ROOT, 'design-data', 'design-heros');
 const SKILL_BLOCKS = new Set(['天生技能', '技能1', '技能2', '技能3', '技能4', '阳印', '阴印', '铸魔', '铸神']);
 const DRY_RUN = process.argv.includes('--dry-run');

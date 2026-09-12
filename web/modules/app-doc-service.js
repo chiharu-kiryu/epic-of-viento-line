@@ -361,6 +361,7 @@ export async function writeDoc({
   pathValue = '',
   content = '',
   isCreate = false,
+  documentType,
   expectedVersion = '',
   force = false,
   requestTimeoutMs = 10000,
@@ -376,6 +377,7 @@ export async function writeDoc({
   };
   if (isCreate) {
     body[API_REQUEST_KEYS.create] = true;
+    if (documentType !== undefined) body[API_REQUEST_KEYS.documentType] = documentType;
   }
   if (!isCreate && expectedVersion) {
     body[API_REQUEST_KEYS.expectedVersion] = expectedVersion;
@@ -425,4 +427,39 @@ export async function rebuildDocIndex({
     requestTimeoutMs,
     requestLabel,
   );
+}
+
+export async function loadMediaAssets() {
+  return (await fetchJsonApiRequest(API_PATHS.ASSETS, {}, 15000, '读取作品素材')).payload;
+}
+
+export async function prepareDraftMedia(content, sourcePath, assetIds = []) {
+  return (await fetchJsonApiRequest(API_PATHS.MEDIA_INSERT, withAuthHeaders({
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content, sourcePath, assetIds }),
+  }), 15000, '更新素材预览')).payload;
+}
+
+export function uploadMediaFile(file, { signal, onProgress = () => {} } = {}) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const abort = () => xhr.abort();
+    if (signal?.aborted) { reject(new DOMException('已取消导入', 'AbortError')); return; }
+    xhr.open('POST', `${API_PATHS.ASSETS}?name=${encodeURIComponent(file.name)}`);
+    xhr.timeout = 300000;
+    for (const [key, value] of Object.entries(withAuthHeaders({ headers: { 'Content-Type': 'application/octet-stream' } }).headers)) xhr.setRequestHeader(key, value);
+    xhr.upload.onprogress = (event) => onProgress(event.loaded, event.lengthComputable ? event.total : file.size);
+    xhr.onload = () => {
+      let payload;
+      try { payload = JSON.parse(xhr.responseText); } catch { reject(new Error('素材服务返回了无效响应。')); return; }
+      if (xhr.status >= 200 && xhr.status < 300 && payload.ok === true) resolve(payload.data);
+      else reject(new Error(payload.error || '素材导入失败。'));
+    };
+    xhr.onerror = () => reject(new Error('素材连接中断，请重试。'));
+    xhr.ontimeout = () => reject(new Error('素材导入超时，请重试。'));
+    xhr.onabort = () => reject(new DOMException('已取消导入', 'AbortError'));
+    xhr.onloadend = () => signal?.removeEventListener('abort', abort);
+    signal?.addEventListener('abort', abort, { once: true });
+    xhr.send(file);
+  });
 }

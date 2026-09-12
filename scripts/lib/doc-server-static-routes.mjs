@@ -4,9 +4,9 @@ import {
   sendFile,
   sendApiError,
   getWebRootIndexPath,
-  getProjectFilePath,
-  isProjectFilePathSafe,
+  resolveProjectFilePath,
 } from './doc-server.mjs';
+import { resolveContainedPath } from './contained-path.mjs';
 import { API_RESPONSE, API_RESPONSE_DEFAULTS } from './doc-api-contract.mjs';
 
 const STATIC_ALLOWED_METHODS = ['GET', 'HEAD'];
@@ -44,6 +44,9 @@ function isFaviconPath(pathname) {
 
 function isManagedAssetPath(pathname) {
   return pathname.startsWith('/assets/')
+    || pathname.startsWith('/asset-files/')
+    || pathname.startsWith('/documents/')
+    || pathname.startsWith('/templates/')
     || pathname.startsWith('/data-template/')
     || pathname.startsWith('/design-data/')
     || pathname.startsWith('/docs-standard/');
@@ -52,9 +55,14 @@ function isManagedAssetPath(pathname) {
 function isSafeStaticAssetPath(pathname) {
   return pathname === '/favicon.ico'
     || pathname === '/web/favicon.ico'
+    || pathname === '/scripts/lib/doc-api-contract.mjs'
+    || pathname === '/scripts/lib/media-format.mjs'
     || pathname.startsWith('/assets/')
+    || pathname.startsWith('/asset-files/')
     || pathname.startsWith('/web/')
     || pathname.startsWith('/data/')
+    || pathname.startsWith('/documents/')
+    || pathname.startsWith('/templates/')
     || pathname.startsWith('/data-template/')
     || pathname.startsWith('/design-data/')
     || pathname.startsWith('/docs-standard/');
@@ -82,8 +90,9 @@ function sendStaticJsonError(response, statusCode, message, errorCode = '') {
 
 function buildFaviconCandidates(projectRoot, webRoot) {
   return [
-    path.join(projectRoot, 'favicon.ico'),
-    path.join(webRoot, 'favicon.ico'),
+    { root: path.dirname(webRoot), file: path.join(webRoot, '..', 'favicon.ico') },
+    { root: projectRoot, file: path.join(projectRoot, 'favicon.ico') },
+    { root: path.dirname(webRoot), file: path.join(webRoot, 'favicon.ico') },
   ];
 }
 
@@ -92,8 +101,8 @@ async function handleFavicon({ response, projectRoot, webRoot, request }) {
 
   for (const candidate of candidates) {
     try {
-      await fs.access(candidate);
-      await sendFile(candidate, response, request);
+      const file = await resolveContainedPath(candidate.root, candidate.file);
+      await sendFile(file, response, request);
       return true;
     } catch {
       // continue
@@ -116,9 +125,12 @@ async function handleProjectFileRequest({ response, pathname, projectRoot, reque
     return true;
   }
 
-  const candidatePath = path.normalize(getProjectFilePath(decodedPath));
-  if (!isProjectFilePathSafe(candidatePath)) {
-    await sendStaticJsonError(response, 403, 'forbidden', 'path_forbidden');
+  let candidatePath;
+  try { candidatePath = await resolveProjectFilePath(decodedPath); }
+  catch (error) {
+    const forbidden = error.statusCode === 403;
+    await sendStaticJsonError(response, forbidden ? 403 : 404,
+      forbidden ? 'forbidden' : 'Not found', forbidden ? 'path_forbidden' : 'not_found');
     return true;
   }
 

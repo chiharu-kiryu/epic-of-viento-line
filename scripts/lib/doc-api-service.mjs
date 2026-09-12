@@ -6,12 +6,14 @@ import {
   normalizeStandardizeSourceFilter,
   isAllowedEditPath,
   resolveEditableFilePath,
-  readTextFile,
   buildEditableDocIndex,
 } from './doc-server.mjs';
-import { trimName } from './paths.mjs';
+import { trimName, PROJECT_ROOT, DOCUMENTS_PATH } from './paths.mjs';
 import { rebuildIndex } from './rebuild-workflow.mjs';
 import { clearHeroImageCache } from './image-index.mjs';
+import { listMediaAssets, importMediaAsset } from './media-assets.mjs';
+import { createRegisteredDocument } from './project-documents.mjs';
+import { prepareMediaInsertion } from './media-insertion.mjs';
 import {
   makeCapabilitiesPayload,
   API_ERRORS,
@@ -21,6 +23,7 @@ import {
   normalizeRequestId,
 } from './doc-api-contract.mjs';
 import { createApiMetrics } from './doc-api-metrics.mjs';
+import { withDocumentTransaction, readDocumentSnapshot, writeDocumentAtomically } from './doc-file-store.mjs';
 
 const DEFAULT_INDEX_CACHE_TTL_MS = 5000;
 let requestSequence = 0;
@@ -49,7 +52,7 @@ function createDocumentService(options = {}) {
   const sharedState = options.state || {};
   const state = {
     rebuildInProgress: false,
-    editablePrefixes: Array.isArray(options.editablePrefixes) ? options.editablePrefixes : ['design-data/', 'docs-standard/design-data/'],
+    editablePrefixes: Array.isArray(options.editablePrefixes) ? options.editablePrefixes : [`${DOCUMENTS_PATH}/`, `docs-standard/${DOCUMENTS_PATH}/`],
     backstoryMergeMode: options.backstoryMergeMode || 'disabled (default)',
     indexCacheTtlMs: getDefaultIndexCacheTtl(options.indexCacheTtlMs),
     indexCache: null,
@@ -58,6 +61,7 @@ function createDocumentService(options = {}) {
   };
   const indexCache = { value: null, fetchedAt: 0 };
   let indexBuildInFlight = null;
+  let indexGeneration = 0;
   const requestMetrics = options.requestMetrics || createApiMetrics();
 
   async function getCapabilities() {
@@ -77,15 +81,19 @@ function createDocumentService(options = {}) {
   }
 
   function invalidateIndexCache() {
+    indexGeneration += 1;
+    indexBuildInFlight = null;
     indexCache.value = null;
     indexCache.fetchedAt = 0;
     clearHeroImageCache();
   }
 
-  async function rebuildIndexCache() {
+  async function rebuildIndexCache(generation) {
     const index = await buildEditableDocIndex();
-    indexCache.value = index;
-    indexCache.fetchedAt = Date.now();
+    if (generation === indexGeneration) {
+      indexCache.value = index;
+      indexCache.fetchedAt = Date.now();
+    }
     return index;
   }
 
@@ -97,10 +105,11 @@ function createDocumentService(options = {}) {
       return indexBuildInFlight;
     }
 
-    indexBuildInFlight = rebuildIndexCache().finally(() => {
-      indexBuildInFlight = null;
+    const building = rebuildIndexCache(indexGeneration).finally(() => {
+      if (indexBuildInFlight === building) indexBuildInFlight = null;
     });
-    return indexBuildInFlight;
+    indexBuildInFlight = building;
+    return building;
   }
 
   function getHealth() {
@@ -173,35 +182,22 @@ function createDocumentService(options = {}) {
       throw createError(400, API_ERRORS.badPath, {}, API_ERRORS.badPath);
     }
 
-    const resolved = await resolveEditableFilePath(filePath);
-    if (!resolved) {
-      throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
-    }
-
-    const content = await readTextFile(resolved.absolutePath);
-    if (content === null) {
-      throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
-    }
-
-    let lastModified = '';
-    let version = '';
-    try {
-      const stats = await fs.stat(resolved.absolutePath);
-      lastModified = stats.mtime.toISOString();
-      version = String(stats.mtimeMs);
-    } catch {
-      // keep defaults
-    }
-
-    const extension = path.extname(resolved.relativePath).replace('.', '') || 'txt';
-    return {
-      path: resolved.relativePath,
-      type: extension,
-      title: trimName(path.basename(resolved.relativePath)),
-      content,
-      lastModified,
-      version,
-    };
+    return withDocumentTransaction(filePath, async () => {
+      const resolved = await resolveEditableFilePath(filePath);
+      if (!resolved) {
+        throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
+      }
+      const { content, stats } = await readDocumentSnapshot(resolved.absolutePath);
+      const extension = path.extname(resolved.relativePath).replace('.', '') || 'txt';
+      return {
+        path: resolved.relativePath,
+        type: extension,
+        title: trimName(path.basename(resolved.relativePath)),
+        content,
+        lastModified: stats.mtime.toISOString(),
+        version: String(stats.mtimeMs),
+      };
+    });
   }
 
   async function writeDoc(rawPayload = {}) {
@@ -222,67 +218,80 @@ function createDocumentService(options = {}) {
     const createMode = normalized.create === true;
     const forceOverwrite = normalized.force === true;
     const expectedVersion = normalizeLockVersion(normalized.expectedVersion);
-    const resolved = await resolveEditableFilePath(filePath, { allowCreate: createMode });
-    if (!resolved) {
-      throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
-    }
+    return withDocumentTransaction(filePath, async () => {
+      const resolved = await resolveEditableFilePath(filePath, { allowCreate: createMode });
+      if (!resolved) {
+        throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
+      }
 
-    if (!createMode && !resolved.exists) {
-      throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
-    }
-    if (createMode && resolved.exists) {
-      throw createError(409, API_ERRORS.alreadyExists, {}, API_ERRORS.alreadyExists);
-    }
-    if (!createMode && !expectedVersion && !forceOverwrite) {
+      if (!createMode && !resolved.exists) {
+        throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
+      }
+      if (createMode && resolved.exists) {
+        throw createError(409, API_ERRORS.alreadyExists, {}, API_ERRORS.alreadyExists);
+      }
+      if (!createMode && !expectedVersion && !forceOverwrite) {
         throw createError(409, API_ERRORS.missingExpectedVersion, {}, API_ERRORS.missingExpectedVersion);
       }
 
-    if (!createMode && expectedVersion && !forceOverwrite) {
-      try {
-        const stats = await fs.stat(resolved.absolutePath);
-        const currentVersion = String(stats.mtimeMs);
-        if (currentVersion !== expectedVersion) {
-          throw createError(409, API_ERRORS.conflict, {
-            currentVersion,
-            lastModified: stats.mtime.toISOString(),
-          }, API_ERRORS.conflict);
+      let previousStats = null;
+      if (!createMode) {
+        try {
+          const stats = await fs.stat(resolved.absolutePath);
+          previousStats = stats;
+          const currentVersion = String(stats.mtimeMs);
+          if (!forceOverwrite && currentVersion !== expectedVersion) {
+            throw createError(409, API_ERRORS.conflict, {
+              currentVersion,
+              lastModified: stats.mtime.toISOString(),
+            }, API_ERRORS.conflict);
+          }
+        } catch (error) {
+          if (error?.statusCode) {
+            throw error;
+          }
+          if (error?.code === 'ENOENT') {
+            throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
+          }
+          throw createError(500, 'failed to check version', {}, API_RESPONSE_DEFAULTS.internalErrorPrefix);
         }
-      } catch (error) {
-        if (error?.statusCode) {
-          throw error;
-        }
-        if (error?.code === 'ENOENT') {
-          throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
-        }
-        throw createError(500, 'failed to check version', {}, API_RESPONSE_DEFAULTS.internalErrorPrefix);
       }
-    }
 
-    try {
-      await fs.mkdir(path.dirname(resolved.absolutePath), { recursive: true });
-      await fs.writeFile(resolved.absolutePath, normalized.content, 'utf8');
-      const stats = await fs.stat(resolved.absolutePath);
-      invalidateIndexCache();
-      return {
-        ok: true,
-        path: resolved.relativePath,
-        lastModified: stats.mtime.toISOString(),
-        version: String(stats.mtimeMs),
-      };
-    } catch (error) {
-      throw createError(500, 'failed to save', {}, API_RESPONSE_DEFAULTS.internalErrorPrefix);
-    }
+      try {
+        const writeSource = () => writeDocumentAtomically(resolved.absolutePath, normalized.content, { create: createMode, previousStats });
+        const stats = createMode ? await createRegisteredDocument(PROJECT_ROOT, resolved.relativePath, normalized.documentType, writeSource) : await writeSource();
+        invalidateIndexCache();
+        return {
+          ok: true,
+          path: resolved.relativePath,
+          lastModified: stats.mtime.toISOString(),
+          version: String(stats.mtimeMs),
+        };
+      } catch (error) {
+        if (error.statusCode) throw error;
+        if (createMode && error.code === 'EEXIST') {
+          throw createError(409, API_ERRORS.alreadyExists, {}, API_ERRORS.alreadyExists);
+        }
+        throw createError(500, 'failed to save', {}, API_RESPONSE_DEFAULTS.internalErrorPrefix);
+      }
+    });
   }
 
   async function runRebuild(rawPayload = {}) {
+    if (!rawPayload || typeof rawPayload !== 'object' || Array.isArray(rawPayload)
+      || ['source', 'path'].some((key) => rawPayload[key] !== undefined && typeof rawPayload[key] !== 'string')
+      || ['runStandardize', 'runBuild'].some((key) => rawPayload[key] !== undefined && typeof rawPayload[key] !== 'boolean')) {
+      throw createError(400, 'invalid rebuild request', {}, API_ERRORS.badPath);
+    }
+    const rebuildRequest = normalizeRebuildRequest(rawPayload);
+    const sourceFilter = normalizeStandardizeSourceFilter(rebuildRequest.source);
+    if (sourceFilter === null) throw createError(400, API_ERRORS.badPath, {}, API_ERRORS.badPath);
     if (state.rebuildInProgress) {
       throw createError(409, API_ERRORS.rebuildInProgress, {}, API_ERRORS.rebuildInProgress);
     }
 
     state.rebuildInProgress = true;
     try {
-      const rebuildRequest = normalizeRebuildRequest(rawPayload);
-      const sourceFilter = normalizeStandardizeSourceFilter(rebuildRequest.source);
       const result = await rebuildIndex({
         backstoryMode: state.backstoryMergeMode,
         sourceFilter,
@@ -309,6 +318,9 @@ function createDocumentService(options = {}) {
   }
 
   return {
+    getMediaAssets: () => listMediaAssets(PROJECT_ROOT),
+    importMediaAsset: (request, name) => importMediaAsset(PROJECT_ROOT, request, name),
+    prepareMediaInsertion: (payload) => prepareMediaInsertion(PROJECT_ROOT, payload),
     getCapabilities,
     getRuntimeConfig,
     getDocIndex,

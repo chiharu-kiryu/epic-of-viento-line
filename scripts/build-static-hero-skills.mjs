@@ -136,6 +136,10 @@ function parseHeroSkillHeaderFromLines(key, lines, candidateNames = []) {
       };
     }
 
+    if (/^(?:描述|类型)[:：]/.test(current) || isLikelyDescriptionPrefix(current)) {
+      return { name: key, description: lines.slice(cursor).map((line) => line.replace(/^描述[:：]\s*/, '')).join('\n') };
+    }
+
     const inlineMatch = current.match(/^(.*?)[:：]\s*(.+)$/);
     if (inlineMatch) {
       const inlineName = stripSkillSuffixes(inlineMatch[1]);

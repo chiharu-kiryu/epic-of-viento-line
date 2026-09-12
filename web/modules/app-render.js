@@ -20,6 +20,7 @@ import {
   sanitizeList,
 } from './app-helpers.js';
 import { getDocTemplate } from './app-type-templates.js';
+import { hasDocumentLayout, renderDocumentLayout } from './app-document-layout.js';
 
 const { bannerEl } = domElements;
 
@@ -45,6 +46,8 @@ const CONTENT_RENDER_MODES = {
   HYBRID: 'hybrid',
 };
 
+const ITEM_ATTRIBUTE_KEYS = ['属性加成', '属性', '属性加值', '加成'];
+
 const TYPE_METRIC_DEFINITIONS = {
   hero: [
     { label: '主属性', keys: ['主属性'] },
@@ -61,7 +64,7 @@ const TYPE_METRIC_DEFINITIONS = {
   item: [
     { label: '价格', keys: ['价格', '售价', 'Cost', 'price'] },
     { label: '类型', keys: ['类型', '物品类型', '所属类型'] },
-    { label: '属性加成', keys: ['属性加成', '属性', '加成'] },
+    { label: '属性加成', keys: ITEM_ATTRIBUTE_KEYS, type: 'attributes' },
     { label: '冷却', keys: ['冷却', '冷却时间', '冷却时长'] },
     { label: '消耗', keys: ['消耗', '魔力消耗', '法力消耗', '魔法消耗'] },
     { label: '最大库存', keys: ['最大存货数量', '上限', '库存上限'] },
@@ -200,6 +203,26 @@ function parseMetricNumber(value) {
   return parsed;
 }
 
+function splitAttributeRows(value, fallbackLabel) {
+  if (Array.isArray(value)) return value.flatMap((entry) => splitAttributeRows(entry, fallbackLabel));
+  if (value && typeof value === 'object') {
+    return Object.entries(value).filter(([label, entry]) => hasRenderableValue(label, entry));
+  }
+  return toDisplayValue(value).split(/\r\n?|\n/)
+    .map((line) => line.trim().replace(/^(?:[-*•]\s+|\d+[.、)]\s+)/, ''))
+    .filter(hasRenderableToken)
+    .map((line) => {
+      const named = line.match(/^([^:：]+)[:：]\s*(.+)$/);
+      if (named) return [named[1].trim(), named[2].trim()];
+      // Keep the whole value token, including percentages, signs and formulas.
+      const leadingValue = line.match(/^([+\-−]?\d\S*)\s+(.+)$/);
+      if (leadingValue) return [leadingValue[2].trim(), leadingValue[1]];
+      const trailingValue = line.match(/^(.+?)\s+([+\-−]?\d\S*)$/);
+      if (trailingValue) return [trailingValue[1].trim(), trailingValue[2]];
+      return [fallbackLabel, line];
+    });
+}
+
 function collectMetricRows(fields, defs = [], usedKeys = new Set()) {
   const metricRows = [];
   const seenLabels = new Set();
@@ -217,6 +240,18 @@ function collectMetricRows(fields, defs = [], usedKeys = new Set()) {
 
     const keys = sanitizeList(metric.keys || []);
     if (!keys.length) {
+      continue;
+    }
+
+    if (metric.type === 'attributes') {
+      for (const key of keys) {
+        if (!Object.prototype.hasOwnProperty.call(fields, key) || !hasRenderableToken(fields[key])) continue;
+        const rows = splitAttributeRows(fields[key], label);
+        if (rows.length) usedKeys.add(key);
+        for (const [attribute, value] of rows) {
+          metricRows.push({ label: attribute, value: normalizeMetricValue(value), usedKey: key });
+        }
+      }
       continue;
     }
 
@@ -292,6 +327,7 @@ function createMetricStripSection(title, metricRows, options = {}) {
   const card = document.createElement('section');
   const cardClass = normalizeValue(options.cardClass || '');
   card.className = `meta-card metrics-card ${cardClass}`.trim();
+  if (options.showMeters === false) card.classList.add('metrics-card--values');
 
   const heading = document.createElement('h3');
   heading.textContent = title;
@@ -317,25 +353,27 @@ function createMetricStripSection(title, metricRows, options = {}) {
 
     top.appendChild(metricLabel);
     top.appendChild(metricValue);
-
-    const meter = document.createElement('div');
-    meter.className = 'metric-item-meter';
-
-    const fill = document.createElement('span');
-    fill.className = 'metric-item-fill';
-
-    const numeric = parseMetricNumber(value);
-    let percent = 26;
-    if (typeof numeric === 'number' && numericValues.length > 1 && maxValue > minValue) {
-      percent = ((numeric - minValue) / (maxValue - minValue)) * 84 + 8;
-    } else if (typeof numeric === 'number') {
-      percent = Math.max(16, Math.min(88, Math.abs(numeric) > 0 ? 60 : 26));
-    }
-
-    fill.style.setProperty('--fill', `${percent.toFixed(1)}%`);
-    meter.appendChild(fill);
     itemEl.appendChild(top);
-    itemEl.appendChild(meter);
+
+    if (options.showMeters !== false) {
+      const meter = document.createElement('div');
+      meter.className = 'metric-item-meter';
+
+      const fill = document.createElement('span');
+      fill.className = 'metric-item-fill';
+
+      const numeric = parseMetricNumber(value);
+      let percent = 26;
+      if (typeof numeric === 'number' && numericValues.length > 1 && maxValue > minValue) {
+        percent = ((numeric - minValue) / (maxValue - minValue)) * 84 + 8;
+      } else if (typeof numeric === 'number') {
+        percent = Math.max(16, Math.min(88, Math.abs(numeric) > 0 ? 60 : 26));
+      }
+
+      fill.style.setProperty('--fill', `${percent.toFixed(1)}%`);
+      meter.appendChild(fill);
+      itemEl.appendChild(meter);
+    }
     track.appendChild(itemEl);
   }
 
@@ -364,6 +402,7 @@ function buildTemplateCardsFromDefinition(doc, category, usedKeys) {
     const remaining = collectRemainingPairs(fields, usedKeys);
     if (remaining.length > 0) {
       cards.push(createMetaSection('全部字段', remaining, { cardClass: `meta-card--${category}` }));
+      for (const [key] of remaining) usedKeys.add(key);
     }
   }
 
@@ -393,7 +432,10 @@ function buildTypeMetricCard(category, fields, usedKeys) {
     return null;
   }
 
-  return createMetricStripSection(getTypeMetricTitle(category), rows, { cardClass: `meta-card--${category}` });
+  return createMetricStripSection(getTypeMetricTitle(category), rows, {
+    cardClass: `meta-card--${category}`,
+    showMeters: category !== 'item',
+  });
 }
 
 function createMetaSection(title, rows, options = {}) {
@@ -470,21 +512,10 @@ function createTextSection(title, items, options = {}) {
 function createNarrativeSection(title, paragraphs, options = {}) {
   const lines = (Array.isArray(paragraphs) ? paragraphs : [])
     .map((line) => normalizeValue(line))
-    .filter((line) => hasRenderableToken(line));
+    .filter(Boolean);
 
   if (lines.length === 0) {
     return null;
-  }
-
-  const deduped = [];
-  const seen = new Set();
-  for (const line of lines) {
-    const key = normalizeValue(line);
-    if (seen.has(key)) {
-      continue;
-    }
-    seen.add(key);
-    deduped.push(line);
   }
 
   const card = document.createElement('section');
@@ -497,7 +528,7 @@ function createNarrativeSection(title, paragraphs, options = {}) {
 
   const list = document.createElement('ol');
   list.className = 'narrative-list';
-  for (const line of deduped) {
+  for (const line of lines) {
     const li = document.createElement('li');
     li.textContent = line;
     list.appendChild(li);
@@ -550,17 +581,13 @@ function readOrderedPairs(fields, specs, used = new Set()) {
     let hitKey;
 
     for (const key of keys) {
-      if (Object.prototype.hasOwnProperty.call(fields, key)) {
+      if (Object.prototype.hasOwnProperty.call(fields, key) && hasRenderableValue(label, fields[key])) {
         hitKey = key;
         break;
       }
     }
 
     if (!hitKey) {
-      continue;
-    }
-
-    if (!hasRenderableValue(spec.label, fields[hitKey])) {
       continue;
     }
 
@@ -688,7 +715,7 @@ function renderHeroBanner(doc) {
 
   const attrTag = document.createElement('span');
   attrTag.className = 'hero-tag';
-  if (hasAttr) {
+  if (hasAttr && !hasDocumentLayout(doc)) {
     if (tagClass) {
       attrTag.classList.add(tagClass);
     }
@@ -707,7 +734,7 @@ function renderHeroBanner(doc) {
 
   info.appendChild(titleEl);
   info.appendChild(chips);
-  info.appendChild(stats);
+  if (!hasDocumentLayout(doc)) info.appendChild(stats);
 
   banner.appendChild(cover);
   banner.appendChild(info);
@@ -759,9 +786,9 @@ function renderHeroTemplate(doc) {
     cards.push(metricCard);
   }
   cards.push(...buildTemplateCardsFromDefinition(doc, 'hero', used));
-  collectHeroAbilitySegmentsFromSections(Array.isArray(doc.sections) ? doc.sections : [], used);
+  for (const skill of doc.heroSkills || []) used.add(skill.key);
 
-  setContentRenderMode(doc, CONTENT_RENDER_MODES.CARD_ONLY);
+  setContentRenderMode(doc, CONTENT_RENDER_MODES.HYBRID);
   doc._contentDedupeKeys = used;
   return compactCards(cards);
 }
@@ -774,7 +801,9 @@ function renderItemTemplate(doc) {
   if (metricCard) {
     cards.push(metricCard);
   }
-  cards.push(...buildTemplateCardsFromDefinition(doc, 'item', used));
+  const detailFields = Object.fromEntries(Object.entries(fields)
+    .filter(([key]) => !ITEM_ATTRIBUTE_KEYS.includes(key) || !used.has(key)));
+  cards.push(...buildTemplateCardsFromDefinition({ ...doc, fields: detailFields }, 'item', used));
   const abilitySegments = collectAbilitySegmentsFromSections(doc.sections || [], used);
   const usedSegmentKeys = new Set();
 
@@ -834,7 +863,7 @@ function renderUnitLikeTemplate(doc) {
 function renderSkillTemplate(doc) {
   const used = new Set();
   const cards = buildTemplateCardsFromDefinition(doc, 'skill', used);
-  const paragraphs = extractParagraphs(doc).slice(0, 12);
+  const paragraphs = extractParagraphs(doc);
   if (paragraphs.length > 0) {
     used.add('段落');
     cards.push(createNarrativeSection('技能说明', paragraphs, { cardClass: 'meta-card--skill' }));
@@ -848,15 +877,7 @@ function renderSkillTemplate(doc) {
 function renderBackstoryTemplate(doc) {
   const used = new Set();
   const cards = buildTemplateCardsFromDefinition(doc, 'backstory', used);
-  const paragraphs = extractParagraphs(doc).join('\n\n');
-
-  const heroTag = doc.meta?.hero ? `（关联：${doc.meta.hero}）` : '';
-  if (paragraphs) {
-    used.add('段落');
-    cards.push(createNarrativeSection(`背景故事${heroTag}`, paragraphs.split('\n\n').filter(Boolean), { cardClass: 'meta-card--backstory' }));
-  }
-
-  setContentRenderMode(doc, CONTENT_RENDER_MODES.CARD_ONLY);
+  setContentRenderMode(doc, CONTENT_RENDER_MODES.HYBRID);
   doc._contentDedupeKeys = used;
   return compactCards(cards);
 }
@@ -871,7 +892,7 @@ function renderSceneTemplate(doc) {
     cards.push(createNarrativeSection('场景内容', paragraphs, { cardClass: 'meta-card--scene' }));
   }
 
-  setContentRenderMode(doc, CONTENT_RENDER_MODES.CARD_ONLY);
+  setContentRenderMode(doc, CONTENT_RENDER_MODES.HYBRID);
   doc._contentDedupeKeys = used;
   return compactCards(cards);
 }
@@ -886,7 +907,7 @@ function renderRuleTemplate(doc) {
     cards.push(createNarrativeSection('规则段落', paragraphs, { cardClass: 'meta-card--rule' }));
   }
 
-  setContentRenderMode(doc, CONTENT_RENDER_MODES.CARD_ONLY);
+  setContentRenderMode(doc, CONTENT_RENDER_MODES.HYBRID);
   doc._contentDedupeKeys = used;
   return compactCards(cards);
 }
@@ -930,6 +951,7 @@ function renderFallbackTemplate(doc) {
 }
 
 function getHeroCardsByCategory(doc) {
+  if (hasDocumentLayout(doc)) return renderDocumentLayout(doc);
   switch (doc.category) {
     case 'hero': {
       const cards = renderHeroTemplate(doc);
@@ -962,7 +984,7 @@ function getHeroCardsByCategory(doc) {
 
 function extractParagraphs(doc) {
   const fromSections = Array.isArray(doc.sections)
-    ? doc.sections.filter((item) => item?.key === '段落' && hasRenderableValue(item.key, item.value)).map((item) => item.value)
+    ? doc.sections.filter((item) => item?.key === '段落' && normalizeValue(item.value)).map((item) => item.value)
     : [];
 
   if (fromSections.length > 0) {
@@ -976,7 +998,7 @@ function extractParagraphs(doc) {
   return doc.content
     .split(/\n{2,}/)
     .map((line) => line.trim())
-    .filter((line) => hasRenderableToken(line));
+    .filter(Boolean);
 }
 
 function createTextBlock(text) {
@@ -1032,9 +1054,10 @@ function renderTableBlock(block) {
   if (header.length > 0) {
     const thead = document.createElement('thead');
     const tr = document.createElement('tr');
-    for (const cell of header) {
+    for (const [index, cell] of header.entries()) {
       const th = document.createElement('th');
       th.textContent = cell;
+      if (['left', 'center', 'right'].includes(block.align?.[index])) th.style.textAlign = block.align[index];
       tr.appendChild(th);
     }
     thead.appendChild(tr);
@@ -1044,9 +1067,10 @@ function renderTableBlock(block) {
   const body = document.createElement('tbody');
   for (const row of block.rows || []) {
     const tr = document.createElement('tr');
-    for (const cell of row) {
+    for (const [index, cell] of row.entries()) {
       const td = document.createElement('td');
       td.textContent = cell;
+      if (['left', 'center', 'right'].includes(block.align?.[index])) td.style.textAlign = block.align[index];
       tr.appendChild(td);
     }
     body.appendChild(tr);

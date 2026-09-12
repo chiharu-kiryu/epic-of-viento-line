@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "document-v1",
+  "type": "object",
+  "required": [
+    "format",
+    "version",
+    "id",
+    "sourcePath",
+    "assetBindings"
+  ],
+  "properties": {
+    "documentType": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "parserProfile": { "enum": ["structured", "prose", "legacy-hero"] },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "targetId"],
+        "properties": {
+          "kind": { "type": "string", "minLength": 1 },
+          "targetId": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+          "slot": { "type": "string" }
+        }
+      }
+    },
+    "format": {
+      "const": "viento-document"
+    },
+    "version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "sourcePath": {
+      "type": "string",
+      "pattern": "^(design-data|documents)/"
+    },
+    "assetBindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "assetId",
+          "role"
+        ],
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          },
+          "role": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

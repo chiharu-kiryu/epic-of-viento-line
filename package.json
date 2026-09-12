@@ -1,0 +1,28 @@
+{
+  "name": "epic-of-viento-line",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18.19"
+  },
+  "scripts": {
+    "test": "node --test scripts/tests/*.test.mjs",
+    "check": "node scripts/check-project.mjs",
+    "desktop:prepare": "node desktop/prepare.mjs",
+    "desktop:dev": "tauri dev",
+    "desktop:build": "node desktop/build.mjs",
+    "desktop:test": "cargo test --manifest-path src-tauri/Cargo.toml",
+    "clean": "node desktop/clean.mjs",
+    "start": "node scripts/ops/site.mjs --mode edit",
+    "browse": "node scripts/ops/site.mjs --mode browse",
+    "rebuild": "node scripts/ops/rebuild.mjs",
+    "workspace": "node scripts/workspace.mjs"
+  },
+  "dependencies": {
+    "yaml": "2.9.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.11.4"
+  },
+  "version": "2.8.0"
+}

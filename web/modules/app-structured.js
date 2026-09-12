@@ -1,277 +1,85 @@
-import {
-  normalizeValue,
-  normalizeLabel,
-  toDisplayValue,
-} from './app-helpers.js';
-import {
-  renderKvTableRows,
-  renderListBlock,
-  renderTableBlock,
-} from './app-render.js';
+import { normalizeValue, normalizeLabel, toDisplayValue } from './app-helpers.js';
+import { renderKvTableRows, renderListBlock, renderTableBlock } from './app-render.js';
+import { renderMedia, renderMediaText } from './app-media-render.js';
 
-const RENDER_PLACEHOLDERS = new Set([
-  '-',
-  '—',
-  '——',
-  '———',
-  '暂无',
-  '未填写',
-  '无',
-  '未知',
-  '待补充',
-  '待完善',
-  'null',
-  'none',
-  'n/a',
-  'na',
-]);
-
-function normalizeTextFingerprint(value) {
-  return normalizeValue(value)
-    .normalize('NFKC')
-    .toLowerCase()
-    .replace(/\s+/g, '')
-    .replace(/[\[\]【】()（）]/g, '')
-    .replace(/[^0-9A-Za-z\u4e00-\u9fff]/g, '');
-}
+const RENDER_PLACEHOLDERS = new Set(['-', '—', '——', '———', '暂无', '未填写', '无', '未知', '待补充', '待完善', 'null', 'none', 'n/a', 'na']);
 
 function hasRenderableToken(value) {
-  if (value === null || value === undefined) {
-    return false;
-  }
-
+  if (value === null || value === undefined) return false;
   if (typeof value === 'string') {
-    const normalized = normalizeValue(value).replace(/\s+/g, '');
-    if (!normalized) {
-      return false;
-    }
-    const lowered = normalized.toLowerCase();
-    return !RENDER_PLACEHOLDERS.has(lowered) && !RENDER_PLACEHOLDERS.has(normalized);
+    const text = normalizeValue(value).replace(/\s+/g, '');
+    return !!text && !RENDER_PLACEHOLDERS.has(text.toLowerCase());
   }
-
-  if (Array.isArray(value)) {
-    return value.some((entry) => hasRenderableToken(entry));
-  }
-
-  if (typeof value === 'number' || typeof value === 'boolean') {
-    return true;
-  }
-
-  if (typeof value === 'object') {
-    return Object.keys(value || {}).length > 0;
-  }
-
+  if (Array.isArray(value)) return value.some(hasRenderableToken);
+  if (typeof value === 'object') return Object.keys(value).length > 0;
   return true;
-}
-
-function hasRenderableValue(label, value) {
-  if (!hasRenderableToken(value) || !hasRenderableToken(label)) {
-    return false;
-  }
-  return true;
-}
-
-function addTextFingerprint(seenTexts, value) {
-  const signature = normalizeTextFingerprint(value);
-  if (!signature) {
-    return false;
-  }
-  if (seenTexts.has(signature)) {
-    return false;
-  }
-  seenTexts.add(signature);
-  return true;
-}
-
-function collectRenderableRowsFromObject(value, dedupeKeys) {
-  const rows = [];
-  if (!value || typeof value !== 'object') {
-    return rows;
-  }
-
-  if (Array.isArray(value)) {
-    value.forEach((item, index) => {
-      if (!hasRenderableToken(item)) {
-        return;
-      }
-      const label = `项目 ${index + 1}`;
-      const normalizedLabel = normalizeValue(label);
-      if (dedupeKeys.has(normalizedLabel) || dedupeKeys.has(normalizeLabel(normalizedLabel))) {
-        return;
-      }
-      dedupeKeys.add(normalizedLabel);
-      rows.push([label, item]);
-    });
-    return rows;
-  }
-
-  for (const [key, itemValue] of Object.entries(value)) {
-    if (!hasRenderableValue(key, itemValue)) {
-      continue;
-    }
-    const normalizedKey = normalizeValue(key);
-    if (dedupeKeys.has(normalizedKey) || dedupeKeys.has(normalizeLabel(normalizedKey))) {
-      continue;
-    }
-    dedupeKeys.add(normalizedKey);
-    rows.push([key, itemValue]);
-  }
-
-  return rows;
 }
 
 function renderStructuredBlocks(blocks, options = {}) {
-  if (!Array.isArray(blocks) || blocks.length === 0) {
-    return null;
-  }
-
+  if (!Array.isArray(blocks) || options.renderMode === 'card-only') return null;
   const fragment = document.createDocumentFragment();
-  const dedupeKeys = options.dedupeKeys instanceof Set ? options.dedupeKeys : new Set();
-  const dedupeText = options.dedupeText instanceof Set ? options.dedupeText : new Set();
-  const mode = options.renderMode;
+  const keys = options.dedupeKeys instanceof Set ? options.dedupeKeys : new Set();
+  const texts = options.dedupeText instanceof Set ? options.dedupeText : new Set();
+  const isShownKey = (key) => keys.has(key) || keys.has(normalizeLabel(key));
+  // Only suppress content already shown in a metadata card. Repeated prose, headings
+  // and list entries inside the source are meaningful and must keep their order.
+  const isShownText = (value) => texts.has(normalizeValue(value).replace(/\r\n|\r/g, '\n'));
+  const appendPre = (value, className = 'doc-pre') => {
+    const pre = document.createElement('pre');
+    pre.className = className;
+    pre.textContent = value;
+    fragment.appendChild(pre);
+  };
 
   for (const block of blocks) {
-    if (!block || !block.type) {
-      continue;
-    }
-
-    if (mode === 'card-only') {
-      continue;
-    }
-
+    if (!block?.type) continue;
     if (block.type === 'heading') {
-      const level = Math.max(1, Math.min(6, Number(block.level) || 1));
       const title = normalizeValue(block.title);
-      if (!hasRenderableToken(title)) {
-        continue;
-      }
-      const headingSig = normalizeTextFingerprint(title);
-      if (!headingSig || dedupeText.has(headingSig) || dedupeKeys.has(title) || dedupeKeys.has(normalizeLabel(title))) {
-        continue;
-      }
-      dedupeText.add(headingSig);
+      if (!title || isShownText(title)) continue;
+      const level = Math.max(1, Math.min(6, Number(block.level) || 1));
       const heading = document.createElement(`h${level}`);
       heading.textContent = title;
+      if (block.anchor) heading.id = block.anchor.replace(/^#/, '');
       fragment.appendChild(heading);
-      continue;
-    }
-
-    if (block.type === 'paragraph') {
+    } else if (block.type === 'image' || block.type === 'video') {
+      fragment.appendChild(renderMedia(block));
+    } else if (block.type === 'paragraph') {
       const text = normalizeValue(block.text);
-      if (!hasRenderableToken(text)) {
-        continue;
-      }
-      if (!addTextFingerprint(dedupeText, text)) {
-        continue;
-      }
+      if (!text || isShownText(text)) continue;
+      const media = renderMediaText(text);
+      if (media) { fragment.appendChild(media); continue; }
       const p = document.createElement('p');
       p.className = 'doc-paragraph';
       p.textContent = text;
       fragment.appendChild(p);
-      continue;
+    } else if (block.type === 'kv') {
+      const key = normalizeValue(block.key);
+      if (!hasRenderableToken(key) || !hasRenderableToken(block.value) || isShownKey(key)) continue;
+      fragment.appendChild(renderKvTableRows([{ key, value: toDisplayValue(block.value) }]));
+    } else if (block.type === 'list') {
+      const items = (Array.isArray(block.items) ? block.items : []).map(toDisplayValue);
+      if (items.length && !isShownText(items.join('\n'))) fragment.appendChild(renderListBlock({ ...block, items }));
+    } else if (block.type === 'table') {
+      const cellValue = (value) => value == null ? '' : toDisplayValue(value);
+      const header = (Array.isArray(block.header) ? block.header : []).map(cellValue);
+      const rows = (Array.isArray(block.rows) ? block.rows : []).map((row) => (Array.isArray(row) ? row : [row]).map(cellValue));
+      if (header.length || rows.length) fragment.appendChild(renderTableBlock({ ...block, header, rows }));
+    } else if (block.type === 'json') {
+      if (block.value && typeof block.value === 'object' && !Array.isArray(block.value)) {
+        const rows = Object.entries(block.value).filter(([key]) => !isShownKey(key))
+          .map(([key, value]) => ({ key, value: value === null ? 'null' : toDisplayValue(value) }));
+        if (rows.length) fragment.appendChild(renderKvTableRows(rows));
+        else if (!Object.keys(block.value).length) appendPre('{}');
+      } else {
+        appendPre(JSON.stringify(block.value, null, 2) ?? 'null');
+      }
+    } else if (block.type === 'code') {
+      appendPre(block.value ?? '');
+    } else {
+      appendPre(block.value === undefined ? JSON.stringify(block, null, 2) : toDisplayValue(block.value));
     }
-
-    if (block.type === 'kv') {
-      const kvKey = normalizeValue(block.key);
-      const kvValue = toDisplayValue(block.value);
-      if (!hasRenderableValue(kvKey, kvValue)) {
-        continue;
-      }
-      if (dedupeKeys.has(kvKey) || dedupeKeys.has(normalizeLabel(kvKey))) {
-        continue;
-      }
-      dedupeKeys.add(kvKey);
-      addTextFingerprint(dedupeText, kvKey);
-      addTextFingerprint(dedupeText, kvValue);
-      fragment.appendChild(renderKvTableRows([{ key: block.key, value: kvValue }]));
-      continue;
-    }
-
-    if (block.type === 'list') {
-      const entries = Array.isArray(block.items) ? block.items.filter((item) => hasRenderableToken(item)) : [];
-      const hasUniqueItem = entries.some((item) => addTextFingerprint(dedupeText, item));
-      if (!hasUniqueItem) {
-        continue;
-      }
-      fragment.appendChild(renderListBlock({
-        ...block,
-        items: entries,
-      }));
-      continue;
-    }
-
-    if (block.type === 'table') {
-      const header = (block.header || []).filter(hasRenderableToken);
-      const rows = (block.rows || [])
-        .map((row) => (Array.isArray(row) ? row.filter(hasRenderableToken) : [normalizeValue(row)].filter(hasRenderableToken)))
-        .filter((row) => row.length > 0);
-      if (!header.length && !rows.length) {
-        continue;
-      }
-
-      let hasUniqueValue = false;
-      for (const item of header) {
-        if (addTextFingerprint(dedupeText, item)) {
-          hasUniqueValue = true;
-        }
-      }
-      for (const row of rows) {
-        for (const item of row) {
-          if (addTextFingerprint(dedupeText, item)) {
-            hasUniqueValue = true;
-          }
-        }
-      }
-      if (!hasUniqueValue) {
-        continue;
-      }
-
-      fragment.appendChild(renderTableBlock({
-        ...block,
-        header,
-        rows,
-      }));
-      continue;
-    }
-
-    if (block.type === 'json') {
-      const rows = collectRenderableRowsFromObject(block.value, dedupeKeys);
-      if (rows.length > 0) {
-        let hasUniqueValue = false;
-        for (const [key, value] of rows) {
-          if (addTextFingerprint(dedupeText, key) || addTextFingerprint(dedupeText, value)) {
-            hasUniqueValue = true;
-          }
-        }
-        if (hasUniqueValue) {
-          fragment.appendChild(renderKvTableRows(rows.map(([key, value]) => ({ key, value: toDisplayValue(value) }))));
-        }
-      }
-      continue;
-    }
-
-    const text = hasRenderableToken(block.value)
-      ? toDisplayValue(block.value)
-      : hasRenderableToken(JSON.stringify(block))
-        ? JSON.stringify(block, null, 2)
-        : '';
-    if (!text) {
-      continue;
-    }
-    if (!addTextFingerprint(dedupeText, text)) {
-      continue;
-    }
-    const pre = document.createElement('pre');
-    pre.className = 'doc-pre';
-    pre.textContent = text;
-    fragment.appendChild(pre);
   }
-
-  if (fragment.childElementCount === 0) {
-    return null;
-  }
-
-  return fragment;
+  return fragment.childElementCount ? fragment : null;
 }
 
 export { renderStructuredBlocks, hasRenderableToken };

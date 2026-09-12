@@ -1,6 +1,10 @@
 # Epic of Viento Line 架构说明
 
-> 更新时间：2026-08-10
+> 更新时间：2026-09-09
+
+作品与程序已分离，作品及备份位于系统应用数据目录，本机默认作品由应用配置目录的 `viento.config.json` 指定，见 [本机数据目录](LOCAL_DATA_STORAGE.md)。`design-data/`、`data-template/`、`assets/` 和 `metadata/` 均相对于作品根目录；生成数据实际位于作品的 `.viento/cache/`。下文 `docs-standard/...` 和 `web/data/index.json` 仍作为兼容访问路径，由服务映射到缓存，不代表仓库根目录还有这些文件。
+
+当前目录与元数据/迁移契约以 [作品库布局](WORKSPACE_LAYOUT.md) 为准，桌面宿主见 [桌面版说明](../desktop/README.md)。浏览模式已改用 Node.js 只读服务，同样支持程序与作品分离。
 
 ## 1. 系统定位
 
@@ -17,13 +21,15 @@
 
 ```text
 .
-├─ design-data/           # 源文档（权威源）
-├─ assets/                # 图片/多媒体等素材
-├─ docs-standard/         # 标准化产物（生成）
 ├─ web/                   # 前端资源与运行时页面
 ├─ scripts/               # 管道、服务、校验、启动编排
+├─ desktop/               # 桌面首页、运行资源准备、原生测试
+├─ src-tauri/             # 桌面宿主与完整迁移
+├─ schemas/               # 通用数据格式
 └─ README.md
 ```
+
+作品数据树位于应用数据目录的 `workspaces/<作品>/`，保留 `workspace.json`、`design-data/`、`data-template/`、`metadata/`、`assets/` 与 `.viento/cache/`。`scripts/lib/app-storage.mjs` 负责本机配置和默认作品解析，`paths.mjs` 分别导出程序、作品及缓存路径。
 
 ### scripts 目录层级
 
@@ -43,7 +49,8 @@
   - 文本/JSON/YAML 解析
   - source 分类与元信息提取
   - 标准化 JSON 输出与写入规则
-  - 可选合并背景故事（`--merge-backstory`）
+  - `parser.mjs` 通用解析，`legacy-profile.mjs` 负责旧格式兼容
+  - `layout.mjs` 从原文章节、字段和内容块生成统一布局；类型不限定字段
 - `scripts/normalize-*.mjs`
   - 特化清洗脚本：英雄/单位/建筑/物品等文本规范化重排（可选写回）
 
@@ -52,6 +59,7 @@
 - `web/app.js`：应用入口
 - `web/modules/app-state.js`：状态、常量、API 路径常量入口
 - `web/modules/app-runtime.js`：渲染主循环、列表/详情/编辑状态机
+- `web/modules/app-editor-draft.js`：从当前源码拆分编辑区块，保留原文格式并按修改区块写回
 - `web/modules/app-doc-service.js`：与后端 API 的交互
 - `web/modules/app-services.js`：请求工具（超时、错误、JSON 解析）
 
@@ -64,7 +72,7 @@
 - 启动：`./scripts/start-doc-site.sh --mode browse`
 - 行为：
   1. 可选重建标准化产物与索引
-  2. 启动静态服务（Python）
+  2. 启动只读文件服务（Node.js）
   3. 仅读取 `web/data/index.json` 与 `docs-standard` 渲染展示
 
 ### 编辑模式
@@ -91,8 +99,12 @@
 
 1. 前端 `/api/doc?path=...` 读取源文件内容。
 2. 用户编辑保存。
-3. 后端 `writeDoc` 校验版本（乐观锁）后写回 `design-data/`。
+3. 后端在同一文档的串行事务中校验版本，再通过临时文件和原子替换写回 `design-data/`；并发新建使用独占创建，旧版本保存返回 409。
 4. 触发重建可更新 `docs-standard/` 与 `web/data/index.json`。
+
+文档由 `metadata/documents/<UUID>.json` 登记身份、解析配置和归属关系。角色背景用 `part-of` 关联角色，索引解析 ID 关系后生成嵌套目录与档案内导航；独立故事章节保持独立条目。多个角色可关联同一份背景。全量与局部重建均保留关系，详见 [OC 文档模型](OC_DOCUMENT_MODEL.md)。
+
+编辑器的源码/区块切换共享当前草稿，不从展示索引反向生成文本。保存及重建期间禁止重复提交和编辑状态切换；源码与模板读取使用请求序号，防止迟到响应覆盖另一会话。新建路径也参与未保存判断，新建写入成功后即转为已有文件，重建失败仍可继续编辑。
 
 ### 4.3 可编辑路径边界
 
@@ -104,7 +116,7 @@
 ## 5. API 与契约
 
 核心契约定义集中在：
-- [scripts/lib/doc-api-contract.mjs](/Users/Shared/chroot/dev/epic-of-viento-line/scripts/lib/doc-api-contract.mjs)
+- [scripts/lib/doc-api-contract.mjs](../scripts/lib/doc-api-contract.mjs)
 
 关键端点：
 - `/api/capabilities`
@@ -191,7 +203,7 @@ flowchart LR
     scripts --> Rebuild
     scripts --> SiteLauncher[site-launcher]
     SiteLauncher --> API
-    SiteLauncher --> StaticServer[静态服务\n(Python)]
+    SiteLauncher --> StaticServer[只读文件服务\n(Node.js)]
     StaticServer --> Frontend
 ```
 
@@ -206,7 +218,7 @@ flowchart LR
 
 ## 12. 参考入口
 
-- 源数据：`/Users/Shared/chroot/dev/epic-of-viento-line/design-data/README.md`
-- 构建脚本：`/Users/Shared/chroot/dev/epic-of-viento-line/scripts/README.md`
-- 运行入口：`/Users/Shared/chroot/dev/epic-of-viento-line/scripts/start-doc-site.sh`
-- API 契约：`/Users/Shared/chroot/dev/epic-of-viento-line/scripts/lib/doc-api-contract.mjs`
+- 源数据：`design-data/README.md`
+- 构建脚本：`scripts/README.md`
+- 运行入口：`scripts/start-doc-site.sh`
+- API 契约：`scripts/lib/doc-api-contract.mjs`

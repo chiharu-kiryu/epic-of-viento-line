@@ -2,9 +2,11 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {
   ASSET_ROOT,
+  PROJECT_ROOT,
   toPosix,
 } from './paths.mjs';
 import { collectFiles } from './scan-files.mjs';
+import { registeredAssetCatalog } from './workspace.mjs';
 
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg']);
 const CATEGORY_IMAGE_DIRS = {
@@ -25,7 +27,7 @@ const ASSET_REFERENCE_PATTERNS = [
   /!\[[^\]]*\]\(([^)\s]+)\)/g,
   /<img[^>]+src=['"]([^'"]+)['"][^>]*>/gi,
   /\[(?:[^\]]*)\]\(([^)\s]+)\)/g,
-  /assets\/images\/.+?\.(?:png|jpg|jpeg|webp|gif|svg)/gi,
+  /(?:^|[\s"'(])((?:\.?\.?\/)*\/?assets\/[^\r\n"'<>]*?\.(?:png|jpg|jpeg|webp|gif|svg))/gim,
 ];
 
 function toSourceDirPosix(relativePath) {
@@ -70,6 +72,8 @@ function dedupeItems(items) {
 }
 
 async function buildAssetImageCatalog() {
+  const registered = await registeredAssetCatalog(PROJECT_ROOT);
+  if (registered) return registered;
   const files = await collectFiles(ASSET_ROOT, {
     relativeBase: 'assets',
     isAccepted: (name) => IMAGE_EXTENSIONS.has(path.extname(name).toLowerCase()),
@@ -108,14 +112,9 @@ function normalizeCandidateImagePath(rawCandidate, sourceDir) {
     normalized = toPosix(path.join(sourceDir, normalized));
   }
 
-  const assetIndex = normalized.indexOf('assets/images/');
-  if (assetIndex > -1) {
-    normalized = normalized.slice(assetIndex);
-  }
-
   normalized = normalized.replace(/^\.\//, '').replace(/\/+/g, '/');
-  if (!normalized.includes('assets/images/')) {
-    normalized = toPosix(path.join('assets', 'images', normalized));
+  if (!normalized.startsWith('assets/') || normalized.split('/').includes('..') || normalized.includes('\\')) {
+    return '';
   }
 
   if (!IMAGE_EXTENSIONS.has(path.extname(normalized).toLowerCase())) {
@@ -145,7 +144,9 @@ function collectAssetImageRefs(rawText, sourcePath, assetCatalog = null) {
     if (/^https?:\/\//i.test(withoutQuery)) {
       return null;
     }
-    return withoutQuery;
+    // Decode URL syntax once so the catalog is queried with actual filenames.
+    // Literal file names containing #/% remain addressable with %23/%25.
+    try { return decodeURIComponent(withoutQuery); } catch { return null; }
   };
 
   for (const pattern of ASSET_REFERENCE_PATTERNS) {
@@ -161,7 +162,7 @@ function collectAssetImageRefs(rawText, sourcePath, assetCatalog = null) {
         continue;
       }
 
-      if (!hasFileSet || fileSet.has(normalized)) {
+      if (!hasFileSet || assetCatalog?.registered || fileSet.has(normalized)) {
         result.add(toPosix(normalized));
       }
     }

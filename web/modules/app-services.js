@@ -82,24 +82,36 @@ export function withCacheBust(url, forceCacheBust = false) {
   }
 }
 
-export async function fetchWithTimeout(url, options = {}, timeoutMs = 10000, timeoutMessage = '请求') {
+export async function fetchWithTimeout(url, options = {}, timeoutMs = 10000, timeoutMessage = '请求', consumeResponse = (response) => response) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const callerSignal = options.signal;
+  const cancel = () => controller.abort(callerSignal.reason);
+  if (callerSignal?.aborted) cancel();
+  else callerSignal?.addEventListener('abort', cancel, { once: true });
+  let timedOut = false;
+  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
 
   try {
     const response = await fetch(url, {
       ...options,
       signal: controller.signal,
     });
-    return response;
+    // fetch resolves at the headers; JSON/template reads must stay inside the
+    // same deadline so an incomplete body cannot leave the editor locked.
+    return await consumeResponse(response);
   } catch (error) {
-    attachAttemptRecordToError(error, url);
-    if (error?.name === 'AbortError') {
-      error.message = `${timeoutMessage}超时（${Math.round(timeoutMs / 1000)} 秒）`;
+    let failure = error;
+    if (timedOut) {
+      failure = new Error(`${timeoutMessage}超时（${Math.max(0.1, Math.round(timeoutMs / 100) / 10)} 秒）`, { cause: error });
+      failure.name = 'TimeoutError';
+    } else if (callerSignal?.aborted) {
+      failure = callerSignal.reason;
     }
-    throw error;
+    attachAttemptRecordToError(failure, url);
+    throw failure;
   } finally {
     clearTimeout(timer);
+    callerSignal?.removeEventListener('abort', cancel);
   }
 }
 
@@ -162,11 +174,10 @@ export function makeRequestError(response, payload, requestLabel) {
 }
 
 export async function safeParseJsonResponse(response) {
+  if (!response.body) return null;
+  // Reading failures (including aborts) are request failures, not malformed JSON.
+  const rawText = await response.text();
   try {
-    if (!response.body) {
-      return null;
-    }
-    const rawText = await response.text();
     const trimmedText = rawText.trim();
     if (!trimmedText) {
       return null;
@@ -189,32 +200,27 @@ export async function fetchJsonApiRequest(
   requireJson = true,
   invalidResponseMessage = DEFAULT_INVALID_RESPONSE_MESSAGE,
 ) {
-  const response = await fetchWithTimeout(
+  return fetchWithTimeout(
     url,
     options,
     timeoutMs,
     requestLabel,
+    async (response) => {
+      const payload = await safeParseJsonResponse(response);
+      const normalizedPayload = unwrapApiPayload(payload);
+      if (!response.ok || (isApiResponseEnvelope(payload) && payload?.ok === false)) {
+        throw makeRequestError(response, payload, requestLabel);
+      }
+      if (requireJson && normalizedPayload === null) {
+        const error = new Error(invalidResponseMessage);
+        error.status = response.status;
+        error.payload = payload;
+        error.attempts = [toRequestAttemptRecord(response?.url || '', response, false)];
+        throw error;
+      }
+      return { response, payload: normalizedPayload };
+    },
   );
-  const payload = await safeParseJsonResponse(response);
-  const normalizedPayload = unwrapApiPayload(payload);
-  if (!response.ok) {
-    throw makeRequestError(response, payload, requestLabel);
-  }
-  if (isApiResponseEnvelope(payload) && payload?.ok === false) {
-    throw makeRequestError(response, payload, requestLabel);
-  }
-  if (requireJson && normalizedPayload === null) {
-    const error = new Error(invalidResponseMessage);
-    error.status = response.status;
-    error.payload = payload;
-    error.attempts = [toRequestAttemptRecord(response?.url || '', response, false)];
-    return Promise.reject(error);
-  }
-
-  return {
-    response,
-    payload: normalizedPayload,
-  };
 }
 
 export async function fetchTextApiRequest(
@@ -223,36 +229,28 @@ export async function fetchTextApiRequest(
   timeoutMs = 10000,
   requestLabel = '请求',
 ) {
-  const response = await fetchWithTimeout(
+  return fetchWithTimeout(
     url,
     options,
     timeoutMs,
     requestLabel,
-  );
-  const rawText = await response.text();
-  const trimmedText = rawText.trim();
-
-  if (!response.ok) {
-    const contentType = response.headers.get('content-type') || '';
-    let payload = null;
-
-    if (trimmedText) {
-      if (contentType.includes('application/json') || /^[\[{]/.test(trimmedText)) {
-        try {
-          payload = JSON.parse(trimmedText);
-        } catch {
-          payload = trimmedText;
+    async (response) => {
+      const rawText = await response.text();
+      const trimmedText = rawText.trim();
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type') || '';
+        let payload = null;
+        if (trimmedText) {
+          if (contentType.includes('application/json') || /^[\[{]/.test(trimmedText)) {
+            try { payload = JSON.parse(trimmedText); }
+            catch { payload = trimmedText; }
+          } else {
+            payload = trimmedText;
+          }
         }
-      } else {
-        payload = trimmedText;
+        throw makeRequestError(response, payload, requestLabel);
       }
-    }
-
-    throw makeRequestError(response, payload, requestLabel);
-  }
-
-  return {
-    response,
-    text: rawText,
-  };
+      return { response, text: rawText };
+    },
+  );
 }

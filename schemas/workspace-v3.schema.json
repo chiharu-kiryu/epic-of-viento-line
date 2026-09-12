@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "workspace-v3",
+  "type": "object",
+  "required": [
+    "format",
+    "version",
+    "id",
+    "name",
+    "createdAt",
+    "paths",
+    "assetStores"
+  ],
+  "properties": {
+    "format": {
+      "const": "viento-workspace"
+    },
+    "version": {
+      "const": 3
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "createdAt": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "paths": {
+      "const": {
+        "documents": "documents",
+        "templates": "templates",
+        "metadata": "metadata"
+      }
+    },
+    "assetStores": {
+      "const": {
+        "main": {
+          "path": "assets"
+        }
+      }
+    },
+    "documentTypes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "directory",
+          "parserProfile"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "directory": {
+            "type": "string"
+          },
+          "parserProfile": {
+            "enum": [
+              "structured",
+              "prose"
+            ]
+          },
+          "template": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

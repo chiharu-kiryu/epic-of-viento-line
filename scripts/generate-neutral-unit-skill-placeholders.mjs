@@ -1,12 +1,13 @@
 #!/usr/bin/env node
+import { PROJECT_ROOT, ASSET_ROOT } from './lib/paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { execFileSync } from 'node:child_process';
 
-const ROOT = process.cwd();
+const ROOT = PROJECT_ROOT;
 const UNIT_ROOT = path.join(ROOT, 'design-data', 'design-units');
-const UNIT_IMAGE_ROOT = path.join(ROOT, 'assets', 'images', 'units');
+const UNIT_IMAGE_ROOT = path.join(ASSET_ROOT, 'images', 'units');
 
 const DRY_RUN = process.argv.includes('--dry-run');
 const FORCE = process.argv.includes('--force');

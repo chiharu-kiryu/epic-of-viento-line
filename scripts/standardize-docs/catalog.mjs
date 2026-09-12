@@ -1,15 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {
-  BACKSTORY_KEY_OVERRIDES,
-  MERGE_BACKSTORY,
-  PROJECT_ROOT,
-  STANDARD_ROOT,
-} from './config.mjs';
-import {
-  buildCategoryKey,
-} from './utils.mjs';
-import { attachBackstory } from './backstory.mjs';
+import { PROJECT_ROOT, STANDARD_ROOT } from './config.mjs';
 import {
   buildStandardObject,
   buildStandardOutputPath,
@@ -17,61 +8,46 @@ import {
 } from './doc-factory.mjs';
 import { collectSourcePaths } from './sources.mjs';
 import { normalizeFilterPath } from '../lib/path-filter.mjs';
+import { projectDocumentDefaults } from '../lib/project-layout.mjs';
+import { IS_MANAGED_WORKSPACE, DOCUMENTS_PATH, WORKSPACE_MANIFEST } from '../lib/paths.mjs';
+import { readRegistry } from '../lib/workspace.mjs';
 
 async function buildStandardCatalog(sourceFilters = [], options = {}) {
   const outputRoot = options.outputRoot || STANDARD_ROOT;
   const normalizedFilters = sourceFilters.map(normalizeFilterPath);
-  const files = await collectSourcePaths(PROJECT_ROOT, { sourceFilters: normalizedFilters });
+  let files = await collectSourcePaths(PROJECT_ROOT, {
+    sourceFilters: normalizedFilters,
+    excludedRoots: [outputRoot],
+  });
+  if (IS_MANAGED_WORKSPACE) {
+    files = files.filter((file) => file.startsWith(`${DOCUMENTS_PATH}/`));
+  }
   const sourceDocs = [];
+  const registry = await readRegistry(PROJECT_ROOT);
+  const bySource = new Map(registry.documents.map((record) => [record.sourcePath, record]));
+  const outputSources = new Map();
   for (const relPath of files) {
+    const outputPath = buildStandardOutputPath(relPath);
+    if (outputSources.has(outputPath)) {
+      throw new Error(`标准化输出路径冲突 ${outputPath}: ${outputSources.get(outputPath)} / ${relPath}`);
+    }
+    outputSources.set(outputPath, relPath);
     const absolutePath = path.join(PROJECT_ROOT, relPath);
     const stats = await fs.stat(absolutePath);
     const raw = await fs.readFile(absolutePath, 'utf8');
-    const parsed = parseSourceContent(raw, relPath);
-    const normalized = buildStandardObject(relPath, raw, parsed, stats);
+    const descriptor = bySource.get(relPath) || (WORKSPACE_MANIFEST?.version === 3 ? projectDocumentDefaults(WORKSPACE_MANIFEST, relPath) : {});
+    const parsed = parseSourceContent(raw, relPath, descriptor);
+    const normalized = buildStandardObject(relPath, raw, parsed, stats, descriptor);
     sourceDocs.push({
       relPath,
       raw,
       normalized,
-      category: normalized.meta.category,
-      key: buildCategoryKey(normalized.meta, relPath),
     });
   }
 
-  const backstoryByKey = new Map();
-  for (const item of sourceDocs) {
-    if (!item.key) {
-      continue;
-    }
-    if (item.category === 'backstory') {
-      backstoryByKey.set(item.key, item);
-    }
-  }
-
-  const usedBackstoryKeys = new Set();
   const output = [];
-
   for (const item of sourceDocs) {
-    if (!MERGE_BACKSTORY && item.category === 'backstory') {
-      // keep original backstory documents
-    } else if (MERGE_BACKSTORY && item.category === 'backstory') {
-      // merged into matching hero documents later
-      continue;
-    }
-
-    let toWrite = item.normalized;
-    if (item.category === 'hero' && MERGE_BACKSTORY) {
-      const overrideBackstoryKey = item.key && BACKSTORY_KEY_OVERRIDES[item.key];
-      const heroBackstoryKey = item.key?.includes('||') ? item.key.split('||')[1] : null;
-      const backstory = backstoryByKey.get(item.key)
-        || (heroBackstoryKey ? backstoryByKey.get(heroBackstoryKey) : null)
-        || (overrideBackstoryKey ? backstoryByKey.get(overrideBackstoryKey) : null);
-      if (backstory) {
-        toWrite = attachBackstory(item.normalized, backstory.normalized);
-        usedBackstoryKeys.add(backstory.key);
-      }
-    }
-
+    const toWrite = item.normalized;
     const standardRelPath = buildStandardOutputPath(item.relPath);
     const standardAbsolute = path.join(outputRoot, standardRelPath);
     await fs.mkdir(path.dirname(standardAbsolute), { recursive: true });
@@ -83,25 +59,6 @@ async function buildStandardCatalog(sourceFilters = [], options = {}) {
       title: toWrite.meta.title,
       size: item.raw.length,
     });
-  }
-
-  if (MERGE_BACKSTORY) {
-    for (const item of sourceDocs) {
-      if (item.category !== 'backstory' || usedBackstoryKeys.has(item.key)) {
-        continue;
-      }
-      const standardRelPath = buildStandardOutputPath(item.relPath);
-      const standardAbsolute = path.join(outputRoot, standardRelPath);
-      await fs.mkdir(path.dirname(standardAbsolute), { recursive: true });
-      await fs.writeFile(standardAbsolute, `${JSON.stringify(item.normalized)}\n`, 'utf8');
-      output.push({
-        source: item.relPath,
-        standard: standardRelPath,
-        category: item.normalized.meta.category,
-        title: item.normalized.meta.title,
-        size: item.raw.length,
-      });
-    }
   }
 
   return output;

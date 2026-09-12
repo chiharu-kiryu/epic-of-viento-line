@@ -7,10 +7,12 @@ import { resolveBackstoryModeFromEnv } from './lib/rebuild-config.mjs';
 import {
   resolvePort,
   EDIT_ROOT_PREFIXES,
+  sendApiError,
 } from './lib/doc-server.mjs';
 import { createDocumentService } from './lib/doc-api-service.mjs';
 import { handleApiRequest } from './lib/doc-server-routes.mjs';
 import { handleStaticRequest } from './lib/doc-server-static-routes.mjs';
+import { createDesktopSession } from './lib/desktop-session.mjs';
 
 const PORT = resolvePort();
 const HOST = process.env.DOC_API_HOST || '127.0.0.1';
@@ -21,6 +23,7 @@ const DEFAULT_RATE_WINDOW_MS = 60000;
 const DEFAULT_RATE_LIMIT_MAX_REQUESTS = 120;
 const DEFAULT_RATE_BUCKET_MAX = 2048;
 const DEFAULT_MAX_BODY_BYTES = 1024 * 1024;
+const desktopSession = createDesktopSession();
 
 function parsePositiveInteger(value, fallback) {
   const parsed = Number(value);
@@ -180,36 +183,43 @@ function printSecurityBaselineTemplate() {
 }
 
 const server = createServer(async (req, res) => {
-  const url = new URL(req.url, `http://localhost:${PORT}`);
-  const pathname = url.pathname;
+  try {
+    let url;
+    try { url = new URL(req.url, `http://localhost:${PORT}`); }
+    catch { sendApiError(res, 400, 'bad request URL', { errorCode: 'bad_path' }); return; }
+    const pathname = url.pathname;
+    if (desktopSession && await desktopSession(req, res, pathname)) return;
 
-  const handledByApi = await handleApiRequest({
-    pathname,
-    request: req,
-    response: res,
-    requestUrl: url,
-    service: docService,
-  });
-  if (handledByApi) {
-    return;
-  }
+    const handledByApi = await handleApiRequest({
+      pathname,
+      request: req,
+      response: res,
+      requestUrl: url,
+      service: docService,
+    });
+    if (handledByApi) return;
 
-  const handledByStatic = await handleStaticRequest({
-    pathname,
-    response: res,
-    projectRoot: PROJECT_ROOT,
-    webRoot: WEB_ROOT,
-    requestMethod: req.method,
-    request: req,
-  });
-  if (handledByStatic) {
-    return;
+    await handleStaticRequest({
+      pathname,
+      response: res,
+      projectRoot: PROJECT_ROOT,
+      webRoot: WEB_ROOT,
+      requestMethod: req.method,
+      request: req,
+    });
+  } catch (error) {
+    if (res.headersSent || res.destroyed) res.destroy();
+    else sendApiError(res, 500, '无法处理请求', { errorCode: 'internal_error' });
+    console.error(`[doc-server] ${error?.message || error}`);
   }
 });
 
-printStartupSecuritySummary();
-printSecurityBaselineTemplate();
+if (!desktopSession) {
+  printStartupSecuritySummary();
+  printSecurityBaselineTemplate();
+}
 server.listen(PORT, HOST, () => {
-  console.log(`Doc viewer running at http://${HOST}:${PORT}`);
+  if (desktopSession) console.log(`VIENTO_EVENT ${JSON.stringify({ type: 'ready', port: server.address().port })}`);
+  console.log(`Doc viewer running at http://${HOST}:${server.address().port}`);
   console.log(`Backstory merge mode: ${BACKSTORY_MERGE_MODE}`);
 });

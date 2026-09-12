@@ -1,4 +1,16 @@
 export const DOC_TYPE_TEMPLATE_DEFS = {
+  document: {
+    content: '# 新建档案\n\n## 基本信息\n\n名称：\n\n## 内容\n\n',
+    sections: [], includeRemaining: true,
+  },
+  character: {
+    content: '# 新建角色\n\n## 身份\n\n姓名：\n别称：\n\n## 外貌与性格\n\n## 经历\n\n## 关系\n\n',
+    sections: [], includeRemaining: true,
+  },
+  story: {
+    content: '# 新建故事\n\n',
+    sections: [], includeRemaining: true,
+  },
   hero: {
     templateSource: 'data-template/design-heros/模板-英雄',
     sections: [
@@ -58,6 +70,7 @@ export const DOC_TYPE_TEMPLATE_DEFS = {
           { label: '物品描述', keys: ['物品描述', '描述', '说明', '背景描述', '物品背景', '物品背景描述', '说明补充'] },
           { label: '注', keys: ['注', '注释', '备注'] },
           { label: '不包含', keys: ['不包含'] },
+          { label: '适用目标', keys: ['适用目标', '非史诗单位指', '不包含'] },
           { label: '携带与补给', keys: ['携带与补给机制', '携带与补给', '携带机制', '补给'] },
         ],
       },
@@ -95,7 +108,8 @@ export const DOC_TYPE_TEMPLATE_DEFS = {
           { label: '主动', keys: ['主动', '技能'] },
           { label: '技能', keys: ['技能', '技能列表'] },
           { label: '魔力涌动', keys: ['魔力涌动', '魔法涌动'] },
-          { label: '段落', keys: ['段落'] },
+          { label: '增益效果', keys: ['增益效果', 'buff'] },
+          { label: '段落', keys: ['段落', '补充说明'] },
         ],
       },
     ],

@@ -221,7 +221,9 @@ function applyRateLimit(response, request, pathname = '') {
 
   const now = Date.now();
   pruneRateLimitBuckets(now);
-  const clientId = getClientIdentity(request);
+  // Draft previews are frequent read-only work. They must not consume the
+  // request allowance used for saving or navigating the user's documents.
+  const clientId = `${getClientIdentity(request)}${pathname === API_PATHS.MEDIA_INSERT ? ':media-preview' : ''}`;
   const state = getRateLimitState(clientId, now);
   state.count += 1;
 
@@ -287,7 +289,8 @@ function isTokenAllowed(rawToken) {
 
 function isMutatingWriteRequest(pathname, method = '') {
   return pathname === API_PATHS.DOC && WRITE_METHODS.has(method)
-    || pathname === API_PATHS.REBUILD && REBUILD_METHODS.has(method);
+    || pathname === API_PATHS.REBUILD && REBUILD_METHODS.has(method)
+    || [API_PATHS.ASSETS, API_PATHS.MEDIA_INSERT].includes(pathname) && method === API_METHODS.POST;
 }
 
 function methodNotAllowed(response, allow = 'GET', requestId = '') {
@@ -324,6 +327,24 @@ function mapServiceErrorToHttp(error, response, requestId = '') {
     [API_RESPONSE.errorCode]: API_RESPONSE_DEFAULTS.internalErrorPrefix,
   }, requestId);
   return statusCode;
+}
+
+async function handleApiAssets(response, request, requestUrl, service, requestId = '') {
+  try {
+    const data = request.method === API_METHODS.POST
+      ? await service.importMediaAsset(request, requestUrl.searchParams.get('name'))
+      : await service.getMediaAssets();
+    sendApiResponse(response, data, requestId);
+    return 200;
+  } catch (error) { return mapServiceErrorToHttp(error, response, requestId); }
+}
+
+async function handleMediaInsertion(response, request, service, requestId = '') {
+  try {
+    const data = await service.prepareMediaInsertion(await readRequestJsonBody(request));
+    sendApiResponse(response, data, requestId);
+    return 200;
+  } catch (error) { return mapServiceErrorToHttp(error, response, requestId); }
 }
 
 async function handleApiIndex(response, service, requestId = '') {
@@ -429,16 +450,17 @@ async function handleApiRequest({
   service,
 }) {
   const method = normalizeRequestMethod(request?.method);
-  if (applyRateLimit(response, request, pathname)) {
-    return true;
-  }
-
-  const trace = (service && typeof service.startRequest === 'function')
-    ? service.startRequest(pathname, method)
-    : null;
-  const requestId = trace?.requestId || '';
+  let trace = null;
+  let requestId = '';
 
   const route = {
+    [API_PATHS.MEDIA_INSERT]: {
+      [API_METHODS.POST]: () => handleMediaInsertion(response, request, service, requestId),
+    },
+    [API_PATHS.ASSETS]: {
+      [API_METHODS.GET]: () => handleApiAssets(response, request, requestUrl, service, requestId),
+      [API_METHODS.POST]: () => handleApiAssets(response, request, requestUrl, service, requestId),
+    },
     [API_PATHS.INDEX]: {
       [API_METHODS.GET]: () => handleApiIndex(response, service, requestId),
     },
@@ -465,6 +487,13 @@ async function handleApiRequest({
   if (!handlers) {
     return false;
   }
+  if (applyRateLimit(response, request, pathname)) {
+    return true;
+  }
+  trace = (service && typeof service.startRequest === 'function')
+    ? service.startRequest(pathname, method)
+    : null;
+  requestId = trace?.requestId || '';
 
   let statusCode = 200;
   try {
@@ -482,7 +511,9 @@ async function handleApiRequest({
       return true;
     }
 
-    if (isMutatingWriteRequest(pathname, method) && !isJsonRequest(request)) {
+    const validWriteType = pathname === API_PATHS.ASSETS
+      ? getContentType(request) === 'application/octet-stream' : isJsonRequest(request);
+    if (isMutatingWriteRequest(pathname, method) && !validWriteType) {
       statusCode = 415;
       logSecurityEvent('unsupported_media_type', request, {
         method,

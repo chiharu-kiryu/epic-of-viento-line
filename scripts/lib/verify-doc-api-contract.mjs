@@ -2,12 +2,13 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { PROJECT_ROOT } from './paths.mjs';
+import { APPLICATION_ROOT } from './paths.mjs';
 
-const CONTRACT_PATH = path.join(PROJECT_ROOT, 'scripts/lib/doc-api-contract.mjs');
-const ROUTES_PATH = path.join(PROJECT_ROOT, 'scripts/lib/doc-server-routes.mjs');
-const APP_STATE_PATH = path.join(PROJECT_ROOT, 'web/modules/app-state.js');
-const APP_RUNTIME_PATH = path.join(PROJECT_ROOT, 'web/modules/app-runtime.js');
+const CONTRACT_PATH = path.join(APPLICATION_ROOT, 'scripts/lib/doc-api-contract.mjs');
+const ROUTES_PATH = path.join(APPLICATION_ROOT, 'scripts/lib/doc-server-routes.mjs');
+const APP_STATE_PATH = path.join(APPLICATION_ROOT, 'web/modules/app-state.js');
+const APP_RUNTIME_PATH = path.join(APPLICATION_ROOT, 'web/modules/app-runtime.js');
+const APP_DOC_SERVICE_PATH = path.join(APPLICATION_ROOT, 'web/modules/app-doc-service.js');
 const CHECK_PREFIX = '[doc-api-contract-check]';
 const PRECHECK_MAX_HINTS = 8;
 
@@ -151,7 +152,7 @@ async function validateRouteExport(issues) {
   }
 }
 
-function validateFrontendText(issues, appStateText, appRuntimeText) {
+function validateFrontendText(issues, appStateText, appRuntimeText, appDocServiceText) {
   const stateMarkers = [
     "from '../../scripts/lib/doc-api-contract.mjs'",
     'API_PATHS.CAPABILITIES',
@@ -162,8 +163,15 @@ function validateFrontendText(issues, appStateText, appRuntimeText) {
   checkTextMarkers(appStateText, stateMarkers, 'DOCAPI-FRONTEND-STATE', issues);
 
   const runtimeMarkers = [
-    'API_REQUEST_KEYS',
     'DOC_API_URL',
+    'readDocSource',
+    'writeDoc',
+    'rebuildDocIndex',
+  ];
+  checkTextMarkers(appRuntimeText, runtimeMarkers, 'DOCAPI-FRONTEND-RUNTIME', issues);
+
+  const serviceMarkers = [
+    'API_REQUEST_KEYS',
     '[API_REQUEST_KEYS.path]',
     '[API_REQUEST_KEYS.content]',
     '[API_REQUEST_KEYS.expectedVersion]',
@@ -171,7 +179,7 @@ function validateFrontendText(issues, appStateText, appRuntimeText) {
     '[API_REQUEST_KEYS.create]',
     '[API_REQUEST_KEYS.source]',
   ];
-  checkTextMarkers(appRuntimeText, runtimeMarkers, 'DOCAPI-FRONTEND-RUNTIME', issues);
+  checkTextMarkers(appDocServiceText, serviceMarkers, 'DOCAPI-FRONTEND-SERVICE', issues);
 }
 
 function summarizeIssuesByArea(issues) {
@@ -232,11 +240,13 @@ async function runDocApiContractPreflight() {
     readText(ROUTES_PATH),
     readText(APP_STATE_PATH),
     readText(APP_RUNTIME_PATH),
+    readText(APP_DOC_SERVICE_PATH),
   ]);
 
   const routeText = fileReads[0].status === 'fulfilled' ? fileReads[0].value : '';
   const appStateText = fileReads[1].status === 'fulfilled' ? fileReads[1].value : '';
   const appRuntimeText = fileReads[2].status === 'fulfilled' ? fileReads[2].value : '';
+  const appDocServiceText = fileReads[3].status === 'fulfilled' ? fileReads[3].value : '';
 
   if (fileReads[0].status === 'rejected') {
     issues.push(createIssue('DOCAPI-ROUTE-000', 'doc-server-routes', `doc-server-routes.mjs 读取失败: ${fileReads[0].reason?.message || fileReads[0].reason}`, '确认文件路径与内容可读'));
@@ -246,6 +256,9 @@ async function runDocApiContractPreflight() {
   }
   if (fileReads[2].status === 'rejected') {
     issues.push(createIssue('DOCAPI-FRONTEND-RUNTIME-000', 'app-runtime.js', `app-runtime.js 读取失败: ${fileReads[2].reason?.message || fileReads[2].reason}`, '确认文件存在且可读'));
+  }
+  if (fileReads[3].status === 'rejected') {
+    issues.push(createIssue('DOCAPI-FRONTEND-SERVICE-000', 'app-doc-service.js', `app-doc-service.js 读取失败: ${fileReads[3].reason?.message || fileReads[3].reason}`, '确认文件存在且可读'));
   }
 
   let contract = null;
@@ -263,7 +276,7 @@ async function runDocApiContractPreflight() {
 
   await validateRouteExport(issues);
   if (appStateText || appRuntimeText) {
-    validateFrontendText(issues, appStateText, appRuntimeText);
+    validateFrontendText(issues, appStateText, appRuntimeText, appDocServiceText);
   }
 
   if (issues.length > 0) {

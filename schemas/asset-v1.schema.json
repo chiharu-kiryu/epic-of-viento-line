@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "asset-v1",
+  "type": "object",
+  "required": [
+    "format",
+    "version",
+    "id",
+    "name",
+    "kind",
+    "tags",
+    "location",
+    "content",
+    "legacyPaths"
+  ],
+  "properties": {
+    "format": {
+      "const": "viento-asset"
+    },
+    "version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "image",
+        "video",
+        "audio",
+        "font",
+        "text",
+        "other"
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "location": {
+      "type": "object",
+      "required": [
+        "store",
+        "path"
+      ],
+      "properties": {
+        "store": {
+          "const": "main"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "content": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "size",
+            "sha256"
+          ],
+          "properties": {
+            "size": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        }
+      ]
+    },
+    "legacyPaths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

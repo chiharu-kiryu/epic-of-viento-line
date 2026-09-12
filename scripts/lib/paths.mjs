@@ -1,14 +1,28 @@
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { workspacePaths } from './project-layout.mjs';
+import { readWorkspace, resolveAssetRoot } from './workspace.mjs';
+import { resolveWorkspaceRoot } from './app-storage.mjs';
 
-const PROJECT_ROOT = process.cwd();
-const SCRIPT_ROOT = path.join(PROJECT_ROOT, 'scripts');
-const DOC_ROOT = path.join(PROJECT_ROOT, 'design-data');
-const ASSET_ROOT = path.join(PROJECT_ROOT, 'assets');
-const WEB_ROOT = path.join(PROJECT_ROOT, 'web');
-const STANDARD_ROOT = path.join(PROJECT_ROOT, 'docs-standard');
-const DATA_TEMPLATE_ROOT = path.join(PROJECT_ROOT, 'data-template');
-
-const INDEX_OUTPUT = path.join(WEB_ROOT, 'data', 'index.json');
+// The application is located from its module, while data can live anywhere.
+const APPLICATION_ROOT = path.resolve(process.env.VIENTO_APP_ROOT || fileURLToPath(new URL('../../', import.meta.url)));
+const PROJECT_ROOT = resolveWorkspaceRoot({ appRoot: APPLICATION_ROOT });
+const WORKSPACE_MANIFEST = readWorkspace(PROJECT_ROOT);
+const IS_DESKTOP_WORKSPACE = Boolean(process.env.VIENTO_SESSION_TOKEN);
+const IS_MANAGED_WORKSPACE = Boolean(process.env.VIENTO_WORKSPACE_ROOT) || Boolean(WORKSPACE_MANIFEST);
+const CACHE_ROOT = IS_MANAGED_WORKSPACE ? path.join(PROJECT_ROOT, '.viento', 'cache') : PROJECT_ROOT;
+const SCRIPT_ROOT = path.join(APPLICATION_ROOT, 'scripts');
+const DOCUMENTS_PATH = workspacePaths(WORKSPACE_MANIFEST).documents;
+const TEMPLATES_PATH = workspacePaths(WORKSPACE_MANIFEST).templates;
+const DOC_ROOT = path.join(PROJECT_ROOT, DOCUMENTS_PATH);
+const ASSET_ROOT = resolveAssetRoot(PROJECT_ROOT);
+const METADATA_ROOT = path.join(PROJECT_ROOT, 'metadata');
+const WEB_ROOT = path.join(APPLICATION_ROOT, 'web');
+const STANDARD_ROOT = path.join(CACHE_ROOT, 'docs-standard');
+const DATA_TEMPLATE_ROOT = path.join(PROJECT_ROOT, TEMPLATES_PATH);
+const INDEX_OUTPUT = [2, 3].includes(WORKSPACE_MANIFEST?.version)
+  ? path.join(CACHE_ROOT, 'indexes', 'documents.json')
+  : path.join(CACHE_ROOT, 'web', 'data', 'index.json');
 const INDEX_OUTPUT_DIR = path.dirname(INDEX_OUTPUT);
 
 const STANDARDIZE_SCRIPT = path.join(SCRIPT_ROOT, 'standardize-docs.mjs');
@@ -24,6 +38,14 @@ function trimName(fileName = '') {
 }
 
 export {
+  DOCUMENTS_PATH,
+  TEMPLATES_PATH,
+  WORKSPACE_MANIFEST,
+  APPLICATION_ROOT,
+  IS_DESKTOP_WORKSPACE,
+  IS_MANAGED_WORKSPACE,
+  METADATA_ROOT,
+  CACHE_ROOT,
   PROJECT_ROOT,
   SCRIPT_ROOT,
   DOC_ROOT,

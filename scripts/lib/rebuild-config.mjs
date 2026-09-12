@@ -20,25 +20,13 @@ function normalizeBackstoryModeLabel(rawMode) {
 }
 
 function resolveStandardizeArgs(modeLabel) {
-  const mode = normalizeBackstoryModeLabel(modeLabel);
-  if (mode === 'on') {
-    return ['--merge-backstory'];
-  }
-  if (mode === 'off') {
-    return ['--no-merge-backstory'];
-  }
+  // Old launch flags remain accepted. Ownership is now portable metadata and
+  // must not change when a rebuild happens to select a different CLI mode.
   return [];
 }
 
 function formatBackstoryLabel(modeLabel) {
-  const mode = normalizeBackstoryModeLabel(modeLabel);
-  if (mode === 'on') {
-    return 'enabled (merged into hero docs)';
-  }
-  if (mode === 'off') {
-    return 'disabled (backstory standalone)';
-  }
-  return 'disabled (default)';
+  return 'document ownership metadata';
 }
 
 export {

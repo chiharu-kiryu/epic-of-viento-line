@@ -1,4 +1,6 @@
 import path from 'node:path';
+import { projectDocumentDefaults, projectDefinition } from './project-layout.mjs';
+import { WORKSPACE_MANIFEST } from './paths.mjs';
 import { toPosix, trimName } from './paths.mjs';
 
 function normalizeSegments(rawPath = '') {
@@ -12,18 +14,24 @@ function normalizeSegments(rawPath = '') {
 
 function normalizeDesignDataSegments(rawPath = '') {
   const segments = normalizeSegments(rawPath);
-  if (segments[0] === 'docs-standard' && segments[1] === 'design-data') {
+  if (segments[0] === 'docs-standard' && ['design-data', 'documents'].includes(segments[1])) {
     return segments.slice(1);
   }
   return segments;
 }
 
 function normalizeValue(value) {
-  return (value || '').toString().trim();
+  return (value ?? '').toString().trim();
 }
 
 function inferCategory(rawPath = '') {
   const parts = normalizeDesignDataSegments(rawPath);
+
+  if (parts[0] === 'documents') {
+    const record = projectDocumentDefaults(WORKSPACE_MANIFEST, parts.join('/'));
+    const type = projectDefinition(WORKSPACE_MANIFEST).documentTypes.find((type) => type.id === record.documentType);
+    return { category: record.documentType, group: type?.label || '档案' };
+  }
 
   if (parts[0] === 'design-data') {
     if (parts[1] === 'design-heros' && parts.length >= 4) {
@@ -216,9 +224,8 @@ function buildDisplayPath(sourceCategory, sourcePath, sourceMeta = {}, name) {
   }
 
   if (normalizedCategory === 'backstory') {
-    const attr = normalizeValue(sourceMeta.attribute || fallbackSegments[1] || '通用');
-    const hero = normalizeValue(sourceMeta.hero || fallbackSegments[2] || normalizedName);
-    return toPosix(path.join('hero', attr, hero, 'story'));
+    // A story directory can contain many chapters; retain the complete source path.
+    return toPosix(path.join('backstory', ...fallbackSegments.slice(1)));
   }
 
   if (normalizedCategory === 'item') {

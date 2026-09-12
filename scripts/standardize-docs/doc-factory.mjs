@@ -3,8 +3,10 @@ import { SCHEMA_VERSION } from './config.mjs';
 import { inferCategory, inferPurposeGroup } from './utils.mjs';
 import { toPosix, trimName } from '../lib/paths.mjs';
 import { parseJsonContent, parseTextContent, parseYamlContent } from './parser.mjs';
+import { parserOptionsForSource } from './legacy-profile.mjs';
+import { buildDocumentLayout } from './layout.mjs';
 
-function parseSourceContent(rawText, relPath) {
+function parseSourceContent(rawText, relPath, descriptor = {}) {
   const ext = path.extname(relPath).toLowerCase();
   if (ext === '.json') {
     return parseJsonContent(rawText, relPath);
@@ -12,7 +14,7 @@ function parseSourceContent(rawText, relPath) {
   if (ext === '.yml' || ext === '.yaml') {
     return parseYamlContent(rawText, relPath);
   }
-  return parseTextContent(rawText, relPath);
+  return parseTextContent(rawText, relPath, parserOptionsForSource(relPath, descriptor));
 }
 
 function toSafeString(value, fallback = '') {
@@ -57,7 +59,7 @@ function buildStandardOutputPath(sourceRelativePath) {
   ));
 }
 
-function buildStandardObject(relativePath, raw, parsedContent, stats) {
+function buildStandardObject(relativePath, raw, parsedContent, stats, descriptor = {}) {
   const categoryInfo = inferCategory(relativePath);
   const parsedByType = normalizeObject(parsedContent || {});
   const parsedTitle = toSafeString(parsedByType.title, '');
@@ -90,11 +92,13 @@ function buildStandardObject(relativePath, raw, parsedContent, stats) {
         attribute: categoryInfo.meta?.attribute,
       }),
       ...categoryInfo.meta,
+      ...(descriptor.documentType ? { category: descriptor.documentType } : {}),
     },
     parser: {
       contentType: parserContentType,
       format: parserFormat,
       profile: parserProfile,
+      ...(parsedByType.parseError ? { error: parsedByType.parseError } : {}),
       lineCount,
       fieldCount: toSafeInt(parsedByType.fieldCount, Object.keys(fields).length),
       blockCount: toSafeInt(parsedByType.blockCount, parserStats.blockCount),
@@ -104,6 +108,7 @@ function buildStandardObject(relativePath, raw, parsedContent, stats) {
     blocks,
     outline,
     parserStats,
+    layout: buildDocumentLayout({ ...parsedByType, title }),
     rawPath: toPosix(relativePath),
     raw,
   };

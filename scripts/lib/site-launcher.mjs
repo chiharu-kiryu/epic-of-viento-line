@@ -1,45 +1,18 @@
+import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { PROJECT_ROOT } from './paths.mjs';
+import { PROJECT_ROOT, SCRIPT_ROOT } from './paths.mjs';
 import { DOC_SITE_SERVER_SCRIPT } from './paths.mjs';
-import { openInBrowser, commandExists } from './process.mjs';
+import { openInBrowser } from './process.mjs';
 import { rebuildIndex } from './rebuild-workflow.mjs';
 import { formatBackstoryLabel } from './rebuild-config.mjs';
 import { runDocApiContractPreflight } from './verify-doc-api-contract.mjs';
 
-function resolvePythonCommand() {
-  if (commandExists('python3')) {
-    return 'python3';
-  }
-  if (commandExists('python')) {
-    return 'python';
-  }
-  return null;
-}
-
 function startStaticServe(port) {
-  const command = resolvePythonCommand();
-  if (!command) {
-    console.error('Need python3 or python installed');
-    process.exit(1);
-  }
-
-  const child = spawn(command, ['-m', 'http.server', `${port}`, '--bind', '127.0.0.1'], {
-    cwd: PROJECT_ROOT,
-    stdio: 'inherit',
+  const child = spawn(process.execPath, [path.join(SCRIPT_ROOT, 'browse-server.mjs'), '--port', `${port}`], {
+    cwd: PROJECT_ROOT, stdio: 'inherit',
   });
-
-  child.on('error', (error) => {
-    console.error(`启动静态服务失败: ${error.message}`);
-    process.exit(1);
-  });
-
-  child.on('exit', (code, signal) => {
-    if (signal) {
-      process.exit(0);
-      return;
-    }
-    process.exit(code ?? 0);
-  });
+  child.on('error', (error) => { console.error(error.message); process.exitCode = 1; });
+  child.on('exit', (code) => { process.exitCode = code || 0; });
 }
 
 function startDocServer(port, backstoryMode) {
@@ -125,5 +98,4 @@ export {
   launchDocSite,
   startDocServer,
   startStaticServe,
-  resolvePythonCommand,
 };

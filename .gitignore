@@ -2,9 +2,22 @@
 .godot/
 .nomedia
 .DS_Store
+._*
 
 # Local temp/workspace output
 tmp/
+node_modules/
+**/.viento/*
+!**/.viento/workspace.json
+src-tauri/target/
+src-tauri/binaries/
+src-tauri/gen/schemas/
+desktop/resources/
+desktop/.resources-*/
+desktop/.cache/
+dist/
+workspaces/
+viento.config.json
 
 # Godot-specific ignores
 .import/

@@ -133,6 +133,23 @@ function validateDocument(doc, relPath) {
   }
 
   if (STRICT_MODE) {
+    if (doc.layout !== undefined) {
+      const layout = doc.layout;
+      const ids = new Set();
+      if (layout?.schemaVersion !== 'viento-layout-v1' || !Array.isArray(layout.sections)) {
+        addIssue(issues, relPath, 'layout', '解析器布局结构无效');
+      } else for (const section of layout.sections) {
+        if (!section || typeof section.id !== 'string' || !section.id || ids.has(section.id)
+          || typeof section.title !== 'string' || !Number.isInteger(section.level) || section.level < 1 || section.level > 6
+          || !Array.isArray(section.blocks) || section.blocks.some((block) => !['kv', 'paragraph', 'list', 'table', 'code', 'json', 'image', 'video'].includes(block?.type))) {
+          addIssue(issues, relPath, 'layout', '解析器布局分节无效', section?.id);
+        }
+        ids.add(section?.id);
+      }
+    }
+    if (doc.parser?.contentType?.startsWith('invalid-')) {
+      addIssue(issues, relPath, 'parser', '源文档格式解析失败', doc.parser.error || doc.parser.contentType);
+    }
     if (!doc.parserStats || typeof doc.parserStats !== 'object' || Array.isArray(doc.parserStats)) {
       addIssue(issues, relPath, 'parserStats', 'strict: parserStats 必须为对象');
     } else {
@@ -145,7 +162,7 @@ function validateDocument(doc, relPath) {
       }
     }
 
-    if (!doc.raw || typeof doc.raw !== 'string') {
+    if (typeof doc.raw !== 'string') {
       addIssue(issues, relPath, 'raw', 'strict: raw 缺失');
     }
     if (STRICT_MODE && (!doc.rawPath || typeof doc.rawPath !== 'string' || !doc.rawPath.trim())) {

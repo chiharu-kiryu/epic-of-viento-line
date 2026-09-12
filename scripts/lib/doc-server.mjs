@@ -1,32 +1,28 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { createReadStream } from 'node:fs';
+import { pipeline } from 'node:stream/promises';
 import { collectHeroImages } from './image-index.mjs';
 import { collectFilesRecursive } from './scan-files.mjs';
 import { inferCategory } from './category.mjs';
-import { PROJECT_ROOT, DOC_ROOT, WEB_ROOT, trimName, toPosix } from './paths.mjs';
+import { APPLICATION_ROOT, PROJECT_ROOT, DOCUMENTS_PATH, WORKSPACE_MANIFEST, DOC_ROOT, WEB_ROOT, SCRIPT_ROOT, STANDARD_ROOT, INDEX_OUTPUT, CACHE_ROOT, IS_MANAGED_WORKSPACE, trimName, toPosix } from './paths.mjs';
+import { projectDefinition } from './project-layout.mjs';
+import { resolveContainedPath } from './contained-path.mjs';
+import { resolveAssetRoot, resolveAssetRequest, registeredAssetCatalog } from './workspace.mjs';
 import {
   API_RESPONSE,
   API_RESPONSE_DEFAULTS,
 } from './doc-api-contract.mjs';
 
-const EDIT_ROOT_PREFIXES = ['design-data/', 'docs-standard/design-data/'];
-const STATIC_CACHE_CONTROL_STATIC_EXTENSIONS = new Set([
-  '.css',
-  '.js',
-  '.json',
-  '.txt',
-  '.md',
-]);
+const EDIT_ROOT_PREFIXES = [`${DOCUMENTS_PATH}/`, `docs-standard/${DOCUMENTS_PATH}/`];
 const STATIC_CACHE_CONTROL_HTML_EXTENSIONS = new Set([
   '.html',
 ]);
-const DEFAULT_STATIC_CACHE_SECONDS = 3600;
 
 const MIME_TYPES = new Map([
   ['.html', 'text/html; charset=utf-8'],
   ['.css', 'text/css; charset=utf-8'],
   ['.js', 'application/javascript; charset=utf-8'],
+  ['.mjs', 'application/javascript; charset=utf-8'],
   ['.json', 'application/json; charset=utf-8'],
   ['.txt', 'text/plain; charset=utf-8'],
   ['.md', 'text/plain; charset=utf-8'],
@@ -34,10 +30,26 @@ const MIME_TYPES = new Map([
   ['.jpg', 'image/jpeg'],
   ['.jpeg', 'image/jpeg'],
   ['.webp', 'image/webp'],
+  ['.gif', 'image/gif'],
+  ['.svg', 'image/svg+xml'],
+  ['.ico', 'image/vnd.microsoft.icon'],
+  ['.mp4', 'video/mp4'],
+  ['.webm', 'video/webm'],
+  ['.mov', 'video/quicktime'],
+  ['.mp3', 'audio/mpeg'],
+  ['.m4a', 'audio/mp4'],
+  ['.aac', 'audio/aac'],
+  ['.wav', 'audio/wav'],
+  ['.ogg', 'audio/ogg'],
+  ['.flac', 'audio/flac'],
+  ['.ttf', 'font/ttf'],
+  ['.otf', 'font/otf'],
+  ['.woff', 'font/woff'],
+  ['.woff2', 'font/woff2'],
 ]);
 
 const PROJECT_ROOT_REAL = path.resolve(PROJECT_ROOT);
-const README_PATHS = ['README.md', 'design-data/README.md'];
+const README_PATHS = ['README.md', `${DOCUMENTS_PATH}/README.md`];
 const INDEX_BUILD_CONCURRENCY = normalizeNumericConfigValue('DOC_API_INDEX_BUILD_CONCURRENCY', 16, 1);
 
 function normalizeNumericConfigValue(name, fallback, min = 0) {
@@ -138,23 +150,13 @@ function normalizeLockVersion(rawVersion) {
 }
 
 function normalizeStandardizeSourceFilter(rawPath = '') {
+  if (typeof rawPath !== 'string') return null;
+  if (!rawPath.trim()) return '';
   const safePath = safePathFromQuery(rawPath);
-  if (!safePath) {
-    return '';
-  }
-  if (safePath === 'docs-standard' || safePath === 'design-data') {
-    return '';
-  }
-  if (safePath.startsWith('design-data/')) {
-    return safePath;
-  }
-  if (safePath.startsWith('docs-standard/design-data/')) {
-    return safePath.replace(/^docs-standard\/design-data\//, 'design-data/');
-  }
-  if (safePath.startsWith('docs-standard/')) {
-    return '';
-  }
-  return '';
+  if (!safePath) return null;
+  const canonical = safePath.replace(/^docs-standard\//, '');
+  if (safePath === 'docs-standard' || canonical === DOCUMENTS_PATH) return '';
+  return canonical.startsWith(`${DOCUMENTS_PATH}/`) ? canonical : null;
 }
 
 function isAllowedEditPath(relativePath) {
@@ -163,12 +165,10 @@ function isAllowedEditPath(relativePath) {
 
 async function resolveEditableFilePath(relativePath, options = {}) {
   const { allowCreate = false } = options;
-  const canonicalPath = relativePath.startsWith('docs-standard/design-data/')
-    ? relativePath.replace(/^docs-standard\/design-data\//, 'design-data/')
-    : relativePath;
+  const canonicalPath = relativePath.replace(/^docs-standard\//, '');
   const candidates = [canonicalPath];
 
-  if (relativePath !== canonicalPath) {
+  if (relativePath !== canonicalPath && !IS_MANAGED_WORKSPACE) {
     candidates.push(relativePath);
   }
 
@@ -177,18 +177,15 @@ async function resolveEditableFilePath(relativePath, options = {}) {
     if (!candidate || !isAllowedEditPath(candidate)) {
       continue;
     }
-    if (!fallbackCandidate) {
-      const fallbackAbsolutePath = path.join(PROJECT_ROOT, candidate);
-      fallbackCandidate = { relativePath: candidate, absolutePath: fallbackAbsolutePath };
-    }
-    const absolutePath = path.join(PROJECT_ROOT, candidate);
     try {
+      const absolutePath = await resolveContainedPath(PROJECT_ROOT, path.join(PROJECT_ROOT, candidate), { allowMissing: allowCreate });
+      if (!fallbackCandidate) fallbackCandidate = { relativePath: candidate, absolutePath };
       const stat = await fs.stat(absolutePath);
       if (stat.isFile()) {
         return { relativePath: candidate, absolutePath, exists: true };
       }
-    } catch {
-      // keep trying
+    } catch (error) {
+      if (!['ENOENT', 'ENOTDIR'].includes(error.code)) throw error;
     }
   }
 
@@ -344,16 +341,21 @@ async function mapWithConcurrency(items = [], mapper, limit = 8) {
 
 async function buildEditableDocIndex() {
   const fileList = await collectFilesRecursive(DOC_ROOT, { relativeBase: '' });
+  const registry = await registeredAssetCatalog(PROJECT_ROOT);
   const result = await mapWithConcurrency(fileList, async (filePath) => {
-    const rel = toPosix(path.join('design-data', filePath));
+    const rel = toPosix(path.join(DOCUMENTS_PATH, filePath));
     const absolutePath = path.join(PROJECT_ROOT, rel);
     const classification = classifyEntry(rel);
     const baseName = path.basename(absolutePath);
+    const registration = registry?.bySource.get(rel);
+    const registeredType = projectDefinition(WORKSPACE_MANIFEST).documentTypes.find((type) => type.id === registration?.documentType);
+    const registeredImages = (registration?.assetBindings || []).map((link) => registry.byId.get(link.assetId)).filter((asset) => asset?.kind === 'image').map((asset) => `assets/${asset.location.path}`);
     const entry = {
+      ...(registration ? { id: registration.id, assetRefs: registration.assetBindings.map((link) => link.assetId) } : {}),
       path: rel,
       title: trimName(baseName),
-      category: classification.category,
-      group: classification.group,
+      category: registration?.documentType || classification.category,
+      group: registeredType?.label || classification.group,
       name: trimName(baseName),
       fullPath: rel,
       lastModified: '',
@@ -362,7 +364,7 @@ async function buildEditableDocIndex() {
 
     try {
       const [heroImages, stats] = await Promise.all([
-        classification.category === 'hero'
+        registry ? Promise.resolve(registeredImages) : classification.category === 'hero'
           ? collectHeroImages(classification.meta.attribute, classification.meta.hero)
           : Promise.resolve([]),
         fs.stat(absolutePath),
@@ -426,6 +428,7 @@ async function buildEditableDocIndex() {
 
   return {
     generatedAt: new Date().toISOString(),
+    workspace: projectDefinition(WORKSPACE_MANIFEST),
     count: result.length,
     docs: result,
     entries: result,
@@ -446,10 +449,8 @@ function resolveStaticCacheControl(filePath) {
   if (STATIC_CACHE_CONTROL_HTML_EXTENSIONS.has(ext)) {
     return 'no-cache, no-store, must-revalidate, max-age=0';
   }
-  if (STATIC_CACHE_CONTROL_STATIC_EXTENSIONS.has(ext)) {
-    return `public, max-age=${DEFAULT_STATIC_CACHE_SECONDS}, immutable`;
-  }
-  return `public, max-age=${DEFAULT_STATIC_CACHE_SECONDS}, must-revalidate`;
+  // Source, indexes, assets and stable asset IDs can all change in place.
+  return 'no-cache, must-revalidate';
 }
 
 function normalizeWeakEtag(rawEtag = '') {
@@ -466,15 +467,15 @@ function isNotModifiedByCacheHeaders(request, stats, etag) {
   if (typeof ifNoneMatch === 'string' && ifNoneMatch.trim()) {
     const candidates = ifNoneMatch.split(',').map((value) => normalizeWeakEtag(value));
     const normalizedEtag = normalizeWeakEtag(etag);
-    if (candidates.includes('*') || candidates.includes(normalizedEtag)) {
-      return true;
-    }
+    // RFC 9110 §13.1.3: this validator takes precedence over the date, even
+    // when it does not match. Otherwise a changed file can receive a stale 304.
+    return candidates.includes('*') || candidates.includes(normalizedEtag);
   }
 
   const ifModifiedSince = headers['if-modified-since'];
   if (typeof ifModifiedSince === 'string' && ifModifiedSince.trim()) {
     const parsed = Date.parse(ifModifiedSince.trim());
-    if (Number.isFinite(parsed) && parsed >= stats.mtimeMs) {
+    if (Number.isFinite(parsed) && parsed >= Math.floor(stats.mtimeMs / 1000) * 1000) {
       return true;
     }
   }
@@ -482,31 +483,85 @@ function isNotModifiedByCacheHeaders(request, stats, etag) {
   return false;
 }
 
-async function sendFile(filePath, response, request = null, fileStats = null) {
-  setSecurityHeaders(response);
-  const stats = fileStats || await fs.stat(filePath);
-  const etag = generateEtag(stats);
-  const isHead = request?.method?.toUpperCase() === 'HEAD';
-
-  response.setHeader('Content-Type', getMime(filePath));
-  response.setHeader('Content-Length', String(stats.size));
-  response.setHeader('ETag', etag);
-  response.setHeader('Last-Modified', stats.mtime.toUTCString());
-  response.setHeader('Cache-Control', resolveStaticCacheControl(filePath));
-  if (isNotModifiedByCacheHeaders(request, stats, etag)) {
-    response.statusCode = 304;
-    response.end();
-    return;
+function requestedByteRange(request, stats) {
+  if (request?.method?.toUpperCase() !== 'GET') return null;
+  const range = request.headers?.range;
+  if (typeof range !== 'string') return null;
+  const ifRange = request.headers?.['if-range'];
+  if (ifRange) {
+    // Our ETags are weak and cannot satisfy If-Range's strong comparison.
+    // A sufficiently old Last-Modified value can serve as a date validator.
+    const date = Date.parse(ifRange);
+    const modified = Math.floor(stats.mtimeMs / 1000) * 1000;
+    if (!Number.isFinite(date) || date !== modified || Date.now() - modified < 60000) return null;
   }
-
-  response.statusCode = 200;
-  if (isHead) {
-    response.end();
-    return;
+  // Ignore unsupported units, malformed syntax and multipart ranges. Supporting
+  // one range is sufficient for media seeking and keeps memory usage bounded.
+  const match = /^bytes=(\d*)-(\d*)$/.exec(range.trim());
+  if (!match || (!match[1] && !match[2])) return null;
+  const size = BigInt(stats.size);
+  let start, end;
+  if (!match[1]) {
+    const length = BigInt(match[2]);
+    if (length === 0n || size === 0n) return false;
+    start = size > length ? size - length : 0n;
+    end = size - 1n;
+  } else {
+    start = BigInt(match[1]);
+    end = match[2] ? BigInt(match[2]) : size - 1n;
+    if (match[2] && end < start) return null;
+    if (start >= size) return false;
+    if (end >= size) end = size - 1n;
   }
+  return { start: Number(start), end: Number(end) };
+}
 
-  const stream = createReadStream(filePath);
-  stream.pipe(response);
+async function sendFile(filePath, response, request = null) {
+  // Open before sending headers, so missing/unreadable files follow the normal
+  // request error path. An unhandled stream error used to kill the whole editor.
+  const handle = await fs.open(filePath, 'r');
+  try {
+    const stats = await handle.stat();
+    if (!stats.isFile()) throw new Error('not a regular file');
+    setSecurityHeaders(response);
+    if (path.extname(filePath).toLowerCase() === '.svg') {
+      response.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox");
+    }
+    const etag = generateEtag(stats);
+    const isHead = request?.method?.toUpperCase() === 'HEAD';
+    response.setHeader('Content-Type', getMime(filePath));
+    response.setHeader('Content-Length', String(stats.size));
+    response.setHeader('ETag', etag);
+    response.setHeader('Last-Modified', stats.mtime.toUTCString());
+    response.setHeader('Cache-Control', resolveStaticCacheControl(filePath));
+    response.setHeader('Accept-Ranges', 'bytes');
+    if (isNotModifiedByCacheHeaders(request, stats, etag)) {
+      response.statusCode = 304;
+      response.end();
+      return;
+    }
+    const range = requestedByteRange(request, stats);
+    if (range === false) {
+      response.statusCode = 416;
+      response.setHeader('Content-Range', `bytes */${stats.size}`);
+      response.setHeader('Content-Length', '0');
+      response.end();
+      return;
+    }
+    response.statusCode = range ? 206 : 200;
+    if (range) {
+      response.setHeader('Content-Range', `bytes ${range.start}-${range.end}/${stats.size}`);
+      response.setHeader('Content-Length', String(range.end - range.start + 1));
+    }
+    if (isHead) { response.end(); return; }
+    try {
+      await pipeline(handle.createReadStream({ autoClose: false, ...(range || {}) }), response);
+    } catch (error) {
+      // A disconnect or a read failure after streaming began cannot be replaced
+      // with a JSON body. End this response while keeping the service alive.
+      response.destroy(error);
+    }
+  } finally { await handle.close(); }
 }
 
 function normalizeApiPayload(payload) {
@@ -535,7 +590,7 @@ function sendApiResponse(response, data, requestId = '') {
   response.end(JSON.stringify(payload));
 }
 
-async function sendApiError(response, statusCode, message, extra = {}, requestId = '') {
+function sendApiError(response, statusCode, message, extra = {}, requestId = '') {
   setSecurityHeaders(response);
   response.statusCode = statusCode;
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -564,16 +619,26 @@ function getProjectFilePath(relativePath) {
   const sanitizedPath = typeof relativePath === 'string'
     ? relativePath.replace(/^\/+/, '')
     : '';
+  if (sanitizedPath === 'web/data/index.json' || sanitizedPath === 'data/index.json') return INDEX_OUTPUT;
+  if (sanitizedPath === 'data/assets.json') return path.join(CACHE_ROOT, 'indexes/assets.json');
+  if (sanitizedPath === 'data/references.json') return path.join(CACHE_ROOT, 'indexes/references.json');
+  if (sanitizedPath.startsWith('assets/') || sanitizedPath.startsWith('asset-files/')) return resolveAssetRequest(PROJECT_ROOT, sanitizedPath);
+  if (sanitizedPath.startsWith('web/')) return path.resolve(WEB_ROOT, sanitizedPath.slice(4));
+  if (sanitizedPath.startsWith('scripts/')) return path.resolve(SCRIPT_ROOT, sanitizedPath.slice(8));
+  if (sanitizedPath.startsWith('docs-standard/')) return path.resolve(STANDARD_ROOT, sanitizedPath.slice(14));
   return path.resolve(PROJECT_ROOT_REAL, sanitizedPath);
 }
 
-function isProjectFilePathSafe(candidatePath) {
-  const absoluteCandidate = path.resolve(candidatePath);
-  const relativeToProject = path.relative(PROJECT_ROOT_REAL, absoluteCandidate);
-  return relativeToProject === '' || (
-    !relativeToProject.startsWith('..')
-    && !path.isAbsolute(relativeToProject)
-  );
+async function resolveProjectFilePath(requestPath) {
+  const applicationResource = /^\/(?:web|scripts)\//.test(requestPath)
+    && requestPath !== '/web/data/index.json';
+  let root = applicationResource ? APPLICATION_ROOT : PROJECT_ROOT;
+  if (/^\/(?:assets|asset-files)\//.test(requestPath)) {
+    const assets = resolveAssetRoot(PROJECT_ROOT);
+    // Only an explicit external asset binding selects a separate trust root.
+    if (assets !== path.join(PROJECT_ROOT, 'assets')) root = assets;
+  }
+  return resolveContainedPath(root, getProjectFilePath(requestPath));
 }
 
 export {
@@ -594,5 +659,5 @@ export {
   sendApiError,
   getWebRootIndexPath,
   getProjectFilePath,
-  isProjectFilePathSafe,
+  resolveProjectFilePath,
 };

@@ -33,8 +33,10 @@ async function collectFiles(rootDir, {
   relativeBase = '',
   skipDirs = DEFAULT_SKIP_DIRS,
   isAccepted = () => true,
+  excludedRoots = [],
 } = {}) {
   const files = [];
+  const exclusions = excludedRoots.map((root) => path.resolve(root));
   const normalizedSkipDirs = skipDirs instanceof Set
     ? skipDirs
     : new Set(Array.isArray(skipDirs) ? skipDirs : []);
@@ -71,6 +73,12 @@ async function collectFiles(rootDir, {
 
           const absolute = path.join(item.dir, entry.name);
           const relative = toPosix(path.join(item.base, entry.name));
+          if (exclusions.some((root) => {
+            const fromRoot = path.relative(root, absolute);
+            return fromRoot === '' || (!fromRoot.startsWith(`..${path.sep}`) && fromRoot !== '..' && !path.isAbsolute(fromRoot));
+          })) {
+            continue;
+          }
 
           if (entry.isDirectory()) {
             queue.push({

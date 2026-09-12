@@ -1,3 +1,5 @@
+import { DOCUMENTS_PATH, WORKSPACE_MANIFEST } from './paths.mjs';
+import { projectDefinition } from './project-layout.mjs';
 import fs from 'node:fs';
 import fsPromises from 'node:fs/promises';
 import path from 'node:path';
@@ -12,6 +14,8 @@ import {
 } from './image-index.mjs';
 import { PROJECT_ROOT, STANDARD_ROOT, toPosix, trimName } from './paths.mjs';
 import { collectFilesRecursive } from './scan-files.mjs';
+import { attachDocumentHierarchy } from './document-model.mjs';
+import { buildDocumentLayout } from '../standardize-docs/layout.mjs';
 
 function toSafeString(value, fallback = '') {
   if (typeof value === 'string') {
@@ -52,7 +56,7 @@ function toSafeSectionValue(value) {
     return '';
   }
   if (Array.isArray(value)) {
-    return value.join('\n');
+    return value.map(toSafeSectionValue).join('\n');
   }
   if (typeof value === 'object') {
     return JSON.stringify(value, null, 2);
@@ -84,7 +88,7 @@ function ensureSections(rawSections, fallbackHeader = '') {
         appendSection(item);
         continue;
       }
-      appendSection({ key: '段落', value: String(item || '') });
+      appendSection({ key: '段落', value: String(item ?? '') });
     }
   } else if (rawSections && typeof rawSections === 'object' && !Array.isArray(rawSections)) {
     for (const [key, value] of Object.entries(rawSections)) {
@@ -136,7 +140,7 @@ function ensureBlocks(rawBlocks) {
         });
         continue;
       }
-      addSectionBlock(block.key || '段落', block.value || block.text || block);
+      addSectionBlock(block.key || '段落', block.value ?? block.text ?? block);
     }
   } else if (rawBlocks && typeof rawBlocks === 'object') {
     for (const [key, value] of Object.entries(rawBlocks)) {
@@ -180,6 +184,7 @@ function normalizeParser(rawParser, parsedParserStats, fallbackSectionCount = 0,
     contentType: toSafeString(parser.contentType || parser.type || 'text', 'text'),
     format: toSafeString(parser.format || parser.typeHint || 'text', 'text'),
     profile: toSafeString(parser.profile, 'plain'),
+    ...(parser.error ? { error: toSafeString(parser.error) } : {}),
     lineCount: toSafeInt(parser.lineCount, 0),
     fieldCount: toSafeInt(parser.fieldCount, fallbackFieldCount),
     blockCount: toSafeInt(parser.blockCount, parserStats.blockCount),
@@ -208,6 +213,8 @@ function normalizeStandardSourcePath(sourcePath) {
   if (!normalized) {
     return '';
   }
+  if (normalized.startsWith('docs-standard/documents/')) return normalized;
+  if (normalized.startsWith('documents/')) return `docs-standard/${normalized}`;
   if (normalized.startsWith('docs-standard/design-data/')) {
     return normalized;
   }
@@ -281,7 +288,9 @@ function ensureStandardDocDefaults(rawDoc = {}, relativePath = '', rawText = '')
     parserStats,
     rawPath: rawSectionPath || toSafeString(parsed.rawPath, ''),
     raw: toSafeString(parsed.raw, toSafeString(rawText, '')),
-    data: parsed.data || null,
+    backstory: parsed.backstory || null,
+    data: parsed.data ?? null,
+    layout: parsed.layout || buildDocumentLayout({ title: fallbackTitle, blocks }),
   };
 }
 
@@ -295,6 +304,15 @@ async function collectImagesForSourceDoc(standardDoc, sourcePath, sourceCategory
   const baseName = trimName(normalizedName);
   const explicitPaths = collectAssetImageRefs(rawText, sourcePath, assetCatalog);
   const matched = new Set(explicitPaths);
+  if (assetCatalog.registered) {
+    const registration = assetCatalog.bySource.get(sourcePath.replace(/^docs-standard\//, ''));
+    const ids = [...(registration?.assetBindings || []).map((link) => link.assetId), ...[...rawText.matchAll(/asset:([0-9a-f-]{36})/g)].map((match) => match[1])];
+    for (const id of ids) {
+      const asset = assetCatalog.byId.get(id);
+      if (asset?.kind === 'image') matched.add(`assets/${asset.location.path}`);
+    }
+    return [...matched];
+  }
 
   const cls = sourceCategory || 'other';
   const { attribute, hero } = resolveHeroMeta(cls, sourceMeta, sourcePath);
@@ -325,7 +343,7 @@ async function collectImagesForSourceDoc(standardDoc, sourcePath, sourceCategory
 function sourcePathFromStandardDoc(standardDoc, relativePath) {
   const sourcePath = standardDoc?.source?.path;
   if (typeof sourcePath === 'string' && sourcePath.trim()) {
-    return normalizeStandardSourcePath(sourcePath).replace(/\.json$/i, '');
+    return normalizeStandardSourcePath(sourcePath);
   }
   const fallback = normalizeStandardSourcePath(relativePath);
   return fallback.replace(/\.json$/i, '');
@@ -336,14 +354,15 @@ function normalizeBackstoryPayload(backstory) {
     return null;
   }
 
-  const backstorySourcePath = normalizeStandardSourcePath(backstory.source?.path || backstory.rawPath || '');
+  const source = typeof backstory.source === 'string' ? { path: backstory.source } : toSafeObject(backstory.source);
+  const backstorySourcePath = normalizeStandardSourcePath(source.path || backstory.rawPath || '');
   const normalizedRawPath = backstorySourcePath || backstory.rawPath || '';
 
   return {
     ...backstory,
     source: {
-      ...backstory.source,
-      path: backstorySourcePath || backstory.source?.path || '',
+      ...source,
+      path: backstorySourcePath || '',
     },
     rawPath: normalizedRawPath,
     meta: {
@@ -368,7 +387,7 @@ async function buildIndexFromStandard(assetCatalog) {
   const docs = [];
 
   for (const relPath of files) {
-    const absolutePath = path.join(PROJECT_ROOT, relPath);
+    const absolutePath = path.join(STANDARD_ROOT, relPath.slice('docs-standard/'.length));
     const rawStandard = await fsPromises.readFile(absolutePath, 'utf8');
     let loaded = null;
     try {
@@ -410,13 +429,14 @@ async function buildIndexFromStandard(assetCatalog) {
   const sourcePath = sourcePathFromStandardDoc(normalizedDoc, relPath);
   const sourceDocumentPath = toSafeString(normalizedDoc.source?.path, sourcePath);
   const normalizedName = trimName(path.basename(sourcePath || relPath));
-    const sourceCategory = toSafeString(normalizedDoc.meta?.category, 'other');
+    const registration = assetCatalog.bySource?.get(sourceDocumentPath.replace(/^docs-standard\//, ''));
+    const sourceCategory = registration?.documentType || toSafeString(normalizedDoc.meta?.category, 'other');
     const cls = classify(sourcePath);
     const effectiveCategory = sourceCategory || cls.category || 'other';
     const sourceMeta = toSafeObject(normalizedDoc.meta, cls.meta || {});
-  const group = sourceCategory && sourceCategory !== 'other'
-      ? toSafeString(sourceMeta.group, cls.group)
-      : toSafeString(sourceMeta.group, cls.group);
+    const projectType = WORKSPACE_MANIFEST?.version === 3
+      ? projectDefinition(WORKSPACE_MANIFEST).documentTypes.find((type) => type.id === effectiveCategory) : null;
+    const group = projectType?.label || toSafeString(sourceMeta.group, cls.group);
     const fields = toSafeObject(normalizedDoc.fields, {});
     const title = toSafeString(sourceMeta.title, normalizedName);
     const imageList = await collectImagesForSourceDoc(
@@ -426,20 +446,31 @@ async function buildIndexFromStandard(assetCatalog) {
       sourceMeta,
       assetCatalog
     );
-    const heroSkills = effectiveCategory === 'hero'
+    const isCharacter = ['hero', 'character'].includes(effectiveCategory);
+    const heroSkills = isCharacter
       ? collectHeroSkillsFromSections(normalizedDoc.sections || [], imageList)
       : [];
-    const orderedHeroImages = effectiveCategory === 'hero'
+    const orderedHeroImages = isCharacter
       ? sortHeroImagesForDisplay(imageList, heroSkills)
       : imageList;
 
+    const displayPath = registration?.legacyId || (WORKSPACE_MANIFEST?.version === 3 ? sourcePath : buildDisplayPath(cls.category, sourcePath, sourceMeta, normalizedName));
+    const assetRefs = assetCatalog.registered ? [...new Set([
+      ...(registration?.assetBindings || []).map((link) => link.assetId),
+      ...[...normalizedDoc.raw.matchAll(/asset:(?:\/\/)?([0-9a-f-]{36})/gi)].map((match) => match[1].toLowerCase()),
+      ...imageList.map((file) => assetCatalog.byPath.get(file)?.id).filter(Boolean),
+    ])] : undefined;
     docs.push({
-      path: buildDisplayPath(effectiveCategory, sourcePath, sourceMeta, normalizedName),
+      ...(registration ? { id: registration.id } : {}),
+      ...(assetRefs ? { assetRefs, unresolvedAssetPaths: imageList.filter((file) => !assetCatalog.byPath.has(file)) } : {}),
+      path: displayPath,
       title,
       name: normalizedName,
       category: sourceCategory || cls.category || 'other',
-      displayPath: buildDisplayPath(effectiveCategory, sourcePath, sourceMeta, normalizedName),
-      group: inferPurposeGroup(
+      displayPath,
+      relations: registration?.relations || [],
+      layout: normalizedDoc.layout,
+      group: projectType?.label || inferPurposeGroup(
         sourceCategory || cls.category || 'other',
         group || cls.group || '其他',
         fields,
@@ -454,7 +485,7 @@ async function buildIndexFromStandard(assetCatalog) {
         ...sourceMeta,
         category: sourceCategory || cls.category || 'other',
         group: group || cls.group,
-        purpose: inferPurposeGroup(
+        purpose: projectType?.label || inferPurposeGroup(
           sourceCategory || cls.category || 'other',
           group || cls.group || '其他',
           fields,
@@ -470,7 +501,7 @@ async function buildIndexFromStandard(assetCatalog) {
       type: sourceTypeFromPath(sourcePath),
       lastModified: sourceMeta.modifiedAt || normalizedDoc.source?.modifiedAt || new Date().toISOString(),
       size: normalizedDoc.source?.size || 0,
-      content: normalizedDoc.raw || JSON.stringify(normalizedDoc.data || normalizedDoc, null, 2),
+      content: normalizedDoc.raw,
       heroImages: orderedHeroImages,
       heroSkills,
       standardPath: relPath,
@@ -479,7 +510,7 @@ async function buildIndexFromStandard(assetCatalog) {
     });
   }
 
-  return docs;
+  return attachDocumentHierarchy(docs);
 }
 
 async function buildStandardIndex() {
@@ -487,6 +518,13 @@ async function buildStandardIndex() {
   const shouldUseStandard = fs.existsSync(STANDARD_ROOT);
   if (shouldUseStandard) {
     const docs = await buildIndexFromStandard(assetCatalog);
+    const paths = new Map();
+    for (const doc of docs) {
+      if (paths.has(doc.path)) {
+        throw new Error(`文档标识重复 ${doc.path}: ${paths.get(doc.path)} / ${doc.standardPath}`);
+      }
+      paths.set(doc.path, doc.standardPath);
+    }
     docs.sort((a, b) => {
       if (a.group !== b.group) {
         return a.group.localeCompare(b.group, 'zh-CN');
@@ -494,6 +532,7 @@ async function buildStandardIndex() {
       return a.name.localeCompare(b.name, 'zh-CN');
     });
     return {
+      workspace: projectDefinition(WORKSPACE_MANIFEST),
       generatedAt: new Date().toISOString(),
       count: docs.length,
       docs,

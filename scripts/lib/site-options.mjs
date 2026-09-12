@@ -1,7 +1,7 @@
 const DEFAULT_PORT = 4173;
 
 function printHelp() {
-  console.log(`Usage: start-doc-site.mjs [options]\n\nOptions:\n  -p, --port PORT      HTTP port (default: 4173)\n  -m, --mode MODE      运行模式：browse（只读）/ edit（可编辑） default: browse\n      --merge-backstory      合并背景故事到英雄（默认关闭）\n      --no-merge-backstory   保持背景故事独立文件（默认）\n      --no-open              不自动打开浏览器\n      --no-build             跳过索引重建（保留现有索引）\n      --no-standardize       跳过标准化步骤\n  -h, --help            显示帮助`);
+  console.log(`Usage: start-doc-site.mjs [options]\n\nOptions:\n  -p, --port PORT      HTTP port (default: 4173)\n  -m, --mode MODE      运行模式：browse（只读）/ edit（可编辑） default: browse\n      --merge-backstory      兼容旧参数；归属由元数据关系决定\n      --no-merge-backstory   兼容旧参数；保留独立源文件和归属关系\n      --no-open              不自动打开浏览器\n      --no-build             跳过索引重建（保留现有索引）\n      --no-standardize       跳过标准化步骤\n  -h, --help            显示帮助`);
 }
 
 function parseSiteArgs(args) {

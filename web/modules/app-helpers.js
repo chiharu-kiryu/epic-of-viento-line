@@ -23,6 +23,7 @@ const visibleNoSearchDocCache = {
   hero: [],
   item: [],
   other: [],
+  types: new Map(),
 };
 const visibleSearchDocCache = new WeakMap();
 const visibleSearchIndexCache = new WeakMap();
@@ -46,20 +47,21 @@ const CATEGORIES_NO_DOC_THUMBNAIL = new Set(['template', 'rule', 'root', 'other'
 
 function getDisplayCategory(doc) {
   const category = doc?.category || 'other';
-  if (category === 'backstory') {
-    return 'hero';
-  }
+  if (state.workspace?.version === 3) return category;
+  if (category === 'hero') return 'character';
+  if (category === 'backstory') return 'story';
   return category;
 }
 
 function docMatchesTab(doc, tabId) {
+  if (tabId.startsWith('type:')) return doc?.category === tabId.slice(5);
   if (tabId === 'all') {
     return true;
   }
 
   if (tabId === 'hero') {
     const category = doc?.category || 'other';
-    return category === 'hero' || category === 'backstory';
+    return category === 'hero' || category === 'character';
   }
 
   if (tabId === 'item') {
@@ -68,7 +70,7 @@ function docMatchesTab(doc, tabId) {
 
   if (tabId === 'other') {
     const category = getDisplayCategory(doc);
-    return category !== 'hero' && category !== 'item';
+    return category !== 'character' && category !== 'item';
   }
 
   return true;
@@ -255,8 +257,13 @@ function getVisibleDocs(rawDocs = state.docs, keyword = searchInput.value, activ
       visibleNoSearchDocCache.hero = hero;
       visibleNoSearchDocCache.item = item;
       visibleNoSearchDocCache.other = other;
+      visibleNoSearchDocCache.types = new Map();
     }
 
+    if (activeTab.startsWith('type:')) {
+      if (!visibleNoSearchDocCache.types.has(activeTab)) visibleNoSearchDocCache.types.set(activeTab, visibleNoSearchDocCache.all.filter((doc) => docMatchesTab(doc, activeTab)));
+      return visibleNoSearchDocCache.types.get(activeTab);
+    }
     if (activeTab === 'hero') {
       return visibleNoSearchDocCache.hero;
     }
@@ -323,6 +330,15 @@ function getVisibleDocs(rawDocs = state.docs, keyword = searchInput.value, activ
 }
 
 function getHeroDisplayKey(doc) {
+  if (doc?.category === 'backstory') {
+    const sourcePath = normalizeValue(doc.source?.path || doc.meta?.source || doc.path);
+    const segments = sourcePath.split('/');
+    const backstoryIndex = segments.indexOf('backstory');
+    if (backstoryIndex >= 0 && segments.length - backstoryIndex > 3) {
+      return `chapter:${sourcePath}`;
+    }
+  }
+
   const metaHero = normalizeValue(doc?.meta?.hero);
   if (metaHero) {
     return metaHero;
@@ -353,6 +369,10 @@ function resolveHeroBackstory(doc) {
 }
 
 function getHeroDisplayDocs(rawDocs = [], activeTab = state.activeTab) {
+  if (rawDocs.some((doc) => Array.isArray(doc.owners))) {
+    // Ownership is resolved by IDs in the index, independent of type and name.
+    return rawDocs.filter((doc) => !doc.owners?.length);
+  }
   if (activeTab !== 'hero' && activeTab !== 'all') {
     return rawDocs;
   }
@@ -371,7 +391,7 @@ function getHeroDisplayDocs(rawDocs = [], activeTab = state.activeTab) {
 
   for (const doc of rawDocs) {
     const displayCategory = getDisplayCategory(doc);
-    if (displayCategory !== 'hero') {
+    if (doc.category !== 'hero' && doc.category !== 'backstory') {
       continue;
     }
 
@@ -387,7 +407,7 @@ function getHeroDisplayDocs(rawDocs = [], activeTab = state.activeTab) {
 
   for (const doc of rawDocs) {
     const displayCategory = getDisplayCategory(doc);
-    if (displayCategory !== 'hero') {
+    if (doc.category !== 'hero' && doc.category !== 'backstory') {
       mergedDocs.push(doc);
       continue;
     }
@@ -422,9 +442,9 @@ function getHeroDisplayDocs(rawDocs = [], activeTab = state.activeTab) {
 
 function getHeroCount(sourceDocs = state.docs) {
   const unique = new Set();
-  for (const doc of sourceDocs) {
+  for (const doc of getHeroDisplayDocs(sourceDocs, 'all')) {
     if (docMatchesTab(doc, 'hero')) {
-      unique.add(getHeroDisplayKey(doc));
+      unique.add(doc.id || doc.path);
     }
   }
   return unique.size;
@@ -432,12 +452,19 @@ function getHeroCount(sourceDocs = state.docs) {
 
 function getTabCounts(source = state.docs) {
   const allDisplayDocs = getHeroDisplayDocs(source, 'all');
+  if (state.workspace?.version === 3) return Object.fromEntries(projectTabs().map((tab) => [tab.id, allDisplayDocs.filter((doc) => docMatchesTab(doc, tab.id)).length]));
   return {
     all: allDisplayDocs.length,
     hero: getHeroCount(source),
-    item: source.filter((doc) => docMatchesTab(doc, 'item')).length,
-    other: source.filter((doc) => docMatchesTab(doc, 'other')).length,
+    item: allDisplayDocs.filter((doc) => docMatchesTab(doc, 'item')).length,
+    other: allDisplayDocs.filter((doc) => docMatchesTab(doc, 'other')).length,
   };
+}
+
+function projectTabs() {
+  return state.workspace?.version === 3
+    ? [{ id: 'all', label: '全部' }, ...(state.workspace.documentTypes || []).map((type) => ({ id: `type:${type.id}`, label: type.label }))]
+    : TAB_DEFINITIONS;
 }
 
 function renderTabs(onTabChange = () => {}, counts = null) {
@@ -448,7 +475,7 @@ function renderTabs(onTabChange = () => {}, counts = null) {
   const tabCounts = counts || getTabCounts();
   categoryTabsEl.innerHTML = '';
 
-  for (const tab of TAB_DEFINITIONS) {
+  for (const tab of projectTabs()) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = `tab-btn ${tab.id === state.activeTab ? 'is-active' : ''}`;
@@ -475,7 +502,7 @@ function renderTabs(onTabChange = () => {}, counts = null) {
 }
 
 function normalizeValue(value) {
-  return (value || '').toString().trim();
+  return (value ?? '').toString().trim();
 }
 
 function normalizeLabel(value) {
@@ -559,7 +586,7 @@ function getNameAvatarDataUrl(rawLabel) {
 }
 
 function resolveImageUrl(rawImagePath = '') {
-  const imagePath = normalizeDisplayValue(rawImagePath);
+  const imagePath = normalizeValue(rawImagePath);
   if (!imagePath) {
     return '';
   }
@@ -578,12 +605,15 @@ function resolveImageUrl(rawImagePath = '') {
   }
 
   const safePrefixes = [
+    'asset-files/',
+    '/asset-files/',
     'assets/',
     '/assets/',
     '/web/',
     'web/',
     '/data/',
     'data/',
+    '/documents/', 'documents/', '/templates/', 'templates/',
     '/data-template/',
     'data-template/',
     '/design-data/',
@@ -603,12 +633,15 @@ function resolveImageUrl(rawImagePath = '') {
   }
 
   try {
-    const resolved = new URL(`./${normalizedRelativePath}`, ASSET_BASE_URL);
+    // Registry paths are filenames, not URL strings. A literal # or % must not
+    // turn into a fragment or an already-encoded character in the request.
+    const encodedPath = normalizedRelativePath.split('/').map(encodeURIComponent).join('/');
+    const resolved = new URL(`./${encodedPath}`, ASSET_BASE_URL);
     if (resolved.origin !== location.origin) {
       return '';
     }
 
-    if (!hasSafePrefix.some((prefix) => resolved.pathname.startsWith(prefix.startsWith('/') ? prefix : `/${prefix}`))) {
+    if (!safePrefixes.some((prefix) => resolved.pathname.startsWith(prefix.startsWith('/') ? prefix : `/${prefix}`))) {
       return '';
     }
 
@@ -1335,7 +1368,7 @@ function createDocButton(doc, onSelect = () => {}, options = {}) {
 
   button.appendChild(textWrap);
   button.title = normalizeValue(`${doc.title || doc.name}`);
-  const normalizedPath = normalizeDisplayValue(doc.path);
+  const normalizedPath = normalizeValue(doc.path);
   button.dataset.path = doc.path;
   button.dataset.pathKey = normalizedPath;
   button.dataset.editPermission = initialEditPermissionState;
@@ -1453,6 +1486,11 @@ function getPurposeGroup(doc, itemPairCounts = new Map(), overrideFields = null)
 
 function markActiveItem() {
   const nextPath = state.activePath || '';
+  for (const button of listEl?.querySelectorAll('.doc-owned-item') || []) {
+    const active = button.dataset.ownedPath === nextPath;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-current', active ? 'page' : 'false');
+  }
   if (activeDocPath === nextPath) {
     return;
   }
@@ -1482,7 +1520,7 @@ function cacheDocListButton(pathValue, button, permissionTag = null, textWrap = 
   docButtonCacheByPath.set(normalizedPath, button);
   if (!docButtonMetaByPath.has(normalizedPath)) {
     docButtonMetaByPath.set(normalizedPath, {
-      normalizedPath: normalizedPathValue || normalizeDisplayValue(normalizedPath),
+      normalizedPath: normalizedPathValue || normalizeValue(normalizedPath),
       path: normalizedPath,
       permissionTag: null,
       textWrap: null,
@@ -1588,7 +1626,7 @@ function toDisplayValue(value) {
     return 'true';
   }
   if (Array.isArray(value)) {
-    return value.join('\n');
+    return value.map(toDisplayValue).join('\n');
   }
   if (typeof value === 'object') {
     return JSON.stringify(value, null, 2);
