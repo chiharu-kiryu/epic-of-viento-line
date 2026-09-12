@@ -1,6 +1,7 @@
 import { renderStructuredBlocks } from './app-structured.js';
 import { isMediaValue } from '../../scripts/lib/media-format.mjs';
 import { renderMedia, renderMediaText } from './app-media-render.js';
+import { splitValueFields } from '../../scripts/lib/document-values.mjs';
 
 export function hasDocumentLayout(doc) {
   return doc?.layout?.schemaVersion === 'viento-layout-v1' && Array.isArray(doc.layout.sections);
@@ -41,14 +42,8 @@ function renderValue(value) {
   const text = value === null ? 'null' : String(value ?? '');
   const media = renderMediaText(text);
   if (media) return media;
-  const lines = text.split(/\r\n?|\n/).filter((line) => line.trim());
-  const pairs = lines.map((line) => {
-    const named = line.trim().match(/^([^:：]+)[:：]\s*(.+)$/);
-    if (named) return [named[1].trim(), named[2].trim()];
-    const leading = line.trim().match(/^([+\-−]?\d\S*)\s+(.+)$/);
-    return leading ? [leading[2], leading[1]] : null;
-  });
-  if (lines.length > 1 && pairs.every(Boolean)) {
+  const pairs = splitValueFields(text);
+  if (pairs) {
     const fields = document.createElement('dl');
     fields.className = 'document-fields document-value-rows';
     for (const [key, entry] of pairs) fields.appendChild(fieldRow(key, entry));

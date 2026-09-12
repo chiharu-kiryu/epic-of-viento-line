@@ -42,7 +42,7 @@ test('tables preserve escaped pipes, empty columns and alignment without repeati
 });
 
 test('inline and multiline hero skills retain their description without swallowing hero metadata', () => {
-  const parsed = parseSourceContent('英雄\n技能1：烈焰\n描述：灼烧目标\n伤害：10\n技能2：\n名称：冰霜\n伤害：20\n主属性：智力\n\n铸魔：\n描述：增加范围\n施法距离：800', 'design-data/design-heros/智力/英雄');
+  const parsed = parseSourceContent('英雄\n技能1：烈焰\n描述：灼烧目标\n伤害：10\n技能2：\n名称：冰霜\n伤害：20\n主属性：智力\n\n铸魔：\n描述：增加范围\n施法距离：800', 'design-data/design-heros/智力/英雄', { parserProfile: 'legacy-hero' });
   assert.equal(parsed.fields.技能1, '烈焰\n描述：灼烧目标\n伤害：10');
   assert.equal(parsed.fields.技能2, '名称：冰霜\n伤害：20');
   assert.equal(parsed.fields.主属性, '智力');
@@ -56,7 +56,7 @@ test('inline and multiline hero skills retain their description without swallowi
 
 test('story dialogue and repeated paragraphs remain body content in their original order', () => {
   const lines = ['他问：“你是谁？”', '她答：“我不知道。”', '不。', '不？', '不。'];
-  const parsed = parseSourceContent('# 章节\n\n' + lines.join('\n\n'), 'design-data/backstory/故事/第一幕分章/001.md');
+  const parsed = parseSourceContent('# 章节\n\n' + lines.join('\n\n'), 'design-data/backstory/故事/第一幕分章/001.md', { parserProfile: 'prose' });
   assert.deepEqual(parsed.fields, { _header: '章节' });
   assert.deepEqual(parsed.blocks.filter((block) => block.type === 'paragraph').map((block) => block.text), lines);
 });

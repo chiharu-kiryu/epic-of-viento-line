@@ -27,7 +27,7 @@ function normalizeValue(value) {
 function inferCategory(rawPath = '') {
   const parts = normalizeDesignDataSegments(rawPath);
 
-  if (parts[0] === 'documents') {
+  if (parts[0] === 'documents' || (parts[0] === 'design-data' && WORKSPACE_MANIFEST?.documentTypes)) {
     const record = projectDocumentDefaults(WORKSPACE_MANIFEST, parts.join('/'));
     const type = projectDefinition(WORKSPACE_MANIFEST).documentTypes.find((type) => type.id === record.documentType);
     return { category: record.documentType, group: type?.label || '档案' };

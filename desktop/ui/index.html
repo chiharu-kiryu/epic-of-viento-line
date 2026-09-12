@@ -5,22 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Viento Studio · 作品库</title>
     <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./i18n/settings.css">
   </head>
   <body>
     <main class="library">
-      <header><div class="brand-mark" aria-hidden="true">V</div><div><p class="eyebrow">VIENTO STUDIO · <span id="appVersion">b.2.8</span></p><h1>你的故事，从这里继续。</h1><p class="subtitle">作品、设定和素材，都留在你自己的文件夹里。</p></div></header>
-      <section class="actions" aria-label="管理作品库">
-        <button id="createBtn" class="primary">新建作品库</button>
-        <button id="openBtn">打开已有文件夹</button>
-        <button id="importBtn">导入迁移包</button>
+      <header><div class="brand-mark" aria-hidden="true">V</div><div><p class="eyebrow">VIENTO STUDIO · <span id="appVersion">b.2.8.1</span></p><h1 data-i18n="你的故事，从这里继续。">你的故事，从这里继续。</h1><p class="subtitle" data-i18n="作品、设定和素材，都留在你自己的文件夹里。">作品、设定和素材，都留在你自己的文件夹里。</p></div></header>
+      <section class="actions" aria-label="管理作品库" data-i18n-aria-label="管理作品库">
+        <button id="createBtn" class="primary" data-i18n="新建作品库">新建作品库</button>
+        <button id="openBtn" data-i18n="打开已有文件夹">打开已有文件夹</button>
+        <button id="importBtn" data-i18n="导入迁移包">导入迁移包</button>
+        <button id="settingsBtn" type="button" data-i18n="设置">设置</button>
       </section>
-      <section id="activeSession" class="active-session" hidden><div><strong id="activeName"></strong><p>编辑窗口中的草稿会保留。切换作品前，请先保存并关闭当前编辑窗口。</p></div><button id="resumeBtn">继续编辑</button><button id="closeEditorBtn">关闭编辑窗口</button></section>
-      <div class="section-heading"><h2>最近使用</h2><span id="count"></span></div>
-      <section id="workspaces" class="workspaces" aria-label="最近使用的作品库"></section>
-      <section id="emptyState" class="empty-state" hidden><h3>还没有打开过作品库</h3><p>可以打开现有项目文件夹，也可以新建空白作品库或导入作品数据包。</p></section>
-      <footer><p>完整迁移包包含已保存的正文、模板、元数据和素材。预览缓存会在打开时自动生成。</p><p id="status" role="status" aria-live="polite"></p></footer>
+      <section id="activeSession" class="active-session" hidden><div><strong id="activeName"></strong><p data-i18n="编辑窗口中的草稿会保留。切换作品前，请先保存并关闭当前编辑窗口。">编辑窗口中的草稿会保留。切换作品前，请先保存并关闭当前编辑窗口。</p></div><button id="resumeBtn" data-i18n="继续编辑">继续编辑</button><button id="closeEditorBtn" data-i18n="关闭编辑窗口">关闭编辑窗口</button></section>
+      <div class="section-heading"><h2 data-i18n="最近使用">最近使用</h2><span id="count"></span></div>
+      <section id="workspaces" class="workspaces" aria-label="最近使用的作品库" data-i18n-aria-label="最近使用的作品库"></section>
+      <section id="emptyState" class="empty-state" hidden><h3 data-i18n="还没有打开过作品库">还没有打开过作品库</h3><p data-i18n="可以打开现有项目文件夹，也可以新建空白作品库或导入作品数据包。">可以打开现有项目文件夹，也可以新建空白作品库或导入作品数据包。</p></section>
+      <footer><p data-i18n="完整迁移包包含已保存的正文、模板、元数据和素材。预览缓存会在打开时自动生成。">完整迁移包包含已保存的正文、模板、元数据和素材。预览缓存会在打开时自动生成。</p><p id="status" role="status" aria-live="polite"></p></footer>
     </main>
-    <dialog id="createDialog"><form id="createForm"><h2>新建作品库</h2><label for="workspaceName">作品库名称</label><input id="workspaceName" name="name" value="我的作品库" maxlength="80" required autocomplete="off"><p>创建通用 OC 项目：正文、模板、元数据和素材分别保存。附带可修改的档案、角色、故事、地点、组织与设定模板；不预置任何作品内容。下一步选择保存位置。</p><div class="dialog-actions"><button id="cancelCreateBtn" type="button">取消</button><button type="submit" class="primary">选择保存位置</button></div></form></dialog>
+    <dialog id="createDialog"><form id="createForm"><h2 data-i18n="新建作品库">新建作品库</h2><label for="workspaceName" data-i18n="作品库名称">作品库名称</label><input id="workspaceName" name="name" value="我的作品库" maxlength="80" required autocomplete="off"><p data-i18n="创建通用 OC 项目：正文、模板、元数据和素材分别保存。附带可修改的档案、角色、故事、地点、组织与设定模板；不预置任何作品内容。下一步选择保存位置。">创建通用 OC 项目：正文、模板、元数据和素材分别保存。附带可修改的档案、角色、故事、地点、组织与设定模板；不预置任何作品内容。下一步选择保存位置。</p><div class="dialog-actions"><button id="cancelCreateBtn" type="button" data-i18n="取消">取消</button><button type="submit" class="primary" data-i18n="选择保存位置">选择保存位置</button></div></form></dialog>
     <script type="module" src="./app.js"></script>
   </body>
 </html>

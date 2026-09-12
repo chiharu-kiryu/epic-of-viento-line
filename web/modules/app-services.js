@@ -1,4 +1,5 @@
 import { API_RESPONSE } from '../../scripts/lib/doc-api-contract.mjs';
+import { t } from '../i18n/index.js';
 
 export const DEFAULT_INVALID_RESPONSE_MESSAGE = '后端返回了非预期响应格式';
 
@@ -82,7 +83,7 @@ export function withCacheBust(url, forceCacheBust = false) {
   }
 }
 
-export async function fetchWithTimeout(url, options = {}, timeoutMs = 10000, timeoutMessage = '请求', consumeResponse = (response) => response) {
+export async function fetchWithTimeout(url, options = {}, timeoutMs = 10000, timeoutMessage = t('请求'), consumeResponse = (response) => response) {
   const controller = new AbortController();
   const callerSignal = options.signal;
   const cancel = () => controller.abort(callerSignal.reason);
@@ -102,7 +103,7 @@ export async function fetchWithTimeout(url, options = {}, timeoutMs = 10000, tim
   } catch (error) {
     let failure = error;
     if (timedOut) {
-      failure = new Error(`${timeoutMessage}超时（${Math.max(0.1, Math.round(timeoutMs / 100) / 10)} 秒）`, { cause: error });
+      failure = new Error(t`${timeoutMessage}超时（${Math.max(0.1, Math.round(timeoutMs / 100) / 10)} 秒）`, { cause: error });
       failure.name = 'TimeoutError';
     } else if (callerSignal?.aborted) {
       failure = callerSignal.reason;
@@ -145,7 +146,7 @@ export function extractPayloadErrorMessage(payload) {
 
 export function makeRequestError(response, payload, requestLabel) {
   const responseError = extractPayloadErrorMessage(payload);
-  const label = requestLabel || '请求';
+  const label = requestLabel || t('请求');
   const suffix = responseError ? `${response.status}：${responseError}` : `${response.status}`;
   const headerRequestId = typeof response?.headers?.get === 'function'
     ? response.headers.get('x-request-id')
@@ -156,7 +157,7 @@ export function makeRequestError(response, payload, requestLabel) {
   const payloadErrorCode = payload && typeof payload === 'object'
     ? payload[API_RESPONSE.errorCode]
     : '';
-  const error = new Error(`${label}失败（${suffix}）`);
+  const error = new Error(t`${label}失败（${suffix}）`);
   error.status = response.status;
   error.payload = payload;
   error.requestId = typeof payloadRequestId === 'string' && payloadRequestId.trim()
@@ -196,9 +197,9 @@ export async function fetchJsonApiRequest(
   url,
   options = {},
   timeoutMs = 10000,
-  requestLabel = '请求',
+  requestLabel = t('请求'),
   requireJson = true,
-  invalidResponseMessage = DEFAULT_INVALID_RESPONSE_MESSAGE,
+  invalidResponseMessage = t(DEFAULT_INVALID_RESPONSE_MESSAGE),
 ) {
   return fetchWithTimeout(
     url,
@@ -227,7 +228,7 @@ export async function fetchTextApiRequest(
   url,
   options = {},
   timeoutMs = 10000,
-  requestLabel = '请求',
+  requestLabel = t('请求'),
 ) {
   return fetchWithTimeout(
     url,

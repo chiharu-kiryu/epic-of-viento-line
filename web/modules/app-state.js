@@ -1,3 +1,4 @@
+import { t, localize } from '../i18n/index.js';
 import { API_PATHS } from '../../scripts/lib/doc-api-contract.mjs';
 
 export const PAGE_BASE = new URL('./', location.href);
@@ -22,6 +23,7 @@ export const appState = {
   isEditing: false,
   isRebuilding: false,
   isSaving: false,
+  isExporting: false,
   isImportingMedia: false,
   isLoadingSource: false,
   isLoadingTemplate: false,
@@ -98,7 +100,7 @@ export const domElements = {
 
 export const EDITABLE_SOURCE_PREFIXES = ['design-data/', 'docs-standard/design-data/'];
 
-export const APP_ERROR_MESSAGES = {
+export const APP_ERROR_MESSAGES = localize({
   unsavedConfirmDefault: '放弃后，当前编辑未保存内容将丢失，是否继续？',
   runtimeContextDefault: '运行时',
   readLatestSourceFailure: '读取最新内容失败',
@@ -106,7 +108,7 @@ export const APP_ERROR_MESSAGES = {
   templateLoadFallback: '模板加载失败，已使用空模板',
   saveConflictTitle: '保存冲突',
   forceSaveConfirmTitle: '强制覆盖确认',
-  saveConflictHeader: (latestLabel) => `保存冲突：文档已被其他会话更新（最新版本：${latestLabel}）。`,
+  saveConflictHeader: (latestLabel) => t`保存冲突：文档已被其他会话更新（最新版本：${latestLabel}）。`,
   saveConflictOptions: {
     loadLatest: '1) 载入服务器最新内容并放弃当前草稿',
     keepDraft: '2) 保留当前草稿，放弃这次保存',
@@ -139,12 +141,12 @@ export const APP_ERROR_MESSAGES = {
   requestForbiddenHint: '请使用具备文档写权限的账号后重试，或联系管理员授予权限',
   requestRateLimited: '请求过于频繁，请稍后再试',
   requestRateLimitedHint: (retryAfterText) => retryAfterText
-    ? `服务限制中，建议 ${retryAfterText} 秒后重试`
-    : '服务限制中，请稍后再试',
+    ? t`服务限制中，建议 ${retryAfterText} 秒后重试`
+    : t('服务限制中，请稍后再试'),
   requestUnsupportedMediaType: '请求体类型不支持，请使用 application/json',
   requestUnsupportedMediaTypeHint: (pathHint = '') => pathHint
-    ? `请检查 ${pathHint} 接口请求头是否包含正确的 Content-Type`
-    : '请检查请求头是否包含正确的 Content-Type',
+    ? t`请检查 ${pathHint} 接口请求头是否包含正确的 Content-Type`
+    : t('请检查请求头是否包含正确的 Content-Type'),
   requestPayloadTooLarge: '提交内容过大，请减少内容后重试',
   requestServerError: '服务端异常，请稍后再试',
   requestServerErrorHint: '服务端可能在重启或部署窗口，稍后请再尝试',
@@ -159,11 +161,11 @@ export const APP_ERROR_MESSAGES = {
   createPathInvalid: '新建路径无效',
   createPathExists: '路径已存在，请更换新建路径',
   createPathPlaceholder: '请输入项目内的正文路径',
-  createDocHintTemplate: (createActionLabel) => `输入新建路径与内容后，点击“${createActionLabel}”`,
-  generatedStatusTemplate: (generatedAtText) => `（静态生成 ${generatedAtText}）`,
+  createDocHintTemplate: (createActionLabel) => t`输入新建路径与内容后，点击“${createActionLabel}”`,
+  generatedStatusTemplate: (generatedAtText) => t`（静态生成 ${generatedAtText}）`,
   rebuildStarting: '重建索引中...',
   rebuildSuccess: '重建完成，文档已刷新',
-  rebuildElapsedTemplate: (elapsedText) => `（耗时 ${elapsedText}）`,
+  rebuildElapsedTemplate: (elapsedText) => t`（耗时 ${elapsedText}）`,
   rebuildInProgress: '重建中',
   rebuildFailed: '重建失败，请稍后重试',
   editModeUnavailable: '当前后端未开启编辑接口，已切到浏览模式。',
@@ -192,9 +194,9 @@ export const APP_ERROR_MESSAGES = {
   saveDocParamsInvalid: '保存请求参数不完整',
   rebuildIndexParamsInvalid: '重建请求参数不完整',
   lockVersionMissing: '未获取到当前文件的编辑锁版本，请刷新后重试',
-};
+});
 
-export const APP_REQUEST_LABELS = {
+export const APP_REQUEST_LABELS = localize({
   detectEditCapability: '检测编辑能力',
   loadDocIndex: '加载文档索引',
   loadTemplate: '加载模板',
@@ -203,9 +205,9 @@ export const APP_REQUEST_LABELS = {
   saveDoc: '保存',
   rebuildIndex: '重建索引',
   templateLoad: '模板加载',
-};
+});
 
-export const APP_RUNTIME_TEXTS = {
+export const APP_RUNTIME_TEXTS = localize({
   modeState: {
     editBackendUnavailable: '编辑模式（后端未接入）',
     editNoDoc: '编辑模式（请选择文档）',
@@ -250,7 +252,6 @@ export const APP_RUNTIME_TEXTS = {
   },
   heroSkill: {
     heading: '技能图标与说明',
-    duplicateSectionTitles: ['技能树', '技能说明'],
     fallbackName: '技能',
     mediaFallbackLabel: '媒体',
     mediaImageAltSuffix: '图标',
@@ -275,7 +276,7 @@ export const APP_RUNTIME_TEXTS = {
       initFailed: '初始化失败',
       initListFailure: '初始化失败，请刷新页面后重试。',
       skeleton: '正在加载文档列表…',
-      visibleCountTemplate: (visibleCount, totalCount) => `当前显示 ${visibleCount} 个文档（共 ${totalCount} 个）`,
+      visibleCountTemplate: (visibleCount, totalCount) => t`当前显示 ${visibleCount} 个文档（共 ${totalCount} 个）`,
       noDataByKeyword: '未匹配到文档',
       noDataByTab: '当前标签暂无文档',
       filteredTagText: '（已按关键词筛选）',
@@ -301,7 +302,7 @@ export const APP_RUNTIME_TEXTS = {
       renderFailureText: '文档列表渲染失败',
       genericLoadFailureText: '加载失败',
       unknownEntry: '未知条目',
-      contextLoadFailureTemplate: (context, message) => `${context}加载失败：${message}`,
+      contextLoadFailureTemplate: (context, message) => t`${context}加载失败：${message}`,
       duplicatePrefix: '重复错误省略（已出现',
       duplicateSuffix: '次）',
       latestErrorLabel: '最近一次错误码/状态（展开）',
@@ -317,7 +318,7 @@ export const APP_RUNTIME_TEXTS = {
       unitLabel: '处问题',
       moreLabel: '更多',
       moreSuffix: '项（展开）',
-      countTemplate: (context, count) => `${context}：${count}次`,
+      countTemplate: (context, count) => t`${context}：${count}次`,
     },
     otherFallback: '其他',
   },
@@ -389,16 +390,16 @@ export const APP_RUNTIME_TEXTS = {
     conflictForceActionText: '强制覆盖',
     conflictCancelActionText: '取消',
   },
-};
+});
 
-export const TAB_DEFINITIONS = [
+export const TAB_DEFINITIONS = localize([
   { id: 'all', label: '全部' },
   { id: 'hero', label: '角色' },
   { id: 'item', label: '物品' },
   { id: 'other', label: '其他' },
-];
+]);
 
-export const CATEGORY_LABELS = {
+export const CATEGORY_LABELS = localize({
   document: '档案',
   character: '角色',
   place: '地点',
@@ -416,7 +417,7 @@ export const CATEGORY_LABELS = {
   template: '模板',
   root: '项目文档',
   other: '其他',
-};
+});
 
 export const CATEGORY_TAG = {
   document: 'other',

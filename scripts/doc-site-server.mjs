@@ -23,7 +23,6 @@ const DEFAULT_RATE_WINDOW_MS = 60000;
 const DEFAULT_RATE_LIMIT_MAX_REQUESTS = 120;
 const DEFAULT_RATE_BUCKET_MAX = 2048;
 const DEFAULT_MAX_BODY_BYTES = 1024 * 1024;
-const desktopSession = createDesktopSession();
 
 function parsePositiveInteger(value, fallback) {
   const parsed = Number(value);
@@ -38,6 +37,7 @@ const docService = createDocumentService({
   backstoryMergeMode: BACKSTORY_MERGE_MODE,
   state: apiState,
 });
+const desktopSession = createDesktopSession(process.env.VIENTO_SESSION_TOKEN, { exports: docService.exports });
 
 function resolveWriteAuthMode() {
   const explicit = process.env.DOC_API_REQUIRE_WRITE_AUTH;

@@ -303,7 +303,7 @@ export async function registerWorkspace(root, { name, legacyIndex, scanAssets = 
       if (bySource.has(sourcePath)) continue;
       const old = oldDocs.get(sourcePath);
       const bindings = (old?.heroImages || []).map((p) => byLocation.get(p.replace(/^assets\//, ''))).filter(Boolean);
-      const record = { format: 'viento-document', version: 1, id: randomUUID(), sourcePath, ...(manifest.version === 3 ? projectDocumentDefaults(manifest, sourcePath) : legacyDocumentDefaults(sourcePath)), ...(old?.path ? { legacyId: old.path } : {}), assetBindings: [...new Set(bindings.map((a) => a.id))].map((assetId) => ({ assetId, role: 'attachment', origin: 'legacy-index' })) };
+      const record = { format: 'viento-document', version: 1, id: randomUUID(), sourcePath, ...(manifest.version === 3 || manifest.documentTypes ? projectDocumentDefaults(manifest, sourcePath) : legacyDocumentDefaults(sourcePath)), ...(old?.path ? { legacyId: old.path } : {}), assetBindings: [...new Set(bindings.map((a) => a.id))].map((assetId) => ({ assetId, role: 'attachment', origin: 'legacy-index' })) };
       await writeJson(path.join(root, 'metadata/documents', `${record.id}.json`), record, { exclusive: true });
       addedDocuments++;
     }

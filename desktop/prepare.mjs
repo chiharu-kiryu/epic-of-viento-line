@@ -58,6 +58,9 @@ async function prepareNode() {
 }
 
 async function prepareResources() {
+  // The library and editor ship the same catalogue and settings component.
+  await fs.rm(path.join(desktop, 'ui', 'i18n'), { recursive: true, force: true });
+  await fs.cp(path.join(root, 'web', 'i18n'), path.join(desktop, 'ui', 'i18n'), { recursive: true });
   const output = path.join(desktop, 'resources');
   const stage = await fs.mkdtemp(path.join(desktop, '.resources-'));
   try {
@@ -69,7 +72,12 @@ async function prepareResources() {
       });
     }
     await fs.mkdir(path.join(stage, 'node_modules'), { recursive: true });
-    await fs.cp(path.join(root, 'node_modules', 'yaml'), path.join(stage, 'node_modules', 'yaml'), { recursive: true });
+    const lock = JSON.parse(await fs.readFile(path.join(root, 'package-lock.json'), 'utf8'));
+    for (const [relative, dependency] of Object.entries(lock.packages)) {
+      if (!relative.startsWith('node_modules/') || dependency.dev) continue;
+      if (relative.split('/').includes('..') || dependency.link) throw new Error(`Unsupported runtime dependency: ${relative}`);
+      await fs.cp(path.join(root, relative), path.join(stage, relative), { recursive: true });
+    }
     const { version: displayVersion, buildVersion: version } = await verifyReleaseVersions();
     await fs.writeFile(path.join(stage, 'package.json'), JSON.stringify({ private: true, type: 'module', version, displayVersion }));
     await fs.copyFile(path.join(root, 'VERSION'), path.join(stage, 'VERSION'));

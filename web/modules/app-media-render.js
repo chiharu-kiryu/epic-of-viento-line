@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { isMediaValue, mediaUrl, splitMediaText } from '../../scripts/lib/media-format.mjs';
 
 export function renderMedia(media) {
@@ -5,7 +6,8 @@ export function renderMedia(media) {
   figure.className = 'doc-media';
   const url = mediaUrl(media.src);
   if (!url) {
-    figure.textContent = '素材引用无效';
+    figure.dataset.i18n = '素材引用无效';
+    figure.textContent = t('素材引用无效');
     return figure;
   }
   const element = document.createElement(media.type === 'video' ? 'video' : 'img');
@@ -15,7 +17,8 @@ export function renderMedia(media) {
     element.controls = true;
     element.preload = 'metadata';
     element.setAttribute('playsinline', '');
-    element.setAttribute('aria-label', caption || '视频素材');
+    element.setAttribute('aria-label', caption || t('视频素材'));
+    if (!caption) element.setAttribute('data-i18n-aria-label', '视频素材');
   } else {
     element.alt = caption;
     element.loading = 'lazy';
@@ -25,7 +28,8 @@ export function renderMedia(media) {
   status.hidden = true;
   element.addEventListener('error', () => {
     status.hidden = false;
-    status.textContent = media.type === 'video' ? '视频暂时无法播放，请检查素材是否在线及视频编码。' : '图片暂时无法读取，请检查素材是否在线。';
+    status.dataset.i18n = media.type === 'video' ? '视频暂时无法播放，请检查素材是否在线及视频编码。' : '图片暂时无法读取，请检查素材是否在线。';
+    status.textContent = media.type === 'video' ? t('视频暂时无法播放，请检查素材是否在线及视频编码。') : t('图片暂时无法读取，请检查素材是否在线。');
   });
   element.src = url;
   figure.appendChild(element);
@@ -38,7 +42,8 @@ export function renderMedia(media) {
     const link = document.createElement('a');
     link.href = url;
     link.download = caption || 'video';
-    link.textContent = '下载原视频';
+    link.textContent = t('下载原视频');
+    link.dataset.i18n = '下载原视频';
     figure.appendChild(link);
   }
   figure.appendChild(status);

@@ -27,7 +27,7 @@ test('inline images and videos parse at the start, in prose and fields, but neve
   const image = mediaMarkup({ id, kind: 'image', name: '绘图 [版本] #1.png' });
   const movie = mediaMarkup({ id, kind: 'video', name: '动作.mp4' });
   const source = `${image}\n\n前文 ${movie} 后文\n\n配图：${image}\n\n\`\`\`md\n${image}\n\`\`\`\n`;
-  const parsed = parseSourceContent(source, 'design-data/stories/媒体.md');
+  const parsed = parseSourceContent(source, 'design-data/stories/媒体.md', { parserProfile: 'prose' });
   assert.equal(parsed.blocks.filter((b) => b.type === 'image').length, 2);
   assert.equal(parsed.blocks.filter((b) => b.type === 'video').length, 1);
   assert.ok(parsed.blocks.some((b) => b.type === 'code' && b.value.includes(image)));

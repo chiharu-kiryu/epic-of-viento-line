@@ -12,6 +12,7 @@ import {
   readRequestJsonBody,
   sendApiResponse,
   sendApiError,
+  sendFile,
 } from './doc-server.mjs';
 
 const RATE_LIMIT_WINDOW_MS = normalizeNumericConfigValue('DOC_API_RATE_WINDOW_MS', 60 * 1000);
@@ -288,9 +289,10 @@ function isTokenAllowed(rawToken) {
 }
 
 function isMutatingWriteRequest(pathname, method = '') {
+  if (pathname === API_PATHS.EXPORT && method === API_METHODS.POST) return true;
   return pathname === API_PATHS.DOC && WRITE_METHODS.has(method)
     || pathname === API_PATHS.REBUILD && REBUILD_METHODS.has(method)
-    || [API_PATHS.ASSETS, API_PATHS.MEDIA_INSERT].includes(pathname) && method === API_METHODS.POST;
+    || [API_PATHS.ASSETS, API_PATHS.MEDIA_INSERT, API_PATHS.PROJECT, API_PATHS.PROJECT_PREVIEW].includes(pathname) && method === API_METHODS.POST;
 }
 
 function methodNotAllowed(response, allow = 'GET', requestId = '') {
@@ -339,9 +341,43 @@ async function handleApiAssets(response, request, requestUrl, service, requestId
   } catch (error) { return mapServiceErrorToHttp(error, response, requestId); }
 }
 
+async function handleExport(response, request, requestUrl, service, requestId = '') {
+  const controller = new AbortController();
+  const cancel = () => { if (!response.writableEnded) controller.abort(new Error('导出已取消')); };
+  response.on('close', cancel);
+  try {
+    if (request.method === API_METHODS.GET) {
+      const job = service.exports.get(requestUrl.searchParams.get('id'));
+      response.setHeader('Content-Disposition', `attachment; filename="viento-export.zip"; filename*=UTF-8''${encodeURIComponent(job.fileName)}`);
+      response.setHeader('Cache-Control', 'no-store');
+      await sendFile(job.file, response, request);
+    } else {
+      const payload = await readRequestJsonBody(request);
+      const result = payload?.action === 'release'
+        ? await service.exports.release(payload.id).then(() => ({ released: true }))
+        : await service.exports.create(payload, controller.signal);
+      sendApiResponse(response, result, requestId);
+    }
+    return 200;
+  } catch (error) {
+    if (response.destroyed) return 499;
+    if (response.headersSent) { response.destroy(); return 500; }
+    return mapServiceErrorToHttp(error, response, requestId);
+  } finally { response.removeListener('close', cancel); }
+}
+
 async function handleMediaInsertion(response, request, service, requestId = '') {
   try {
     const data = await service.prepareMediaInsertion(await readRequestJsonBody(request));
+    sendApiResponse(response, data, requestId);
+    return 200;
+  } catch (error) { return mapServiceErrorToHttp(error, response, requestId); }
+}
+
+async function handleProject(response, request, service, preview, requestId = '') {
+  try {
+    const data = request.method === 'GET' ? await service.getProject()
+      : await service[preview ? 'previewProject' : 'saveProject'](await readRequestJsonBody(request));
     sendApiResponse(response, data, requestId);
     return 200;
   } catch (error) { return mapServiceErrorToHttp(error, response, requestId); }
@@ -454,6 +490,17 @@ async function handleApiRequest({
   let requestId = '';
 
   const route = {
+    [API_PATHS.PROJECT]: {
+      [API_METHODS.GET]: () => handleProject(response, request, service, false, requestId),
+      [API_METHODS.POST]: () => handleProject(response, request, service, false, requestId),
+    },
+    [API_PATHS.PROJECT_PREVIEW]: {
+      [API_METHODS.POST]: () => handleProject(response, request, service, true, requestId),
+    },
+    [API_PATHS.EXPORT]: {
+      [API_METHODS.GET]: () => handleExport(response, request, requestUrl, service, requestId),
+      [API_METHODS.POST]: () => handleExport(response, request, requestUrl, service, requestId),
+    },
     [API_PATHS.MEDIA_INSERT]: {
       [API_METHODS.POST]: () => handleMediaInsertion(response, request, service, requestId),
     },

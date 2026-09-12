@@ -8,12 +8,14 @@ import {
   resolveEditableFilePath,
   buildEditableDocIndex,
 } from './doc-server.mjs';
-import { trimName, PROJECT_ROOT, DOCUMENTS_PATH } from './paths.mjs';
+import { trimName, PROJECT_ROOT, DOCUMENTS_PATH, reloadWorkspaceManifest } from './paths.mjs';
+import { readProjectConfiguration, previewProjectTemplate, saveProjectTemplate } from './project-service.mjs';
 import { rebuildIndex } from './rebuild-workflow.mjs';
 import { clearHeroImageCache } from './image-index.mjs';
 import { listMediaAssets, importMediaAsset } from './media-assets.mjs';
 import { createRegisteredDocument } from './project-documents.mjs';
 import { prepareMediaInsertion } from './media-insertion.mjs';
+import { createExportService } from './export-service.mjs';
 import {
   makeCapabilitiesPayload,
   API_ERRORS,
@@ -49,6 +51,7 @@ function getDefaultIndexCacheTtl(rawTtl) {
 }
 
 function createDocumentService(options = {}) {
+  const exports = createExportService(PROJECT_ROOT);
   const sharedState = options.state || {};
   const state = {
     rebuildInProgress: false,
@@ -317,7 +320,24 @@ function createDocumentService(options = {}) {
     };
   }
 
+  async function saveProject(payload) {
+    if (state.rebuildInProgress) throw createError(409, API_ERRORS.rebuildInProgress);
+    state.rebuildInProgress = true;
+    try {
+      const result = await saveProjectTemplate(PROJECT_ROOT, payload);
+      reloadWorkspaceManifest();
+      invalidateIndexCache();
+      try { await rebuildIndex({ runStandardize: true, runBuild: true }); }
+      catch (error) { result.indexWarning = `配置已保存，索引更新失败，请重新构建：${error.message}`; }
+      return result;
+    } finally { state.rebuildInProgress = false; }
+  }
+
   return {
+    getProject: () => readProjectConfiguration(PROJECT_ROOT),
+    previewProject: (payload) => previewProjectTemplate(reloadWorkspaceManifest(), payload),
+    saveProject,
+    exports,
     getMediaAssets: () => listMediaAssets(PROJECT_ROOT),
     importMediaAsset: (request, name) => importMediaAsset(PROJECT_ROOT, request, name),
     prepareMediaInsertion: (payload) => prepareMediaInsertion(PROJECT_ROOT, payload),

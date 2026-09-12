@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { API_PATHS, API_REQUEST_KEYS, DOC_CAPABILITIES_FIELDS } from '../../scripts/lib/doc-api-contract.mjs';
 import { fetchJsonApiRequest, fetchTextApiRequest, withCacheBust } from './app-services.js';
 import { APP_ERROR_MESSAGES, APP_REQUEST_LABELS } from './app-state.js';
@@ -122,7 +123,7 @@ function normalizeEditBackendResultFromCapabilities(payload) {
   if (!payload || typeof payload !== 'object') {
     return createEditBackendDetectionResult({
       reason: 'capabilities_invalid',
-      reasonText: '编辑能力接口返回结构异常',
+      reasonText: t('编辑能力接口返回结构异常'),
       source: DETECT_SOURCE_CAPABILITIES,
       payload,
     });
@@ -141,7 +142,7 @@ function normalizeEditBackendResultFromCapabilities(payload) {
     }
     return createEditBackendDetectionResult({
       reason: 'capabilities_disabled',
-      reasonText: '服务已关闭编辑能力',
+      reasonText: t('服务已关闭编辑能力'),
       source: DETECT_SOURCE_CAPABILITIES,
       payload,
     });
@@ -165,7 +166,7 @@ function normalizeEditBackendResultFromCapabilities(payload) {
 
   return createEditBackendDetectionResult({
     reason: 'capabilities_missing_edit_flag',
-    reasonText: '能力字段缺失，无法确认是否支持编辑',
+    reasonText: t('能力字段缺失，无法确认是否支持编辑'),
     source: DETECT_SOURCE_CAPABILITIES,
     payload,
   });
@@ -175,7 +176,7 @@ function normalizeEditBackendResultFromHealth(payload) {
   if (!payload || typeof payload !== 'object') {
     return createEditBackendDetectionResult({
       reason: 'health_invalid',
-      reasonText: '健康检查返回格式异常',
+      reasonText: t('健康检查返回格式异常'),
       source: DETECT_SOURCE_HEALTH,
       payload,
     });
@@ -185,7 +186,7 @@ function normalizeEditBackendResultFromHealth(payload) {
   if (!isHealthy) {
     return createEditBackendDetectionResult({
       reason: 'health_unavailable',
-      reasonText: '后端健康检查不可用',
+      reasonText: t('后端健康检查不可用'),
       source: DETECT_SOURCE_HEALTH,
       payload,
       status: 200,
@@ -194,7 +195,7 @@ function normalizeEditBackendResultFromHealth(payload) {
 
   return createEditBackendDetectionResult({
     reason: 'health_no_edit_info',
-    reasonText: '检测到健康服务，但未检测到编辑能力字段',
+    reasonText: t('检测到健康服务，但未检测到编辑能力字段'),
     source: DETECT_SOURCE_HEALTH,
     payload,
     status: 200,
@@ -247,7 +248,7 @@ export async function detectEditBackendAvailability({
     if (firstErrorStatus === 404 && currentStatus !== 404) {
       return createEditBackendDetectionResult({
         reason: 'capabilities_http_404',
-        reasonText: '编辑能力接口不可达，可能未启动可写服务',
+        reasonText: t('编辑能力接口不可达，可能未启动可写服务'),
         source: DETECT_SOURCE_UNAVAILABLE,
         status: firstErrorStatus || 404,
         attempts,
@@ -257,7 +258,7 @@ export async function detectEditBackendAvailability({
     if (status === 404) {
       return createEditBackendDetectionResult({
         reason: 'capabilities_http_404',
-        reasonText: '编辑能力接口不可达，可能未启动可写服务',
+        reasonText: t('编辑能力接口不可达，可能未启动可写服务'),
         source: DETECT_SOURCE_UNAVAILABLE,
         status,
         attempts,
@@ -265,7 +266,7 @@ export async function detectEditBackendAvailability({
     }
     return createEditBackendDetectionResult({
       reason: 'service_unreachable',
-      reasonText: '文档服务不可达',
+      reasonText: t('文档服务不可达'),
       source: DETECT_SOURCE_UNAVAILABLE,
       status,
       attempts,
@@ -430,34 +431,54 @@ export async function rebuildDocIndex({
 }
 
 export async function loadMediaAssets() {
-  return (await fetchJsonApiRequest(API_PATHS.ASSETS, {}, 15000, '读取作品素材')).payload;
+  return (await fetchJsonApiRequest(API_PATHS.ASSETS, {}, 15000, t('读取作品素材'))).payload;
 }
 
-export async function prepareDraftMedia(content, sourcePath, assetIds = []) {
+export async function requestExport(payload, signal) {
+  return (await fetchJsonApiRequest(API_PATHS.EXPORT, withAuthHeaders({
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal,
+  }), 60 * 60 * 1000, t('准备导出'))).payload;
+}
+
+export async function releaseExport(id) {
+  if (id) await fetchJsonApiRequest(API_PATHS.EXPORT, withAuthHeaders({
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'release', id }), keepalive: true,
+  }), 10000, t('清理导出临时文件'));
+}
+
+export async function requestProject(action = 'read', payload) {
+  const url = action === 'preview' ? API_PATHS.PROJECT_PREVIEW : API_PATHS.PROJECT;
+  const options = action === 'read' ? { cache: 'no-store' } : withAuthHeaders({
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+  });
+  return (await fetchJsonApiRequest(url, options, 120000, t('项目类型与模板'))).payload;
+}
+
+export async function prepareDraftMedia(content, sourcePath, assetIds = [], documentType) {
   return (await fetchJsonApiRequest(API_PATHS.MEDIA_INSERT, withAuthHeaders({
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content, sourcePath, assetIds }),
-  }), 15000, '更新素材预览')).payload;
+    body: JSON.stringify({ content, sourcePath, assetIds, documentType }),
+  }), 15000, t('更新素材预览'))).payload;
 }
 
 export function uploadMediaFile(file, { signal, onProgress = () => {} } = {}) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const abort = () => xhr.abort();
-    if (signal?.aborted) { reject(new DOMException('已取消导入', 'AbortError')); return; }
+    if (signal?.aborted) { reject(new DOMException(t('已取消导入'), 'AbortError')); return; }
     xhr.open('POST', `${API_PATHS.ASSETS}?name=${encodeURIComponent(file.name)}`);
     xhr.timeout = 300000;
     for (const [key, value] of Object.entries(withAuthHeaders({ headers: { 'Content-Type': 'application/octet-stream' } }).headers)) xhr.setRequestHeader(key, value);
     xhr.upload.onprogress = (event) => onProgress(event.loaded, event.lengthComputable ? event.total : file.size);
     xhr.onload = () => {
       let payload;
-      try { payload = JSON.parse(xhr.responseText); } catch { reject(new Error('素材服务返回了无效响应。')); return; }
+      try { payload = JSON.parse(xhr.responseText); } catch { reject(new Error(t('素材服务返回了无效响应。'))); return; }
       if (xhr.status >= 200 && xhr.status < 300 && payload.ok === true) resolve(payload.data);
-      else reject(new Error(payload.error || '素材导入失败。'));
+      else reject(new Error(payload.error || t('素材导入失败。')));
     };
-    xhr.onerror = () => reject(new Error('素材连接中断，请重试。'));
-    xhr.ontimeout = () => reject(new Error('素材导入超时，请重试。'));
-    xhr.onabort = () => reject(new DOMException('已取消导入', 'AbortError'));
+    xhr.onerror = () => reject(new Error(t('素材连接中断，请重试。')));
+    xhr.ontimeout = () => reject(new Error(t('素材导入超时，请重试。')));
+    xhr.onabort = () => reject(new DOMException(t('已取消导入'), 'AbortError'));
     xhr.onloadend = () => signal?.removeEventListener('abort', abort);
     signal?.addEventListener('abort', abort, { once: true });
     xhr.send(file);

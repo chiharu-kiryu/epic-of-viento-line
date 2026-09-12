@@ -1,0 +1,14 @@
+.viento-settings { width: min(460px, calc(100vw - 32px)); box-sizing: border-box; padding: 24px; color: #e1e9f4; background: #111c2c; border: 1px solid #435776; border-radius: 16px; box-shadow: 0 24px 80px #0009; }
+.viento-settings::backdrop { background: #050b17ba; }
+.viento-settings form { display: grid; gap: 14px; }
+.viento-settings-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.viento-settings h2, .viento-settings p { margin: 0; }
+.viento-settings h2 { font-size: 22px; }
+.viento-settings p { color: #aebed2; font-size: 14px; line-height: 1.6; }
+.viento-settings label { margin-top: 12px; font-size: 15px; }
+.viento-settings button, .viento-settings select { font: inherit; color: #e1e9f4; background: #1c2e45; border: 1px solid #526e8e; border-radius: 8px; padding: 9px 14px; }
+.viento-settings select { width: 100%; appearance: none; cursor: pointer; padding-right: 36px; background-image: linear-gradient(45deg, transparent 50%, #dce8fa 50%), linear-gradient(135deg, #dce8fa 50%, transparent 50%); background-position: right 18px center, right 12px center; background-size: 6px 6px; background-repeat: no-repeat; }
+.viento-settings select:focus-visible, .viento-settings button:focus-visible { outline: 2px solid #86d8b9; outline-offset: 3px; }
+.viento-settings button { cursor: pointer; }
+.viento-settings :disabled { opacity: .6; cursor: wait; }
+#settingsStatus:empty { display: none; }

@@ -7,7 +7,13 @@ import { resolveWorkspaceRoot } from './app-storage.mjs';
 // The application is located from its module, while data can live anywhere.
 const APPLICATION_ROOT = path.resolve(process.env.VIENTO_APP_ROOT || fileURLToPath(new URL('../../', import.meta.url)));
 const PROJECT_ROOT = resolveWorkspaceRoot({ appRoot: APPLICATION_ROOT });
-const WORKSPACE_MANIFEST = readWorkspace(PROJECT_ROOT);
+let WORKSPACE_MANIFEST = readWorkspace(PROJECT_ROOT);
+export function reloadWorkspaceManifest() {
+  const next = readWorkspace(PROJECT_ROOT);
+  if (JSON.stringify(workspacePaths(next)) !== JSON.stringify(workspacePaths(WORKSPACE_MANIFEST))) throw new Error('项目目录已改变，请重新打开项目');
+  WORKSPACE_MANIFEST = next;
+  return next;
+}
 const IS_DESKTOP_WORKSPACE = Boolean(process.env.VIENTO_SESSION_TOKEN);
 const IS_MANAGED_WORKSPACE = Boolean(process.env.VIENTO_WORKSPACE_ROOT) || Boolean(WORKSPACE_MANIFEST);
 const CACHE_ROOT = IS_MANAGED_WORKSPACE ? path.join(PROJECT_ROOT, '.viento', 'cache') : PROJECT_ROOT;

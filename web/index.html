@@ -3,10 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Epic of Viento Line · b.2.8</title>
+    <title>Epic of Viento Line · b.2.8.1</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="stylesheet" href="/web/styles.css" />
     <link rel="stylesheet" href="/web/editor-layout.css" />
+    <link rel="stylesheet" href="/web/i18n/settings.css" />
   </head>
   <body>
     <div id="workspaceShell" class="page-shell">
@@ -15,15 +16,15 @@
           <div class="topbar-identity">
             <button id="docSidebarToggleBtn" class="doc-sidebar-toggle" type="button" aria-controls="docSidebar" aria-expanded="true" hidden>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg>
-              <span id="docSidebarToggleLabel">收起目录</span>
+              <span id="docSidebarToggleLabel" data-i18n="收起目录">收起目录</span>
             </button>
             <div class="brand">
               <div class="brand-badge">V</div>
               <div class="brand-copy">
                 <h1 id="siteTitle">Viento Studio</h1>
-                <p id="siteSubtitle">角色、故事与世界设定</p>
+                <p id="siteSubtitle" data-i18n="角色、故事与世界设定">角色、故事与世界设定</p>
               </div>
-              <span id="appVersion" class="release-version">b.2.8</span>
+              <span id="appVersion" class="release-version">b.2.8.1</span>
             </div>
           </div>
           <nav id="topbarNav" class="topbar-nav" aria-label="—">
@@ -33,6 +34,9 @@
             <a id="navUnitLink" href="#">—</a>
           </nav>
           <div id="modeSwitch" class="topbar-mode" role="group" aria-label="—">
+            <button id="settingsBtn" type="button" class="doc-btn doc-btn-ghost" data-i18n="设置">设置</button>
+            <button id="projectSettingsBtn" type="button" class="doc-btn doc-btn-ghost" data-i18n="项目类型与模板">项目类型与模板</button>
+            <button id="docExportBtn" type="button" class="doc-btn doc-btn-ghost" data-i18n="导出">导出</button>
             <button id="modeBrowseBtn" type="button" class="mode-btn mode-btn-active" data-mode="browse">—</button>
             <button id="modeEditBtn" type="button" class="mode-btn" data-mode="edit">—</button>
             <span id="modeStateChip" class="mode-state" aria-live="polite">—</span>
@@ -40,8 +44,8 @@
         </div>
       </header>
       <main class="layout">
-        <button id="docSidebarBackdrop" type="button" class="doc-sidebar-backdrop" aria-label="收起文档目录" tabindex="-1" hidden></button>
-        <aside id="docSidebar" class="left" aria-label="文档目录">
+        <button id="docSidebarBackdrop" type="button" class="doc-sidebar-backdrop" aria-label="收起文档目录" data-i18n-aria-label="收起文档目录" tabindex="-1" hidden></button>
+        <aside id="docSidebar" class="left" aria-label="文档目录" data-i18n-aria-label="文档目录">
           <div class="left-shell">
             <div class="toolbar">
               <div class="search-wrap">
@@ -88,12 +92,12 @@
                   <span id="docPathChip" class="doc-chip">—</span>
                 </div>
                 <div id="docTitle" class="doc-title">—</div>
-                <div class="doc-create-title">新建文档</div>
+                <div class="doc-create-title" data-i18n="新建文档">新建文档</div>
                 <div id="docSubtitle" class="doc-subtitle">—</div>
               </div>
               <div id="docEditPanel" class="doc-edit-panel is-hidden">
                 <div class="doc-edit-toolbar">
-                  <div id="docEditModeBar" class="doc-edit-mode-bar is-hidden" role="group" aria-label="编辑方式">
+                  <div id="docEditModeBar" class="doc-edit-mode-bar is-hidden" role="group" aria-label="编辑方式" data-i18n-aria-label="编辑方式">
                     <button id="docEditSourceModeBtn" type="button" class="doc-btn doc-btn-ghost doc-btn-active" data-mode="source" aria-pressed="true">—</button>
                     <button id="docEditBlockModeBtn" type="button" class="doc-btn doc-btn-ghost" data-mode="blocks" aria-pressed="false">—</button>
                   </div>
@@ -101,7 +105,7 @@
                     <button id="docCreateBtn" type="button" class="doc-btn doc-btn-ghost">—</button>
                     <button id="docEditBtn" type="button" class="doc-btn">—</button>
                     <button id="docCancelBtn" type="button" class="doc-btn doc-btn-ghost">—</button>
-                    <button id="docMediaInsertBtn" type="button" class="doc-btn doc-btn-ghost" hidden>插入图片 / 视频</button>
+                    <button id="docMediaInsertBtn" type="button" class="doc-btn doc-btn-ghost" hidden data-i18n="插入图片 / 视频">插入图片 / 视频</button>
                     <button id="docRebuildBtn" type="button" class="doc-btn doc-btn-ghost">—</button>
                     <button id="docSaveBtn" type="button" class="doc-btn doc-btn-success" aria-keyshortcuts="Control+s Meta+s Control+Enter Meta+Enter">—</button>
                   </div>
@@ -113,7 +117,7 @@
                   <div id="docCreateTypeWrap" class="doc-create-type-wrap is-hidden">
                     <label id="docCreateTypeLabel" for="docCreateTypeSelect" class="doc-create-type-label">—</label>
                     <select id="docCreateTypeSelect" class="doc-create-type-select">
-                      <option value="document">档案</option>
+                      <option value="document" data-i18n="档案">档案</option>
                     </select>
                   </div>
                   <div id="docCreatePathWrap" class="doc-create-path-wrap is-hidden">
@@ -122,11 +126,11 @@
                   </div>
                 </div>
                 <div class="doc-editor-surface">
-                  <div id="docBlockEditor" class="doc-block-editor is-hidden" aria-label="分段编辑"></div>
+                  <div id="docBlockEditor" class="doc-block-editor is-hidden" aria-label="分段编辑" data-i18n-aria-label="分段编辑"></div>
                   <div id="docEditorWrap" class="doc-editor-wrap">
-                    <textarea id="docSourceEditor" class="doc-editor" rows="14" spellcheck="false" aria-label="文档源码" placeholder="—"></textarea>
+                    <textarea id="docSourceEditor" class="doc-editor" rows="14" spellcheck="false" aria-label="文档源码" data-i18n-aria-label="文档源码" placeholder="—"></textarea>
                   </div>
-                  <section id="docMediaPreview" class="doc-media-preview" aria-label="草稿中的素材预览" hidden></section>
+                  <section id="docMediaPreview" class="doc-media-preview" aria-label="草稿中的素材预览" data-i18n-aria-label="草稿中的素材预览" hidden></section>
                 </div>
                 <div class="doc-edit-footer">
                   <div class="doc-edit-feedback">
@@ -135,7 +139,7 @@
                   </div>
                   <div class="doc-edit-support">
                     <span id="docEditMetrics" class="doc-edit-metrics"></span>
-                    <span class="doc-edit-shortcut"><kbd>Ctrl / ⌘</kbd> + <kbd>S</kbd> 保存</span>
+                    <span class="doc-edit-shortcut"><kbd>Ctrl / ⌘</kbd> + <kbd>S</kbd> <span data-i18n="保存">保存</span></span>
                   </div>
                 </div>
               </div>
@@ -149,29 +153,54 @@
         </section>
       </main>
     </div>
+    <dialog id="docExportDialog" class="doc-media-dialog doc-export-dialog" aria-labelledby="docExportTitle">
+      <div class="doc-media-dialog-heading">
+        <h2 id="docExportTitle" data-i18n="导出作品">导出作品</h2>
+        <button id="docExportCloseBtn" type="button" class="doc-btn doc-btn-ghost" data-i18n="关闭">关闭</button>
+      </div>
+      <p id="docExportContext" class="muted"></p>
+      <fieldset id="docExportOptions" class="doc-export-options">
+        <legend data-i18n="导出用途">导出用途</legend>
+        <label class="doc-export-choice"><input type="radio" name="exportKind" value="document" checked><span><strong data-i18n="文档分享">文档分享</strong><small data-i18n="当前档案与引用的图片、视频，打包后便于分享。">当前档案与引用的图片、视频，打包后便于分享。</small></span></label>
+        <label class="doc-export-choice"><input type="radio" name="exportKind" value="workspace"><span><strong data-i18n="完整项目包">完整项目包</strong><small data-i18n="全部正文、模板、元数据和素材，可在作品库中导入恢复。">全部正文、模板、元数据和素材，可在作品库中导入恢复。</small></span></label>
+        <div id="docExportDocumentOptions" class="doc-export-document-options">
+          <label for="docExportFormat" data-i18n="分享格式">分享格式</label>
+          <select id="docExportFormat"><option value="html" data-i18n="离线网页 · 解压后打开阅读">离线网页 · 解压后打开阅读</option><option value="markdown" data-i18n="Markdown · 继续编辑或交给其他工具">Markdown · 继续编辑或交给其他工具</option></select>
+          <label class="doc-export-children"><input id="docExportChildren" type="checkbox" checked><span data-i18n="包含附属内容（如角色背景故事）">包含附属内容（如角色背景故事）</span></label>
+        </div>
+      </fieldset>
+      <p id="docExportHint" class="muted" data-i18n="导出已保存的内容，图片与视频会一起打包。原始项目保留在原处。">导出已保存的内容，图片与视频会一起打包。原始项目保留在原处。</p>
+      <p id="docExportMessage" class="doc-media-message" role="status" aria-live="polite"></p>
+      <div class="doc-export-actions">
+        <button id="docExportStartBtn" type="button" class="doc-btn doc-btn-success" data-i18n="开始导出">开始导出</button>
+        <a id="docExportDownload" class="doc-btn doc-btn-success" hidden data-i18n="下载文件">下载文件</a>
+        <button id="docExportSaveBtn" type="button" class="doc-btn doc-btn-success" hidden data-i18n="选择保存位置">选择保存位置</button>
+        <button id="docExportCancelBtn" type="button" class="doc-btn doc-btn-ghost" hidden data-i18n="取消导出">取消导出</button>
+      </div>
+    </dialog>
     <dialog id="docMediaDialog" class="doc-media-dialog" aria-labelledby="docMediaDialogTitle">
       <div class="doc-media-dialog-heading">
-        <h2 id="docMediaDialogTitle">插入图片或视频</h2>
-        <button id="docMediaCloseBtn" type="button" class="doc-btn doc-btn-ghost" aria-label="关闭素材窗口">关闭</button>
+        <h2 id="docMediaDialogTitle" data-i18n="插入图片或视频">插入图片或视频</h2>
+        <button id="docMediaCloseBtn" type="button" class="doc-btn doc-btn-ghost" aria-label="关闭素材窗口" data-i18n-aria-label="关闭素材窗口" data-i18n="关闭">关闭</button>
       </div>
-      <p class="muted">导入的文件保存在当前作品的素材目录中，可以在其他档案里复用。也可以直接粘贴图片，或将文件拖入编辑区。</p>
+      <p class="muted" data-i18n="导入的文件保存在当前作品的素材目录中，可以在其他档案里复用。也可以直接粘贴图片，或将文件拖入编辑区。">导入的文件保存在当前作品的素材目录中，可以在其他档案里复用。也可以直接粘贴图片，或将文件拖入编辑区。</p>
       <div class="doc-media-picker-actions">
-        <button id="docMediaImportBtn" type="button" class="doc-btn doc-btn-success">从电脑导入</button>
+        <button id="docMediaImportBtn" type="button" class="doc-btn doc-btn-success" data-i18n="从电脑导入">从电脑导入</button>
         <input id="docMediaFileInput" type="file" accept=".png,.jpg,.jpeg,.webp,.gif,.svg,.mp4,.webm,.mov" multiple hidden />
-        <span class="muted">单个文件最多 256 MB</span>
+        <span class="muted" data-i18n="单个文件最多 256 MB">单个文件最多 256 MB</span>
       </div>
       <div class="doc-media-filter">
-        <input id="docMediaSearch" type="search" placeholder="搜索作品中的图片或视频" aria-label="搜索作品素材" />
-        <select id="docMediaKind" aria-label="素材类型"><option value="">全部素材</option><option value="image">图片</option><option value="video">视频</option></select>
+        <input id="docMediaSearch" type="search" placeholder="搜索作品中的图片或视频" data-i18n-placeholder="搜索作品中的图片或视频" aria-label="搜索作品素材" data-i18n-aria-label="搜索作品素材" />
+        <select id="docMediaKind" aria-label="素材类型" data-i18n-aria-label="素材类型"><option value="" data-i18n="全部素材">全部素材</option><option value="image" data-i18n="图片">图片</option><option value="video" data-i18n="视频">视频</option></select>
       </div>
       <p id="docMediaMessage" class="doc-media-message" role="status" aria-live="polite"></p>
       <div class="doc-media-progress-row">
         <progress id="docMediaProgress" max="100" value="0" hidden></progress>
         <span id="docMediaProgressLabel" hidden></span>
-        <button id="docMediaAbortBtn" type="button" class="doc-btn doc-btn-ghost" hidden>取消导入</button>
+        <button id="docMediaAbortBtn" type="button" class="doc-btn doc-btn-ghost" hidden data-i18n="取消导入">取消导入</button>
       </div>
-      <div id="docMediaList" class="doc-media-list" aria-label="作品素材"></div>
-      <button id="docMediaMoreBtn" type="button" class="doc-btn doc-btn-ghost" hidden>显示更多</button>
+      <div id="docMediaList" class="doc-media-list" aria-label="作品素材" data-i18n-aria-label="作品素材"></div>
+      <button id="docMediaMoreBtn" type="button" class="doc-btn doc-btn-ghost" hidden data-i18n="显示更多">显示更多</button>
     </dialog>
     <div id="docSaveConflictDialog" class="doc-conflict-overlay is-hidden" role="dialog" aria-modal="true" aria-labelledby="docSaveConflictDialogTitle" aria-describedby="docSaveConflictDialogMessage">
       <div class="doc-conflict-backdrop"></div>

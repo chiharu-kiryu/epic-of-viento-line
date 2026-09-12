@@ -4,11 +4,14 @@ import { fileURLToPath } from 'node:url';
 
 export const APP_ROOT = fileURLToPath(new URL('../', import.meta.url));
 
+export function parseReleaseVersion(version) {
+  const match = /^[a-z]\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:\.(0|[1-9][0-9]*))?$/.exec(version);
+  if (!match) throw new Error('VERSION must use the project release format, for example b.2.8 or b.2.8.1');
+  return { version, buildVersion: `${match[1]}.${match[2]}.${match[3] ?? '0'}` };
+}
+
 export async function readReleaseVersion() {
-  const version = (await fs.readFile(path.join(APP_ROOT, 'VERSION'), 'utf8')).trim();
-  const match = /^[a-z]\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/.exec(version);
-  if (!match) throw new Error('VERSION must use the project release format, for example b.2.8');
-  return { version, buildVersion: `${match[1]}.${match[2]}.0` };
+  return parseReleaseVersion((await fs.readFile(path.join(APP_ROOT, 'VERSION'), 'utf8')).trim());
 }
 
 export async function verifyReleaseVersions() {

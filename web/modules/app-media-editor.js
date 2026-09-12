@@ -1,3 +1,4 @@
+import { t, onLanguageChange, translateMessage } from '../i18n/index.js';
 import { MEDIA_MAX_BYTES, mediaKindForName, mediaMarkup } from '../../scripts/lib/media-format.mjs';
 import { loadMediaAssets, uploadMediaFile, prepareDraftMedia } from './app-doc-service.js';
 import { renderMedia } from './app-media-render.js';
@@ -28,7 +29,8 @@ export function setupMediaEditor(adapter) {
     preview.replaceChildren();
     if (!media.length) return;
     const title = document.createElement('h3');
-    title.textContent = '素材预览';
+    title.dataset.i18n = '素材预览';
+    title.textContent = t('素材预览');
     preview.appendChild(title);
     media.forEach((item) => preview.appendChild(renderMedia(item)));
   }
@@ -43,7 +45,7 @@ export function setupMediaEditor(adapter) {
     previewTimer = setTimeout(async () => {
       try {
         lastPreviewRequestAt = Date.now();
-        const result = await prepareDraftMedia(current.content, current.path);
+        const result = await prepareDraftMedia(current.content, current.path, [], current.documentType);
         if (generation === previewGeneration && adapter.isEditable()) showPreview(result.media || []);
       } catch { /* Keep the last preview while a source is incomplete. */ }
     }, Math.max(350, 1000 - (Date.now() - lastPreviewRequestAt)));
@@ -68,23 +70,23 @@ export function setupMediaEditor(adapter) {
       }
       const label = document.createElement('span'); label.textContent = asset.name; item.appendChild(label);
       const detail = document.createElement('small');
-      detail.textContent = `${asset.kind === 'video' ? '视频' : '图片'} · ${fileSize(asset.size)}${asset.status === 'available' ? '' : ' · 离线或缺失'}`;
+      detail.textContent = `${asset.kind === 'video' ? t('视频') : t('图片')} · ${fileSize(asset.size)}${asset.status === 'available' ? '' : t(' · 离线或缺失')}`;
       item.appendChild(detail);
       item.addEventListener('click', () => void insertExisting(asset));
       list.appendChild(item);
     }
     more.hidden = filtered.length <= limit;
     if (!filtered.length) {
-      const empty = document.createElement('p'); empty.textContent = '没有匹配的素材，可以从电脑导入。'; list.appendChild(empty);
+      const empty = document.createElement('p'); empty.textContent = t('没有匹配的素材，可以从电脑导入。'); list.appendChild(empty);
     }
   }
   async function refreshList() {
     const generation = ++listGeneration;
-    status('正在读取作品素材…');
+    status(t('正在读取作品素材…'));
     try {
       const result = await loadMediaAssets();
       if (generation !== listGeneration) return;
-      assets = result.assets || []; renderList(); status(`作品中有 ${assets.length} 份图片和视频。`);
+      assets = result.assets || []; renderList(); status(t`作品中有 ${assets.length} 份图片和视频。`);
     } catch (error) { if (generation === listGeneration) status(error.message, true); }
   }
   function setBusy(busy) {
@@ -95,9 +97,9 @@ export function setupMediaEditor(adapter) {
     list.querySelectorAll('button').forEach((item) => { item.disabled = busy || assets.find((asset) => asset.id === item.dataset.assetId)?.status !== 'available'; });
   }
   async function insert(selected) {
-    if (!context || !adapter.isEditable() || adapter.getContext(context.input)?.path !== context.path) throw new Error('正在编辑的文档已变化，请重新选择插入位置。');
+    if (!context || !adapter.isEditable() || adapter.getContext(context.input)?.path !== context.path) throw new Error(t('正在编辑的文档已变化，请重新选择插入位置。'));
     if (/\.(json|ya?ml)$/i.test(context.path)) {
-      const result = await prepareDraftMedia(context.content, context.path, selected.map((asset) => asset.id));
+      const result = await prepareDraftMedia(context.content, context.path, selected.map((asset) => asset.id), context.documentType);
       adapter.replaceSource(result.content);
       showPreview(result.media || []);
     } else {
@@ -108,7 +110,7 @@ export function setupMediaEditor(adapter) {
   async function insertExisting(asset) {
     if (adapter.isBusy()) return;
     setBusy(true);
-    try { await insert([asset]); dialog.close(); adapter.status('已插入素材，保存文档后生效。'); }
+    try { await insert([asset]); dialog.close(); adapter.status(t('已插入素材，保存文档后生效。')); }
     catch (error) { status(error.message, true); }
     finally { setBusy(false); schedulePreview(); }
   }
@@ -117,7 +119,7 @@ export function setupMediaEditor(adapter) {
     context = captured || context || capture();
     const invalid = files.find((file) => !mediaKindForName(file.name) || file.size > MEDIA_MAX_BYTES);
     if (invalid) {
-      const text = !mediaKindForName(invalid.name) ? `不支持 ${invalid.name} 的格式。` : `${invalid.name} 超过 256 MB。`;
+      const text = !mediaKindForName(invalid.name) ? t`不支持 ${invalid.name} 的格式。` : t`${invalid.name} 超过 256 MB。`;
       status(text, true); adapter.status(text); return;
     }
     if (!dialog.open) dialog.showModal();
@@ -127,19 +129,19 @@ export function setupMediaEditor(adapter) {
     const imported = [];
     try {
       for (const [index, file] of files.entries()) {
-        status(`导入 ${index + 1}/${files.length}：${file.name}`);
+        status(t`导入 ${index + 1}/${files.length}：${file.name}`);
         progress.value = 0;
         const result = await uploadMediaFile(file, { signal: aborter.signal, onProgress: (loaded, total) => {
           const percent = total ? Math.min(100, Math.round(loaded / total * 100)) : 0;
-          progress.value = percent; progressLabel.textContent = `${percent}% · ${percent === 100 ? '正在登记素材…' : fileSize(loaded)}`;
+          progress.value = percent; progressLabel.textContent = `${percent}% · ${percent === 100 ? t('正在登记素材…') : fileSize(loaded)}`;
         } });
         imported.push(result.asset);
       }
       await insert(imported);
       dialog.close();
-      adapter.status(`已插入 ${imported.length} 份素材，保存文档后生效。`);
+      adapter.status(t`已插入 ${imported.length} 份素材，保存文档后生效。`);
     } catch (error) {
-      const text = `${error.name === 'AbortError' ? '已取消导入。' : error.message}${imported.length ? ` 已导入的 ${imported.length} 份素材可从作品素材列表重新选择。` : ''}`;
+      const text = `${error.name === 'AbortError' ? t('已取消导入。') : error.message}${imported.length ? t` 已导入的 ${imported.length} 份素材可从作品素材列表重新选择。` : ''}`;
       status(text, error.name !== 'AbortError'); adapter.status(text);
       if (imported.length) { assets = (await loadMediaAssets().catch(() => ({ assets }))).assets; renderList(); }
     } finally { aborter = null; setBusy(false); schedulePreview(); picker.value = ''; }
@@ -176,5 +178,9 @@ export function setupMediaEditor(adapter) {
   search.addEventListener('input', () => { limit = 60; renderList(); });
   kind.addEventListener('change', () => { limit = 60; renderList(); });
   more.addEventListener('click', () => { limit += 60; renderList(); });
+  onLanguageChange(() => {
+    if (dialog.open) renderList();
+    message.textContent = translateMessage(message.textContent);
+  });
   return { refresh() { button.hidden = !adapter.isEditable(); button.disabled = adapter.isBusy(); schedulePreview(); } };
 }

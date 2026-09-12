@@ -1,6 +1,6 @@
 # Viento Studio 桌面版
 
-当前发布版本 **b.2.8**，内部安装版本 **2.8.0**；两者对应同一次发布。统一命名及更新步骤见 [版本规则](../docs/RELEASE_b.2.8.md#版本规则)。
+当前发布版本 **b.2.8.1**，内部安装版本 **2.8.1**；两者对应同一次发布。统一命名及更新步骤见 [版本规则](../docs/RELEASE_b.2.8.1.md#版本规则)。
 
 桌面版使用 Tauri 2。安装后从应用图标启动，在作品库首页新建、打开或导入作品，然后进入现有文档编辑器。Node.js 24.20.0 与转换器随应用提供，使用者无需安装 Node.js、Python、Rust 或手动启动服务。
 
@@ -18,7 +18,7 @@
 
 作品库最近记录位于系统应用数据目录下的 `io.viento.studio/library.json`。一次桌面会话打开一个作品库；返回首页保留编辑草稿，切换作品前需保存并关闭当前编辑窗口。
 
-详细的目录、登记命令和已实现边界见 [作品库布局](../docs/WORKSPACE_LAYOUT.md)。本机的 `dist/current/` 保存 b.2.8 Linux x86_64 便携包、源码归档和校验记录，作品迁移包保存到应用数据目录的 `backups/`；修复内容见 [故障记录](../docs/BUGFIX_0.2.1.md)。旧版程序在新包验证后删除。
+详细的目录、登记命令和已实现边界见 [作品库布局](../docs/WORKSPACE_LAYOUT.md)。本机的 `dist/current/` 保存已构建的 Linux x86_64 便携包、源码归档和校验记录，具体版本以交付文件名和校验记录为准。作品迁移包保存到应用数据目录的 `backups/`；修复内容见 [故障记录](../docs/BUGFIX_0.2.1.md)。旧版程序在新包验证后删除。
 
 ## 开发和打包
 
@@ -37,7 +37,7 @@ npm run desktop:build
 
 构建前会自动准备应用资源并下载官方 Node.js 二进制。运行时及许可文本的 SHA-256 固定在 `desktop/node-runtime.json`。下载支持重试，校验后的缓存位于 `desktop/.cache`；只有脚本、前端、通用格式定义与 YAML 依赖进入 `desktop/resources`，约 3 GB 的大型素材无需随每次应用升级重新分发。
 
-输出位于 `src-tauri/target/release/bundle`，构建脚本将完成的安装包改为 `VERSION` 中的发布编号，例如 `Viento-Studio_b.2.8_amd64.AppImage`。Linux 可指定 `--bundles deb,appimage`，Windows 使用 `--bundles nsis`，macOS 使用 `--bundles dmg`。跨平台发行应分别在目标系统构建；仓库中的 **Build desktop installers** 工作流可手动生成三端产物，仅上传工作流构件，不自动发布版本。
+输出位于 `src-tauri/target/release/bundle`，构建脚本将完成的安装包改为 `VERSION` 中的发布编号，例如 `Viento-Studio_b.2.8.1_amd64.AppImage`。Linux 可指定 `--bundles deb,appimage`，Windows 使用 `--bundles nsis`，macOS 使用 `--bundles dmg`。跨平台发行应分别在目标系统构建；仓库中的 **Build desktop installers** 工作流可手动生成三端产物，仅上传工作流构件，不自动发布版本。
 
 每次 Linux 打包前会重建生成用的 `.AppDir` 目录，避免 GTK 打包插件因旧链接残留而使第二次构建失败。Rust 编译缓存、已生成的安装包及作品库不在此清理范围内。
 

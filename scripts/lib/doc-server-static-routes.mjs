@@ -57,6 +57,7 @@ function isSafeStaticAssetPath(pathname) {
     || pathname === '/web/favicon.ico'
     || pathname === '/scripts/lib/doc-api-contract.mjs'
     || pathname === '/scripts/lib/media-format.mjs'
+    || pathname === '/scripts/lib/document-values.mjs'
     || pathname.startsWith('/assets/')
     || pathname.startsWith('/asset-files/')
     || pathname.startsWith('/web/')

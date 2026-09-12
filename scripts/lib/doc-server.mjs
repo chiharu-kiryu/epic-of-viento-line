@@ -533,7 +533,7 @@ async function sendFile(filePath, response, request = null) {
     response.setHeader('Content-Length', String(stats.size));
     response.setHeader('ETag', etag);
     response.setHeader('Last-Modified', stats.mtime.toUTCString());
-    response.setHeader('Cache-Control', resolveStaticCacheControl(filePath));
+    if (!response.getHeader('Cache-Control')) response.setHeader('Cache-Control', resolveStaticCacheControl(filePath));
     response.setHeader('Accept-Ranges', 'bytes');
     if (isNotModifiedByCacheHeaders(request, stats, etag)) {
       response.statusCode = 304;

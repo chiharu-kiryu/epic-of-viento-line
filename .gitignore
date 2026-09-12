@@ -34,3 +34,4 @@ mono_crash.*.json
 
 # resource
 assets/
+desktop/ui/i18n/

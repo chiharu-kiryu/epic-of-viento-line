@@ -434,7 +434,7 @@ async function buildIndexFromStandard(assetCatalog) {
     const cls = classify(sourcePath);
     const effectiveCategory = sourceCategory || cls.category || 'other';
     const sourceMeta = toSafeObject(normalizedDoc.meta, cls.meta || {});
-    const projectType = WORKSPACE_MANIFEST?.version === 3
+    const projectType = WORKSPACE_MANIFEST?.version === 3 || WORKSPACE_MANIFEST?.documentTypes
       ? projectDefinition(WORKSPACE_MANIFEST).documentTypes.find((type) => type.id === effectiveCategory) : null;
     const group = projectType?.label || toSafeString(sourceMeta.group, cls.group);
     const fields = toSafeObject(normalizedDoc.fields, {});
@@ -446,7 +446,7 @@ async function buildIndexFromStandard(assetCatalog) {
       sourceMeta,
       assetCatalog
     );
-    const isCharacter = ['hero', 'character'].includes(effectiveCategory);
+    const isCharacter = !projectType && ['hero', 'character'].includes(effectiveCategory);
     const heroSkills = isCharacter
       ? collectHeroSkillsFromSections(normalizedDoc.sections || [], imageList)
       : [];

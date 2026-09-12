@@ -15,8 +15,8 @@ function isListLine(line) {
 function isKvLine(line) {
   if (!line.trim() || isListLine(line) || /^\s*(?:>|https?:\/\/)/i.test(line)) return null;
   const parts = splitMediaText(line);
-  if (parts.some(isMediaValue) && (parts[0]?.type !== 'paragraph' || !/^[^：:]{1,60}[:：]/.test(parts[0].text.trim()))) return null;
-  const match = line.trim().match(/^([^：:]{1,60})[:：]\s*(.*)$/);
+  if (parts.some(isMediaValue) && (parts[0]?.type !== 'paragraph' || !/^[^：:]{1,120}[:：]/.test(parts[0].text.trim()))) return null;
+  const match = line.trim().match(/^([^：:]{1,120})[:：]\s*(.*)$/);
   return match && match[1].trim() ? { key: match[1].trim(), value: match[2].trim() } : null;
 }
 

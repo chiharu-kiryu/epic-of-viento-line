@@ -242,6 +242,8 @@
 }
 
 @media (max-width: 480px) {
+  .is-editor-mode .topbar-inner { flex-wrap: wrap; }
+  .is-editor-mode .topbar-mode { margin-left: auto; }
   .doc-sidebar-toggle span { display: none; }
   .is-editor-mode .brand-copy h1 { max-width: 120px; }
   .is-writing .doc-edit-actions { width: 100%; justify-content: flex-end; }
@@ -249,3 +251,58 @@
   .is-writing .doc-edit-mode-bar .doc-btn { flex: 1; }
 }
 .release-version { flex-shrink: 0; font-size: 11px; color: #91a3bf; white-space: nowrap; }
+/* Export is available in reading mode and in the empty-project view. */
+.doc-export-dialog { width: min(560px, calc(100vw - 32px)); color-scheme: dark; }
+.doc-export-options { border: 0; padding: 0; margin: 20px 0; min-width: 0; }
+.doc-export-options legend { font-size: 13px; color: #a8bad2; margin-bottom: 10px; }
+.doc-export-choice { display: flex; gap: 12px; align-items: flex-start; padding: 15px; margin-bottom: 10px; border: 1px solid #405977; border-radius: 10px; cursor: pointer; }
+.doc-export-choice:has(input:checked) { background: #18372f; border-color: #8ad8b4; }
+.doc-export-choice input { margin-top: 5px; accent-color: #8ad8b4; }
+.doc-export-choice strong, .doc-export-choice small { display: block; }
+.doc-export-choice small { margin-top: 5px; line-height: 1.7; color: #afbed2; }
+.doc-export-document-options { display: grid; gap: 10px; padding: 12px 4px 0; font-size: 14px; }
+.doc-export-document-options[hidden] { display: none; }
+.doc-export-document-options select { appearance: none; -webkit-appearance: none; width: 100%; min-height: 40px; padding: 8px 34px 8px 12px; border: 1px solid #536e91; border-radius: 8px; color: #dce8fa; background-color: #15233a; background-image: linear-gradient(45deg, transparent 50%, #dce8fa 50%), linear-gradient(135deg, #dce8fa 50%, transparent 50%); background-position: right 18px center, right 12px center; background-size: 6px 6px; background-repeat: no-repeat; }
+.doc-export-children { display: flex; align-items: center; gap: 8px; line-height: 1.7; }
+.doc-export-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+.doc-export-actions a { text-decoration: none; }
+.doc-export-actions [hidden] { display: none; }
+
+.project-settings { width: min(1080px, calc(100vw - 36px)); max-height: calc(100vh - 40px); overflow: auto; box-sizing: border-box; border: 1px solid #36516a; border-radius: 16px; padding: 24px; background: #101b2b; color: #dce9f6; }
+.project-settings::backdrop { background: #030a15c9; }
+.project-settings header, .project-settings-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.project-settings h2 { margin: 0; }
+.project-settings p { color: #a6bad0; font-size: 13px; line-height: 1.6; }
+.project-settings #projectSettingsMessage { white-space: pre-wrap; color: #8bdabc; }
+.project-settings-grid { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 24px; }
+.project-settings aside { display: flex; flex-direction: column; gap: 10px; }
+.project-settings fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.project-settings label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; margin: 10px 0; }
+.project-settings input, .project-settings select, .project-settings textarea { box-sizing: border-box; width: 100%; min-width: 0; background: #0a1423; color: #e4f0fb; border: 1px solid #395069; padding: 9px; border-radius: 7px; font: inherit; }
+.project-settings textarea { resize: vertical; line-height: 1.6; }
+.project-settings #projectTemplateContent { font-family: ui-monospace, monospace; tab-size: 2; }
+.project-settings input[readonly] { color: #93a7bb; }
+.project-settings button { border-radius: 8px; border: 1px solid #43617a; padding: 9px 14px; background: #21384e; color: #edf7ff; cursor: pointer; }
+.project-settings button:disabled { opacity: .5; cursor: wait; }
+.project-settings #projectTemplateSave { background: #85d8ba; color: #10251f; border-color: transparent; }
+.project-type-properties { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+.project-settings summary { cursor: pointer; padding: 12px 0; }
+.project-settings-actions { justify-content: flex-end; padding-top: 20px; }
+.project-field-group { display: grid; grid-template-columns: 1fr 2fr auto; gap: 8px; align-items: start; margin: 10px 0; }
+.project-template-preview { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 720px) { .project-settings { padding: 16px; } .project-settings-grid, .project-type-properties, .project-template-preview { grid-template-columns: 1fr; } .project-settings aside select { max-height: 120px; } .project-field-group { grid-template-columns: 1fr; } }
+/* Keep project actions reachable while a long template or its preview scrolls. */
+.project-settings { height: min(920px, calc(100vh - 40px)); overflow: hidden; }
+.project-settings[open] { display: flex; flex-direction: column; }
+.project-settings > header, .project-settings > footer { flex-shrink: 0; }
+.project-settings > header { padding-bottom: 14px; border-bottom: 1px solid #2b4158; }
+.project-settings > header p { margin: 6px 0 0; }
+.project-settings-body { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding-right: 4px; }
+.project-settings > footer { padding-top: 14px; border-top: 1px solid #2b4158; margin-top: 14px; }
+.project-settings-grid > aside { align-self: start; position: sticky; top: 0; padding-top: 4px; background: #101b2b; }
+.project-settings button:focus-visible, .project-settings summary:focus-visible { outline: 2px solid #85d8ba; outline-offset: 3px; }
+@media (max-width: 720px) { .project-settings-grid > aside { position: static; } }
+.project-settings { color-scheme: dark; }
+.project-settings #projectSettingsMessage { flex-shrink: 0; max-height: 80px; overflow: auto; margin: 8px 0; }
+.project-settings #projectTypeList option { color: #e4f0fb; background: #0a1423; padding: 3px 4px; }
+.project-settings #projectTypeList option:checked { color: #eafff6; background: #254a45; }

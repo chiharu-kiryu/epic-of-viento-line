@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import {
   CATEGORY_LABELS,
   ASSET_BASE_URL,
@@ -748,31 +749,31 @@ function buildCommonCards(doc) {
   const category = getDisplayCategory(doc);
 
   const metaPairs = [
-    ['标题', doc.meta?.title || doc.title || doc.name],
-    ['分类', CATEGORY_LABELS[category] || category || 'other'],
-    ['分组', doc.group || '其他'],
-    ['文件类型', doc.type || 'txt'],
-    ['标准版本', doc.schemaVersion || doc.meta?.schemaVersion || 'standard-doc-v2'],
-    ['最后更新', formatTime(doc.lastModified)],
-    ['体积', formatSize(doc.size)],
+    [t('标题'), doc.meta?.title || doc.title || doc.name],
+    [t('分类'), CATEGORY_LABELS[category] || category || 'other'],
+    [t('分组'), doc.group || t('其他')],
+    [t('文件类型'), doc.type || 'txt'],
+    [t('标准版本'), doc.schemaVersion || doc.meta?.schemaVersion || 'standard-doc-v2'],
+    [t('最后更新'), formatTime(doc.lastModified)],
+    [t('体积'), formatSize(doc.size)],
   ];
 
   const parserPairs = [
-    ['解析类型', parser.contentType || '-'],
-    ['解析格式', parser.format || '-'],
-    ['解析形态', parser.profile || '-'],
-    ['行数', parser.lineCount || 0],
-    ['字段数', Object.keys(fields || {}).length],
-    ['块数', parser.blockCount || (doc.blocks ? doc.blocks.length : 0)],
-    ['段落块', parserStats.paragraphCount || 0],
-    ['列表块', parserStats.listCount || 0],
-    ['表格块', parserStats.tableCount || 0],
-    ['KV块', parserStats.kvCount || 0],
+    [t('解析类型'), parser.contentType || '-'],
+    [t('解析格式'), parser.format || '-'],
+    [t('解析形态'), parser.profile || '-'],
+    [t('行数'), parser.lineCount || 0],
+    [t('字段数'), Object.keys(fields || {}).length],
+    [t('块数'), parser.blockCount || (doc.blocks ? doc.blocks.length : 0)],
+    [t('段落块'), parserStats.paragraphCount || 0],
+    [t('列表块'), parserStats.listCount || 0],
+    [t('表格块'), parserStats.tableCount || 0],
+    [t('KV块'), parserStats.kvCount || 0],
   ];
 
   const cards = [
-    createMetaSection('档案标识', metaPairs, { cardClass: 'meta-card--meta' }),
-    createMetaSection('解析信息', parserPairs, { cardClass: 'meta-card--meta' }),
+    createMetaSection(t('档案标识'), metaPairs, { cardClass: 'meta-card--meta' }),
+    createMetaSection(t('解析信息'), parserPairs, { cardClass: 'meta-card--meta' }),
   ];
   return compactCards(cards);
 }

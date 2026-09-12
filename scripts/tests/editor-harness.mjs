@@ -3,6 +3,7 @@ import vm from 'node:vm';
 import { API_PATHS, API_ERRORS, API_RESPONSE } from '../lib/doc-api-contract.mjs';
 import { getDocTemplate, DOC_TYPE_TEMPLATE_DEFS } from '../../web/modules/app-type-templates.js';
 import { createBlockDraft, serializeBlockDraft, serializeSourceDraft } from '../../web/modules/app-editor-draft.js';
+import { t, localize, getLanguage, onLanguageChange, translatePage, translateMessage } from '../../web/i18n/index.js';
 
 // A small DOM surface for testing the production editor controller without a browser dependency.
 export class Element {
@@ -73,6 +74,7 @@ export async function editorHarness(overrides = {}) {
     localStorage: { getItem: () => null, setItem() {} },
     window: { confirm: () => false },
     API_PATHS, API_ERRORS, API_RESPONSE, getDocTemplate, DOC_TYPE_TEMPLATE_DEFS, createBlockDraft, serializeBlockDraft, serializeSourceDraft,
+    t, localize, getLanguage, onLanguageChange, translatePage, translateMessage,
     toDisplayValue: (value) => String(value ?? ''),
     getDisplayCategory: (doc) => doc?.category || 'other',
     getDocListButtonCacheVersion: () => 0,

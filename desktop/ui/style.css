@@ -52,3 +52,4 @@ dialog p { font-size: 12px; line-height: 1.8; color: #9eb0cb; margin-bottom: 24p
 .dialog-actions { display: flex; justify-content: end; gap: 10px; }
 @media (max-width: 760px) { .library { padding: 32px 24px 20px; } h1 { font-size: 23px; } .workspace { align-items: start; flex-direction: column; } .workspace-copy { width: 100%; } .workspace-actions { align-self: end; } .active-session { flex-wrap: wrap; } .active-session div { flex-basis: 100%; } }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+.example-badge { display: inline-block; margin-left: 12px; padding: 3px 8px; border: 1px solid #63ab94; border-radius: 6px; color: #8cddbc; font-size: 11px; font-weight: 500; vertical-align: middle; }

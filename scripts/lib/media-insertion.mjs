@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { parseDocument, isMap, isSeq } from 'yaml';
-import { readRegistry } from './workspace.mjs';
+import { readRegistry, readWorkspace } from './workspace.mjs';
+import { resolveDocumentDefinition } from './project-layout.mjs';
 import { isMediaValue, splitMediaText } from './media-format.mjs';
 import { parseSourceContent } from '../standardize-docs/doc-factory.mjs';
 
@@ -69,7 +70,7 @@ function collectMedia(value, result = [], visited = new WeakSet()) {
   return result;
 }
 
-export async function prepareMediaInsertion(root, { content, sourcePath, assetIds = [] } = {}) {
+export async function prepareMediaInsertion(root, { content, sourcePath, assetIds = [], documentType } = {}) {
   if (typeof content !== 'string' || typeof sourcePath !== 'string' || !Array.isArray(assetIds) || assetIds.length > 100) throw invalid('素材插入参数无效。');
   const registry = await readRegistry(root);
   const assets = assetIds.map((id) => {
@@ -83,7 +84,8 @@ export async function prepareMediaInsertion(root, { content, sourcePath, assetId
     if (!['.json', '.yaml', '.yml'].includes(extension)) throw invalid('此操作仅用于 JSON 或 YAML；正文素材应在光标处插入。');
     updated = insertStructuredMedia(content, extension, assets);
   }
-  const descriptor = registry.documents.find((record) => record.sourcePath === sourcePath) || {};
+  const record = registry.documents.find((record) => record.sourcePath === sourcePath);
+  const descriptor = resolveDocumentDefinition(readWorkspace(root), sourcePath, record || (documentType ? { documentType } : {}));
   const parsed = parseSourceContent(updated, sourcePath, descriptor);
   return { content: updated, media: collectMedia(parsed.blocks).slice(0, 100) };
 }

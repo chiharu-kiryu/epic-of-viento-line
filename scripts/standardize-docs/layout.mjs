@@ -26,5 +26,20 @@ export function buildDocumentLayout(parsed) {
     } else current.blocks.push(block);
   }
   if (!sections.length) start();
+  // Explicit groups select exact field names, preserving values and duplicates.
+  // Unselected fields and every prose/media block remain in source order.
+  if (parsed.fieldGroups?.length) {
+    const grouped = [];
+    const selected = new Set(parsed.fieldGroups.flatMap((group) => group.fields));
+    for (const [index, group] of parsed.fieldGroups.entries()) {
+      const blocks = group.fields.flatMap((key) => sections.flatMap((section) => section.blocks.filter((block) => block.type === 'kv' && block.key === key)));
+      if (blocks.length) grouped.push({ id: `group-${index + 1}`, title: group.title, level: 2, anchor: '', blocks });
+    }
+    for (const section of sections) {
+      section.blocks = section.blocks.filter((block) => block.type !== 'kv' || !selected.has(block.key));
+      if (section.blocks.length) grouped.push(section);
+    }
+    return { schemaVersion: LAYOUT_VERSION, sections: grouped.length ? grouped : sections };
+  }
   return { schemaVersion: LAYOUT_VERSION, sections };
 }

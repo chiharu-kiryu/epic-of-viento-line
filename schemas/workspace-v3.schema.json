@@ -49,36 +49,7 @@
       "minItems": 1,
       "maxItems": 100,
       "items": {
-        "type": "object",
-        "required": [
-          "id",
-          "label",
-          "directory",
-          "parserProfile"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "pattern": "^[a-z][a-z0-9_-]{0,63}$"
-          },
-          "label": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 120
-          },
-          "directory": {
-            "type": "string"
-          },
-          "parserProfile": {
-            "enum": [
-              "structured",
-              "prose"
-            ]
-          },
-          "template": {
-            "type": "string"
-          }
-        }
+        "$ref": "project-type-v1.schema.json"
       }
     }
   }

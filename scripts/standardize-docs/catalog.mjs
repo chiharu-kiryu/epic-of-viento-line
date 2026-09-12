@@ -8,7 +8,7 @@ import {
 } from './doc-factory.mjs';
 import { collectSourcePaths } from './sources.mjs';
 import { normalizeFilterPath } from '../lib/path-filter.mjs';
-import { projectDocumentDefaults } from '../lib/project-layout.mjs';
+import { resolveDocumentDefinition } from '../lib/project-layout.mjs';
 import { IS_MANAGED_WORKSPACE, DOCUMENTS_PATH, WORKSPACE_MANIFEST } from '../lib/paths.mjs';
 import { readRegistry } from '../lib/workspace.mjs';
 
@@ -35,7 +35,7 @@ async function buildStandardCatalog(sourceFilters = [], options = {}) {
     const absolutePath = path.join(PROJECT_ROOT, relPath);
     const stats = await fs.stat(absolutePath);
     const raw = await fs.readFile(absolutePath, 'utf8');
-    const descriptor = bySource.get(relPath) || (WORKSPACE_MANIFEST?.version === 3 ? projectDocumentDefaults(WORKSPACE_MANIFEST, relPath) : {});
+    const descriptor = resolveDocumentDefinition(WORKSPACE_MANIFEST, relPath, bySource.get(relPath));
     const parsed = parseSourceContent(raw, relPath, descriptor);
     const normalized = buildStandardObject(relPath, raw, parsed, stats, descriptor);
     sourceDocs.push({

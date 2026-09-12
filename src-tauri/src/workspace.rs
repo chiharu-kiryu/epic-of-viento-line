@@ -194,7 +194,7 @@ fn validate_manifest(workspace: &Workspace) -> Result<()> {
                     .bytes()
                     .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'_' || c == b'-')
                 || label.trim().is_empty()
-                || label.chars().count() > 120
+                || label.encode_utf16().count() > 120
                 || (!directory.is_empty() && !directory.split('/').all(portable_component))
                 || ![Some("structured"), Some("prose")]
                     .contains(&definition["parserProfile"].as_str())
@@ -211,10 +211,43 @@ fn validate_manifest(workspace: &Workspace) -> Result<()> {
                     .unwrap_or("")
                     .to_ascii_lowercase();
                 if !file.split('/').all(portable_component)
-                    || !["md", "txt", "json", "yaml", "yml"].contains(&extension.as_str())
+                    || (! ["md", "txt", "json", "yaml", "yml"].contains(&extension.as_str())
+                        && !(workspace.version == 2 && !file.rsplit('/').next().unwrap_or("").contains('.')))
                 {
                     return Err("文档模板路径无效".into());
                 }
+            }
+            validate_parser_definition(definition)?;
+        }
+    }
+    Ok(())
+}
+
+fn validate_parser_definition(definition: &serde_json::Value) -> Result<()> {
+    let field_name = |value: &serde_json::Value| value.as_str().is_some_and(|text| !text.trim().is_empty() && text.encode_utf16().count() <= 120);
+    if let Some(options) = definition.get("parserOptions") {
+        let options = options.as_object().ok_or("无效的字段解析规则")?;
+        for (key, value) in options {
+            if key == "titleField" {
+                if !field_name(value) { return Err("标题字段无效".into()); }
+            } else {
+                if !["allowedFieldKeys", "multilineFieldKeys", "boundaryFieldKeys"].contains(&key.as_str()) { return Err("无效的字段解析规则".into()); }
+                let fields = value.as_array().filter(|items| items.len() <= 200).ok_or("字段解析规则需要字段名称")?;
+                let mut seen = HashSet::new();
+                for field in fields {
+                    if !field_name(field) || !seen.insert(field.as_str()) { return Err("字段解析规则需要不重复的字段名称".into()); }
+                }
+            }
+        }
+    }
+    if let Some(groups) = definition.get("fieldGroups") {
+        let groups = groups.as_array().filter(|items| items.len() <= 50).ok_or("字段分组无效")?;
+        let mut seen = HashSet::new();
+        for group in groups {
+            if !field_name(&group["title"]) { return Err("字段分组需要名称".into()); }
+            let fields = group["fields"].as_array().filter(|items| !items.is_empty() && items.len() <= 200).ok_or("字段分组需要字段")?;
+            for field in fields {
+                if !field_name(field) || !seen.insert(field.as_str()) { return Err("分组字段无效或重复".into()); }
             }
         }
     }
@@ -280,7 +313,7 @@ fn ensure_v2_guard(root: &Path) -> Result<()> {
     write_json(&file, &v2_guard())
 }
 
-fn asset_root(root: &Path) -> Result<PathBuf> {
+pub(crate) fn asset_root(root: &Path) -> Result<PathBuf> {
     let file = root.join(".viento/local.json");
     if !file.exists() {
         return Ok(root.join("assets"));
@@ -880,7 +913,7 @@ mod tests {
         let character = fs::read_to_string(root.join("templates/character.md")).unwrap();
         assert!(character.contains("## 背景与经历"));
         assert!(!character.contains("力量"));
-        manifest.extra.get_mut("documentTypes").unwrap().as_array_mut().unwrap().push(serde_json::json!({"id":"species","label":"种族","directory":"species","parserProfile":"structured","template":"species.md"}));
+        manifest.extra.get_mut("documentTypes").unwrap().as_array_mut().unwrap().push(serde_json::json!({"id":"species","label":"种族","directory":"species","parserProfile":"structured","template":"species.md","parserOptions":{"titleField":"名称","allowedFieldKeys":["名称"]},"fieldGroups":[{"title":"身份","fields":["名称"]}]}));
         write_json(&root.join("workspace.json"), &manifest).unwrap();
         fs::write(
             root.join("templates/species.md"),

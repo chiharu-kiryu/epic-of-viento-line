@@ -1,19 +1,21 @@
-# Epic of Viento Line 架构说明
+# Viento Studio 架构说明
 
-> 更新时间：2026-09-09
+> 更新时间：2026-09-12
 
-作品与程序已分离，作品及备份位于系统应用数据目录，本机默认作品由应用配置目录的 `viento.config.json` 指定，见 [本机数据目录](LOCAL_DATA_STORAGE.md)。`design-data/`、`data-template/`、`assets/` 和 `metadata/` 均相对于作品根目录；生成数据实际位于作品的 `.viento/cache/`。下文 `docs-standard/...` 和 `web/data/index.json` 仍作为兼容访问路径，由服务映射到缓存，不代表仓库根目录还有这些文件。
+作品与程序已分离，作品及备份位于系统应用数据目录，本机默认作品由应用配置目录的 `viento.config.json` 指定，见 [本机数据目录](LOCAL_DATA_STORAGE.md)。新项目的 `documents/`、`templates/`、`assets/` 和 `metadata/` 均相对于作品根目录（旧作品使用 `design-data/`、`data-template/`）；生成数据实际位于作品的 `.viento/cache/`。下文 `docs-standard/...` 和 `web/data/index.json` 仍作为兼容访问路径，由服务映射到缓存，不代表仓库根目录还有这些文件。
 
 当前目录与元数据/迁移契约以 [作品库布局](WORKSPACE_LAYOUT.md) 为准，桌面宿主见 [桌面版说明](../desktop/README.md)。浏览模式已改用 Node.js 只读服务，同样支持程序与作品分离。
 
 ## 1. 系统定位
 
-`Epic of Viento Line` 的文档体系是一个“**内容源 -> 标准化 -> 索引 -> 前后端 API/前端渲染**”的单仓库系统。
+Viento Studio 是通用 OC 设计引擎。应用代码、项目定义、作品内容与派生缓存各自独立。
 
-- 源数据：`design-data/`（策划原文，人工编辑）
-- 中间产物：`docs-standard/`（标准化 JSON）
-- 渲染输入：`web/data/index.json`（轻量索引）
-- 运行时分发：`web/` 静态页面 + `scripts/doc-site-server.mjs` 编辑 API
+- 项目配置：`workspace.json` 的类型、解析规则和字段分组；`templates/` 的起始正文。
+- 权威内容：项目正文、稳定 ID 元数据与素材；新项目使用 v3 目录，旧项目兼容 v2。
+- 派生数据：`.viento/cache/` 内的标准文档、索引、引用图；可完整重建。
+- 展示与分享：统一 `viento-layout-v1` 布局供编辑器和导出消费。
+
+`project-layout.mjs` 统一解析文档类型，`project-service.mjs` 提供模板预览和原子配置保存。模板按内容指纹先落盘，再切换清单；过期修改通过配置版本阻止覆盖。原作品的具体规则在其项目清单中声明，轻量示范定义见 `docs/examples/`，不会装入桌面运行包。
 
 ---
 

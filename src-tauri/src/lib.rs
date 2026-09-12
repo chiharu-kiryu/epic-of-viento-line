@@ -1,6 +1,9 @@
+mod export;
+mod preferences;
 pub mod workspace;
 
 use fs2::FileExt;
+use preferences::Language;
 use serde::Serialize;
 use std::{
     fs,
@@ -69,6 +72,50 @@ fn settings_path(app: &AppHandle) -> Result<PathBuf> {
         .app_data_dir()
         .map_err(|e| e.to_string())?
         .join("library.json"))
+}
+fn preferences_path(app: &AppHandle) -> Result<PathBuf> {
+    Ok(app
+        .path()
+        .app_config_dir()
+        .map_err(|e| e.to_string())?
+        .join("preferences.json"))
+}
+fn language(app: &AppHandle) -> Language {
+    preferences_path(app)
+        .and_then(|file| preferences::read(&file))
+        .map(|value| value.language)
+        .unwrap_or_default()
+}
+fn notify_language(app: &AppHandle, language: Language) {
+    if let Some(main) = app.get_webview_window("main") {
+        let _ = main.set_title(&format!(
+            "Viento Studio {} · {}",
+            release_version(),
+            language.text("作品库", "Library")
+        ));
+    }
+    let _ = app.emit_to("main", "language-changed", language);
+    if let Some(editor) = app.get_webview_window("editor") {
+        let detail = serde_json::json!({ "language": language });
+        let _ = editor.eval(&format!("window.dispatchEvent(new CustomEvent('viento-language-changed', {{detail: {detail}}}));"));
+    }
+}
+fn update_language(app: &AppHandle, language: Language) -> Result<()> {
+    let state = app.state::<DesktopState>();
+    let _lock = state.settings_lock.lock().map_err(|e| e.to_string())?;
+    preferences::save_language(&preferences_path(app)?, language)?;
+    notify_language(app, language);
+    Ok(())
+}
+#[tauri::command]
+fn get_language(app: AppHandle, window: WebviewWindow) -> Result<Language> {
+    home_only(&window)?;
+    Ok(preferences::read(&preferences_path(&app)?)?.language)
+}
+#[tauri::command]
+fn set_language(app: AppHandle, window: WebviewWindow, language: Language) -> Result<()> {
+    home_only(&window)?;
+    update_language(&app, language)
 }
 fn runtime_root(app: &AppHandle) -> Result<PathBuf> {
     Ok(app
@@ -145,6 +192,7 @@ struct LibraryState {
     active: Option<Recent>,
     version: String,
     build_version: String,
+    examples: Vec<String>,
 }
 #[tauri::command]
 fn library_state(app: AppHandle, window: WebviewWindow) -> Result<LibraryState> {
@@ -156,11 +204,18 @@ fn library_state(app: AppHandle, window: WebviewWindow) -> Result<LibraryState> 
         .map_err(|e| e.to_string())?
         .as_ref()
         .map(|engine| engine.workspace.clone());
+    let recent = workspace::read_settings(&settings_path(&app)?)?.recent;
+    let examples = recent.iter().filter(|item| {
+        std::fs::read(std::path::Path::new(&item.path).join("workspace.json")).ok()
+            .and_then(|bytes| serde_json::from_slice::<serde_json::Value>(&bytes).ok())
+            .is_some_and(|manifest| manifest["example"]["id"].as_str().is_some_and(|id| !id.is_empty()))
+    }).map(|item| item.path.clone()).collect();
     Ok(LibraryState {
-        recent: workspace::read_settings(&settings_path(&app)?)?.recent,
+        recent,
         active,
         version: release_version().into(),
         build_version: app.package_info().version.to_string(),
+        examples,
     })
 }
 #[tauri::command]
@@ -169,11 +224,12 @@ async fn choose_workspace(app: AppHandle, window: WebviewWindow) -> Result<Optio
     let state = app.state::<DesktopState>();
     let _operation = operation(&state)?;
     let directory = storage_directory(&app, "workspaces")?;
+    let lang = language(&app);
     let Some(folder) = select_path(&app, move || {
         rfd::AsyncFileDialog::new()
             .set_parent(&window)
             .set_directory(directory)
-            .set_title("选择作品项目文件夹")
+            .set_title(lang.text("选择作品项目文件夹", "Choose a project folder"))
             .pick_folder()
     })
     .await?
@@ -192,11 +248,15 @@ async fn new_workspace(
     let state = app.state::<DesktopState>();
     let _operation = operation(&state)?;
     let directory = storage_directory(&app, "workspaces")?;
+    let lang = language(&app);
     let Some(folder) = select_path(&app, move || {
         rfd::AsyncFileDialog::new()
             .set_parent(&window)
             .set_directory(directory)
-            .set_title("选择新作品库的保存位置")
+            .set_title(lang.text(
+                "选择新作品库的保存位置",
+                "Choose a location for the new library",
+            ))
             .set_can_create_directories(true)
             .pick_folder()
     })
@@ -215,23 +275,31 @@ async fn restore_workspace(app: AppHandle, window: WebviewWindow) -> Result<Opti
     let backups = storage_directory(&app, "backups")?;
     let directory = storage_directory(&app, "workspaces")?;
     let parent = window.clone();
+    let lang = language(&app);
     let Some(archive) = select_path(&app, move || {
         rfd::AsyncFileDialog::new()
             .set_parent(&parent)
             .set_directory(backups)
-            .set_title("选择 Viento 迁移包")
-            .add_filter("Viento 迁移包", &["zip"])
+            .set_title(lang.text("选择 Viento 迁移包", "Choose a Viento project archive"))
+            .add_filter(
+                lang.text("Viento 迁移包", "Viento project archive"),
+                &["zip"],
+            )
             .pick_file()
     })
     .await?
     else {
         return Ok(None);
     };
+    let lang = language(&app);
     let Some(folder) = select_path(&app, move || {
         rfd::AsyncFileDialog::new()
             .set_parent(&window)
             .set_directory(directory)
-            .set_title("选择导入位置（会创建新文件夹）")
+            .set_title(lang.text(
+                "选择导入位置（会创建新文件夹）",
+                "Choose import location (creates a new folder)",
+            ))
             .set_can_create_directories(true)
             .pick_folder()
     })
@@ -254,13 +322,20 @@ async fn backup_workspace(
     let root = registered(&app, &path)?;
     let manifest = workspace::ensure_workspace(&root)?;
     let backups = storage_directory(&app, "backups")?;
+    let lang = language(&app);
     let Some(output) = select_path(&app, move || {
         rfd::AsyncFileDialog::new()
             .set_parent(&window)
             .set_directory(backups)
-            .set_title("导出已保存的正文、模板和素材")
+            .set_title(lang.text(
+                "导出已保存的正文、模板和素材",
+                "Export saved documents, templates and media",
+            ))
             .set_file_name(format!("{}-{}.viento.zip", manifest.name, workspace::now()))
-            .add_filter("Viento 迁移包", &["zip"])
+            .add_filter(
+                lang.text("Viento 迁移包", "Viento project archive"),
+                &["zip"],
+            )
             .save_file()
     })
     .await?
@@ -286,6 +361,68 @@ fn show_library(app: &AppHandle) {
         let _ = window.hide();
     }
     let _ = app.emit_to("main", "library-changed", ());
+}
+
+async fn save_editor_export(app: AppHandle, engine_id: String, id: String, file_name: String) {
+    let result: Result<Option<String>> = async {
+        let state = app.state::<DesktopState>();
+        let _operation = operation(&state)?;
+        if Uuid::parse_str(&id)
+            .map(|value| value.to_string())
+            .as_deref()
+            != Ok(id.as_str())
+            || file_name.contains(['/', '\\'])
+            || !file_name.ends_with(".zip")
+        {
+            return Err("无效的导出任务".into());
+        }
+        let root = state
+            .engine
+            .lock()
+            .map_err(|e| e.to_string())?
+            .as_ref()
+            .filter(|engine| engine.id == engine_id)
+            .map(|engine| PathBuf::from(&engine.workspace.path))
+            .ok_or("作品已关闭")?;
+        let editor = app.get_webview_window("editor").ok_or("编辑窗口已关闭")?;
+        let directory = match app.path().download_dir() {
+            Ok(directory) => directory,
+            Err(_) => storage_directory(&app, "exports")?,
+        };
+        let lang = language(&app);
+        let Some(destination) = select_path(&app, move || {
+            rfd::AsyncFileDialog::new()
+                .set_parent(&editor)
+                .set_directory(directory)
+                .set_title(lang.text("保存导出文件", "Save exported file"))
+                .set_file_name(file_name)
+                .add_filter(lang.text("ZIP 文件", "ZIP file"), &["zip"])
+                .save_file()
+        })
+        .await?
+        else {
+            return Ok(None);
+        };
+        let output = destination.to_string_lossy().into_owned();
+        let job_id = id.clone();
+        tauri::async_runtime::spawn_blocking(move || {
+            export::save_prepared_export(&root, &job_id, &destination)
+        })
+        .await
+        .map_err(|e| e.to_string())??;
+        Ok(Some(output))
+    }
+    .await;
+    let detail = match result {
+        Ok(Some(path)) => serde_json::json!({ "id": id, "ok": true, "path": path }),
+        Ok(None) => serde_json::json!({ "id": id, "ok": true, "cancelled": true }),
+        Err(error) => serde_json::json!({ "id": id, "ok": false, "error": error }),
+    };
+    if let Some(editor) = app.get_webview_window("editor") {
+        let _ = editor.eval(&format!(
+            "window.dispatchEvent(new CustomEvent('viento-export-result', {{detail: {detail}}}));"
+        ));
+    }
 }
 fn stop_engine(app: &AppHandle) {
     let state = app.state::<DesktopState>();
@@ -315,15 +452,16 @@ fn finish_close(app: &AppHandle, allow: bool) {
     }
 }
 const CLOSE_SCRIPT: &str = r#"(async () => {
+  const {t} = await import('/web/i18n/index.js');
   let allow = false;
-  if (document.querySelector('#docEditPanel')?.getAttribute('aria-busy') === 'true') {
-    window.alert('正在保存或更新预览，请完成后再关闭。');
+  if (document.querySelector('#docEditPanel')?.getAttribute('aria-busy') === 'true' || document.querySelector('#projectSettingsDialog')?.getAttribute('aria-busy') === 'true') {
+    window.alert(t('正在保存、导出或更新预览，请完成后再关闭。'));
   } else {
-    const dirty = document.querySelector('#docEditDirtyIndicator')?.classList.contains('is-unsaved');
-    allow = !dirty || window.confirm('还有未保存的修改。关闭编辑窗口将丢弃这些修改，确定关闭？') === true;
+    const dirty = document.querySelector('#docEditDirtyIndicator')?.classList.contains('is-unsaved') || document.querySelector('#projectSettingsDialog')?.dataset.dirty === 'true';
+    allow = !dirty || window.confirm(t('还有未保存的修改。关闭编辑窗口将丢弃这些修改，确定关闭？')) === true;
   }
   await fetch('/__desktop/close-response', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({allow})});
-})().catch(() => window.alert('无法联系本地服务，请先复制保存未保存的内容，再关闭窗口。'));"#;
+})().catch(() => window.alert(document.documentElement.lang === 'en' ? 'Cannot contact the local service. Copy your unsaved work somewhere safe before closing.' : '无法联系本地服务，请先复制保存未保存的内容，再关闭窗口。'));"#;
 fn request_close(app: &AppHandle, exit: bool) {
     let state = app.state::<DesktopState>();
     if state.close_pending.swap(true, Ordering::SeqCst) {
@@ -337,14 +475,15 @@ fn request_close(app: &AppHandle, exit: bool) {
             return;
         }
         let handle = app.clone();
+        let lang = language(app);
         if app
             .run_on_main_thread(move || {
                 let dialog = rfd::AsyncMessageDialog::new()
                     .set_parent(&editor)
                     .set_description(
-                        "本地服务已停止。请确认未保存内容已复制到安全位置，然后关闭编辑窗口。",
+                        lang.text("本地服务已停止。请确认未保存内容已复制到安全位置，然后关闭编辑窗口。", "The local service stopped. Copy unsaved work somewhere safe before closing."),
                     )
-                    .set_title("关闭编辑窗口")
+                    .set_title(lang.text("关闭编辑窗口", "Close editor"))
                     .set_buttons(rfd::MessageButtons::OkCancel)
                     .show();
                 tauri::async_runtime::spawn(async move {
@@ -408,6 +547,7 @@ async fn start_editor(app: &AppHandle, root: &Path) -> Result<()> {
         .env("VIENTO_APP_ROOT", &runtime)
         .env("VIENTO_WORKSPACE_ROOT", root)
         .env("VIENTO_SESSION_TOKEN", &token)
+        .env("VIENTO_PREFERENCES_PATH", preferences_path(app)?)
         .env("PORT", "0")
         .env("DOC_API_HOST", "127.0.0.1")
         .env("DOC_API_REQUIRE_WRITE_AUTH", "0")
@@ -463,6 +603,32 @@ async fn start_editor(app: &AppHandle, root: &Path) -> Result<()> {
                                 }
                             }
                             Some("library") => show_library(&handle),
+                            Some("preferences") => {
+                                if let (Some(request_id), Ok(selected)) = (
+                                    event["id"]
+                                        .as_str()
+                                        .filter(|value| Uuid::parse_str(value).is_ok()),
+                                    serde_json::from_value::<Language>(event["language"].clone()),
+                                ) {
+                                    let result = update_language(&handle, selected);
+                                    let detail = serde_json::json!({ "id": request_id, "ok": result.is_ok(), "error": result.err() });
+                                    if let Some(editor) = handle.get_webview_window("editor") {
+                                        let _ = editor.eval(&format!("window.dispatchEvent(new CustomEvent('viento-language-result', {{detail: {detail}}}));"));
+                                    }
+                                }
+                            }
+                            Some("export") => {
+                                if let (Some(job_id), Some(file_name)) =
+                                    (event["id"].as_str(), event["fileName"].as_str())
+                                {
+                                    tauri::async_runtime::spawn(save_editor_export(
+                                        handle.clone(),
+                                        id.clone(),
+                                        job_id.into(),
+                                        file_name.into(),
+                                    ));
+                                }
+                            }
                             Some("close-response") => {
                                 if let Some(allow) = event["allow"].as_bool() {
                                     finish_close(&handle, allow);
@@ -556,12 +722,18 @@ pub fn run() {
         .manage(DesktopState::default())
         .setup(|app| {
             if let Some(main) = app.get_webview_window("main") {
-                main.set_title(&format!("Viento Studio {} · 作品库", release_version()))?;
+                main.set_title(&format!(
+                    "Viento Studio {} · {}",
+                    release_version(),
+                    language(app.handle()).text("作品库", "Library")
+                ))?;
             }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             library_state,
+            get_language,
+            set_language,
             choose_workspace,
             new_workspace,
             restore_workspace,

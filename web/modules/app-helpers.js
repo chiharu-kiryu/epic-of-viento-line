@@ -1,3 +1,4 @@
+import { t, getLanguage } from '../i18n/index.js';
 import {
   appState as state,
   CATEGORY_LABELS,
@@ -47,7 +48,7 @@ const CATEGORIES_NO_DOC_THUMBNAIL = new Set(['template', 'rule', 'root', 'other'
 
 function getDisplayCategory(doc) {
   const category = doc?.category || 'other';
-  if (state.workspace?.version === 3) return category;
+  if ((state.workspace?.projectTypes || state.workspace?.version === 3)) return category;
   if (category === 'hero') return 'character';
   if (category === 'backstory') return 'story';
   return category;
@@ -452,7 +453,7 @@ function getHeroCount(sourceDocs = state.docs) {
 
 function getTabCounts(source = state.docs) {
   const allDisplayDocs = getHeroDisplayDocs(source, 'all');
-  if (state.workspace?.version === 3) return Object.fromEntries(projectTabs().map((tab) => [tab.id, allDisplayDocs.filter((doc) => docMatchesTab(doc, tab.id)).length]));
+  if ((state.workspace?.projectTypes || state.workspace?.version === 3)) return Object.fromEntries(projectTabs().map((tab) => [tab.id, allDisplayDocs.filter((doc) => docMatchesTab(doc, tab.id)).length]));
   return {
     all: allDisplayDocs.length,
     hero: getHeroCount(source),
@@ -462,8 +463,8 @@ function getTabCounts(source = state.docs) {
 }
 
 function projectTabs() {
-  return state.workspace?.version === 3
-    ? [{ id: 'all', label: '全部' }, ...(state.workspace.documentTypes || []).map((type) => ({ id: `type:${type.id}`, label: type.label }))]
+  return (state.workspace?.projectTypes || state.workspace?.version === 3)
+    ? [{ id: 'all', label: t('全部') }, ...(state.workspace.documentTypes || []).map((type) => ({ id: `type:${type.id}`, label: type.label }))]
     : TAB_DEFINITIONS;
 }
 
@@ -1292,7 +1293,7 @@ function createDocButton(doc, onSelect = () => {}, options = {}) {
     ? (isEditable ? 'editable' : 'readonly')
     : 'hidden';
   const category = getDisplayCategory(doc);
-  const categoryLabel = CATEGORY_LABELS[category] || category || '其他';
+  const categoryLabel = CATEGORY_LABELS[category] || category || t('其他');
   const groupText = doc.group ? `${doc.group}` : '';
   const isHeroDoc = category === 'hero' || doc.category === 'hero';
   const isBackstory = category === 'backstory' || doc.category === 'backstory';
@@ -1313,7 +1314,7 @@ function createDocButton(doc, onSelect = () => {}, options = {}) {
       getHeroFallbackPath(doc),
     ];
     applyImageFallbackChain(img, fallbackChain, doc.name || doc.title || categoryLabel);
-    img.alt = `${doc.name} 缩略图`;
+    img.alt = t`${doc.name} 缩略图`;
     avatar.appendChild(img);
     button.appendChild(avatar);
   } else if (shouldShowThumbnail) {
@@ -1324,7 +1325,7 @@ function createDocButton(doc, onSelect = () => {}, options = {}) {
     image.loading = 'lazy';
     const localPlaceholder = getDocImagePlaceholderPath(doc, doc.name || doc.title || categoryLabel);
     applyImageFallbackChain(image, localPlaceholder ? [localPlaceholder] : [], fallbackLabel);
-    image.alt = `${normalizeValue(doc.name) || categoryLabel} 缩略图`;
+    image.alt = t`${normalizeValue(doc.name) || categoryLabel} 缩略图`;
     avatar.appendChild(image);
     button.appendChild(avatar);
   }
@@ -1349,7 +1350,7 @@ function createDocButton(doc, onSelect = () => {}, options = {}) {
   const rawAttrHint = normalizeValue(doc?.meta?.attribute || doc?.fields?.主属性 || '');
   const normalizedAttrHint = rawAttrHint.replace(/\s+/g, '');
   if (normalizedAttrHint && !RENDER_PLACEHOLDERS.has(normalizedAttrHint.toLowerCase()) && !RENDER_PLACEHOLDERS.has(rawAttrHint)) {
-    hint.textContent = `属性：${rawAttrHint}`;
+    hint.textContent = t`属性：${rawAttrHint}`;
     textWrap.appendChild(titleText);
     textWrap.appendChild(subText);
     textWrap.appendChild(hint);
@@ -1362,7 +1363,7 @@ function createDocButton(doc, onSelect = () => {}, options = {}) {
   if (showEditAccess) {
     permissionTag = document.createElement('div');
     permissionTag.className = isEditable ? 'doc-item-edit-access is-editable' : 'doc-item-edit-access is-readonly';
-    permissionTag.textContent = isEditable ? '可编辑' : '不可编辑';
+    permissionTag.textContent = isEditable ? t('可编辑') : t('不可编辑');
     textWrap.appendChild(permissionTag);
   }
 
@@ -1383,6 +1384,8 @@ function createDetailsGroup(title, count, expanded = true) {
   details.open = expanded;
 
   const summary = document.createElement('summary');
+  summary.setAttribute('data-expand-label', t('展开'));
+  summary.setAttribute('data-collapse-label', t('收起'));
   summary.textContent = `${title}（${count}）`;
   details.appendChild(summary);
 
@@ -1571,7 +1574,7 @@ function formatTime(value) {
   if (!value) {
     return '-';
   }
-  return new Date(value).toLocaleString();
+  return new Date(value).toLocaleString(getLanguage());
 }
 
 function formatSize(bytes) {

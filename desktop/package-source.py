@@ -15,7 +15,7 @@ INPUTS = [".gitattributes", ".gitignore", ".github", "LICENSE", "README.md", "VE
           "package.json", "package-lock.json", "web", "scripts",
           "desktop", "src-tauri", "schemas", "docs"]
 GENERATED = {"src-tauri/target", "src-tauri/binaries", "src-tauri/gen/schemas",
-             "desktop/resources", "desktop/.cache", "web/data"}
+             "desktop/resources", "desktop/.cache", "desktop/ui/i18n", "web/data"}
 
 
 def source_files(directory):
@@ -36,8 +36,8 @@ def source_files(directory):
 
 def main():
     version = (ROOT / "VERSION").read_text().strip()
-    match = re.fullmatch(r"[a-z]\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", version)
-    if not match or json.loads((ROOT / "package.json").read_text())["version"] != f"{match[1]}.{match[2]}.0":
+    match = re.fullmatch(r"[a-z]\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:\.(0|[1-9][0-9]*))?", version)
+    if not match or json.loads((ROOT / "package.json").read_text())["version"] != f"{match[1]}.{match[2]}.{match[3] or '0'}":
         raise ValueError("Application build version does not match VERSION")
     name = f"Viento-Studio_{version}_source"
     destination = Path(sys.argv[1]) if len(sys.argv) == 2 else ROOT / "dist/current" / f"{name}.tar.gz"

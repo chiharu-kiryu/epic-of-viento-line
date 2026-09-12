@@ -22,7 +22,8 @@ test('the core parser is independent of paths and game vocabulary; compatibility
   assert.deepEqual(parseTextContent(source, 'design-data/design-heros/力量/角色'), generic);
   assert.equal(generic.fields.描述, '离开地面');
   assert.equal(generic.fields.灵魂数量, '0');
-  const legacy = parseSourceContent(source, 'design-data/design-heros/力量/角色');
+  assert.deepEqual(parseSourceContent(source, 'design-data/design-heros/力量/角色'), generic);
+  const legacy = parseSourceContent(source, 'design-data/design-heros/力量/角色', { parserProfile: 'legacy-hero' });
   assert.match(legacy.fields.技能1, /描述：离开地面/);
   const portable = parseSourceContent(source, 'documents/renamed.md', { parserProfile: 'legacy-hero' });
   assert.deepEqual(portable, legacy);

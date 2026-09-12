@@ -111,7 +111,7 @@ test('prose punctuation, repeated paragraphs, list entries and headings survive 
 });
 
 test('story previews include dialogue and rules retain tables outside metadata cards', () => {
-  const story = parseSourceContent('# 章节\n\n他问：“你是谁？”\n\n她答：“不知道。”', 'design-data/backstory/故事/第一幕分章/001.md');
+  const story = parseSourceContent('# 章节\n\n他问：“你是谁？”\n\n她答：“不知道。”', 'design-data/backstory/故事/第一幕分章/001.md', { parserProfile: 'prose' });
   const doc = { ...story, category: 'backstory', meta: {} };
   getHeroCardsByCategory(doc);
   assert.equal(doc._contentRenderMode, 'hybrid');

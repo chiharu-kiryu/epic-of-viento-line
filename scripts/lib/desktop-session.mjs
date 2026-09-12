@@ -1,12 +1,13 @@
 import { timingSafeEqual } from 'node:crypto';
 import { readRequestJsonBody } from './doc-server.mjs';
+import fs from 'node:fs/promises';
 
 function equalsSecret(value, expected) {
   if (typeof value !== 'string' || Buffer.byteLength(value) !== Buffer.byteLength(expected)) return false;
   return timingSafeEqual(Buffer.from(value), Buffer.from(expected));
 }
 
-export function createDesktopSession(token = process.env.VIENTO_SESSION_TOKEN) {
+export function createDesktopSession(token = process.env.VIENTO_SESSION_TOKEN, { exports } = {}) {
   if (!token) return null;
   if (!/^[a-f\d-]{32,64}$/i.test(token)) throw new Error('Invalid desktop session token');
   const emit = (event) => console.log(`VIENTO_EVENT ${JSON.stringify(event)}`);
@@ -27,6 +28,37 @@ export function createDesktopSession(token = process.env.VIENTO_SESSION_TOKEN) {
     if (!equalsSecret(cookie?.slice('viento-session='.length), token)) return reject(401, 'Desktop session required');
     if (pathname === '/__desktop/library' && req.method === 'POST') {
       emit({ type: 'library' }); res.writeHead(204); res.end(); return true;
+    }
+    if (pathname === '/__desktop/preferences') {
+      try {
+        if (req.method === 'GET') {
+          let language = 'zh-CN';
+          if (process.env.VIENTO_PREFERENCES_PATH) {
+            try { language = JSON.parse(await fs.readFile(process.env.VIENTO_PREFERENCES_PATH, 'utf8')).language || language; }
+            catch (error) { if (error.code !== 'ENOENT') throw error; }
+          }
+          if (!['zh-CN', 'en'].includes(language)) return reject(400, 'Invalid language preference');
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ language })); return true;
+        }
+        if (req.method === 'POST') {
+          const body = await readRequestJsonBody(req);
+          if (!body || !['zh-CN', 'en'].includes(body.language) || typeof body.id !== 'string' || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(body.id)) return reject(400, 'Invalid language preference');
+          emit({ type: 'preferences', id: body.id, language: body.language });
+          res.writeHead(204); res.end(); return true;
+        }
+        res.setHeader('Allow', 'GET, POST'); return reject(405, 'Method not allowed');
+      } catch (error) { return reject(error.statusCode || 500, 'Unable to read language preferences'); }
+    }
+    if (pathname === '/__desktop/export' && req.method === 'POST') {
+      try {
+        const body = await readRequestJsonBody(req);
+        const job = exports?.get(body.id);
+        if (!job) return reject(410, '导出文件已过期，请重新导出');
+        emit({ type: 'export', id: job.id, fileName: job.fileName });
+        res.writeHead(204); res.end();
+      } catch (error) { return reject(error.statusCode || 400, error.message || '无法保存导出文件'); }
+      return true;
     }
     if (pathname === '/__desktop/close-response' && req.method === 'POST') {
       try {

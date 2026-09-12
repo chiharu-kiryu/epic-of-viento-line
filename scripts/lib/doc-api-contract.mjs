@@ -7,6 +7,9 @@ export const API_PATHS = Object.freeze({
   REBUILD: '/api/rebuild',
   ASSETS: '/api/assets',
   MEDIA_INSERT: '/api/assets/insert',
+  EXPORT: '/api/export',
+  PROJECT: '/api/project',
+  PROJECT_PREVIEW: '/api/project/preview',
 });
 
 export const API_METHODS = Object.freeze({
@@ -192,6 +195,7 @@ export function makeCapabilitiesPayload(editablePrefixes, backstoryMergeMode, ve
       API_PATHS.INDEX,
       API_PATHS.ASSETS,
       API_PATHS.MEDIA_INSERT,
+      API_PATHS.EXPORT,
     ],
     [DOC_CAPABILITIES_FIELDS.backstoryMergeMode]: backstoryMergeMode,
     [DOC_CAPABILITIES_FIELDS.version]: version,
@@ -200,6 +204,7 @@ export function makeCapabilitiesPayload(editablePrefixes, backstoryMergeMode, ve
       [DOC_CAPABILITIES_FIELDS.create]: true,
       [DOC_CAPABILITIES_FIELDS.rebuild]: true,
       media: true,
+      export: true,
     },
   };
 }

@@ -1,3 +1,5 @@
+import { t, getLanguage, onLanguageChange, translatePage, translateMessage } from '../i18n/index.js';
+import { setupSettings } from '../i18n/settings.js';
 import {
   appState as state,
   domElements,
@@ -43,6 +45,8 @@ import { renderStructuredBlocks, hasRenderableToken } from './app-structured.js'
 import { getDocTemplate, DOC_TYPE_TEMPLATE_DEFS } from './app-type-templates.js';
 import { createBlockDraft, serializeBlockDraft, serializeSourceDraft } from './app-editor-draft.js';
 import { setupMediaEditor } from './app-media-editor.js';
+import { setupExport } from './app-export.js';
+import { setupProjectSettings } from './app-project-settings.js';
 import { API_ERRORS, API_RESPONSE } from '../../scripts/lib/doc-api-contract.mjs';
 import {
   detectEditBackendAvailability,
@@ -122,7 +126,6 @@ const LIST_ERROR_SUMMARY_VISIBLE_ENTRIES = 3;
 const LIST_ERROR_SUMMARY_AUTO_OPEN_THRESHOLD = 8;
 const LIST_UI_TEXT = APP_RUNTIME_TEXTS.list;
 const LIST_ERROR_SUMMARY_TEXTS = APP_RUNTIME_TEXTS.list.summary;
-const REBUILD_TEXT = APP_REQUEST_LABELS.rebuildIndex;
 const PAGE_UI_TEXTS = APP_RUNTIME_TEXTS.pageShell;
 const DATA_INDEX_REQUEST_TIMEOUT_MS = 12000;
 const CAPABILITIES_REQUEST_TIMEOUT_MS = 5000;
@@ -161,6 +164,7 @@ let createTemplateToken = 0;
 let editSessionBaselinePath = '';
 let editSessionVersion = '';
 let saveConflictResolver = null;
+let saveConflictView = null;
 let renderedDocRef = null;
 const createTemplateCache = new Map();
 const createTemplateLoadErrorCache = new Map();
@@ -287,7 +291,7 @@ function getEditModeUnavailableText() {
   const reasonHint = APP_ERROR_MESSAGES.editBackendUnavailableReasons?.[reason];
   const messageDetail = reasonHint || detectedEditBackendState.reasonText || APP_ERROR_MESSAGES.editBackendUnavailableReasons?.service_unreachable;
   const attemptSummary = summarizeRequestAttempts(detectedEditBackendState.attempts, {
-    label: '编辑能力检测',
+    label: t('编辑能力检测'),
     maxEntries: 2,
   });
   if (!messageDetail && !attemptSummary) {
@@ -317,18 +321,18 @@ function summarizeAttemptFailureMeta(attempts = []) {
   const firstAt = normalizeDisplayValue(firstFailure?.timestamp);
   const lastAt = normalizeDisplayValue(lastFailure?.timestamp);
 
-  const chunks = [`失败${failedAttempts.length}次`];
+  const chunks = [t`失败${failedAttempts.length}次`];
   if (retryCount > 0) {
-    chunks.push(`可重试${retryCount}次`);
+    chunks.push(t`可重试${retryCount}次`);
   }
   if (reason) {
-    chunks.push(`原因：${reason}`);
+    chunks.push(t`原因：${reason}`);
   }
   if (firstAt) {
-    chunks.push(`首次失败：${firstAt}`);
+    chunks.push(t`首次失败：${firstAt}`);
   }
   if (lastAt && lastAt !== firstAt) {
-    chunks.push(`最近失败：${lastAt}`);
+    chunks.push(t`最近失败：${lastAt}`);
   }
   return chunks.join('；');
 }
@@ -432,7 +436,7 @@ function formatRuntimeErrorRecentFailures(window = []) {
   if (!Array.isArray(window) || window.length === 0) {
     return '';
   }
-  return `最近${window.length}次失败：${window.map(formatRuntimeErrorTimestamp).join(' | ')}`;
+  return t`最近${window.length}次失败：${window.map(formatRuntimeErrorTimestamp).join(' | ')}`;
 }
 
 function getRuntimeErrorDisplayCode(item = {}) {
@@ -443,12 +447,12 @@ function getRuntimeErrorDisplayCode(item = {}) {
   if (item.status) {
     return `HTTP ${normalizeDisplayValue(item.status)}`;
   }
-  return '未标记';
+  return t('未标记');
 }
 
 function createRuntimeErrorCodeFilterButton(code = '', label = '') {
   const normalizedCode = normalizeDisplayValue(code);
-  const normalizedLabel = normalizeDisplayValue(label) || (normalizedCode ? `错误码：${normalizedCode}` : '');
+  const normalizedLabel = normalizeDisplayValue(label) || (normalizedCode ? t`错误码：${normalizedCode}` : '');
   if (!normalizedCode || !normalizedLabel) {
     return null;
   }
@@ -457,7 +461,7 @@ function createRuntimeErrorCodeFilterButton(code = '', label = '') {
   button.className = 'runtime-error-filter-tag';
   button.dataset.runtimeErrorFilter = normalizedCode;
   button.textContent = normalizedLabel;
-  button.title = `按${normalizedLabel}筛选`;
+  button.title = t`按${normalizedLabel}筛选`;
   return button;
 }
 
@@ -504,7 +508,7 @@ function buildRuntimeErrorCodeSummary(runtimeErrors = [], currentFilter = '') {
     codeItem.className = `runtime-error-code-summary-item${isActive ? ' is-active' : ''}`;
     codeItem.textContent = `${code}（${count}）`;
     codeItem.dataset.runtimeErrorFilter = normalizeDisplayValue(code);
-    codeItem.title = isActive ? '取消筛选' : '按该错误码筛选';
+    codeItem.title = isActive ? t('取消筛选') : t('按该错误码筛选');
     return codeItem;
   };
   const clearFilterButton = document.createElement('button');
@@ -512,9 +516,9 @@ function buildRuntimeErrorCodeSummary(runtimeErrors = [], currentFilter = '') {
   if (hasFilter) {
     clearFilterButton.type = 'button';
     clearFilterButton.className = 'runtime-error-code-summary-clear';
-    clearFilterButton.textContent = `清除筛选：${hasFilter}`;
+    clearFilterButton.textContent = t`清除筛选：${hasFilter}`;
     clearFilterButton.dataset.runtimeErrorFilter = '';
-    clearFilterButton.title = '取消筛选';
+    clearFilterButton.title = t('取消筛选');
   }
 
   wrapper.className = 'runtime-error-code-summary';
@@ -522,7 +526,7 @@ function buildRuntimeErrorCodeSummary(runtimeErrors = [], currentFilter = '') {
   summaryBody.className = 'runtime-error-code-summary-body';
   summaryList.className = 'runtime-error-code-summary-list';
 
-  summaryTitle.textContent = `错误码统计（${runtimeErrors.length}）`;
+  summaryTitle.textContent = t`错误码统计（${runtimeErrors.length}）`;
 
   const renderItems = (entries, targetList = summaryList) => {
     for (const [code, count] of entries) {
@@ -547,7 +551,7 @@ function buildRuntimeErrorCodeSummary(runtimeErrors = [], currentFilter = '') {
 
     moreNode.className = 'runtime-error-code-summary-more';
     moreSummary.className = 'runtime-error-code-summary-more-title';
-    moreSummary.textContent = `其余 ${hiddenEntries.length} 项`;
+    moreSummary.textContent = t`其余 ${hiddenEntries.length} 项`;
     moreList.className = 'runtime-error-code-summary-list';
 
     renderItems(hiddenEntries, moreList);
@@ -568,9 +572,9 @@ function getRuntimeErrorTimeWindowText(firstAt = '', lastAt = '') {
     return '';
   }
   if (!firstText || firstText === lastText) {
-    return `首次：${lastText}；最近：${lastText}`;
+    return t`首次：${lastText}；最近：${lastText}`;
   }
-  return `首次：${firstText}；最近：${lastText}`;
+  return t`首次：${firstText}；最近：${lastText}`;
 }
 
 function setListText(message = '') {
@@ -637,7 +641,7 @@ function setAttributeById(elementId, attrName, value) {
   el.setAttribute(attrName, safeValue);
 }
 
-function setStaticUiTexts() {
+function setStaticUiTexts(initial = true) {
   const ui = PAGE_UI_TEXTS || {};
   if (!ui || typeof ui !== 'object') {
     return;
@@ -672,7 +676,7 @@ function setStaticUiTexts() {
   setAttributeById('searchClear', 'title', ui.searchClearText);
 
   setAttributeById('categoryTabs', 'aria-label', ui.categoryTabsAriaLabel);
-  setTextContentById('status', LIST_UI_TEXT.status.loadingIndex);
+  if (initial) setTextContentById('status', LIST_UI_TEXT.status.loadingIndex);
 
   setTextContentById('runtimeErrorPanelTitle', ui.runtimeErrorTitle);
   if (runtimeErrorClearBtnEl) {
@@ -688,12 +692,13 @@ function setStaticUiTexts() {
   setAttributeById('leftLegend', 'aria-label', ui.legendAriaLabel);
   setTextContentById('leftLegendTitle', ui.legendTitle);
 
-  if (listEl) {
+  if (initial && listEl) {
     listEl.textContent = ui.docListLoadingPlaceholder || LIST_UI_TEXT.status.loadingList;
   }
+  if (initial) {
   setTextContentById('docTypeChip', ui.docTypeChipPlaceholder);
   setTextContentById('docGroupChip', ui.docGroupChipPlaceholder);
-  const docPathChipPrefix = ui.docPathChipPrefix || LIST_UI_TEXT.status.pathChipPrefix || '路径';
+  const docPathChipPrefix = ui.docPathChipPrefix || LIST_UI_TEXT.status.pathChipPrefix || t('路径');
   const docPathChipSuffix = ui.docPathChipSuffix || '—';
   setTextContentById('docPathChip', `${docPathChipPrefix}：${docPathChipSuffix}`);
   setTextContentById('docTitle', ui.docTitlePlaceholder);
@@ -702,6 +707,7 @@ function setStaticUiTexts() {
     editPathEl.textContent = ui.editableSourcePrefixPlaceholder;
   }
   setTextContentById('docEditDirtyIndicator', ui.unsavedIndicatorText);
+  }
 
   if (editCreateBtnEl) {
     editCreateBtnEl.textContent = ui.createButtonText;
@@ -730,13 +736,56 @@ function setStaticUiTexts() {
     editBlockModeBtnEl.textContent = ui.blockModeText;
   }
   setAttributeById('docSourceEditor', 'placeholder', ui.editorPlaceholderText);
-  setTextContentById('docContent', ui.contentPlaceholderText);
+  if (initial) setTextContentById('docContent', ui.contentPlaceholderText);
 
   setTextContentById('docSaveConflictDialogTitle', ui.conflictDialogTitle);
   setTextContentById('docSaveConflictReloadBtn', ui.conflictReloadActionText);
   setTextContentById('docSaveConflictKeepBtn', ui.conflictKeepActionText);
   setTextContentById('docSaveConflictForceBtn', ui.conflictForceActionText);
   setTextContentById('docSaveConflictCancelBtn', ui.conflictCancelActionText);
+}
+
+function refreshLanguageUi() {
+  // Update labels in place: source/blocks, selection, undo history and the
+  // editing session must not be recreated just to change interface language.
+  setStaticUiTexts(false);
+  translatePage();
+  const groupStates = Array.from(listEl?.querySelectorAll('details') || [], (node) => node.open);
+  const listScroll = listEl?.scrollTop || 0;
+  cachedListRenderState = { filtered: null, activeTab: null, groups: null };
+  if (state.generatedAt) state.generatedStatus = APP_ERROR_MESSAGES.generatedStatusTemplate(formatTime(state.generatedAt));
+  renderFilteredDocs(state.activePath, { preserveSelection: true });
+  Array.from(listEl?.querySelectorAll('details') || []).forEach((node, index) => {
+    if (index < groupStates.length) node.open = groupStates[index];
+  });
+  if (listEl) listEl.scrollTop = listScroll;
+  const doc = getActiveDoc();
+  if (doc) {
+    const detailsOpen = metaEl?.querySelector('.document-file-details')?.open;
+    renderMeta(doc);
+    const details = metaEl?.querySelector('.document-file-details');
+    if (details && detailsOpen !== undefined) details.open = detailsOpen;
+    const navigation = renderDocumentNavigation(doc);
+    const previous = sectionEl?.querySelector('.document-navigation');
+    if (previous && navigation) previous.replaceWith(navigation);
+    else if (navigation) sectionEl?.prepend(navigation);
+  }
+  for (const item of editBlockEditorEl?.querySelectorAll('.doc-block-editor-item') || []) {
+    const editor = item.querySelector('textarea');
+    const label = item.querySelector('.doc-block-editor-label');
+    const type = APP_RUNTIME_TEXTS.editBlock.typeLabels[editor.dataset.blockType] || APP_RUNTIME_TEXTS.editBlock.defaultBlockType;
+    label.textContent = `${APP_RUNTIME_TEXTS.editBlock.blockTypePrefix} ${Number(editor.dataset.blockIndex) + 1} · ${type}`;
+    editor.setAttribute('aria-label', label.textContent);
+  }
+  if (editStatusEl) editStatusEl.textContent = translateMessage(editStatusEl.textContent);
+  if (state.isCreating && editPathEl) editPathEl.textContent = `${APP_RUNTIME_TEXTS.create.sourcePrefix}${getCreateTypeLabel(state.activeCreateType)}${APP_RUNTIME_TEXTS.create.sourceTypeSuffix}${createPathInputEl.value}`;
+  else if (editPathEl) editPathEl.textContent = doc ? `${APP_RUNTIME_TEXTS.editPath.sourcePrefix}${getSourcePath(doc)}` : APP_RUNTIME_TEXTS.editPath.sourceMissing;
+  refreshEditButtons();
+  updateEditUnsavedUi();
+  setModeUi();
+  updateEmptyProject();
+  renderRuntimeErrorPanel();
+  refreshSaveConflictTexts();
 }
 
 function createListErrorSummaryNode(totalErrorCount, errorCountsByContext) {
@@ -881,7 +930,7 @@ function summarizeRequestAttempts(attempts = [], options = {}) {
     return '';
   }
   const maxEntries = Number.isFinite(options.maxEntries) ? Math.max(1, Math.floor(options.maxEntries)) : 3;
-  const label = normalizeDisplayValue(options.label || '请求尝试');
+  const label = normalizeDisplayValue(options.label || t('请求尝试'));
   const normalizedItems = attempts
     .map((entry) => {
       const normalizedEntry = entry && typeof entry === 'object' ? entry : {};
@@ -895,7 +944,7 @@ function summarizeRequestAttempts(attempts = [], options = {}) {
       const suffixParts = [status, statusText, normalizedEntry.message || '', attemptTime]
         .map((item) => normalizeDisplayValue(item))
         .filter(Boolean);
-      const suffix = suffixParts.length ? `（${normalizedEntry.ok ? '成功' : '失败'}：${suffixParts.join(' ')}）` : `${normalizedEntry.ok ? '（成功）' : '（失败）'}`;
+      const suffix = suffixParts.length ? `（${normalizedEntry.ok ? t('成功') : t('失败')}：${suffixParts.join(' ')}）` : `${normalizedEntry.ok ? t('（成功）') : t('（失败）')}`;
       return `${url}${suffix}`;
     })
     .filter(Boolean)
@@ -904,7 +953,7 @@ function summarizeRequestAttempts(attempts = [], options = {}) {
   if (normalizedItems.length === 0) {
     return '';
   }
-  return `${label}：${normalizedItems.join('；')}${attempts.length > maxEntries ? `；…共${attempts.length}次` : ''}`;
+  return `${label}：${normalizedItems.join('；')}${attempts.length > maxEntries ? t`；…共${attempts.length}次` : ''}`;
 }
 
 function enrichRequestError(error, attempts = [], fallbackMessage = '') {
@@ -934,7 +983,7 @@ function getFriendlyRequestError(error, options = {}) {
     return APP_ERROR_MESSAGES.serviceUnavailable;
   }
   if (error.name === 'AbortError') {
-    return '请求已取消';
+    return t('请求已取消');
   }
   if (error.name === 'TypeError') {
     return APP_ERROR_MESSAGES.serviceUnavailable;
@@ -949,10 +998,10 @@ function getFriendlyRequestError(error, options = {}) {
       const payloadErrorCode = normalizeDisplayValue(error?.code || error?.payload?.[API_RESPONSE.errorCode] || '').toLowerCase();
       const attemptSummary = summarizeRequestAttempts(error?.attempts, options);
       if (requestId) {
-        suffixes.push(`请求ID：${requestId}`);
+        suffixes.push(t`请求ID：${requestId}`);
       }
       if (payloadErrorCode) {
-        suffixes.push(`错误码：${payloadErrorCode}`);
+        suffixes.push(t`错误码：${payloadErrorCode}`);
       }
       if (attemptSummary) {
         suffixes.push(attemptSummary);
@@ -981,7 +1030,7 @@ function getFriendlyRequestError(error, options = {}) {
       return withMeta(baseText);
     }
     if (status === 405) {
-      return withMeta('该接口不支持当前请求方法，请核对调用方式');
+      return withMeta(t('该接口不支持当前请求方法，请核对调用方式'));
     }
     if (status === 415) {
       const details = APP_ERROR_MESSAGES.requestUnsupportedMediaTypeHint
@@ -1015,10 +1064,10 @@ function getFriendlyRequestError(error, options = {}) {
   const attemptSummary = summarizeRequestAttempts(error?.attempts, options);
   const requestMetadataParts = [];
   if (requestId) {
-    requestMetadataParts.push(`请求ID：${requestId}`);
+    requestMetadataParts.push(t`请求ID：${requestId}`);
   }
   if (payloadErrorCode) {
-    requestMetadataParts.push(`错误码：${payloadErrorCode}`);
+    requestMetadataParts.push(t`错误码：${payloadErrorCode}`);
   }
   if (attemptSummary) {
     requestMetadataParts.push(attemptSummary);
@@ -1170,8 +1219,8 @@ function renderRuntimeErrorPanel() {
     emptyNode.className = 'runtime-error-item';
     emptySummary.className = 'runtime-error-item-summary';
     emptyContext.className = 'runtime-error-item-context';
-    emptySummary.textContent = `当前筛选“${runtimeErrorCodeFilter}”暂无匹配错误`;
-    emptyContext.textContent = '可点“清除筛选”重新查看全部';
+    emptySummary.textContent = t`当前筛选“${runtimeErrorCodeFilter}”暂无匹配错误`;
+    emptyContext.textContent = t('可点“清除筛选”重新查看全部');
     emptyNode.appendChild(emptyContext);
     emptyNode.appendChild(emptySummary);
     fragment.appendChild(emptyNode);
@@ -1188,10 +1237,10 @@ function renderRuntimeErrorPanel() {
       const itemCode = getRuntimeErrorDisplayCode(item);
       const requestMetaParts = [];
       if (item.requestId) {
-        requestMetaParts.push(`请求ID：${item.requestId}`);
+        requestMetaParts.push(t`请求ID：${item.requestId}`);
       }
       if (item.status) {
-        requestMetaParts.push(`状态：HTTP ${item.status}`);
+        requestMetaParts.push(t`状态：HTTP ${item.status}`);
       }
       const requestMetaText = requestMetaParts.length
         ? `（${requestMetaParts.join('；')}）`
@@ -1202,11 +1251,11 @@ function renderRuntimeErrorPanel() {
       summary.className = 'runtime-error-item-summary';
       summary.textContent = `${item.message}${countText}${timeWindowText ? ` · ${timeWindowText}` : ''}${requestMetaText}`;
       context.className = 'runtime-error-item-context';
-      context.textContent = `来源：${sourceContextText}`;
+      context.textContent = t`来源：${sourceContextText}`;
       detail.className = 'runtime-error-item-detail';
       const detailParts = [];
       if (sourceContextText) {
-        detailParts.push(`来源：${sourceContextText}`);
+        detailParts.push(t`来源：${sourceContextText}`);
       }
       if (timeWindowText) {
         detailParts.push(timeWindowText);
@@ -1220,7 +1269,7 @@ function renderRuntimeErrorPanel() {
       detail.textContent = detailParts.filter(Boolean).join('；');
 
       const detailFilterCode = itemCode;
-      const detailFilterLabel = item.errorCode ? `错误码：${item.errorCode}` : (item.status ? `状态：HTTP ${item.status}` : `代码：${itemCode}`);
+      const detailFilterLabel = item.errorCode ? t`错误码：${item.errorCode}` : (item.status ? t`状态：HTTP ${item.status}` : t`代码：${itemCode}`);
       const filterTag = createRuntimeErrorCodeFilterButton(detailFilterCode, detailFilterLabel);
       if (filterTag) {
         if (detail.textContent) {
@@ -1375,7 +1424,7 @@ function isInEditSession() {
 }
 
 function isEditorWriteBusy() {
-  return state.isSaving || state.isRebuilding || state.isImportingMedia;
+  return state.isSaving || state.isRebuilding || state.isImportingMedia || state.isExporting || state.isConfiguringProject;
 }
 
 function isEditorBusy() {
@@ -1395,7 +1444,7 @@ function syncEditorBusyUi() {
   syncEditorLayout();
   editPanelEl?.setAttribute('aria-busy', String(writeBusy));
   if (editSaveBtnEl && writeBusy) {
-    editSaveBtnEl.textContent = state.isImportingMedia ? '正在插入素材…' : state.isRebuilding ? '更新预览中…' : '保存中…';
+    editSaveBtnEl.textContent = state.isExporting ? t('正在导出…') : state.isImportingMedia ? t('正在插入素材…') : state.isRebuilding ? t('更新预览中…') : t('保存中…');
   }
   if (editEditorEl) editEditorEl.readOnly = busy;
   editBlockEditorEl?.querySelectorAll('textarea').forEach((editor) => { editor.readOnly = busy; });
@@ -1422,6 +1471,7 @@ function mediaDraftContext(preferredInput = null) {
   const input = inputs.includes(preferredInput) ? preferredInput : inputs[0];
   if (!input) return null;
   return { input, start: input.selectionStart ?? input.value.length, end: input.selectionEnd ?? input.value.length,
+    documentType: state.isCreating ? state.activeCreateType : getActiveDoc()?.category,
     content: getCurrentEditContent(), path: state.isCreating ? state.activeCreatePath : getSourcePath(getActiveDoc()).replace(/^docs-standard\//, '') };
 }
 
@@ -1536,6 +1586,7 @@ function setSaveConflictDialogMode(mode = 'default') {
 }
 
 function closeSaveConflictDialog() {
+  saveConflictView = null;
   if (!saveConflictDialogEl) {
     return;
   }
@@ -1565,13 +1616,8 @@ function openSaveConflictDialog(conflictPayload, options = {}) {
     resolveSaveConflictAction('cancel');
   }
 
-  saveConflictDialogTitleEl.textContent = mode === 'force'
-    ? APP_ERROR_MESSAGES.forceSaveConfirmTitle
-    : APP_ERROR_MESSAGES.saveConflictTitle;
-  saveConflictDialogMessageEl.textContent = mode === 'force'
-    ? renderForceConfirmMessagePayload(conflictPayload)
-    : renderConflictMessagePayload(conflictPayload);
-  setSaveConflictDialogMode(mode);
+  saveConflictView = { conflictPayload, mode };
+  refreshSaveConflictTexts();
   if (saveConflictDialogEl.classList.contains('is-hidden')) {
     saveConflictDialogEl.classList.remove('is-hidden');
   }
@@ -1579,6 +1625,18 @@ function openSaveConflictDialog(conflictPayload, options = {}) {
   return new Promise((resolve) => {
     saveConflictResolver = resolve;
   });
+}
+
+function refreshSaveConflictTexts() {
+  if (!saveConflictView) return;
+  const { conflictPayload, mode } = saveConflictView;
+  saveConflictDialogTitleEl.textContent = mode === 'force'
+    ? APP_ERROR_MESSAGES.forceSaveConfirmTitle
+    : APP_ERROR_MESSAGES.saveConflictTitle;
+  saveConflictDialogMessageEl.textContent = mode === 'force'
+    ? renderForceConfirmMessagePayload(conflictPayload)
+    : renderConflictMessagePayload(conflictPayload);
+  setSaveConflictDialogMode(mode);
 }
 
 async function handleSaveConflict(doc, conflictPayload) {
@@ -1646,7 +1704,7 @@ function updateEditUnsavedUi() {
   if (editDirtyIndicatorEl) {
     editDirtyIndicatorEl.classList.toggle('is-hidden', !inSession);
     editDirtyIndicatorEl.classList.toggle('is-unsaved', showUnsaved);
-    editDirtyIndicatorEl.textContent = showUnsaved ? '未保存' : state.isCreating ? '新草稿' : '与文件一致';
+    editDirtyIndicatorEl.textContent = showUnsaved ? t('未保存') : state.isCreating ? t('新草稿') : t('与文件一致');
   }
   if (editSaveBtnEl) {
     editSaveBtnEl.classList.toggle('doc-btn-unsaved', showUnsaved);
@@ -1655,7 +1713,7 @@ function updateEditUnsavedUi() {
     const content = inSession ? getCurrentEditDraftContent() : '';
     const characters = Array.from(content.replace(/\s/g, '')).length;
     const lines = content ? content.split(/\r\n|\r|\n/).length : 0;
-    editMetricsEl.textContent = inSession ? `${characters.toLocaleString('zh-CN')} 字 · ${lines} 行` : '';
+    editMetricsEl.textContent = inSession ? t`${characters.toLocaleString(getLanguage())} 字 · ${lines} 行` : '';
   }
 }
 
@@ -1668,10 +1726,10 @@ function syncEditorLayout() {
   if (sidebarToggleBtnEl) {
     sidebarToggleBtnEl.hidden = !editingMode;
     sidebarToggleBtnEl.setAttribute('aria-expanded', String(!state.isSidebarCollapsed));
-    sidebarToggleBtnEl.setAttribute('aria-label', state.isSidebarCollapsed ? '显示文档目录' : '收起文档目录');
-    sidebarToggleBtnEl.setAttribute('title', state.isSidebarCollapsed ? '显示文档目录' : '收起目录，专注编辑');
+    sidebarToggleBtnEl.setAttribute('aria-label', state.isSidebarCollapsed ? t('显示文档目录') : t('收起文档目录'));
+    sidebarToggleBtnEl.setAttribute('title', state.isSidebarCollapsed ? t('显示文档目录') : t('收起目录，专注编辑'));
   }
-  if (sidebarToggleLabelEl) sidebarToggleLabelEl.textContent = state.isSidebarCollapsed ? '显示目录' : '收起目录';
+  if (sidebarToggleLabelEl) sidebarToggleLabelEl.textContent = state.isSidebarCollapsed ? t('显示目录') : t('收起目录');
   if (sidebarBackdropEl) sidebarBackdropEl.hidden = !editingMode || state.isSidebarCollapsed;
 }
 
@@ -1879,6 +1937,8 @@ function getCreateTypeDisplayList() {
 }
 
 function getCreateDefaultNameByType(type = '') {
+  const projectType = getProjectCreateType(type);
+  if (projectType) return `${APP_RUNTIME_TEXTS.create.prefix}${projectType.label}`;
   const template = getProjectCreateType(type) || getDocTemplate(type);
   if (!template) {
     return APP_RUNTIME_TEXTS.create.defaultName;
@@ -2113,7 +2173,7 @@ function ensureMarkdownLikeExtension(sourcePath) {
 }
 
 function getCreateFileExtension(type) {
-  if (state.workspace?.version !== 3) return 'txt';
+  if (!state.workspace?.projectTypes && state.workspace?.version !== 3) return 'txt';
   return getProjectCreateType(type)?.template?.match(/\.(md|txt|json|ya?ml)$/i)?.[1].toLowerCase() || 'md';
 }
 
@@ -2222,7 +2282,7 @@ function startRebuildProgressIndicator() {
   rebuildProgressStart = Date.now();
 
   if (editRebuildBtnEl && !editRebuildBtnEl.dataset.rebuildText) {
-    editRebuildBtnEl.dataset.rebuildText = editRebuildBtnEl.textContent || REBUILD_TEXT;
+    editRebuildBtnEl.dataset.rebuildText = editRebuildBtnEl.textContent || APP_REQUEST_LABELS.rebuildIndex;
   }
   if (editRebuildBtnEl) {
     editRebuildBtnEl.classList.add('is-loading');
@@ -2246,7 +2306,7 @@ function stopRebuildProgressIndicator() {
   }
   if (editRebuildBtnEl) {
     editRebuildBtnEl.classList.remove('is-loading');
-    editRebuildBtnEl.textContent = editRebuildBtnEl.dataset.rebuildText || REBUILD_TEXT;
+    editRebuildBtnEl.textContent = translateMessage(editRebuildBtnEl.dataset.rebuildText || APP_REQUEST_LABELS.rebuildIndex);
   }
 }
 
@@ -3054,7 +3114,7 @@ function buildHeroSkillCards(doc) {
 }
 
 function removeDuplicateHeroSkillCards() {
-  const removeTitles = new Set(APP_RUNTIME_TEXTS.heroSkill.duplicateSectionTitles || []);
+  const removeTitles = new Set(['技能树', '技能说明']);
   const cards = sectionEl.querySelectorAll('.meta-card');
   for (const card of cards) {
     const title = card.querySelector('h3');
@@ -3082,7 +3142,8 @@ function renderSectionCards(doc) {
   sectionEl.innerHTML = '';
   const generic = doc.layout?.schemaVersion === 'viento-layout-v1';
   sectionEl.classList.toggle('document-layout', generic);
-  renderDocumentNavigation(doc);
+  const navigation = renderDocumentNavigation(doc);
+  if (navigation) sectionEl.appendChild(navigation);
   const sectionCards = getHeroCardsByCategory(doc);
   for (const card of sectionCards) {
     if (card) {
@@ -3111,13 +3172,13 @@ function renderDocumentNavigation(doc) {
   if (!owners.length && !doc.ownedDocuments?.length) return;
   const navigation = document.createElement('nav');
   navigation.className = 'document-navigation';
-  navigation.setAttribute('aria-label', '档案与附属内容');
+  navigation.setAttribute('aria-label', t('档案与附属内容'));
   for (const owner of owners) {
-    const button = documentLinkButton({ ...owner, title: `返回 ${owner.title}`, slot: '' });
+    const button = documentLinkButton({ ...owner, title: t`返回 ${owner.title}`, slot: '' });
     navigation.appendChild(button);
   }
   if (parent) {
-    const main = documentLinkButton({ path: parent.path, title: '基本档案' });
+    const main = documentLinkButton({ path: parent.path, title: t('基本档案') });
     main.classList.toggle('is-active', parent.path === doc.path);
     main.setAttribute('aria-current', parent.path === doc.path ? 'page' : 'false');
     navigation.appendChild(main);
@@ -3132,7 +3193,7 @@ function renderDocumentNavigation(doc) {
   if (parent !== doc) {
     for (const child of doc.ownedDocuments || []) navigation.appendChild(documentLinkButton(child));
   }
-  sectionEl.appendChild(navigation);
+  return navigation;
 }
 
 function renderOwnedDocumentList(doc, ancestors = new Set()) {
@@ -3214,7 +3275,7 @@ function renderMeta(doc) {
     const details = document.createElement('details');
     details.className = 'document-file-details';
     const summary = document.createElement('summary');
-    summary.textContent = '文件信息';
+    summary.textContent = t('文件信息');
     details.appendChild(summary);
     metaEl.appendChild(details);
     metadataTarget = details;
@@ -3243,7 +3304,7 @@ function setEditorStatus(message = '') {
 function setEditButtons({ isEditing, isCreating, canEdit }) {
   const editModeAvailable = isEditModeActive();
   const isCreateMode = !!isCreating;
-  const saveText = isCreateMode ? '创建文档' : PAGE_UI_TEXTS.saveButtonText;
+  const saveText = isCreateMode ? t('创建文档') : PAGE_UI_TEXTS.saveButtonText;
   const isEditorVisible = isEditing || isCreateMode;
 
   if (!editModeAvailable) {
@@ -3434,7 +3495,7 @@ async function enterCreateMode() {
   contentEl.classList.toggle('is-empty', false);
   editEditorEl?.setSelectionRange?.(0, 0);
   if (editEditorEl) editEditorEl.scrollTop = 0;
-  setEditorStatus(APP_ERROR_MESSAGES.createDocHintTemplate('创建文档'));
+  setEditorStatus(APP_ERROR_MESSAGES.createDocHintTemplate(t('创建文档')));
 }
 
 async function fetchEditableSource(pathValue) {
@@ -3466,7 +3527,7 @@ function fillSourcePreview(doc, sourcePath, options = {}) {
   const sourceVersion = typeof doc._sourceVersion === 'string' ? doc._sourceVersion : '';
   if (editPathEl) {
     editPathEl.textContent = sourcePath
-      ? `源文件：${canonicalizeSourcePath(sourcePath)}`
+      ? t`源文件：${canonicalizeSourcePath(sourcePath)}`
       : `${APP_RUNTIME_TEXTS.editPath.sourcePrefix}${APP_RUNTIME_TEXTS.editPath.sourceMissing}`;
     editPathEl.setAttribute('title', canonicalizeSourcePath(sourcePath));
   }
@@ -3628,8 +3689,8 @@ async function saveNewDoc() {
       : payloadErrorCode === DOC_WRITE_ERROR_MISSING_CONTENT
         ? APP_ERROR_MESSAGES.saveMissingContent
         : payloadErrorCode === DOC_WRITE_ERROR_BAD_PATH || errorStatus === 400
-          ? `${APP_REQUEST_LABELS.createDoc}失败：${requestMessage}`
-          : `${APP_REQUEST_LABELS.createDoc}失败：${logRuntimeErrorOrMessage(APP_REQUEST_LABELS.createDoc, error) || requestMessage}`;
+          ? t`${APP_REQUEST_LABELS.createDoc}失败：${requestMessage}`
+          : t`${APP_REQUEST_LABELS.createDoc}失败：${logRuntimeErrorOrMessage(APP_REQUEST_LABELS.createDoc, error) || requestMessage}`;
     setEditorStatus(message);
     if (editSaveBtnEl) {
       editSaveBtnEl.disabled = false;
@@ -3791,7 +3852,7 @@ async function saveExistingDoc(options = {}) {
     const requestMessage = getFriendlyRequestError(error);
     const message = statusCode === 409
       ? `${APP_ERROR_MESSAGES.saveConflict}：${requestMessage}`
-        : `${APP_REQUEST_LABELS.saveDoc}失败：${logRuntimeErrorOrMessage(APP_REQUEST_LABELS.saveDoc, error) || requestMessage}`;
+        : t`${APP_REQUEST_LABELS.saveDoc}失败：${logRuntimeErrorOrMessage(APP_REQUEST_LABELS.saveDoc, error) || requestMessage}`;
     setEditorStatus(message);
     if (editSaveBtnEl) {
       editSaveBtnEl.disabled = false;
@@ -3842,7 +3903,7 @@ async function rebuildIndexForDoc(doc, options = {}) {
     setEditorStatus(`${APP_ERROR_MESSAGES.rebuildSuccess}${APP_ERROR_MESSAGES.rebuildElapsedTemplate(elapsed)}`);
   } catch (error) {
     const message = logRuntimeErrorOrMessage(APP_REQUEST_LABELS.rebuildIndex, error) || getFriendlyRequestError(error);
-    setEditorStatus(`${APP_REQUEST_LABELS.rebuildIndex}失败：${message}`);
+    setEditorStatus(t`${APP_REQUEST_LABELS.rebuildIndex}失败：${message}`);
   } finally {
     stopRebuildProgressIndicator();
     state.isRebuilding = false;
@@ -3895,9 +3956,9 @@ function updateEmptyProject() {
   setEditorPanelVisibility(canCreate);
   setEditButtons({ isEditing: false, isCreating: false, canEdit: false });
   if (editPathEl) editPathEl.textContent = '';
-  if (titleEl) titleEl.textContent = state.workspace.name || '新的作品';
-  if (subtitleEl) subtitleEl.textContent = '从第一份档案开始，建立你的角色、故事与世界。';
-  if (contentEl) contentEl.textContent = canCreate ? '点击“新建文档”，选择类型和模板开始写作。' : (hasEditableBackend() ? '切换到“编辑”，即可新建第一份文档。' : '这个项目还没有文档。');
+  if (titleEl) titleEl.textContent = state.workspace.name || t('新的作品');
+  if (subtitleEl) subtitleEl.textContent = t('从第一份档案开始，建立你的角色、故事与世界。');
+  if (contentEl) contentEl.textContent = canCreate ? t('点击“新建文档”，选择类型和模板开始写作。') : (hasEditableBackend() ? t('切换到“编辑”，即可新建第一份文档。') : t('这个项目还没有文档。'));
 }
 
 async function syncDocEditorSource(doc) {
@@ -4596,7 +4657,7 @@ function renderFilteredDocs(preferredPath = '', options = {}) {
     targetPath = filtered[0].path;
   }
 
-  selectDoc(targetPath, { allowDuringWrite: options.allowDuringWrite === true });
+  if (!options.preserveSelection) selectDoc(targetPath, { allowDuringWrite: options.allowDuringWrite === true });
 
   if (!skipTabs) {
     renderTabsNow();
@@ -4650,7 +4711,7 @@ function selectDoc(pathValue, options = {}) {
         .catch((error) => {
           if (state.activePath === doc.path) {
             const message = logRuntimeErrorOrMessage(APP_REQUEST_LABELS.readSource, error) || getFriendlyRequestError(error);
-            setEditorStatus(`${APP_REQUEST_LABELS.readSource}失败：${message}`);
+            setEditorStatus(t`${APP_REQUEST_LABELS.readSource}失败：${message}`);
           }
         });
     }
@@ -4878,6 +4939,7 @@ async function loadData(preferredPath = '', options = {}) {
     cachedListGroups.filtered = null;
     cachedListGroups.groups = null;
     cachedGroupedDocs = new WeakMap();
+    state.generatedAt = payload.generatedAt;
     state.generatedStatus = APP_ERROR_MESSAGES.generatedStatusTemplate(formatTime(payload.generatedAt));
     renderTabsNow();
     renderFilteredDocs(normalizedPreferredPath || state.activePath, {
@@ -4903,6 +4965,21 @@ async function loadData(preferredPath = '', options = {}) {
 }
 
 async function initApp() {
+  await setupSettings();
+  setupProjectSettings({
+    getContext: () => ({ workspace: state.workspace, editable: isEditModeActive(), dirty: state.editHasUnsavedChanges, creating: state.isCreating, busy: isEditorBusy() }),
+    setBusy: (busy) => { state.isConfiguringProject = busy; refreshEditButtons(); },
+    applied: async () => { createTemplateCache.clear(); createTemplateLoadErrorCache.clear(); await loadData(state.activePath, { forceCacheBust: true }); },
+  });
+  onLanguageChange(refreshLanguageUi);
+  setupExport({
+    getContext: () => ({
+      path: getSourcePath(getActiveDoc()).replace(/^docs-standard\//, ''),
+      title: getActiveDoc()?.title || getActiveDoc()?.name || '',
+      dirty: state.editHasUnsavedChanges, creating: state.isCreating, busy: isEditorBusy(),
+    }),
+    setBusy: (busy) => { state.isExporting = busy; refreshEditButtons(); },
+  });
   mediaEditorController = setupMediaEditor({
     isEditable: () => isInEditSession() && isEditModeActive(),
     isBusy: isEditorBusy,
@@ -5207,7 +5284,7 @@ async function initApp() {
     });
 
     window.addEventListener('beforeunload', (event) => {
-      if (!state.editHasUnsavedChanges) {
+      if (!state.editHasUnsavedChanges && document.getElementById('projectSettingsDialog')?.dataset.dirty !== 'true') {
         return;
       }
       event.preventDefault();

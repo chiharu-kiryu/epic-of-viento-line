@@ -6,7 +6,7 @@ import { appStoragePaths, readWorkspaceSelector } from '../scripts/lib/app-stora
 // Only application build output belongs here. Never add dist/, workspaces/,
 // .viento/, Git history or arbitrary user-supplied paths to this list.
 const generated = ['src-tauri/target', 'src-tauri/binaries', 'src-tauri/gen/schemas',
-  'desktop/resources', 'desktop/.cache'];
+  'desktop/resources', 'desktop/.cache', 'desktop/ui/i18n'];
 const root = fileURLToPath(new URL('../', import.meta.url));
 
 export async function cleanBuilds(appRoot, { dryRun = false, storage = appStoragePaths() } = {}) {

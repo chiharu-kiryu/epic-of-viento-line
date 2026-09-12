@@ -1,0 +1,125 @@
+{
+  "format": "viento-project-definition",
+  "version": 1,
+  "example": {
+    "id": "epic-of-viento-line",
+    "title": "Epic of Viento Line",
+    "description": "官方示范项目：角色、附属背景故事、世界设定与素材的一体化设计工作流。"
+  },
+  "documentTypes": [
+    {
+      "id": "document",
+      "label": "作品说明",
+      "directory": "",
+      "parserProfile": "structured"
+    },
+    {
+      "id": "character",
+      "label": "英雄",
+      "directory": "design-heros",
+      "parserProfile": "structured",
+      "template": "design-heros/模板-英雄",
+      "parserOptions": {
+        "multilineFieldKeys": [
+          "天生技能",
+          "先天技能",
+          "技能1",
+          "技能2",
+          "技能3",
+          "技能4",
+          "阳印",
+          "阴印",
+          "铸魔",
+          "铸神"
+        ],
+        "boundaryFieldKeys": [
+          "_header",
+          "英雄名",
+          "姓名",
+          "英文名",
+          "英文名称",
+          "主属性",
+          "基础攻击间隔",
+          "基础移动速度"
+        ]
+      },
+      "fieldGroups": [
+        {
+          "title": "身份",
+          "fields": [
+            "_header",
+            "英雄名",
+            "姓名",
+            "英文名",
+            "英文名称",
+            "主属性"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "story",
+      "label": "故事",
+      "directory": "backstory",
+      "parserProfile": "prose",
+      "template": "backstory/模板-背景故事",
+      "parserOptions": {
+        "allowedFieldKeys": [
+          "_header",
+          "正文",
+          "内容",
+          "剧情",
+          "正文内容"
+        ]
+      }
+    },
+    {
+      "id": "item",
+      "label": "物品",
+      "directory": "design-item",
+      "parserProfile": "structured",
+      "template": "design-item/模板-物品"
+    },
+    {
+      "id": "skill",
+      "label": "技能",
+      "directory": "design-skills",
+      "parserProfile": "structured",
+      "template": "design-skills/模板-技能"
+    },
+    {
+      "id": "unit",
+      "label": "单位",
+      "directory": "design-units",
+      "parserProfile": "structured",
+      "template": "design-units/模板-单位"
+    },
+    {
+      "id": "building",
+      "label": "建筑",
+      "directory": "design-building",
+      "parserProfile": "structured",
+      "template": "design-building/模板-建筑"
+    },
+    {
+      "id": "scene",
+      "label": "场景",
+      "directory": "design-scenes",
+      "parserProfile": "structured",
+      "template": "design-scenes/模板-场景"
+    },
+    {
+      "id": "rule",
+      "label": "规则",
+      "directory": "design-rules",
+      "parserProfile": "structured",
+      "template": "design-rules/模板-规则"
+    },
+    {
+      "id": "template",
+      "label": "设计范例",
+      "directory": "design-template",
+      "parserProfile": "structured"
+    }
+  ]
+}

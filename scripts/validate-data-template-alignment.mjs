@@ -3,17 +3,19 @@
 // content; the same parser/layout contract validates templates and source data.
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
-import { APPLICATION_ROOT, DATA_TEMPLATE_ROOT } from './lib/paths.mjs';
+import { DATA_TEMPLATE_ROOT, PROJECT_ROOT, WORKSPACE_MANIFEST } from './lib/paths.mjs';
+import { PROJECT_DEFAULTS } from './lib/project-layout.mjs';
+import { readProjectConfiguration } from './lib/project-service.mjs';
 import { parseSourceContent } from './standardize-docs/doc-factory.mjs';
 import { buildDocumentLayout } from './standardize-docs/layout.mjs';
 import { collectFilesRecursive } from './lib/scan-files.mjs';
 
 async function main() {
-  const { DOC_TYPE_TEMPLATE_DEFS } = await import(pathToFileURL(path.join(APPLICATION_ROOT, 'web/modules/app-type-templates.js')).href);
-  const inputs = Object.entries(DOC_TYPE_TEMPLATE_DEFS)
-    .filter(([, definition]) => typeof definition.content === 'string')
-    .map(([type, definition]) => ({ name: `builtin/${type}.md`, content: definition.content }));
+  const inputs = Object.entries(PROJECT_DEFAULTS.templates).map(([file, content]) => ({ name: `builtin/${file}`, content }));
+  if (WORKSPACE_MANIFEST?.version >= 2) {
+    const configuration = await readProjectConfiguration(PROJECT_ROOT);
+    if (configuration.warnings.length) throw new Error(configuration.warnings.join('\n'));
+  }
   const exists = await fs.stat(DATA_TEMPLATE_ROOT).catch((error) => {
     if (error.code !== 'ENOENT') throw error;
     return null;

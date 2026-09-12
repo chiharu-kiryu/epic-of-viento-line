@@ -8,13 +8,17 @@ import { buildDocumentLayout } from './layout.mjs';
 
 function parseSourceContent(rawText, relPath, descriptor = {}) {
   const ext = path.extname(relPath).toLowerCase();
+  let parsed;
   if (ext === '.json') {
-    return parseJsonContent(rawText, relPath);
-  }
-  if (ext === '.yml' || ext === '.yaml') {
-    return parseYamlContent(rawText, relPath);
-  }
-  return parseTextContent(rawText, relPath, parserOptionsForSource(relPath, descriptor));
+    parsed = parseJsonContent(rawText, relPath);
+  } else if (ext === '.yml' || ext === '.yaml') {
+    parsed = parseYamlContent(rawText, relPath);
+  } else parsed = parseTextContent(rawText, relPath, parserOptionsForSource(relPath, descriptor));
+  const key = descriptor.parserOptions?.titleField;
+  const title = key && Object.hasOwn(parsed.fields, key) ? parsed.fields[key] : undefined;
+  if (['string', 'number', 'boolean'].includes(typeof title) && String(title).trim()) parsed.title = String(title);
+  if (descriptor.fieldGroups?.length) parsed.fieldGroups = descriptor.fieldGroups;
+  return parsed;
 }
 
 function toSafeString(value, fallback = '') {
@@ -93,6 +97,7 @@ function buildStandardObject(relativePath, raw, parsedContent, stats, descriptor
       }),
       ...categoryInfo.meta,
       ...(descriptor.documentType ? { category: descriptor.documentType } : {}),
+      ...(descriptor.typeLabel ? { group: descriptor.typeLabel, purpose: descriptor.typeLabel } : {}),
     },
     parser: {
       contentType: parserContentType,

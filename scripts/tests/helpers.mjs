@@ -42,6 +42,7 @@ function fixtureEnvironment() {
   delete env.VIENTO_APP_ROOT;
   delete env.VIENTO_WORKSPACE_ROOT;
   delete env.VIENTO_SESSION_TOKEN;
+  delete env.VIENTO_PREFERENCES_PATH;
   return env;
 }
 

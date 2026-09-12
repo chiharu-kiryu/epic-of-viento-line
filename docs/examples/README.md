@@ -1,0 +1,20 @@
+# 官方示范：Epic of Viento Line
+
+Epic of Viento Line 是 Viento Studio 的独立官方示范作品，用来展示角色设计、归属背景故事、独立章节、规则和素材的一体化工作流。它与空白通用项目使用相同解析器和展示布局。
+
+[项目定义](epic-of-viento-line.project.json) 只包含该作品的 10 种文档类型、起始模板位置、旧长文本语法的声明式规则，以及示范标记。它不包含正文、图片、视频、缓存或本机绝对路径，桌面运行包也不携带这份示范作品。仓库中的这份定义可供阅读与维护，不是完整作品迁移包。
+
+现有作品继续保存在应用数据目录下的独立 `workspaces/epic-of-viento-line` 文件夹，保留 v2 的 `design-data/` 和 `data-template/`。应用作品库会显示“官方示范”标记。新建空白项目仍使用 v3 通用目录，不默认继承此作品的游戏类型。
+
+该作品的已登记内容包含 885 份文档与 1155 份素材。127 份背景故事归属于 128 位英雄，其中一份为共享背景；364 份独立故事保持独立。作品采用项目定义时只更新公共清单，保留原文、13 份原模板、所有 ID 和原有归属关系。
+
+要迁移或分发整个示范，打开该作品后选择 **导出 → 完整项目包**。使用这个新导出的包恢复作品，不能仅复制本目录的定义文件。既有历史备份不会因为应用更新而自动变成最新内容；更新后的完整包应由当前作品重新导出。未经另行安排，本仓库不托管作品素材或自动上传迁移包。
+
+在已有该作品的环境下采用定义：
+
+```sh
+npm run workspace -- apply-definition --root /作品位置/epic-of-viento-line --definition docs/examples/epic-of-viento-line.project.json --write
+npm run workspace -- check-project --root /作品位置/epic-of-viento-line
+```
+
+维护方式遵循 [项目工作流](../PROJECT_WORKFLOW.md)。作品专有字段应该维护在这份定义及项目模板中，不再加入引擎的默认类型或默认布局。
