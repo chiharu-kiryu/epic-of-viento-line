@@ -5,9 +5,18 @@ import { fileURLToPath } from 'node:url';
 export const APP_ROOT = fileURLToPath(new URL('../', import.meta.url));
 
 export function parseReleaseVersion(version) {
-  const match = /^[a-z]\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:\.(0|[1-9][0-9]*))?$/.exec(version);
-  if (!match) throw new Error('VERSION must use the project release format, for example b.2.8 or b.2.8.1');
-  return { version, buildVersion: `${match[1]}.${match[2]}.${match[3] ?? '0'}` };
+  const beta = /^b\.([0-9])\.([0-9])$/.exec(version);
+  if (beta) return { version, buildVersion: `0.${beta[1]}.${beta[2]}` };
+  if (/^[1-9][0-9]*\.[0-9]\.[0-9]$/.test(version)) return { version, buildVersion: version };
+  throw new Error('VERSION must use b.X.Y (X and Y are digits 0–9) or a numeric release such as 1.0.0');
+}
+
+export function nextReleaseVersion(version) {
+  parseReleaseVersion(version);
+  const [stage, major, minor] = version.split('.');
+  if (minor !== '9') return `${stage}.${major}.${Number(minor) + 1}`;
+  if (major !== '9') return `${stage}.${Number(major) + 1}.0`;
+  return stage === 'b' ? '1.0.0' : `${BigInt(stage) + 1n}.0.0`;
 }
 
 export async function readReleaseVersion() {
@@ -38,4 +47,13 @@ export async function verifyReleaseVersions() {
     }
   }
   return release;
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try {
+    if (process.argv.length !== 3 || process.argv[2] !== '--next') {
+      throw new Error('Usage: node desktop/version.mjs --next');
+    }
+    console.log(nextReleaseVersion((await readReleaseVersion()).version));
+  } catch (error) { console.error(error.message); process.exitCode = 1; }
 }

@@ -2,10 +2,10 @@
   "metadata": {
     "schemaVersion": "viento-function-network-v1",
     "title": "Viento Studio 功能链路网络",
-    "version": "b.2.8.2",
+    "version": "b.2.9",
     "date": "2026-09-13",
     "gitBase": "51d522cb919c20b15815b129bd62e859af9a97a0",
-    "sourceState": "b.2.8.2 发布快照，包含音频、类型导航及十轮功能网络修复；本轮同步版本和发布资料，并规范一处 Rust 格式，业务链路与修订 11 一致",
+    "sourceState": "b.2.9 发布快照；落实 b.X.Y 的单数字进位规则和 b.9.9 → 1.0.0，同步构建及源码归档版本校验；编辑器与作品处理代码沿用修订 12",
     "method": "人工核对业务入口与关键调用；使用本机 Acorn 解析 ES 模块声明、静态字面量动态导入、显式事件绑定和路由表",
     "runtimeTrace": false,
     "verification": {
@@ -26,9 +26,11 @@
       "libraryControllerRegression": "3 new library controller tests and 9 settings tests passed",
       "nativeExportTestReport": "docs/NATIVE_EXPORT_TEST_b.2.8.1.md",
       "exportDialogRegression": "12 dialog tests and 3 language tests passed, including 2 new native-save scenarios",
-      "releaseNotes": "docs/RELEASE_b.2.8.2.md",
+      "releaseNotes": "docs/RELEASE_b.2.9.md",
       "systemNodeObservation": "Initial Node v18.19.1 full run: 193 assertions passed, request-lifecycle worker did not exit and was terminated. Isolated reruns on system and bundled runtimes both passed all 4 tests with normal exit; root cause unconfirmed.",
-      "releaseValidation": "docs/test-results/release-b.2.8.2/results.json"
+      "releaseValidation": "docs/test-results/release-b.2.8.2/results.json",
+      "versionCorrection": "Corrected to b.2.9 / 0.2.9; beta digits are 0–9, b.9.9 advances to 1.0.0. Earlier regression logs retain their original versions.",
+      "versionRuleRegression": "b.2.9: 4 version tests passed (all 100 beta transitions, stable carry, invalid formats); JavaScript/Python agreed on 122 cases; next-version CLI, release manifest/lock/UI consistency and Cargo metadata passed. Source archive verified 253 files and was removed after validation. Full application/Rust regressions were not rerun for this version-rule change."
     },
     "scope": "功能级有向业务步骤 + 文件级静态相对导入；不穷举运行时动态路径、第三方库内部或每次函数调用",
     "projectDataRead": false,
@@ -51,62 +53,72 @@
     "limitations": [
       "workflow-step 是业务步骤顺序，不能当作直接函数调用边。",
       "文件导入关系不代表调用次数、调用顺序、用户使用频率或性能。",
-      "测试声明包含参数化模板，声明数不等于执行数；本轮 app-only 校验实际通过 193 项测试。",
+      "测试声明包含参数化模板，声明数不等于执行数；此前完整 app-only 校验通过 193 项；本次版本规则调整单独运行 4 项版本回归。",
       "没有读取实际作品正文、素材内容、本机秘密或网络服务。",
-      "归档互通回归需设置 VIENTO_TEST_ARCHIVE_BINARY；本轮已启用，未设置时仅该项明确跳过。"
+      "归档互通回归需设置 VIENTO_TEST_ARCHIVE_BINARY；此前完整回归已启用；本次版本规则调整未重跑归档互通，未设置时该项明确跳过。"
     ],
-    "snapshotRevision": 12,
+    "snapshotRevision": 13,
     "repairLog": "docs/NETWORK_BUGFIX_b.2.8.1.md",
     "previousSnapshot": {
-      "revision": 11,
+      "revision": 12,
+      "commit": "147f9b06e1d3e4d67df56eecb5c58e0cd65ede18",
       "changedSources": [
         {
-          "file": "src-tauri/src/lib.rs",
-          "before": "97cd3f23229ae76afee946a1961bce15b8185bba86bc9099089ccbe630e5b0cc",
-          "after": "1f1a7be0fcf70931e060bad4359af93e7dfe57c277213fe4ee3ca45076071716",
-          "reason": "cargo fmt: formatting only"
+          "file": "desktop/package-source.py",
+          "before": "b8f2ffbd79a28a9c9a63578682746b789af696e4177df046104b83615a3d1ee2",
+          "after": "08b271e057cc791364f7c3b19d082ca720e9490e58cfe3f69c47fc368cabb5e6"
+        },
+        {
+          "file": "desktop/version.mjs",
+          "before": "b58df440b1596a2d3dde004bc6deb71cbfe9805dea35433877cde110b97f07f3",
+          "after": "aede5caa36dcb5d712332f451611eb0379877097e015dd3072aeeacdfdd86a22"
+        },
+        {
+          "file": "scripts/tests/version.test.mjs",
+          "before": "988856bbadebc9047d52c5d2d53fea5a9755f24f8dd0382ac29e8aaf43e22393",
+          "after": "0b9e0f332dd07cfc3b358a96d38d18e5235af5cadb3091a32e529c7d54e46222"
         }
       ],
       "releaseFiles": [
         {
           "file": "VERSION",
-          "before": "de5d7d31e2ac066c075f6c7042c9fb363b9534d506d9e1b94061bf5c545cec53",
-          "after": "559a97a6134a2d90c269196c1f19cd3961130152dbeb65505984dda6856522f3"
+          "before": "559a97a6134a2d90c269196c1f19cd3961130152dbeb65505984dda6856522f3",
+          "after": "684ebca53692ec56454478a5762c9ac7f79386d773169dcb0774b5f5b8e7541f"
         },
         {
           "file": "package.json",
-          "before": "1192b1deb9a732ac204d5f7063d2d257f1511d4d9bd86567d9f1e6d3a83fe041",
-          "after": "4203122c8d34f110afbae31bca057ba0e58484bde78759c4661662ecab312362"
+          "before": "4203122c8d34f110afbae31bca057ba0e58484bde78759c4661662ecab312362",
+          "after": "ffb22f214f29fab894b9d685b165daef31bcd411bfcb1a3532238a7d2788b4db"
         },
         {
           "file": "package-lock.json",
-          "before": "06d2fece97e83b2ea6f81bfe9de9fefd5c0352d687bba7debf842268297e3374",
-          "after": "e704b7b9375e77ef6ec9faac41031940af18f7d372df3dc17ead810a1b4bdd93"
+          "before": "e704b7b9375e77ef6ec9faac41031940af18f7d372df3dc17ead810a1b4bdd93",
+          "after": "8474547479702e90939271e5f92d8e6cd04837bde388b54535b5203d6c541bb6"
         },
         {
           "file": "src-tauri/Cargo.toml",
-          "before": "e405bfde120f21417723ccf4e8d07e2c85b159de42cf3828cf81336a2838ac2a",
-          "after": "89e7d267b0b4822320b379a3d9e47a7c1876f66bca39a941517db365cbb65271"
+          "before": "89e7d267b0b4822320b379a3d9e47a7c1876f66bca39a941517db365cbb65271",
+          "after": "7c81bf5f313309b8db43549fefd09813e592ebf23c6d3c8bb7d539d2ffd00c0c"
         },
         {
           "file": "src-tauri/Cargo.lock",
-          "before": "6804d52b714f2cc547e70abe89262b2ded7010cad6c4200807f0c51d022e71a5",
-          "after": "2de472ac89a75c546edebd410bcb5736d1573d33456b28f50ff8a5c52d3c74fe"
+          "before": "2de472ac89a75c546edebd410bcb5736d1573d33456b28f50ff8a5c52d3c74fe",
+          "after": "42e01f9591cff82b82713b2bcd6ba75d7dc99fe65afbfc8ee96dac4cc3a4656f"
         },
         {
           "file": "src-tauri/tauri.conf.json",
-          "before": "54d68e0d9d3bb099399516d897b7bacfadc4ed6b8421ac80aa5f156ce1d9166c",
-          "after": "23df6fce778a20360af905f3ef4cee2a7e4744271fd7b57cfec528eb01c9405b"
+          "before": "23df6fce778a20360af905f3ef4cee2a7e4744271fd7b57cfec528eb01c9405b",
+          "after": "d0a2fd22886fa95918adf60860e3f561d13d1950fe326eac58be21a74627f2a6"
         },
         {
           "file": "web/index.html",
-          "before": "418b5bd7e4a095ab96a1ae7a6dda5b9ebc56809bbc5e38f487375176fef04988",
-          "after": "03fe12e0dcba3a72ac6fad0035de028ad0a2fdd6a96e4b7e6f19341acd917223"
+          "before": "03fe12e0dcba3a72ac6fad0035de028ad0a2fdd6a96e4b7e6f19341acd917223",
+          "after": "e6d6154feebc472b2e26e7f03855f8d306037aed111149e603b339c942d5c2fd"
         },
         {
           "file": "desktop/ui/index.html",
-          "before": "c93feeddd32e5a44abb2c184089ad2e97cb0923bf41e8162d9d2613c70d6ce3b",
-          "after": "0eae7ad55a6120f3b16d75c0ac3ac7829a8160a18c0bdfe365f9f4eda6236624"
+          "before": "0eae7ad55a6120f3b16d75c0ac3ac7829a8160a18c0bdfe365f9f4eda6236624",
+          "after": "3381eca659a4a2365030c6f9e08896058c80d2bc9b62592cd2a8ac6051b423e9"
         }
       ]
     },
@@ -552,6 +564,60 @@
             "file": "desktop/tests/native_export_workflow.py",
             "before": null,
             "after": "c31e811182f66e632c78d9ffcbc26c17adce5d4c4a78be3ef4e96c96fb566add"
+          }
+        ]
+      },
+      {
+        "fromRevision": 11,
+        "toRevision": 12,
+        "changedSources": [
+          {
+            "file": "src-tauri/src/lib.rs",
+            "before": "97cd3f23229ae76afee946a1961bce15b8185bba86bc9099089ccbe630e5b0cc",
+            "after": "1f1a7be0fcf70931e060bad4359af93e7dfe57c277213fe4ee3ca45076071716",
+            "reason": "cargo fmt: formatting only"
+          }
+        ],
+        "releaseFiles": [
+          {
+            "file": "VERSION",
+            "before": "de5d7d31e2ac066c075f6c7042c9fb363b9534d506d9e1b94061bf5c545cec53",
+            "after": "559a97a6134a2d90c269196c1f19cd3961130152dbeb65505984dda6856522f3"
+          },
+          {
+            "file": "package.json",
+            "before": "1192b1deb9a732ac204d5f7063d2d257f1511d4d9bd86567d9f1e6d3a83fe041",
+            "after": "4203122c8d34f110afbae31bca057ba0e58484bde78759c4661662ecab312362"
+          },
+          {
+            "file": "package-lock.json",
+            "before": "06d2fece97e83b2ea6f81bfe9de9fefd5c0352d687bba7debf842268297e3374",
+            "after": "e704b7b9375e77ef6ec9faac41031940af18f7d372df3dc17ead810a1b4bdd93"
+          },
+          {
+            "file": "src-tauri/Cargo.toml",
+            "before": "e405bfde120f21417723ccf4e8d07e2c85b159de42cf3828cf81336a2838ac2a",
+            "after": "89e7d267b0b4822320b379a3d9e47a7c1876f66bca39a941517db365cbb65271"
+          },
+          {
+            "file": "src-tauri/Cargo.lock",
+            "before": "6804d52b714f2cc547e70abe89262b2ded7010cad6c4200807f0c51d022e71a5",
+            "after": "2de472ac89a75c546edebd410bcb5736d1573d33456b28f50ff8a5c52d3c74fe"
+          },
+          {
+            "file": "src-tauri/tauri.conf.json",
+            "before": "54d68e0d9d3bb099399516d897b7bacfadc4ed6b8421ac80aa5f156ce1d9166c",
+            "after": "23df6fce778a20360af905f3ef4cee2a7e4744271fd7b57cfec528eb01c9405b"
+          },
+          {
+            "file": "web/index.html",
+            "before": "418b5bd7e4a095ab96a1ae7a6dda5b9ebc56809bbc5e38f487375176fef04988",
+            "after": "03fe12e0dcba3a72ac6fad0035de028ad0a2fdd6a96e4b7e6f19341acd917223"
+          },
+          {
+            "file": "desktop/ui/index.html",
+            "before": "c93feeddd32e5a44abb2c184089ad2e97cb0923bf41e8162d9d2613c70d6ce3b",
+            "after": "0eae7ad55a6120f3b16d75c0ac3ac7829a8160a18c0bdfe365f9f4eda6236624"
           }
         ]
       }
@@ -7688,6 +7754,7 @@
       "local": true,
       "line": 3,
       "symbols": [
+        "nextReleaseVersion",
         "parseReleaseVersion"
       ]
     },
@@ -11131,8 +11198,8 @@
     {
       "path": "desktop/package-source.py",
       "area": "build",
-      "lines": 91,
-      "sha256": "b8f2ffbd79a28a9c9a63578682746b789af696e4177df046104b83615a3d1ee2"
+      "lines": 99,
+      "sha256": "08b271e057cc791364f7c3b19d082ca720e9490e58cfe3f69c47fc368cabb5e6"
     },
     {
       "path": "desktop/prepare-bundle.mjs",
@@ -11179,8 +11246,8 @@
     {
       "path": "desktop/version.mjs",
       "area": "build",
-      "lines": 42,
-      "sha256": "b58df440b1596a2d3dde004bc6deb71cbfe9805dea35433877cde110b97f07f3"
+      "lines": 60,
+      "sha256": "aede5caa36dcb5d712332f451611eb0379877097e015dd3072aeeacdfdd86a22"
     },
     {
       "path": "scripts/browse-server.mjs",
@@ -11767,8 +11834,8 @@
     {
       "path": "scripts/tests/version.test.mjs",
       "area": "test",
-      "lines": 23,
-      "sha256": "988856bbadebc9047d52c5d2d53fea5a9755f24f8dd0382ac29e8aaf43e22393"
+      "lines": 46,
+      "sha256": "0b9e0f332dd07cfc3b358a96d38d18e5235af5cadb3091a32e529c7d54e46222"
     },
     {
       "path": "scripts/tests/workspace-layout.test.mjs",
@@ -13494,12 +13561,22 @@
     {
       "file": "scripts/tests/version.test.mjs",
       "line": 5,
-      "name": "release numbers retain their letter and map optional patches to installer versions"
+      "name": "beta release digits map below the first stable installer version"
     },
     {
       "file": "scripts/tests/version.test.mjs",
-      "line": 17,
-      "name": "release numbers reject ambiguous, missing and extra components"
+      "line": 19,
+      "name": "release numbers reject extra patches, non-digit beta parts and invalid stable numbers"
+    },
+    {
+      "file": "scripts/tests/version.test.mjs",
+      "line": 28,
+      "name": "all beta versions advance one digit and b.9.9 becomes 1.0.0"
+    },
+    {
+      "file": "scripts/tests/version.test.mjs",
+      "line": 40,
+      "name": "stable release digits carry without losing precision in the leading number"
     },
     {
       "file": "scripts/tests/workspace-layout.test.mjs",

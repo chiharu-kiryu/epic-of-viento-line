@@ -34,10 +34,18 @@ def source_files(directory):
         raise ValueError(f"Missing or unsupported source file: {relative}")
 
 
+def parse_release_version(version):
+    beta = re.fullmatch(r"b\.([0-9])\.([0-9])", version)
+    if beta:
+        return f"0.{beta[1]}.{beta[2]}"
+    if re.fullmatch(r"[1-9][0-9]*\.[0-9]\.[0-9]", version):
+        return version
+    raise ValueError("VERSION must use b.X.Y (X and Y are digits 0–9) or a numeric release such as 1.0.0")
+
+
 def main():
     version = (ROOT / "VERSION").read_text().strip()
-    match = re.fullmatch(r"[a-z]\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:\.(0|[1-9][0-9]*))?", version)
-    if not match or json.loads((ROOT / "package.json").read_text())["version"] != f"{match[1]}.{match[2]}.{match[3] or '0'}":
+    if json.loads((ROOT / "package.json").read_text())["version"] != parse_release_version(version):
         raise ValueError("Application build version does not match VERSION")
     name = f"Viento-Studio_{version}_source"
     destination = Path(sys.argv[1]) if len(sys.argv) == 2 else ROOT / "dist/current" / f"{name}.tar.gz"

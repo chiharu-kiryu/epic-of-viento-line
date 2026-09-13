@@ -1,6 +1,6 @@
 # Viento Studio 桌面版
 
-当前发布版本 **b.2.8.2**，内部安装版本 **2.8.2**；两者对应同一次发布。更新内容和统一命名见 [发布记录与版本规则](../docs/RELEASE_b.2.8.2.md)。
+当前发布版本 **b.2.9**，内部安装版本 **0.2.9**；测试版 `b.X.Y` 对应 `0.X.Y`，X、Y 均为 0–9，`b.9.9` 的下一版为正式版 `1.0.0`。更新内容、历史安装包编号兼容说明与统一命名见 [发布记录与版本规则](../docs/RELEASE_b.2.9.md)。
 
 桌面版使用 Tauri 2。安装后从应用图标启动，在作品库首页新建、打开或导入作品，然后进入现有文档编辑器。Node.js 24.20.0 与转换器随应用提供，使用者无需安装 Node.js、Python、Rust 或手动启动服务。
 
@@ -37,7 +37,7 @@ npm run desktop:build
 
 构建前会自动准备应用资源并下载官方 Node.js 二进制。运行时及许可文本的 SHA-256 固定在 `desktop/node-runtime.json`。下载支持重试，校验后的缓存位于 `desktop/.cache`；只有脚本、前端、通用格式定义与 YAML 依赖进入 `desktop/resources`，约 3 GB 的大型素材无需随每次应用升级重新分发。
 
-输出位于 `src-tauri/target/release/bundle`，构建脚本将完成的安装包改为 `VERSION` 中的发布编号，例如 `Viento-Studio_b.2.8.2_amd64.AppImage`。Linux 可指定 `--bundles deb,appimage`，Windows 使用 `--bundles nsis`，macOS 使用 `--bundles dmg`。跨平台发行应分别在目标系统构建；仓库中的 **Build desktop installers** 工作流可手动生成三端产物，仅上传工作流构件，不自动发布版本。
+输出位于 `src-tauri/target/release/bundle`，构建脚本将完成的安装包改为 `VERSION` 中的发布编号，例如 `Viento-Studio_b.2.9_amd64.AppImage`。Linux 可指定 `--bundles deb,appimage`，Windows 使用 `--bundles nsis`，macOS 使用 `--bundles dmg`。跨平台发行应分别在目标系统构建；仓库中的 **Build desktop installers** 工作流可手动生成三端产物，仅上传工作流构件，不自动发布版本。
 
 每次 Linux 打包前会重建生成用的 `.AppDir` 目录，避免 GTK 打包插件因旧链接残留而使第二次构建失败。Rust 编译缓存、已生成的安装包及作品库不在此清理范围内。
 
@@ -86,7 +86,7 @@ cargo run --manifest-path src-tauri/Cargo.toml --release --example workspace-arc
 
 ## 验证
 
-本次升版前的 Linux 原生窗口实测过程、截图及覆盖边界见 [b.2.8.1 开发阶段桌面实测](../docs/NATIVE_WORKFLOW_TEST_b.2.8.1.md)；报告保留实测时的版本和指纹，相关修复统一收录于 b.2.8.2。
+本次升版前的 Linux 原生窗口实测过程、截图及覆盖边界见 [b.2.8.1 开发阶段桌面实测](../docs/NATIVE_WORKFLOW_TEST_b.2.8.1.md)；报告保留实测时的版本和指纹，相关修复统一收录于 b.2.9。
 
 作品库首页的原生目录选择、备份和恢复另见 [作品库实测](../docs/NATIVE_LIBRARY_TEST_b.2.8.1.md)。已有编辑窗口时，新建、打开其他作品和导入入口会禁用；宿主也在显示文件选择器和写入前检查，避免先创建或恢复作品再拒绝切换。当前作品仍可继续编辑或备份已保存内容。
 
