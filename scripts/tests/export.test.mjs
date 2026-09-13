@@ -7,11 +7,14 @@ import { inflateRawSync } from 'node:zlib';
 import vm from 'node:vm';
 import { setTimeout as delay } from 'node:timers/promises';
 import { fixture, write, serve, request } from './helpers.mjs';
-import { readRegistry, registerWorkspace, writeJson } from '../lib/workspace.mjs';
+import { readRegistry, registerWorkspace, writeJson, assertPortableFileTree } from '../lib/workspace.mjs';
 import { PROJECT_DEFAULTS } from '../lib/project-layout.mjs';
 import { exportFileName, planExport, writeExportZip } from '../lib/export-package.mjs';
 import { createExportService } from '../lib/export-service.mjs';
 import { t as translate } from '../../web/i18n/index.js';
+import { deferred } from './editor-harness.mjs';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 
 // Read the ZIP central directory independently of the writer, including entries
 // whose local headers use data descriptors. Also verify every manifest digest.
@@ -55,12 +58,14 @@ async function project(t, version = 3) {
   await write(root, `${documents}/无关.md`, '# 另一位角色\n');
   await write(root, '外置素材/立绘.png', Buffer.from('binary image'));
   await write(root, '外置素材/片段.mp4', Buffer.from('binary video'));
+  await write(root, '外置素材/主题曲.m4a', Buffer.from('referenced audio'));
   await write(root, '外置素材/未引用.wav', Buffer.from('unreferenced audio'));
   await write(root, '.viento/local.json', JSON.stringify({ version: 1, assetStores: { main: path.join(root, '外置素材') } }));
   await registerWorkspace(root);
   let registry = await readRegistry(root);
   const image = registry.assets.find((asset) => asset.kind === 'image');
   const video = registry.assets.find((asset) => asset.kind === 'video');
+  const audio = registry.assets.find((asset) => asset.location.path === '主题曲.m4a');
   const owner = registry.documents.find((doc) => doc.sourcePath.endsWith('/角色.md'));
   const child = registry.documents.find((doc) => doc.sourcePath.endsWith('/背景.md'));
   owner.assetBindings = [{ assetId: image.id, role: 'portrait' }];
@@ -68,13 +73,13 @@ async function project(t, version = 3) {
   child.relations = [{ kind: 'part-of', targetId: owner.id, slot: '背景故事' }];
   await writeJson(path.join(root, 'metadata/documents', `${child.id}.json`), child);
   await write(root, `${documents}/角色.md`, `# 星裔\n\n自定义数值：2\n\n<script>alert("x")</script>\n\n![立绘](asset:${image.id})\n\n| 属性 | 值 |\n| --- | --- |\n| 灵魂 | 2 |\n\n\`\`\`text\n代码中的 ![不是素材](asset:00000000-0000-0000-0000-000000000000)\n\`\`\`\n`);
-  await write(root, `${documents}/背景.md`, `# 星裔的背景\n\n原有大纲与故事内容。\n\n!video[片段](asset:${video.id})\n`);
+  await write(root, `${documents}/背景.md`, `# 星裔的背景\n\n原有大纲与故事内容。\n\n!video[片段](asset:${video.id})\n\n!audio[主题曲](asset:${audio.id})\n`);
   await write(root, '.viento/cache/secret.txt', 'cache is not portable');
-  return { root, documents, image, video, owner, child };
+  return { root, documents, image, video, audio, owner, child };
 }
 
 test('document exports include owned stories, exact sources and referenced external media in both formats', async (t) => {
-  const { root, documents, image, video } = await project(t);
+  const { root, documents, image, video, audio } = await project(t);
   for (const format of ['html', 'markdown']) {
     const plan = await planExport(root, { kind: 'document', format, path: `${documents}/角色.md` });
     const output = path.join(root, `${format}.zip`);
@@ -83,34 +88,100 @@ test('document exports include owned stories, exact sources and referenced exter
     assert.equal(manifest.format, 'viento-document-export');
     assert.equal(manifest.documents.length, 2);
     assert.equal(manifest.documents[1].depth, 1);
-    assert.equal(plan.assetCount, 2);
+    assert.equal(plan.assetCount, 3);
     assert.deepEqual(files.get(`sources/${documents}/角色.md`), await fs.readFile(path.join(root, `${documents}/角色.md`)));
     const body = files.get(format === 'html' ? 'index.html' : 'document.md').toString();
     assert.match(body, /星裔的背景/); assert.match(body, /原有大纲与故事内容/);
     assert.match(body, new RegExp(`assets/${image.id}.png`));
     assert.match(body, new RegExp(`assets/${video.id}.mp4`));
+    assert.match(body, new RegExp(`assets/${audio.id}.m4a`));
+    assert.deepEqual(files.get(`assets/${audio.id}.m4a`), await fs.readFile(path.join(root, '外置素材/主题曲.m4a')));
     assert.match(body, /灵魂/); assert.match(body, /代码中的/);
     assert.ok(![...files.keys()].some((name) => /无关|local\.json|cache|未引用/.test(name)));
     if (format === 'html') {
-      assert.match(body, /<video controls/); assert.doesNotMatch(body, /<script>/);
+      assert.match(body, /<video controls/); assert.match(body, /<audio controls preload="auto"/);
+      assert.doesNotMatch(body, /<script>|autoplay/);
       assert.equal((body.match(/<img /g) || []).length, 1, 'An embedded image must not also be appended as a duplicate gallery');
       assert.match(body, /&lt;script&gt;/); assert.match(body, /<th>属性<\/th>/);
-    } else { assert.match(body, /\[视频：片段\]/); assert.match(body, /```text/); }
+    } else { assert.match(body, /\[视频：片段\]/); assert.match(body, /\[音频：主题曲\]/); assert.match(body, /```text/); }
   }
   const only = await planExport(root, { kind: 'document', format: 'html', path: `${documents}/角色.md`, includeChildren: false });
   assert.equal(only.documentCount, 1); assert.equal(only.assetCount, 1);
 });
 
 test('JSON and YAML typed fields export using the generic layout and media bindings', async (t) => {
-  const { root, documents, image } = await project(t);
-  const value = { title: '自定义物种', 身体: { 灵魂: 2, 可飞行: false, 别名: ['甲', '乙'], 空值: null }, 属性: '+15% 技能伤害\n+350 魔法上限', 插图: { type: 'image', src: `asset:${image.id}`, caption: '结构化插图' } };
-  for (const [extension, content] of [['json', JSON.stringify(value)], ['yaml', `title: 自定义物种\n灵魂: 2\n可飞行: false\n别名: [甲, 乙]\n插图:\n  type: image\n  src: asset:${image.id}\n`]]) {
+  const { root, documents, image, audio } = await project(t);
+  const value = { title: '自定义物种', 身体: { 灵魂: 2, 可飞行: false, 别名: ['甲', '乙'], 空值: null }, 属性: '+15% 技能伤害\n+350 魔法上限', 插图: { type: 'image', src: `asset:${image.id}`, caption: '结构化插图' }, 配音: { type: 'audio', src: `asset:${audio.id}`, caption: '结构化音频' } };
+  for (const [extension, content] of [['json', JSON.stringify(value)], ['yaml', `title: 自定义物种\n灵魂: 2\n可飞行: false\n别名: [甲, 乙]\n插图:\n  type: image\n  src: asset:${image.id}\n配音:\n  type: audio\n  src: asset:${audio.id}\n`]]) {
     await write(root, `${documents}/物种.${extension}`, content);
     const plan = await planExport(root, { kind: 'document', format: 'html', path: `${documents}/物种.${extension}` });
     const body = plan.entries.find((entry) => entry.path === 'index.html').buffer.toString();
     assert.match(body, /自定义物种/); assert.match(body, /false/); assert.match(body, /<li>甲<\/li>/); assert.match(body, /<img /);
-    assert.equal(plan.assetCount, 1);
+    assert.match(body, /<audio controls/);
+    assert.equal(plan.assetCount, 2);
     if (extension === 'json') assert.match(body, /<dt>技能伤害<\/dt><dd>\+15%<\/dd>/);
+  }
+});
+
+test('explicit audio bindings export a player even when the source does not embed the audio', async (t) => {
+  const { root, documents, owner, audio } = await project(t);
+  owner.assetBindings.push({ assetId: audio.id, role: 'theme' });
+  await writeJson(path.join(root, 'metadata/documents', `${owner.id}.json`), owner);
+  const plan = await planExport(root, { kind: 'document', format: 'html', path: `${documents}/角色.md`, includeChildren: false });
+  const html = plan.entries.find((entry) => entry.path === 'index.html').buffer.toString();
+  assert.equal(plan.assetCount, 2);
+  assert.equal((html.match(/<audio controls/g) || []).length, 1);
+  assert.match(html, /关联素材/);
+  assert.match(html, new RegExp(`assets/${audio.id}.m4a`));
+});
+
+test('sharing preserves distinct percent and space filenames, registered identities and renamed aliases', async (t) => {
+  const { root, documents, owner } = await project(t);
+  owner.assetBindings = [];
+  await writeJson(path.join(root, 'metadata/documents', `${owner.id}.json`), owner);
+  const names = ['take one.wav', 'take%20one.wav', '100%.wav'];
+  for (const name of names) await write(root, `外置素材/${name}`, `original bytes: ${name}`);
+  await registerWorkspace(root);
+  const registry = await readRegistry(root);
+  const assets = names.map((name) => registry.assets.find((asset) => asset.location.path === name));
+  const source = `# 素材引用\n\n${names.map((name) => `!audio[${name}](assets/${encodeURIComponent(name)})`).join('\n\n')}\n`;
+  await write(root, `${documents}/角色.md`, source);
+  for (const renamed of [false, true]) {
+    if (renamed) for (const asset of assets) {
+      await fs.rename(path.join(root, '外置素材', asset.location.path), path.join(root, '外置素材', `${asset.id}.wav`));
+      asset.location.path = `${asset.id}.wav`;
+      await writeJson(path.join(root, 'metadata/assets', `${asset.id}.json`), asset);
+    }
+    const plan = await planExport(root, { kind: 'document', format: 'html', path: `${documents}/角色.md`, includeChildren: false });
+    const output = path.join(root, `aliases-${renamed}.zip`);
+    await writeExportZip(plan, output);
+    const { files, manifest } = unzip(await fs.readFile(output));
+    assert.deepEqual(manifest.assets.map((asset) => asset.id).sort(), assets.map((asset) => asset.id).sort());
+    for (const [index, asset] of assets.entries()) {
+      assert.equal(files.get(`assets/${asset.id}.wav`).toString(), `original bytes: ${names[index]}`);
+      assert.ok(files.has(`metadata/assets/${asset.id}.json`));
+    }
+    assert.equal(files.get(`sources/${documents}/角色.md`).toString(), source);
+  }
+});
+
+test('owned stories retain nested heading levels in HTML and Markdown shares', async (t) => {
+  const { root, documents } = await project(t);
+  await write(root, `${documents}/背景.md`, '# 背景故事\n\n## 第一幕\n\n### 初遇\n\n#### 细节\n\n故事正文。\n');
+  for (const format of ['html', 'markdown']) {
+    const plan = await planExport(root, { kind: 'document', format, path: `${documents}/角色.md` });
+    const body = plan.entries.find((entry) => entry.path === (format === 'html' ? 'index.html' : 'document.md')).buffer.toString();
+    if (format === 'html') {
+      assert.match(body, /<h2>背景故事<\/h2>/);
+      assert.match(body, /<h3>第一幕<\/h3>/);
+      assert.match(body, /<h4>初遇<\/h4>/);
+      assert.match(body, /<h5>细节<\/h5>/);
+    } else {
+      assert.match(body, /^## 背景故事$/m);
+      assert.match(body, /^### 第一幕$/m);
+      assert.match(body, /^#### 初遇$/m);
+      assert.match(body, /^##### 细节$/m);
+    }
   }
 });
 
@@ -125,7 +196,8 @@ for (const version of [2, 3]) test(`v${version} complete project packages preser
   assert.ok(files.has(`metadata/documents/${owner.id}.json`));
   assert.ok(files.has('assets/未引用.wav')); assert.ok(files.has('.viento/workspace.json'));
   assert.ok(![...files.keys()].some((name) => /local\.json|cache|外置素材/.test(name)));
-  assert.equal(job.assetCount, 3);
+  assert.equal(job.assetCount, 4);
+  assert.equal(files.get('assets/主题曲.m4a').toString(), 'referenced audio');
   const directory = service.get(job.id).directory;
   await service.release(job.id);
   await assert.rejects(fs.stat(directory), { code: 'ENOENT' });
@@ -150,6 +222,48 @@ test('missing assets, traversal, symlinks and changed source snapshots cannot pr
   await assert.rejects(service.create({ kind: 'document', format: 'html', path: `${documents}/背景.md` }, controller.signal), /cancelled by user/);
 });
 
+test('complete exports reject directory aliases and file-directory conflicts without changing project bytes', async (t) => {
+  for (const [first, second] of [['Book/a.bin', 'book/b.bin'], ['Book', 'book/b.bin'], ['café/a.bin', 'cafe\u0301/b.bin']]) {
+    assert.throws(() => assertPortableFileTree([first, second]), /冲突/);
+    assert.throws(() => assertPortableFileTree([second, first]), /冲突/);
+    // These physically distinct names cannot be created on every filesystem;
+    // the virtual archive-tree checks above run on all supported platforms.
+    if (process.platform !== 'linux') continue;
+    const { root } = await project(t);
+    await write(root, `外置素材/${first}`, 'first'); await write(root, `外置素材/${second}`, 'second');
+    await assert.rejects(planExport(root, { kind: 'workspace' }), /冲突/);
+    assert.equal(await fs.readFile(path.join(root, '外置素材', first), 'utf8'), 'first');
+    assert.equal(await fs.readFile(path.join(root, '外置素材', second), 'utf8'), 'second');
+  }
+});
+
+test('editor and native v2/v3 archives round-trip with exact sources, metadata and external media', { skip: !process.env.VIENTO_TEST_ARCHIVE_BINARY }, async (t) => {
+  const run = promisify(execFile);
+  const native = async (...args) => JSON.parse((await run(process.env.VIENTO_TEST_ARCHIVE_BINARY, args, { timeout: 15000 })).stdout);
+  for (const version of [2, 3]) {
+    const { root } = await project(t, version);
+    const nodeArchive = path.join(root, 'node.viento.zip');
+    await writeExportZip(await planExport(root, { kind: 'workspace' }), nodeArchive);
+    const original = unzip(await fs.readFile(nodeArchive));
+    const parent = path.join(root, 'restores'); await fs.mkdir(parent);
+    const { root: restored } = await native('import', nodeArchive, parent);
+    for (const entry of original.manifest.files) assert.deepEqual(await fs.readFile(path.join(restored, entry.path)), original.files.get(entry.path), entry.path);
+    assert.deepEqual(await readRegistry(restored), await readRegistry(root));
+    await assert.rejects(fs.access(path.join(restored, '.viento/local.json')), { code: 'ENOENT' });
+    const nativeArchive = path.join(root, 'native.viento.zip');
+    await native('export', restored, nativeArchive);
+    const exported = unzip(await fs.readFile(nativeArchive));
+    for (const entry of original.manifest.files) assert.deepEqual(exported.files.get(entry.path), original.files.get(entry.path), entry.path);
+    const { root: roundTrip } = await native('import', nativeArchive, parent);
+    const next = path.join(root, 'next.viento.zip');
+    await writeExportZip(await planExport(roundTrip, { kind: 'workspace' }), next);
+    const final = unzip(await fs.readFile(next));
+    for (const entry of original.manifest.files) assert.deepEqual(final.files.get(entry.path), original.files.get(entry.path), entry.path);
+    assert.equal(final.manifest.workspace.id, original.manifest.workspace.id);
+    assert.ok(![...final.files.keys()].some((name) => name.includes('cache/') || name.endsWith('local.json')));
+  }
+});
+
 test('HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup', async (t) => {
   const { root, documents } = await project(t);
   for (const script of ['doc-site-server.mjs', 'browse-server.mjs']) {
@@ -169,6 +283,69 @@ test('HTTP export supports edit and browse modes, authenticated creation, binary
   assert.equal((await request(protectedBase, '/api/export', { kind: 'workspace' })).status, 401);
   const protectedResponse = await fetch(`${protectedBase}/api/export`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer export-test-token' }, body: JSON.stringify({ kind: 'workspace' }) });
   assert.equal(protectedResponse.status, 200);
+});
+
+test('consecutive browser exports recycle completed downloads instead of exhausting the three-job limit', async (t) => {
+  const { root, documents } = await project(t);
+  const base = await serve(t, root, {}, 'browse-server.mjs');
+  for (let i = 0; i < 5; i += 1) {
+    const created = await request(base, '/api/export', { kind: 'document', format: 'html', path: `${documents}/角色.md` });
+    assert.equal(created.status, 200, `export ${i + 1}: ${JSON.stringify(created.payload)}`);
+    const response = await fetch(`${base}/api/export?id=${created.data.id}`);
+    assert.equal(response.status, 200);
+    assert.equal(unzip(Buffer.from(await response.arrayBuffer())).manifest.documents.length, 2);
+  }
+});
+
+test('releasing or expiring an export cannot remove a file being downloaded', async (t) => {
+  const { root, documents } = await project(t);
+  const service = createExportService(root, { ttlMs: 30 });
+  const job = await service.create({ kind: 'document', format: 'html', path: `${documents}/角色.md` });
+  const file = service.get(job.id).file;
+  const ready = deferred(), finish = deferred();
+  const downloading = service.download(job.id, async () => { ready.resolve(); await finish.promise; return true; });
+  await ready.promise;
+  try {
+    await delay(80);
+    assert.equal(unzip(await fs.readFile(file)).manifest.documents.length, 2);
+    await service.release(job.id);
+    assert.throws(() => service.get(job.id), { statusCode: 410 });
+    await fs.access(file);
+  } finally { finish.resolve(); await downloading; }
+  await assert.rejects(fs.access(file), { code: 'ENOENT' });
+});
+
+test('export range requests keep their real status in diagnostics and remain retryable', async (t) => {
+  const { root, documents } = await project(t);
+  const base = await serve(t, root);
+  const created = await request(base, '/api/export', { kind: 'document', format: 'html', path: `${documents}/角色.md` });
+  const url = `${base}/api/export?id=${created.data.id}`;
+  for (const [range, expected] of [['bytes=0-7', 206], ['bytes=999999999-', 416]]) {
+    const response = await fetch(url, { headers: { Range: range } });
+    assert.equal(response.status, expected);
+    await response.arrayBuffer();
+    const metrics = (await request(base, '/api/metrics')).data;
+    assert.equal(metrics.routes['GET /api/export'].lastStatusCode, expected);
+  }
+  const response = await fetch(url);
+  assert.equal(response.status, 200);
+  assert.equal(unzip(Buffer.from(await response.arrayBuffer())).manifest.documents.length, 2);
+});
+
+test('pending and interrupted exports remain protected from automatic quota eviction', async (t) => {
+  const { root, documents } = await project(t);
+  const service = createExportService(root);
+  const options = { kind: 'document', format: 'html', path: `${documents}/角色.md` };
+  const jobs = [];
+  for (let i = 0; i < 3; i += 1) jobs.push(await service.create(options));
+  t.after(() => Promise.all(jobs.map(job => service.release(job.id))));
+  await service.download(jobs[0].id, async () => false);
+  await assert.rejects(service.create(options), { statusCode: 409 });
+  assert.ok(service.get(jobs[0].id));
+  await service.download(jobs[0].id, async () => true);
+  jobs.push(await service.create(options));
+  assert.throws(() => service.get(jobs[0].id), { statusCode: 410 });
+  assert.ok(service.get(jobs[1].id));
 });
 
 test('export entry blocks unsaved and new drafts without changing editor state', async () => {

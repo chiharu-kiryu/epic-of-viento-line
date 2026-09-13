@@ -31,6 +31,28 @@ export const API_REQUEST_KEYS = Object.freeze({
   runBuild: 'runBuild',
 });
 
+export const DOCUMENT_SOURCE_EXTENSIONS = Object.freeze(['', '.md', '.txt', '.json', '.yml', '.yaml']);
+
+export function portablePath(value) {
+  return typeof value === 'string' && value.length > 0 && value.split('/').every((part) => part
+    && part !== '.' && part !== '..' && !/[<>:"\\|?*\x00-\x1f\x7f-\x9f]/.test(part) && !/[. ]$/.test(part)
+    && !/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)/i.test(part));
+}
+
+// Creation must agree with both registration and source scanning. Existing
+// documents can still be read and repaired even if their old names differ.
+export function getCreatePathError(value) {
+  if (!portablePath(value)) return '新建路径包含无法跨系统使用的文件名。';
+  const parts = value.split('/');
+  if (parts.some((part) => part.startsWith('.') || part === 'node_modules')) return '新建文档不能使用隐藏路径或保留的目录名。';
+  const encoder = new TextEncoder();
+  if (parts.some((part) => encoder.encode(part).length > 255)) return '文件名过长，请缩短名称。';
+  const name = parts.at(-1);
+  const extension = name.includes('.') ? name.slice(name.lastIndexOf('.')).toLowerCase() : '';
+  if (!DOCUMENT_SOURCE_EXTENSIONS.includes(extension)) return '新建文档仅支持 Markdown、TXT、JSON、YAML，或不带后缀。';
+  return '';
+}
+
 export const DOC_CAPABILITIES_FIELDS = Object.freeze({
   ok: 'ok',
   mode: 'mode',
@@ -186,17 +208,7 @@ export function makeCapabilitiesPayload(editablePrefixes, backstoryMergeMode, ve
     [DOC_CAPABILITIES_FIELDS.ok]: DOC_CAPABILITIES_FIELDS.okValue,
     [DOC_CAPABILITIES_FIELDS.mode]: DOC_CAPABILITIES_FIELDS.modeValue,
     [DOC_CAPABILITIES_FIELDS.editablePrefixes]: editablePrefixes,
-    [DOC_CAPABILITIES_FIELDS.endpoints]: [
-      API_PATHS.CAPABILITIES,
-      API_PATHS.HEALTH,
-      API_PATHS.METRICS,
-      API_PATHS.DOC,
-      API_PATHS.REBUILD,
-      API_PATHS.INDEX,
-      API_PATHS.ASSETS,
-      API_PATHS.MEDIA_INSERT,
-      API_PATHS.EXPORT,
-    ],
+    [DOC_CAPABILITIES_FIELDS.endpoints]: Object.values(API_PATHS),
     [DOC_CAPABILITIES_FIELDS.backstoryMergeMode]: backstoryMergeMode,
     [DOC_CAPABILITIES_FIELDS.version]: version,
     [DOC_CAPABILITIES_FIELDS.capabilities]: {
@@ -205,6 +217,7 @@ export function makeCapabilitiesPayload(editablePrefixes, backstoryMergeMode, ve
       [DOC_CAPABILITIES_FIELDS.rebuild]: true,
       media: true,
       export: true,
+      project: true,
     },
   };
 }

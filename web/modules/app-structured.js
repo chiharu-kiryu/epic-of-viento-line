@@ -41,7 +41,7 @@ function renderStructuredBlocks(blocks, options = {}) {
       heading.textContent = title;
       if (block.anchor) heading.id = block.anchor.replace(/^#/, '');
       fragment.appendChild(heading);
-    } else if (block.type === 'image' || block.type === 'video') {
+    } else if (block.type === 'image' || block.type === 'video' || block.type === 'audio') {
       fragment.appendChild(renderMedia(block));
     } else if (block.type === 'paragraph') {
       const text = normalizeValue(block.text);

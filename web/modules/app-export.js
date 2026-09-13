@@ -19,6 +19,7 @@ export function setupExport({ getContext, setBusy }) {
   const download = byId('docExportDownload'), save = byId('docExportSaveBtn');
   const native = new URL(location.href).searchParams.get('desktop') === '1';
   let controller, job, context, nativePending = false, downloadStarted = false;
+  let session = 0;
   const kind = () => options.querySelector('input[name="exportKind"]:checked').value;
   const discard = () => {
     if (job && !downloadStarted) void releaseExport(job.id).catch(() => {});
@@ -29,14 +30,15 @@ export function setupExport({ getContext, setBusy }) {
     const reason = exportAvailability(context, kind());
     byId('docExportHint').textContent = reason || (kind() === 'workspace'
       ? t('包含全部已保存内容与素材，自动排除缓存、临时文件和本机路径配置。')
-      : t('原始正文与引用素材一并打包。解压后即可阅读；视频保留原始格式。'));
-    start.disabled = !!controller || !!reason || !!job;
+      : t('原始正文与引用素材一并打包。解压后即可阅读；音视频保留原始格式。'));
+    start.disabled = !!controller || nativePending || !!reason || !!job;
     options.disabled = !!controller || nativePending;
     cancel.hidden = !controller || nativePending;
     close.disabled = nativePending;
   }
   function closeDialog() {
     if (nativePending) return;
+    session += 1;
     controller?.abort();
     discard();
     dialog.close();
@@ -59,7 +61,11 @@ export function setupExport({ getContext, setBusy }) {
       window.addEventListener('viento-export-result', receive);
       fetch('/__desktop/export', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })
         .then(async (response) => {
-          if (!response.ok) throw new Error((await response.json()).error || t('无法打开保存窗口'));
+          if (!response.ok) {
+            const error = new Error((await response.json()).error || t('无法打开保存窗口'));
+            error.status = response.status;
+            throw error;
+          }
         }).catch((error) => { cleanup(); reject(error); });
     });
   }
@@ -71,11 +77,22 @@ export function setupExport({ getContext, setBusy }) {
       const result = await nativeSave();
       if (result.cancelled) message.textContent = t('已取消保存，可以重新选择位置。');
       else { message.textContent = t`已保存到 ${result.path}`; discard(); }
-    } catch (error) { message.textContent = error.message; }
+    } catch (error) {
+      if (error.status === 410) {
+        discard();
+        message.textContent = t('导出文件已过期，请重新导出');
+      } else message.textContent = error.message;
+    }
     finally { nativePending = false; setBusy(false); save.disabled = false; refresh(); }
   }
   byId('docExportBtn')?.addEventListener('click', () => {
-    context = getContext();
+    if (nativePending) return;
+    const current = getContext();
+    if (current.busy && !controller) { window.alert(exportAvailability(current, kind())); return; }
+    // An aborted request may still be settling when this window is reopened.
+    // Track its busy state through controller, never through the new snapshot.
+    context = { ...current, busy: false };
+    session += 1;
     discard();
     if (!context.path) options.querySelector('input[value="workspace"]').checked = true;
     byId('docExportContext').textContent = context.title ? t`当前文档：${context.title}` : t('导出当前作品');
@@ -89,17 +106,21 @@ export function setupExport({ getContext, setBusy }) {
   download.addEventListener('click', () => { downloadStarted = true; message.textContent = t('下载已交给浏览器。请先解压整个文件，再打开正文。'); });
   save.addEventListener('click', () => { void saveNative(); });
   start.addEventListener('click', async () => {
-    if (controller || exportAvailability(getContext(), kind())) return;
+    if (controller || nativePending || job || exportAvailability(getContext(), kind())) return;
+    const requestSession = session;
     const requestController = new AbortController(); controller = requestController;
     setBusy(true); refresh(); message.textContent = t('正在整理正文与素材并校验文件…');
     try {
-      job = await requestExport({ kind: kind(), format: format.value, path: context.path, includeChildren: byId('docExportChildren').checked }, requestController.signal);
-      if (requestController.signal.aborted || !dialog.open) { discard(); return; }
+      const prepared = await requestExport({ kind: kind(), format: format.value, path: context.path, includeChildren: byId('docExportChildren').checked }, requestController.signal);
+      if (requestController.signal.aborted || requestSession !== session || !dialog.open) {
+        void releaseExport(prepared.id).catch(() => {}); return;
+      }
+      job = prepared;
       message.textContent = t`已准备好 ${job.fileName}（${(job.bytes / 1024 ** 2).toFixed(1)} MB，${job.assetCount} 个素材）。`;
       if (native) save.hidden = false;
       else { download.href = `${API_PATHS.EXPORT}?id=${encodeURIComponent(job.id)}`; download.download = job.fileName; download.hidden = false; }
     } catch (error) {
-      if (dialog.open) message.textContent = requestController.signal.aborted ? t('已取消导出，原始内容保留。') : t`导出失败：${error.message}`;
+      if (requestSession === session && dialog.open) message.textContent = requestController.signal.aborted ? t('已取消导出，原始内容保留。') : t`导出失败：${error.message}`;
     } finally { controller = null; setBusy(false); refresh(); }
     if (native && job && dialog.open) await saveNative();
   });

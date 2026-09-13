@@ -2,6 +2,8 @@
 
 > 更新时间：2026-09-12
 
+功能入口、业务上下游、接口和数据落点的最新盘点见 [功能链路网络](FUNCTION_NETWORK.md)（2026-09-13 当前工作树），可用 [离线交互图](function-network.html) 筛选查看。
+
 作品与程序已分离，作品及备份位于系统应用数据目录，本机默认作品由应用配置目录的 `viento.config.json` 指定，见 [本机数据目录](LOCAL_DATA_STORAGE.md)。新项目的 `documents/`、`templates/`、`assets/` 和 `metadata/` 均相对于作品根目录（旧作品使用 `design-data/`、`data-template/`）；生成数据实际位于作品的 `.viento/cache/`。下文 `docs-standard/...` 和 `web/data/index.json` 仍作为兼容访问路径，由服务映射到缓存，不代表仓库根目录还有这些文件。
 
 当前目录与元数据/迁移契约以 [作品库布局](WORKSPACE_LAYOUT.md) 为准，桌面宿主见 [桌面版说明](../desktop/README.md)。浏览模式已改用 Node.js 只读服务，同样支持程序与作品分离。

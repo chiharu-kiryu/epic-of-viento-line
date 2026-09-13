@@ -4,6 +4,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fixture, node, write, serve, request } from './helpers.mjs';
 import { normalizeBackstoryPayload } from '../lib/static-index.mjs';
+import { randomUUID } from 'node:crypto';
+import { PROJECT_DEFAULTS } from '../lib/project-layout.mjs';
+import { registerWorkspace, readRegistry, writeJson } from '../lib/workspace.mjs';
 
 const read = (root, name) => fs.readFile(path.join(root, name), 'utf8');
 
@@ -47,13 +50,91 @@ test('merged backstory source strings normalize to path objects without characte
   assert.equal(result.meta.source, result.source.path);
 });
 
-test('colliding source basenames fail before overwriting standardized output', async (t) => {
+for (const managed of [false, true]) test(`same-stem sources keep separate caches and identities (${managed ? 'generic v3' : 'legacy'})`, async (t) => {
   const root = await fixture(t);
-  await write(root, 'design-data/design-rules/规则.md', '第一份');
-  await write(root, 'design-data/design-rules/规则.txt', '第二份');
-  await write(root, 'docs-standard/design-data/design-rules/规则.json', 'sentinel');
-  await assert.rejects(node(root, ['scripts/standardize-docs.mjs', 'design-data']), /标准化输出路径冲突/);
-  assert.equal(await read(root, 'docs-standard/design-data/design-rules/规则.json'), 'sentinel');
+  const documents = managed ? 'documents' : 'design-data';
+  const cache = managed ? '.viento/cache/docs-standard' : 'docs-standard';
+  const index = managed ? '.viento/cache/indexes/documents.json' : 'web/data/index.json';
+  if (managed) await write(root, 'workspace.json', JSON.stringify({
+    format: 'viento-workspace', version: 3, id: randomUUID(), name: '同名文档检查', createdAt: 0,
+    paths: { documents, templates: 'templates', metadata: 'metadata' }, assetStores: { main: { path: 'assets' } },
+    documentTypes: PROJECT_DEFAULTS.documentTypes,
+  }));
+  const files = {
+    [`${documents}/design-rules/规则.md`]: '# Markdown 文档\n',
+    [`${documents}/design-rules/规则.txt`]: '纯文本文档\n',
+    [`${documents}/design-rules/规则.json`]: '{"title":"JSON 文档","value":0}\n',
+    [`${documents}/design-rules/规则`]: '无扩展名文档\n',
+  };
+  for (const [file, content] of Object.entries(files)) await write(root, file, content);
+  await node(root, ['scripts/standardize-docs.mjs', documents]);
+  await node(root, ['scripts/build-static-doc-site.mjs']);
+  let docs = JSON.parse(await read(root, index)).docs;
+  assert.equal(docs.length, 4);
+  assert.equal(new Set(docs.map(doc => doc.path)).size, 4);
+  for (const [file, content] of Object.entries(files)) {
+    const cached = JSON.parse(await read(root, `${cache}/${file}.json`));
+    assert.equal(cached.source.path, file);
+    assert.equal(cached.raw, content);
+    assert.equal(await read(root, file), content);
+  }
+  const selected = `${documents}/design-rules/规则.md`;
+  const untouched = `${cache}/${documents}/design-rules/规则.txt.json`;
+  const before = await read(root, untouched);
+  await write(root, selected, '# 修改 Markdown\n');
+  await write(root, `${documents}/design-rules/规则.txt`, '外部修改，未选择重建\n');
+  await node(root, ['scripts/standardize-docs.mjs', selected]);
+  assert.equal(await read(root, untouched), before);
+  await fs.rm(path.join(root, selected));
+  await node(root, ['scripts/standardize-docs.mjs', selected]);
+  await assert.rejects(fs.access(path.join(root, `${cache}/${selected}.json`)), { code: 'ENOENT' });
+  assert.equal(await read(root, untouched), before);
+  await node(root, ['scripts/build-static-doc-site.mjs']);
+  docs = JSON.parse(await read(root, index)).docs;
+  assert.equal(docs.length, 3);
+});
+
+test('partial rebuild respects dotted folders and migrates only matching legacy cache entries', async (t) => {
+  const root = await fixture(t);
+  const source = 'design-data/chapter.v1/场景.md';
+  await write(root, source, '# 新场景\n');
+  await write(root, 'docs-standard/design-data/chapter.v1/场景.json', JSON.stringify({ source: { path: source }, raw: '旧缓存' }));
+  const other = 'docs-standard/design-data/chapter.v2/保留.json';
+  await write(root, other, JSON.stringify({ source: { path: 'design-data/chapter.v2/保留.md' }, raw: '范围外缓存' }));
+  const before = await read(root, other);
+  await node(root, ['scripts/standardize-docs.mjs', 'design-data/chapter.v1']);
+  assert.equal(JSON.parse(await read(root, `docs-standard/${source}.json`)).raw, '# 新场景\n');
+  await assert.rejects(fs.access(path.join(root, 'docs-standard/design-data/chapter.v1/场景.json')), { code: 'ENOENT' });
+  assert.equal(await read(root, other), before);
+});
+
+test('legacy display-path disambiguation preserves document IDs and part-of navigation', async (t) => {
+  const root = await fixture(t);
+  const ownerPath = 'design-data/design-scenes/同名.md';
+  const siblingPath = 'design-data/design-scenes/同名.txt';
+  const childPath = 'design-data/backstory/故事/附属.md';
+  await write(root, ownerPath, '# 主档案');
+  await write(root, siblingPath, '另一份同名档案');
+  await write(root, childPath, '# 附属背景');
+  await registerWorkspace(root);
+  const registry = await readRegistry(root);
+  const owner = registry.documents.find(doc => doc.sourcePath === ownerPath);
+  const sibling = registry.documents.find(doc => doc.sourcePath === siblingPath);
+  const child = registry.documents.find(doc => doc.sourcePath === childPath);
+  child.relations = [{ kind: 'part-of', targetId: owner.id, slot: '背景故事' }];
+  const childMetadata = path.join(root, 'metadata/documents', `${child.id}.json`);
+  await writeJson(childMetadata, child);
+  const metadataBefore = await fs.readFile(childMetadata);
+  await node(root, ['scripts/standardize-docs.mjs', 'design-data']);
+  await node(root, ['scripts/build-static-doc-site.mjs']);
+  const docs = JSON.parse(await read(root, '.viento/cache/indexes/documents.json')).docs;
+  const ownerView = docs.find(doc => doc.id === owner.id), siblingView = docs.find(doc => doc.id === sibling.id);
+  const childView = docs.find(doc => doc.id === child.id);
+  assert.notEqual(ownerView.path, siblingView.path);
+  assert.equal(childView.owners[0].path, ownerView.path);
+  assert.equal(ownerView.ownedDocuments[0].path, childView.path);
+  assert.deepEqual(await fs.readFile(childMetadata), metadataBefore);
+  assert.equal(await read(root, ownerPath), '# 主档案');
 });
 
 test('metadata sorting supports buildings, first-line fields, BOM and original line endings, and is idempotent', async (t) => {

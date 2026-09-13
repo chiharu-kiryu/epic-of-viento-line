@@ -1,0 +1,56 @@
+flowchart LR
+  subgraph UI[界面入口]
+    Home[作品库首页]
+    Editor[文档浏览与编辑]
+    Project[项目类型与模板]
+    Media[图片 / 视频 / 音频]
+    Export[导出]
+    Language[语言设置]
+  end
+  subgraph HOST[桌面与服务]
+    Tauri[Tauri 宿主与会话]
+    API[本地业务接口]
+    Static[静态文件与素材服务]
+    Jobs[导出任务]
+  end
+  subgraph ENGINE[共享引擎]
+    Types[类型 / 模板 / 解析规则]
+    Registry[稳定 ID 与归属登记]
+    Parser[通用解析器]
+    Layout[viento-layout-v1]
+    Build[标准化与三份索引]
+  end
+  subgraph DATA[作品与本机数据]
+    Source[正文 / 模板 / 元数据]
+    Assets[素材根 / 外置绑定]
+    Cache[可重建缓存]
+    Preferences[本机配置与最近作品]
+    ZIP[分享包 / 完整项目包]
+  end
+  Home --> Tauri
+  Tauri -->|启动引擎| API
+  Tauri -->|Rust 归档| ZIP
+  Tauri --> Preferences
+  Editor -->|读写原文| API
+  Editor -->|加载展示索引| Static
+  Project --> API
+  Media --> API
+  Export --> API
+  Language -->|桌面偏好桥| Tauri
+  API --> Source
+  API --> Assets
+  API --> Types
+  API -->|重建| Build
+  API --> Jobs
+  Jobs -->|Node 归档| ZIP
+  Jobs --> Parser
+  Types --> Parser
+  Source --> Build
+  Registry --> Build
+  Build --> Parser
+  Parser --> Layout
+  Layout --> Build
+  Build --> Cache
+  Cache --> Static
+  Assets --> Static
+  Static -->|内容与媒体| Editor

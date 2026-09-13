@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
 import { fetchJsonApiRequest, fetchTextApiRequest } from '../../web/modules/app-services.js';
+import { dialogHarness } from './dialog-harness.mjs';
 
 async function delayedServer(t, { headers = true, body = '{"ok":true,"data":{"value":1}}' } = {}) {
   const server = createServer((_request, response) => {
@@ -46,6 +47,16 @@ test('a caller can cancel a request after its headers without losing the cancell
   const url = await delayedServer(t);
   const controller = new AbortController();
   const pending = fetchTextApiRequest(url, { signal: controller.signal }, 2000);
+  const timer = setTimeout(() => controller.abort(), 150);
+  t.after(() => clearTimeout(timer));
+  await assert.rejects(pending, (error) => error.name === 'AbortError' && !/超时/.test(error.message));
+});
+
+test('media insertion propagates cancellation through the API client while a response body is pending', async (t) => {
+  const url = await delayedServer(t, { body: '{"ok":true,"data":{"content":"should not be applied","media":[]}}' });
+  const { runtime } = await dialogHarness('app-doc-service', { API_PATHS: { MEDIA_INSERT: url }, fetchJsonApiRequest });
+  const controller = new AbortController();
+  const pending = runtime.prepareDraftMedia('{"title":"角色"}', 'documents/角色.json', ['asset-one'], 'character', controller.signal);
   const timer = setTimeout(() => controller.abort(), 150);
   t.after(() => clearTimeout(timer));
   await assert.rejects(pending, (error) => error.name === 'AbortError' && !/超时/.test(error.message));

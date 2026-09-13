@@ -41,6 +41,8 @@ const MIME_TYPES = new Map([
   ['.aac', 'audio/aac'],
   ['.wav', 'audio/wav'],
   ['.ogg', 'audio/ogg'],
+  ['.oga', 'audio/ogg'],
+  ['.opus', 'audio/ogg'],
   ['.flac', 'audio/flac'],
   ['.ttf', 'font/ttf'],
   ['.otf', 'font/otf'],

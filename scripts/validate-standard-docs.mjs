@@ -141,7 +141,7 @@ function validateDocument(doc, relPath) {
       } else for (const section of layout.sections) {
         if (!section || typeof section.id !== 'string' || !section.id || ids.has(section.id)
           || typeof section.title !== 'string' || !Number.isInteger(section.level) || section.level < 1 || section.level > 6
-          || !Array.isArray(section.blocks) || section.blocks.some((block) => !['kv', 'paragraph', 'list', 'table', 'code', 'json', 'image', 'video'].includes(block?.type))) {
+          || !Array.isArray(section.blocks) || section.blocks.some((block) => !['kv', 'paragraph', 'list', 'table', 'code', 'json', 'image', 'video', 'audio'].includes(block?.type))) {
           addIssue(issues, relPath, 'layout', '解析器布局分节无效', section?.id);
         }
         ids.add(section?.id);

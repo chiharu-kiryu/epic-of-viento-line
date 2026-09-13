@@ -12,26 +12,49 @@ export function createExportService(root, { ttlMs = 15 * 60 * 1000 } = {}) {
     const job = jobs.get(id);
     if (!job) return;
     clearTimeout(job.timer);
+    job.released = true;
+    // A download may still be opening/streaming the file, especially on Windows.
+    // Revoke new reads now, but remove its files only after the last reader exits.
+    if (job.readers) return;
     jobs.delete(id);
     await fs.rm(job.directory, { recursive: true, force: true });
   }
   function retain(job) {
     clearTimeout(job.timer);
+    if (job.readers || job.released) return job;
     job.timer = setTimeout(() => { void release(job.id).catch(() => {}); }, ttlMs);
     job.timer.unref?.();
     return job;
   }
   function get(id) {
     const job = UUID.test(id || '') && jobs.get(id);
-    if (!job) throw exportError('导出文件已过期，请重新导出', 410);
+    if (!job || job.released) throw exportError('导出文件已过期，请重新导出', 410);
     return retain(job);
+  }
+  async function download(id, consume) {
+    const job = get(id);
+    job.readers += 1;
+    clearTimeout(job.timer);
+    try {
+      if (await consume(job) === true) job.downloaded = true;
+    } finally {
+      job.readers -= 1;
+      if (job.released) await release(job.id);
+      else retain(job);
+    }
   }
   async function create(options, signal) {
     if (busy) throw exportError('正在准备另一份导出，请稍候', 409);
-    if (jobs.size >= 3) throw exportError('请先下载或关闭已有导出，再继续', 409);
     busy = true;
     let directory;
     try {
+      // Keep prepared and interrupted downloads retryable. Only completed,
+      // inactive downloads can give their slot to the next export.
+      for (const job of jobs.values()) {
+        if (jobs.size < 3) break;
+        if (job.downloaded && !job.readers) await release(job.id);
+      }
+      if (jobs.size >= 3) throw exportError('请先下载或关闭已有导出，再继续', 409);
       const plan = await planExport(root, options, signal);
       const cache = await resolveContainedPath(root, path.join(root, '.viento/cache/exports'), { allowMissing: true });
       await fs.mkdir(cache, { recursive: true, mode: 0o700 });
@@ -49,7 +72,8 @@ export function createExportService(root, { ttlMs = 15 * 60 * 1000 } = {}) {
       const file = path.join(directory, 'payload.zip');
       await writeExportZip(plan, file, signal);
       const bytes = (await fs.stat(file)).size;
-      const job = { id, directory, file, fileName: plan.fileName, bytes, documentCount: plan.documentCount, assetCount: plan.assetCount };
+      const job = { id, directory, file, fileName: plan.fileName, bytes, documentCount: plan.documentCount, assetCount: plan.assetCount,
+        readers: 0, downloaded: false, released: false };
       jobs.set(id, job);
       retain(job);
       return { id, fileName: job.fileName, bytes, documentCount: job.documentCount, assetCount: job.assetCount };
@@ -59,5 +83,5 @@ export function createExportService(root, { ttlMs = 15 * 60 * 1000 } = {}) {
       throw error;
     } finally { busy = false; }
   }
-  return { create, get, release };
+  return { create, get, download, release };
 }

@@ -15,6 +15,7 @@ import {
 import { PROJECT_ROOT, STANDARD_ROOT, toPosix, trimName } from './paths.mjs';
 import { collectFilesRecursive } from './scan-files.mjs';
 import { attachDocumentHierarchy } from './document-model.mjs';
+import { collectDocumentMedia } from './media-format.mjs';
 import { buildDocumentLayout } from '../standardize-docs/layout.mjs';
 
 function toSafeString(value, fallback = '') {
@@ -298,21 +299,34 @@ function classify(relativePath) {
   return inferCategory(normalizeStandardSourcePath(relativePath));
 }
 
+function collectRegisteredReferences(standardDoc, sourcePath, assetCatalog) {
+  const registration = assetCatalog.bySource.get(sourcePath.replace(/^docs-standard\//, ''));
+  const assetRefs = new Set((registration?.assetBindings || []).map((link) => link.assetId));
+  const media = collectDocumentMedia(standardDoc.blocks);
+  const paths = new Set(collectAssetImageRefs(media.text, sourcePath, assetCatalog));
+  for (const url of media.urls) {
+    if (url.startsWith('/asset-files/')) assetRefs.add(url.slice('/asset-files/'.length));
+    else paths.add(url.slice(1).split('/').map(decodeURIComponent).join('/'));
+  }
+  const unresolvedAssetPaths = [];
+  for (const file of paths) {
+    const asset = assetCatalog.byPath.get(file);
+    if (asset) assetRefs.add(asset.id);
+    else unresolvedAssetPaths.push(file);
+  }
+  const images = new Set([...assetRefs].map((id) => assetCatalog.byId.get(id))
+    .filter((asset) => asset?.kind === 'image').map((asset) => `assets/${asset.location.path}`));
+  for (const file of unresolvedAssetPaths) if (/\.(png|jpe?g|webp|gif|svg)$/i.test(file)) images.add(file);
+  return { assetRefs: [...assetRefs], unresolvedAssetPaths, images: [...images] };
+}
+
 async function collectImagesForSourceDoc(standardDoc, sourcePath, sourceCategory, sourceMeta, assetCatalog) {
+  if (assetCatalog.registered) return collectRegisteredReferences(standardDoc, sourcePath, assetCatalog).images;
   const rawText = standardDoc.raw || '';
   const normalizedName = path.basename(sourcePath);
   const baseName = trimName(normalizedName);
   const explicitPaths = collectAssetImageRefs(rawText, sourcePath, assetCatalog);
   const matched = new Set(explicitPaths);
-  if (assetCatalog.registered) {
-    const registration = assetCatalog.bySource.get(sourcePath.replace(/^docs-standard\//, ''));
-    const ids = [...(registration?.assetBindings || []).map((link) => link.assetId), ...[...rawText.matchAll(/asset:([0-9a-f-]{36})/g)].map((match) => match[1])];
-    for (const id of ids) {
-      const asset = assetCatalog.byId.get(id);
-      if (asset?.kind === 'image') matched.add(`assets/${asset.location.path}`);
-    }
-    return [...matched];
-  }
 
   const cls = sourceCategory || 'other';
   const { attribute, hero } = resolveHeroMeta(cls, sourceMeta, sourcePath);
@@ -439,7 +453,8 @@ async function buildIndexFromStandard(assetCatalog) {
     const group = projectType?.label || toSafeString(sourceMeta.group, cls.group);
     const fields = toSafeObject(normalizedDoc.fields, {});
     const title = toSafeString(sourceMeta.title, normalizedName);
-    const imageList = await collectImagesForSourceDoc(
+    const references = assetCatalog.registered ? collectRegisteredReferences(normalizedDoc, sourcePath, assetCatalog) : null;
+    const imageList = references?.images || await collectImagesForSourceDoc(
       normalizedDoc,
       sourcePath,
       effectiveCategory,
@@ -455,14 +470,9 @@ async function buildIndexFromStandard(assetCatalog) {
       : imageList;
 
     const displayPath = registration?.legacyId || (WORKSPACE_MANIFEST?.version === 3 ? sourcePath : buildDisplayPath(cls.category, sourcePath, sourceMeta, normalizedName));
-    const assetRefs = assetCatalog.registered ? [...new Set([
-      ...(registration?.assetBindings || []).map((link) => link.assetId),
-      ...[...normalizedDoc.raw.matchAll(/asset:(?:\/\/)?([0-9a-f-]{36})/gi)].map((match) => match[1].toLowerCase()),
-      ...imageList.map((file) => assetCatalog.byPath.get(file)?.id).filter(Boolean),
-    ])] : undefined;
     docs.push({
       ...(registration ? { id: registration.id } : {}),
-      ...(assetRefs ? { assetRefs, unresolvedAssetPaths: imageList.filter((file) => !assetCatalog.byPath.has(file)) } : {}),
+      ...(references ? { assetRefs: references.assetRefs, unresolvedAssetPaths: references.unresolvedAssetPaths } : {}),
       path: displayPath,
       title,
       name: normalizedName,
@@ -518,6 +528,19 @@ async function buildStandardIndex() {
   const shouldUseStandard = fs.existsSync(STANDARD_ROOT);
   if (shouldUseStandard) {
     const docs = await buildIndexFromStandard(assetCatalog);
+    const displayGroups = new Map();
+    for (const doc of docs) {
+      const group = displayGroups.get(doc.path) || [];
+      group.push(doc); displayGroups.set(doc.path, group);
+    }
+    for (const group of displayGroups.values()) {
+      // Old friendly paths can collapse different source files to one title.
+      // Keep those paths where unambiguous; use stable identities otherwise.
+      // Duplicate copies of the same source remain errors below.
+      if (group.length > 1 && new Set(group.map(doc => doc.source.path)).size === group.length) {
+        for (const doc of group) doc.path = doc.displayPath = doc.id ? `document/${doc.id}` : doc.source.path;
+      }
+    }
     const paths = new Map();
     for (const doc of docs) {
       if (paths.has(doc.path)) {
@@ -531,6 +554,7 @@ async function buildStandardIndex() {
       }
       return a.name.localeCompare(b.name, 'zh-CN');
     });
+    attachDocumentHierarchy(docs);
     return {
       workspace: projectDefinition(WORKSPACE_MANIFEST),
       generatedAt: new Date().toISOString(),

@@ -10,15 +10,19 @@ export function renderMedia(media) {
     figure.textContent = t('素材引用无效');
     return figure;
   }
-  const element = document.createElement(media.type === 'video' ? 'video' : 'img');
+  const timed = media.type === 'video' || media.type === 'audio';
+  const element = document.createElement(timed ? media.type : 'img');
   const caption = String(media.caption || media.alt || '');
   element.className = 'doc-media-content';
-  if (media.type === 'video') {
+  if (timed) {
     element.controls = true;
-    element.preload = 'metadata';
-    element.setAttribute('playsinline', '');
-    element.setAttribute('aria-label', caption || t('视频素材'));
-    if (!caption) element.setAttribute('data-i18n-aria-label', '视频素材');
+    // WebKit/GStreamer can truncate Ogg duration and seek back to zero when
+    // buffering stops after metadata. Audio needs normal buffering for seeking.
+    element.preload = media.type === 'audio' ? 'auto' : 'metadata';
+    if (media.type === 'video') element.setAttribute('playsinline', '');
+    const label = media.type === 'audio' ? '音频素材' : '视频素材';
+    element.setAttribute('aria-label', caption || t(label));
+    if (!caption) element.setAttribute('data-i18n-aria-label', label);
   } else {
     element.alt = caption;
     element.loading = 'lazy';
@@ -28,8 +32,9 @@ export function renderMedia(media) {
   status.hidden = true;
   element.addEventListener('error', () => {
     status.hidden = false;
-    status.dataset.i18n = media.type === 'video' ? '视频暂时无法播放，请检查素材是否在线及视频编码。' : '图片暂时无法读取，请检查素材是否在线。';
-    status.textContent = media.type === 'video' ? t('视频暂时无法播放，请检查素材是否在线及视频编码。') : t('图片暂时无法读取，请检查素材是否在线。');
+    status.dataset.i18n = media.type === 'audio' ? '音频暂时无法播放，请检查素材是否在线及音频编码。'
+      : media.type === 'video' ? '视频暂时无法播放，请检查素材是否在线及视频编码。' : '图片暂时无法读取，请检查素材是否在线。';
+    status.textContent = t(status.dataset.i18n);
   });
   element.src = url;
   figure.appendChild(element);
@@ -38,12 +43,12 @@ export function renderMedia(media) {
     label.textContent = caption;
     figure.appendChild(label);
   }
-  if (media.type === 'video') {
+  if (timed) {
     const link = document.createElement('a');
     link.href = url;
-    link.download = caption || 'video';
-    link.textContent = t('下载原视频');
-    link.dataset.i18n = '下载原视频';
+    link.download = caption || media.type;
+    link.dataset.i18n = media.type === 'audio' ? '下载原音频' : '下载原视频';
+    link.textContent = t(link.dataset.i18n);
     figure.appendChild(link);
   }
   figure.appendChild(status);

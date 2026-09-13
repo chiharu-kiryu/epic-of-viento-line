@@ -1,6 +1,6 @@
 # Viento Studio
 
-当前版本：**b.2.8.1**。更新内容和版本规则见 [发布记录](docs/RELEASE_b.2.8.1.md)。
+当前版本：**b.2.8.2**。更新内容和版本规则见 [发布记录](docs/RELEASE_b.2.8.2.md)。
 
 Viento Studio 是通用 OC 设计 IDE；此仓库包含编辑器、转换器和桌面宿主。正文、模板、元数据、素材及作品备份保存在独立作品文件夹，具体位置可用 `npm run workspace -- paths` 查看。新项目采用 `documents / templates / metadata / assets`，类型和模板由项目定义，见 [通用项目结构](docs/GENERIC_PROJECTS.md)。
 
@@ -27,7 +27,9 @@ Linux 默认作品目录为 `~/.local/share/io.viento.studio/workspaces/`，本�
 
 [作品库布局与元数据契约](docs/WORKSPACE_LAYOUT.md) · [本次迁移及完整性记录](docs/STRUCTURE_MIGRATION.md)
 
-[作品导出](docs/EXPORT.md)：编辑器右上角可导出带图片、视频和附属故事的离线网页 / Markdown，也可导出能在作品库恢复的完整项目包。
+[作品导出](docs/EXPORT.md)：编辑器右上角可导出带图片、视频、音频和附属故事的离线网页 / Markdown，也可导出能在作品库恢复的完整项目包。
+
+[音频资源引用](docs/AUDIO_RESOURCES.md)：编辑时通过 **插入素材** 导入或复用配音、音乐、音效，在正文内播放并随项目导出迁移。
 
 ## 文档规范
 
@@ -44,6 +46,8 @@ Linux 默认作品目录为 `~/.local/share/io.viento.studio/workspaces/`，本�
 
 ### 架构与运维参考
 
+- 当前功能链路网络：[完整枚举与总图](docs/FUNCTION_NETWORK.md) · [离线交互图](docs/function-network.html) · [JSON 快照](docs/function-network.json)（2026-09-13，b.2.8.2）
+- 按图排查与修复：[连续修复记录](docs/NETWORK_BUGFIX_b.2.8.1.md)
 - 系统整体架构：[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 - 脚本职责说明：[`scripts/README.md`](scripts/README.md)
 
@@ -56,8 +60,8 @@ Linux 默认作品目录为 `~/.local/share/io.viento.studio/workspaces/`，本�
 - 本机交付：`dist/current/` 保存已构建的 Linux 便携包、源码与校验记录，具体版本以交付文件名和校验记录为准；完整作品迁移包在应用数据目录的 `backups/`。
 - 构建后释放空间：`npm run clean`，仅清理可重建的桌面构建目录；交付目录和作品保留。
 - 数据目录、备份格式、三端发行与构建依赖见 [`desktop/README.md`](desktop/README.md)。
-- 最新发布见 [b.2.8.1 发布记录](docs/RELEASE_b.2.8.1.md)，故障复现和验证见 [修复记录](docs/BUGFIX_0.2.1.md)。
-- 本版本后续排查见 [调用链故障记录](docs/CALL_PATH_BUGFIX_b.2.8.md)。
+- 最新发布见 [b.2.8.2 发布记录](docs/RELEASE_b.2.8.2.md)，本轮故障复现和验证见 [功能网络修复记录](docs/NETWORK_BUGFIX_b.2.8.1.md)。
+- 较早的排查见 [调用链故障记录](docs/CALL_PATH_BUGFIX_b.2.8.md) 与 [历史修复记录](docs/BUGFIX_0.2.1.md)。
 
 ## 文档网页化预览（HTML5）
 

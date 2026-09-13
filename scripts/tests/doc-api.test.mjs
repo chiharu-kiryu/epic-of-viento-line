@@ -4,6 +4,20 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fixture, serve, request, write } from './helpers.mjs';
 import { writeDocumentAtomically } from '../lib/doc-file-store.mjs';
+import { API_PATHS } from '../lib/doc-api-contract.mjs';
+
+test('capability discovery includes the live project configuration and preview routes', async (t) => {
+  const root = await fixture(t);
+  const base = await serve(t, root);
+  const capabilities = (await request(base, '/api/capabilities')).data;
+  assert.deepEqual(new Set(capabilities.endpoints), new Set(Object.values(API_PATHS)));
+  assert.equal(capabilities.capabilities.project, true);
+  for (const endpoint of ['/api/project', '/api/project/preview']) {
+    const response = await request(base, endpoint, {});
+    assert.notEqual(response.status, 404, endpoint);
+    assert.notEqual(response.status, 405, endpoint);
+  }
+});
 
 test('browser module graph is served as JavaScript; server-only modules stay private', async (t) => {
   const root = await fixture(t);
@@ -121,10 +135,12 @@ test('mutable workspace files revalidate and If-None-Match takes precedence over
 test('media responses identify their format and support bounded seeking without downloading the whole file', async (t) => {
   const root = await fixture(t);
   const contents = Buffer.from('0123456789');
-  for (const name of ['clip.mp4', 'sound.ogg', 'font.woff2', 'icon.svg']) await write(root, 'assets/' + name, contents);
+  const cases = [['clip.mp4', 'video/mp4'], ['sound.ogg', 'audio/ogg'], ['sound.opus', 'audio/ogg'], ['sound.oga', 'audio/ogg'], ['sound.m4a', 'audio/mp4'], ['sound.aac', 'audio/aac'], ['font.woff2', 'font/woff2'], ['icon.svg', 'image/svg+xml']];
+  for (const [name] of cases) await write(root, 'assets/' + name, contents);
   const base = await serve(t, root);
-  for (const [name, mime] of [['clip.mp4', 'video/mp4'], ['sound.ogg', 'audio/ogg'], ['font.woff2', 'font/woff2'], ['icon.svg', 'image/svg+xml']]) {
+  for (const [name, mime] of cases) {
     const response = await fetch(base + '/assets/' + name);
+    assert.equal(response.status, 200, name);
     assert.equal(response.headers.get('content-type'), mime);
     await response.arrayBuffer();
   }

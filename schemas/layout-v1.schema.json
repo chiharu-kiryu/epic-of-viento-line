@@ -22,7 +22,7 @@
               "type": "object",
               "required": ["type"],
               "properties": {
-                "type": { "enum": ["kv", "paragraph", "list", "table", "code", "json", "image", "video"] },
+                "type": { "enum": ["kv", "paragraph", "list", "table", "code", "json", "image", "video", "audio"] },
                 "key": { "type": "string" },
                 "value": {},
                 "text": { "type": "string" },

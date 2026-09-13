@@ -1,6 +1,6 @@
 # Viento Studio 桌面版
 
-当前发布版本 **b.2.8.1**，内部安装版本 **2.8.1**；两者对应同一次发布。统一命名及更新步骤见 [版本规则](../docs/RELEASE_b.2.8.1.md#版本规则)。
+当前发布版本 **b.2.8.2**，内部安装版本 **2.8.2**；两者对应同一次发布。更新内容和统一命名见 [发布记录与版本规则](../docs/RELEASE_b.2.8.2.md)。
 
 桌面版使用 Tauri 2。安装后从应用图标启动，在作品库首页新建、打开或导入作品，然后进入现有文档编辑器。Node.js 24.20.0 与转换器随应用提供，使用者无需安装 Node.js、Python、Rust 或手动启动服务。
 
@@ -37,7 +37,7 @@ npm run desktop:build
 
 构建前会自动准备应用资源并下载官方 Node.js 二进制。运行时及许可文本的 SHA-256 固定在 `desktop/node-runtime.json`。下载支持重试，校验后的缓存位于 `desktop/.cache`；只有脚本、前端、通用格式定义与 YAML 依赖进入 `desktop/resources`，约 3 GB 的大型素材无需随每次应用升级重新分发。
 
-输出位于 `src-tauri/target/release/bundle`，构建脚本将完成的安装包改为 `VERSION` 中的发布编号，例如 `Viento-Studio_b.2.8.1_amd64.AppImage`。Linux 可指定 `--bundles deb,appimage`，Windows 使用 `--bundles nsis`，macOS 使用 `--bundles dmg`。跨平台发行应分别在目标系统构建；仓库中的 **Build desktop installers** 工作流可手动生成三端产物，仅上传工作流构件，不自动发布版本。
+输出位于 `src-tauri/target/release/bundle`，构建脚本将完成的安装包改为 `VERSION` 中的发布编号，例如 `Viento-Studio_b.2.8.2_amd64.AppImage`。Linux 可指定 `--bundles deb,appimage`，Windows 使用 `--bundles nsis`，macOS 使用 `--bundles dmg`。跨平台发行应分别在目标系统构建；仓库中的 **Build desktop installers** 工作流可手动生成三端产物，仅上传工作流构件，不自动发布版本。
 
 每次 Linux 打包前会重建生成用的 `.AppDir` 目录，避免 GTK 打包插件因旧链接残留而使第二次构建失败。Rust 编译缓存、已生成的安装包及作品库不在此清理范围内。
 
@@ -80,7 +80,19 @@ cargo run --manifest-path src-tauri/Cargo.toml --release --example workspace-arc
 
 `verify` 会实际导入到临时目录，校验后自动删除恢复副本，需要额外的展开空间。`import` 返回新作品路径，保留恢复结果。导出会原子替换指定的旧备份，失败时保留旧文件；不会自动积累多份备份。
 
+导出和导入都会核对登记的正文、素材绑定与已有素材指纹；不能用包自身的校验和掩盖不一致的登记。路径按每层目录检查大小写、Unicode 等价写法及文件/目录冲突，冲突时保留原文件并报错。原生备份在写入前记录文件快照，发布前再次核对文件、项目清单与外置素材根。
+
+编译好 `workspace-archive` 后，可设置 `VIENTO_TEST_ARCHIVE_BINARY=/完整路径/workspace-archive` 运行 `npm run check -- --app-only`，补齐 v2/v3 包在 Node 与 Rust 间的往返验证；未设置时该互通测试会明确跳过。全部测试样本使用临时目录。
+
 ## 验证
+
+本次升版前的 Linux 原生窗口实测过程、截图及覆盖边界见 [b.2.8.1 开发阶段桌面实测](../docs/NATIVE_WORKFLOW_TEST_b.2.8.1.md)；报告保留实测时的版本和指纹，相关修复统一收录于 b.2.8.2。
+
+作品库首页的原生目录选择、备份和恢复另见 [作品库实测](../docs/NATIVE_LIBRARY_TEST_b.2.8.1.md)。已有编辑窗口时，新建、打开其他作品和导入入口会禁用；宿主也在显示文件选择器和写入前检查，避免先创建或恢复作品再拒绝切换。当前作品仍可继续编辑或备份已保存内容。
+
+关闭编辑器时，宿主按请求 ID 读取正文和模板的草稿、忙碌状态。读取期间暂停页面输入；有草稿时由原生窗口确认，取消后恢复编辑。状态读取超过 5 秒或界面不完整时，提供可取消的原生恢复确认；等待用户决定本身没有超时。关闭确认期间不启动其他文件操作。
+
+确认关闭后，宿主先通知引擎退出并等待终止，再释放作品会话锁。引擎在启动重建前就监听宿主输入管道，退出时停止并回收正在运行的索引进程，禁止继续启动下一阶段。引擎无响应时仍有 5 秒的强制结束兜底。
 
 ```sh
 npm run check -- --app-only
@@ -90,18 +102,34 @@ npm run desktop:test
 
 测试使用独立的临时样例，不读取日常作品的模板和素材。已有本机作品可另用 `npm run rebuild` 和 `npm run check` 验证完整转换链。现有编辑器与转换器测试继续运行。桌面专项测试覆盖安装目录与数据目录分离、原始字节保留、保存和重建、会话鉴权，以及备份恢复的二进制文件、空文件、中文路径、损坏清单和失败回滚。
 
-Linux 原生窗口流程使用 [Tauri WebDriver](https://v2.tauri.app/develop/tests/webdriver/)。准备 `tauri-driver`、与系统 WebKitGTK 相同版本的 `WebKitWebDriver`、`xvfb-run`、`dbus-run-session` 和可生成 PNG、VP8、H.264 测试素材的 `ffmpeg` 后执行：
+Linux 原生窗口流程使用 [Tauri WebDriver](https://v2.tauri.app/develop/tests/webdriver/)。准备 `tauri-driver`、与系统 WebKitGTK 相同版本的 `WebKitWebDriver`、`xvfb-run`、`dbus-run-session`、`xdotool` 和可生成 PNG、VP8、H.264 测试素材的 `ffmpeg` 后执行。`xdotool` 用于独立测试显示器中的原生关闭确认，也可通过 `VIENTO_TEST_XDOTOOL` 指定位置：
 
 ```sh
 npm run desktop:build -- --debug --no-bundle
 python3 desktop/tests/native-smoke.py /path/to/tauri-driver /path/to/WebKitWebDriver
 ```
 
-此测试使用临时作品库与独立应用设置，验证真实窗口中的版本显示、异常请求恢复、库外链接隔离、打开、编辑、源文/块转换、保存、返回作品库、取消关闭、确认丢弃及子进程退出，不读写日常作品。可添加第三个参数指定安装包主程序或 AppImage；AppImage 会在该次测试的临时目录内解包后运行，无需 FUSE。解包文件与测试截图在结束时自动删除；需要保留截图时显式设置 `VIENTO_TEST_SCREENSHOT_DIR=/截图保存目录`。
+此测试使用临时作品库与独立应用设置，验证真实窗口中的版本显示、异常请求恢复、库外链接隔离、打开、编辑、源文/块转换、保存、返回作品库、取消关闭、确认丢弃及子进程退出，不读写日常作品。配置、缓存和 XDG 运行目录均独立；退出时通过 `fusermount3` 清理测试目录内可能残留的门户挂载。可添加第三个参数指定安装包主程序或 AppImage；AppImage 会在该次测试的临时目录内解包后运行，无需 FUSE。解包文件与测试截图在结束时自动删除；需要保留截图与驱动日志时显式设置 `VIENTO_TEST_SCREENSHOT_DIR=/截图保存目录`。
 
 媒体流程覆盖实际图片与视频导入、素材复用、粘贴和拖入、草稿预览、播放与跳转、窄窗口以及保存后重新打开。AppImage 启动时自动补充系统 GStreamer 插件目录；验证便携包时无需手工设置 `GST_PLUGIN_PATH_1_0`。
 
 新项目流程复用同一测试；先构建 `workspace-archive` 示例，再设置 `VIENTO_TEST_GENERIC_CREATE=/完整路径/workspace-archive` 运行。它使用与桌面文件选择器相同的新建实现，并在原生编辑窗口验证空白项目、六个默认类型、自定义 YAML 模板、角色背景及图片视频、指定目录后类型保留，最后调用桌面归档实现逐字节验证完整备份恢复。
+
+首页文件选择流程使用独立测试，另需 `xclip` 向测试显示器粘贴中文路径；不会访问日常桌面的剪贴板：
+
+```sh
+python3 desktop/tests/native-library.py /path/to/tauri-driver /path/to/WebKitWebDriver /path/to/viento-studio
+```
+
+测试点选真实 GTK 目录、文件和保存窗口，覆盖取消、无效名称和目录、活动编辑窗口限制、备份目的地保护、损坏包回滚及恢复重试。它在新建的临时作品中放入带 BOM/CRLF 的正文、中文及 `#%` 文件名、图片、音频和空文件，逐字节比较归档与恢复结果。截图保留方式与前述测试相同。
+
+设置 `VIENTO_TEST_EDITOR_EXPORT=1` 继续执行编辑器导出的原生保存流程，另需 `xprop` 识别 GTK 覆盖确认与保存窗口的父子关系：
+
+```sh
+VIENTO_TEST_EDITOR_EXPORT=1 python3 desktop/tests/native-library.py /path/to/tauri-driver /path/to/WebKitWebDriver /path/to/viento-studio
+```
+
+该流程用真实释放接口触发与过期相同的缓存清理，验证保存窗口等待期间仍能保存、取消后过期可重新生成、非法位置可重试，以及覆盖确认的取消与替换。正文分享包和完整项目包都核对实际 ZIP 条目与文件字节，见[导出实测报告](../docs/NATIVE_EXPORT_TEST_b.2.8.1.md)。
 
 完整素材迁移是可选的较慢测试，需要额外磁盘空间保存迁移包与恢复副本：
 

@@ -98,6 +98,65 @@ test('separate application/workspace roots support editing, external media, offl
   assert.equal(await fs.readFile(path.join(app, 'web/data/index.json'), 'utf8'), applicationIndex);
 });
 
+test('reference indexes include image, video and audio paths in every source format, including renamed aliases', async (t) => {
+  const app = await fixture(t);
+  const root = await temporary(t);
+  const paths = ['画面 #1.png', '动作%20片段.mp4', '主题 音乐.wav'];
+  for (const file of paths) await write(root, `assets/${file}`, file);
+  await write(root, 'design-data/媒体.md', '# 媒体');
+  await registerWorkspace(root);
+  const registry = await readRegistry(root);
+  const assets = paths.map((file) => registry.assets.find((asset) => asset.location.path === file));
+  const unknownId = randomUUID();
+  const media = assets.map((asset, index) => ({ type: asset.kind, src: `assets/${encodeURIComponent(paths[index])}`, caption: asset.name }));
+  media.push({ type: 'audio', src: `asset://${unknownId.toUpperCase()}` });
+  media.push({ type: 'video', src: 'assets/缺失%20视频.mp4' });
+  media.push({ type: 'image', src: `/asset-files/${assets[0].id.toUpperCase()}` });
+  await write(root, 'design-data/媒体.md', '# 媒体\n\n' + media.map((item) => `${item.type === 'image' ? '!' : `!${item.type}`}[说明](<${item.src}>)`).join('\n\n'));
+  await write(root, 'design-data/媒体.json', JSON.stringify({ title: '媒体', 内容: media }));
+  await write(root, 'design-data/媒体.yaml', `title: 媒体\n内容: ${JSON.stringify(media)}\n`);
+  await registerWorkspace(root);
+  for (const asset of assets) {
+    await fs.rename(path.join(root, 'assets', asset.location.path), path.join(root, 'assets', `${asset.id}${path.extname(asset.location.path)}`));
+    asset.location.path = `${asset.id}${path.extname(asset.location.path)}`;
+    await writeJson(path.join(root, 'metadata/assets', `${asset.id}.json`), asset);
+  }
+  const index = await rebuild(app, root);
+  const references = JSON.parse(await fs.readFile(path.join(root, '.viento/cache/indexes/references.json'), 'utf8')).references;
+  for (const doc of index.docs) {
+    assert.deepEqual([...doc.assetRefs].sort(), [...assets.map((asset) => asset.id), unknownId].sort(), doc.source.path);
+    assert.deepEqual(doc.unresolvedAssetPaths, ['assets/缺失 视频.mp4']);
+    assert.deepEqual(doc.heroImages, [`assets/${assets[0].location.path}`]);
+    const links = references.filter((link) => link.documentId === doc.id);
+    assert.equal(links.length, 5);
+    assert.equal(links.filter((link) => link.resolved).length, 3);
+    assert.equal(links.find((link) => link.assetId === unknownId).resolved, false);
+    assert.equal(links.find((link) => link.legacyPath).legacyPath, 'assets/缺失 视频.mp4');
+  }
+});
+
+test('reference indexes exclude fenced code examples while retaining bare IDs and explicit attachments', async (t) => {
+  const app = await fixture(t);
+  const root = await temporary(t);
+  for (const file of ['示例.png', '附件.wav', '声明.mp4']) await write(root, `assets/${file}`, file);
+  await write(root, 'design-data/说明.md', '# 说明');
+  await registerWorkspace(root);
+  const registry = await readRegistry(root);
+  const example = registry.assets.find((asset) => asset.kind === 'image');
+  const attachment = registry.assets.find((asset) => asset.kind === 'audio');
+  const declared = registry.assets.find((asset) => asset.kind === 'video');
+  const unknown = randomUUID();
+  const doc = registry.documents[0];
+  doc.assetBindings.push({ assetId: attachment.id, role: 'theme' });
+  await writeJson(path.join(root, 'metadata/documents', `${doc.id}.json`), doc);
+  await write(root, doc.sourcePath, `# 说明\n\n声明：asset:${declared.id}\n\n\`\`\`md\n![示例](asset:${example.id})\n![旧路径](assets/示例.png)\n!audio[未登记](asset:${unknown})\n\`\`\`\n`);
+  const index = await rebuild(app, root);
+  assert.deepEqual(index.docs[0].assetRefs.sort(), [attachment.id, declared.id].sort());
+  assert.deepEqual(index.docs[0].heroImages, []);
+  assert.deepEqual(index.docs[0].unresolvedAssetPaths, []);
+  assert.match(index.docs[0].content, new RegExp(unknown), 'code examples remain in the source');
+});
+
 test('v1 registration retains workspace identity and the old manifest; unsupported versions do not mutate sources', async (t) => {
   const root = await temporary(t);
   const original = { format: 'viento-workspace', version: 1, id: randomUUID(), name: '旧作品', createdAt: 0 };

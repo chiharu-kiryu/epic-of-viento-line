@@ -1,0 +1,85 @@
+TAP version 13
+# Subtest: reopening an aborted export ignores its late failure and allows a fresh export
+ok 1 - reopening an aborted export ignores its late failure and allows a fresh export
+  ---
+  duration_ms: 27.839084
+  ...
+# Subtest: an aborted export arriving after reopen is released without blocking the new dialog
+ok 2 - an aborted export arriving after reopen is released without blocking the new dialog
+  ---
+  duration_ms: 14.086084
+  ...
+# Subtest: opening export during a save cannot leave a permanently busy snapshot
+ok 3 - opening export during a save cannot leave a permanently busy snapshot
+  ---
+  duration_ms: 7.242453
+  ...
+# Subtest: an expired native export can be regenerated in the same dialog after cancelling its save picker
+ok 4 - an expired native export can be regenerated in the same dialog after cancelling its save picker
+  ---
+  duration_ms: 13.111757
+  ...
+# Subtest: native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+ok 5 - native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+  ---
+  duration_ms: 10.241219
+  ...
+# Subtest: cancelling media import during structured insertion keeps the draft and uploaded assets
+ok 6 - cancelling media import during structured insertion keeps the draft and uploaded assets
+  ---
+  duration_ms: 9.196687
+  ...
+# Subtest: late media preparation cannot overwrite a draft whose content changed
+ok 7 - late media preparation cannot overwrite a draft whose content changed
+  ---
+  duration_ms: 9.38893
+  ...
+# Subtest: existing media still inserts into an unchanged structured draft and releases the editor
+ok 8 - existing media still inserts into an unchanged structured draft and releases the editor
+  ---
+  duration_ms: 13.509035
+  ...
+# Subtest: template preview and save retain original BOM and line endings when only its label changes
+ok 9 - template preview and save retain original BOM and line endings when only its label changes
+  ---
+  duration_ms: 37.131231
+  ...
+# Subtest: returning from saved project settings keeps editing locked until the new index applies
+ok 10 - returning from saved project settings keeps editing locked until the new index applies
+  ---
+  duration_ms: 18.687668
+  ...
+# Subtest: discarding edits after a template save cannot leave a closed dialog marked dirty
+ok 11 - discarding edits after a template save cannot leave a closed dialog marked dirty
+  ---
+  duration_ms: 24.703223
+  ...
+# Subtest: a failed project index application keeps the settings available for retry without another save
+ok 12 - a failed project index application keeps the settings available for retry without another save
+  ---
+  duration_ms: 22.858084
+  ...
+# Subtest: language changes update retained UI references while preserving authored labels and interpolation values
+ok 13 - language changes update retained UI references while preserving authored labels and interpolation values
+  ---
+  duration_ms: 3.646842
+  ...
+# Subtest: English catalogue preserves all message parameters
+ok 14 - English catalogue preserves all message parameters
+  ---
+  duration_ms: 3.165694
+  ...
+# Subtest: desktop language preferences require the local session and stay outside the project
+ok 15 - desktop language preferences require the local session and stay outside the project
+  ---
+  duration_ms: 358.760109
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 15
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 500.496629

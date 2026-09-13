@@ -1,12 +1,13 @@
 import { t, translatePage, onLanguageChange, translateMessage } from '../i18n/index.js';
 import { requestProject } from './app-doc-service.js';
 import { renderDocumentLayout } from './app-document-layout.js';
+import { serializeSourceDraft } from './app-editor-draft.js';
 
 export function setupProjectSettings({ getContext, applied, setBusy }) {
   const dialog = document.createElement('dialog');
   dialog.id = 'projectSettingsDialog'; dialog.className = 'project-settings';
   dialog.setAttribute('aria-labelledby', 'projectSettingsTitle');
-  dialog.innerHTML = `<header><div><h2 id="projectSettingsTitle" data-i18n="项目类型与模板"></h2><p id="projectSettingsName"></p></div><button type="button" id="projectSettingsClose" data-i18n="完成"></button></header>
+  dialog.innerHTML = `<header><div><h2 id="projectSettingsTitle" data-i18n="项目类型与模板"></h2><p id="projectSettingsName"></p></div><button type="button" id="projectSettingsClose" data-i18n="返回编辑器"></button></header>
     <p id="projectSettingsMessage" role="status" aria-live="polite"></p>
     <div class="project-settings-body"><p data-i18n="先定义文档类型与模板，再新建内容、关联故事和素材，最后导出整个项目。"></p>
     <div class="project-settings-grid"><aside><label for="projectTypeList" data-i18n="文档类型"></label><select id="projectTypeList" size="9"></select><button type="button" id="projectTypeAdd" data-i18n="新增类型"></button></aside>
@@ -24,14 +25,15 @@ export function setupProjectSettings({ getContext, applied, setBusy }) {
       </details>
     </fieldset></form></div>
     <section id="projectTemplatePreviewPanel" hidden><h3 data-i18n="模板预览"></h3><div id="projectTemplatePreviewContent" class="project-template-preview"></div></section></div>
-    <footer class="project-settings-actions"><button type="button" id="projectTemplatePreview" data-i18n="预览解析结果"></button><button type="submit" form="projectTypeForm" id="projectTemplateSave" data-i18n="保存并应用"></button></footer>`;
+    <footer class="project-settings-actions"><button type="button" id="projectTypeCancel" data-i18n="取消新增" hidden></button><button type="button" id="projectTemplatePreview" data-i18n="预览解析结果"></button><button type="submit" form="projectTypeForm" id="projectTemplateSave" data-i18n="保存并应用"></button></footer>`;
   document.body.appendChild(dialog);
   const el = (id) => dialog.querySelector(`#${id}`);
   const message = el('projectSettingsMessage');
-  let configuration, selected = '', original = '', busy = false, changed = false;
+  let configuration, selected = '', returnType = '', original = '', busy = false, changed = false;
   const lines = (id) => el(id).value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
   const payload = () => {
-    const previous = configuration?.entries.find((entry) => entry.type.id === selected)?.type || {};
+    const entry = configuration?.entries.find((entry) => entry.type.id === selected);
+    const previous = entry?.type || {};
     const parserOptions = {
       allowedFieldKeys: lines('projectAllowedFields'), multilineFieldKeys: lines('projectMultilineFields'), boundaryFieldKeys: lines('projectBoundaryFields'),
     };
@@ -39,11 +41,22 @@ export function setupProjectSettings({ getContext, applied, setBusy }) {
     return { revision: configuration?.revision, type: { ...previous,
       id: el('projectTypeId').value.trim(), label: el('projectTypeLabel').value.trim(), directory: el('projectTypeDirectory').value.trim(), parserProfile: el('projectTypeProfile').value,
       parserOptions, fieldGroups: [...el('projectFieldGroups').children].map((row) => ({ title: row.querySelector('input').value.trim(), fields: row.querySelector('textarea').value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean) })),
-    }, format: el('projectTemplateFormat').value, content: el('projectTemplateContent').value };
+    }, format: el('projectTemplateFormat').value, content: serializeSourceDraft(entry?.content || '', el('projectTemplateContent').value) };
   };
   const dirty = () => configuration && JSON.stringify(payload()) !== original;
-  const track = () => { dialog.dataset.dirty = String(Boolean(dirty())); el('projectTemplatePreviewPanel').hidden = true; };
-  const canDiscard = () => !dirty() || window.confirm(t('模板有未保存的修改，确定丢弃？'));
+  function updateActions() {
+    const creating = Boolean(configuration && !selected);
+    const unsaved = Boolean(dirty());
+    dialog.dataset.dirty = String(unsaved);
+    const cancel = el('projectTypeCancel');
+    cancel.dataset.i18n = creating ? '取消新增' : '放弃修改';
+    cancel.textContent = t(cancel.dataset.i18n);
+    cancel.hidden = !creating && !unsaved;
+    cancel.disabled = busy || !configuration;
+    el('projectTypeAdd').disabled = busy || !configuration || creating;
+  }
+  const track = () => { updateActions(); el('projectTemplatePreviewPanel').hidden = true; };
+  const canDiscard = () => !dirty() || window.confirm(t('类型或模板有未保存的修改，确定丢弃？'));
   function addGroup(group = { title: '', fields: [] }) {
     const row = document.createElement('div'); row.className = 'project-field-group';
     const name = document.createElement('input'); name.value = group.title; name.maxLength = 120; name.placeholder = t('分组名称'); name.setAttribute('aria-label', t('分组名称'));
@@ -57,6 +70,7 @@ export function setupProjectSettings({ getContext, applied, setBusy }) {
   function choose(id) {
     selected = id;
     const entry = configuration.entries.find((entry) => entry.type.id === id);
+    if (entry) returnType = id;
     const type = entry?.type || { id: '', label: '', directory: '', parserProfile: 'structured' };
     el('projectTypeId').value = type.id; el('projectTypeId').readOnly = !!entry;
     el('projectTypeLabel').value = type.label; el('projectTypeDirectory').value = type.directory;
@@ -66,7 +80,7 @@ export function setupProjectSettings({ getContext, applied, setBusy }) {
     for (const [field, key] of [['projectAllowedFields', 'allowedFieldKeys'], ['projectMultilineFields', 'multilineFieldKeys'], ['projectBoundaryFields', 'boundaryFieldKeys']]) el(field).value = (type.parserOptions?.[key] || (key === 'allowedFieldKeys' ? ['_header'] : [])).join('\n');
     el('projectFieldGroups').replaceChildren(); (type.fieldGroups || []).forEach(addGroup);
     el('projectTypeList').value = id;
-    original = JSON.stringify(payload()); dialog.dataset.dirty = 'false';
+    original = JSON.stringify(payload()); updateActions();
     dialog.querySelector('.project-settings-body').scrollTop = 0;
     el('projectTemplatePreviewPanel').hidden = true;
     message.textContent = entry?.problem || '';
@@ -82,39 +96,49 @@ export function setupProjectSettings({ getContext, applied, setBusy }) {
     if (busy) return;
     busy = true; setBusy(true); dialog.setAttribute('aria-busy', 'true');
     el('projectTemplatePreview').disabled = true; el('projectTemplateSave').disabled = true;
-    el('projectTypeFields').disabled = true; el('projectTypeList').disabled = true; el('projectTypeAdd').disabled = true; el('projectSettingsClose').disabled = true;
+    el('projectTypeFields').disabled = true; el('projectTypeList').disabled = true; el('projectSettingsClose').disabled = true; updateActions();
     message.textContent = t('正在处理项目配置…');
     try { await action(); }
     catch (error) { message.textContent = error.message || String(error); }
-    finally { busy = false; setBusy(false); dialog.setAttribute('aria-busy', 'false'); el('projectTypeFields').disabled = !configuration; el('projectTypeList').disabled = !configuration; el('projectTypeAdd').disabled = !configuration; el('projectSettingsClose').disabled = false; el('projectTemplatePreview').disabled = !configuration; el('projectTemplateSave').disabled = !configuration; }
+    finally { busy = false; setBusy(false); dialog.setAttribute('aria-busy', 'false'); el('projectTypeFields').disabled = !configuration; el('projectTypeList').disabled = !configuration; el('projectSettingsClose').disabled = false; el('projectTemplatePreview').disabled = !configuration; el('projectTemplateSave').disabled = !configuration; updateActions(); }
   }
   const showPreview = (preview) => { el('projectTemplatePreviewContent').replaceChildren(...renderDocumentLayout(preview)); el('projectTemplatePreviewPanel').hidden = false; el('projectTemplatePreviewPanel').scrollIntoView({ block: 'nearest' }); };
   async function open() {
     const context = getContext();
     if (!context.editable || !context.workspace?.configurable) { window.alert(t('请在已登记项目的编辑模式下管理模板。')); return; }
     if (context.dirty || context.creating || context.busy) { window.alert(t('请先保存或结束当前文档草稿，再调整项目模板。')); return; }
-    configuration = undefined; changed = false; dialog.dataset.dirty = 'false'; dialog.showModal();
+    configuration = undefined; selected = ''; returnType = ''; changed = false; updateActions(); dialog.showModal();
     await run(async () => { configuration = await requestProject(); changed = false; list(); choose(configuration.entries[0]?.type.id || ''); message.textContent = configuration.warnings.join('\n'); });
   }
   async function close() {
     if (busy || !canDiscard()) return;
-    dialog.dataset.dirty = 'false'; dialog.close();
-    if (changed) await applied();
+    const finish = () => { configuration = undefined; dialog.dataset.dirty = 'false'; dialog.close(); };
+    if (changed) await run(async () => { await applied(); changed = false; finish(); });
+    else finish();
+  }
+  function cancelChanges() {
+    if (busy || !configuration) return;
+    const target = selected || returnType || configuration.entries[0]?.type.id;
+    if (!target) { void close(); return; }
+    if (!canDiscard()) return;
+    choose(target);
+    el('projectTypeList').focus();
   }
   document.getElementById('projectSettingsBtn')?.addEventListener('click', () => void open());
   const shortcut = document.createElement('button'); shortcut.type = 'button'; shortcut.dataset.i18n = '项目类型与模板'; shortcut.textContent = t('项目类型与模板');
   document.getElementById('settingsDialog')?.querySelector('form')?.appendChild(shortcut);
   shortcut.addEventListener('click', () => { document.getElementById('settingsDialog').close(); void open(); });
   el('projectSettingsClose').addEventListener('click', () => void close());
-  dialog.addEventListener('cancel', (event) => { event.preventDefault(); void close(); });
+  el('projectTypeCancel').addEventListener('click', cancelChanges);
+  dialog.addEventListener('cancel', (event) => { event.preventDefault(); if (configuration && !selected) cancelChanges(); else void close(); });
   dialog.addEventListener('keydown', (event) => {
     event.stopPropagation();
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
       event.preventDefault(); if (!busy && configuration) el('projectTypeForm').requestSubmit();
     }
   });
-  el('projectTypeList').addEventListener('change', () => { if (canDiscard()) choose(el('projectTypeList').value); else el('projectTypeList').value = selected; });
-  el('projectTypeAdd').addEventListener('click', () => { if (canDiscard()) { choose(''); el('projectTypeLabel').focus(); } });
+  el('projectTypeList').addEventListener('change', () => { if (busy || !configuration) return; if (canDiscard()) choose(el('projectTypeList').value); else el('projectTypeList').value = selected; });
+  el('projectTypeAdd').addEventListener('click', () => { if (busy || !configuration || !selected) return; if (canDiscard()) { choose(''); el('projectTypeLabel').focus(); } });
   el('projectGroupAdd').addEventListener('click', () => { addGroup(); track(); });
   el('projectTypeForm').addEventListener('input', track);
   el('projectTypeForm').addEventListener('change', track);

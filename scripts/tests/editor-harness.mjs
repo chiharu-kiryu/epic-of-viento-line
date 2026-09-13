@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import vm from 'node:vm';
-import { API_PATHS, API_ERRORS, API_RESPONSE } from '../lib/doc-api-contract.mjs';
+import { API_PATHS, API_ERRORS, API_RESPONSE, getCreatePathError } from '../lib/doc-api-contract.mjs';
 import { getDocTemplate, DOC_TYPE_TEMPLATE_DEFS } from '../../web/modules/app-type-templates.js';
 import { createBlockDraft, serializeBlockDraft, serializeSourceDraft } from '../../web/modules/app-editor-draft.js';
 import { t, localize, getLanguage, onLanguageChange, translatePage, translateMessage } from '../../web/i18n/index.js';
@@ -36,6 +36,7 @@ export class Element {
   set textContent(value) { this.children = []; this.text = String(value ?? ''); }
   get textContent() { return (this.text || '') + this.children.map((child) => child.textContent).join(''); }
   setAttribute(name, value) { this[name] = value; }
+  getAttribute(name) { return this[name] ?? null; }
   removeAttribute(name) { delete this[name]; }
   replaceChildren(...children) { this.children = [...children]; this.text = ''; }
   appendChild(child) { this.children.push(...(child.tagName === 'FRAGMENT' ? child.children : [child])); }
@@ -73,7 +74,7 @@ export async function editorHarness(overrides = {}) {
     history: { replaceState() {} },
     localStorage: { getItem: () => null, setItem() {} },
     window: { confirm: () => false },
-    API_PATHS, API_ERRORS, API_RESPONSE, getDocTemplate, DOC_TYPE_TEMPLATE_DEFS, createBlockDraft, serializeBlockDraft, serializeSourceDraft,
+    API_PATHS, API_ERRORS, API_RESPONSE, getCreatePathError, getDocTemplate, DOC_TYPE_TEMPLATE_DEFS, createBlockDraft, serializeBlockDraft, serializeSourceDraft,
     t, localize, getLanguage, onLanguageChange, translatePage, translateMessage,
     toDisplayValue: (value) => String(value ?? ''),
     getDisplayCategory: (doc) => doc?.category || 'other',

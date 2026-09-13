@@ -8,6 +8,7 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 use tempfile::{Builder, NamedTempFile};
+use unicode_normalization::UnicodeNormalization;
 use uuid::Uuid;
 use zip::{write::SimpleFileOptions, CompressionMethod, ZipArchive, ZipWriter};
 
@@ -160,6 +161,34 @@ fn portable_path(value: &str) -> bool {
         && value.split('/').all(portable_component)
 }
 
+fn portable_key(value: &str) -> String {
+    value.nfc().collect::<String>().to_lowercase()
+}
+
+fn validate_file_tree<'a>(files: impl IntoIterator<Item = &'a str>) -> Result<()> {
+    let mut nodes: BTreeMap<String, (String, bool)> = BTreeMap::new();
+    for file in files {
+        let parts: Vec<_> = file.split('/').collect();
+        let mut prefix = String::new();
+        for (index, part) in parts.iter().enumerate() {
+            if index > 0 {
+                prefix.push('/');
+            }
+            prefix.push_str(part);
+            let is_file = index + 1 == parts.len();
+            let key = portable_key(&prefix);
+            if let Some((existing, existing_file)) = nodes.get(&key) {
+                if existing != &prefix || *existing_file || is_file {
+                    return Err(format!("文件或目录名称跨系统冲突，无法安全迁移：{file}"));
+                }
+            } else {
+                nodes.insert(key, (prefix.clone(), is_file));
+            }
+        }
+    }
+    Ok(())
+}
+
 fn validate_manifest(workspace: &Workspace) -> Result<()> {
     if workspace.extra.get("compatibilityGuard") == Some(&serde_json::json!(true)) {
         return Err("公共作品清单缺失，请恢复 workspace.json".into());
@@ -199,7 +228,7 @@ fn validate_manifest(workspace: &Workspace) -> Result<()> {
                 || ![Some("structured"), Some("prose")]
                     .contains(&definition["parserProfile"].as_str())
                 || !ids.insert(id)
-                || !directories.insert(directory.to_lowercase())
+                || !directories.insert(portable_key(directory))
             {
                 return Err("项目文档类型、目录或解析配置无效".into());
             }
@@ -211,8 +240,9 @@ fn validate_manifest(workspace: &Workspace) -> Result<()> {
                     .unwrap_or("")
                     .to_ascii_lowercase();
                 if !file.split('/').all(portable_component)
-                    || (! ["md", "txt", "json", "yaml", "yml"].contains(&extension.as_str())
-                        && !(workspace.version == 2 && !file.rsplit('/').next().unwrap_or("").contains('.')))
+                    || (!["md", "txt", "json", "yaml", "yml"].contains(&extension.as_str())
+                        && !(workspace.version == 2
+                            && !file.rsplit('/').next().unwrap_or("").contains('.')))
                 {
                     return Err("文档模板路径无效".into());
                 }
@@ -224,30 +254,59 @@ fn validate_manifest(workspace: &Workspace) -> Result<()> {
 }
 
 fn validate_parser_definition(definition: &serde_json::Value) -> Result<()> {
-    let field_name = |value: &serde_json::Value| value.as_str().is_some_and(|text| !text.trim().is_empty() && text.encode_utf16().count() <= 120);
+    let field_name = |value: &serde_json::Value| {
+        value
+            .as_str()
+            .is_some_and(|text| !text.trim().is_empty() && text.encode_utf16().count() <= 120)
+    };
     if let Some(options) = definition.get("parserOptions") {
         let options = options.as_object().ok_or("无效的字段解析规则")?;
         for (key, value) in options {
             if key == "titleField" {
-                if !field_name(value) { return Err("标题字段无效".into()); }
+                if !field_name(value) {
+                    return Err("标题字段无效".into());
+                }
             } else {
-                if !["allowedFieldKeys", "multilineFieldKeys", "boundaryFieldKeys"].contains(&key.as_str()) { return Err("无效的字段解析规则".into()); }
-                let fields = value.as_array().filter(|items| items.len() <= 200).ok_or("字段解析规则需要字段名称")?;
+                if ![
+                    "allowedFieldKeys",
+                    "multilineFieldKeys",
+                    "boundaryFieldKeys",
+                ]
+                .contains(&key.as_str())
+                {
+                    return Err("无效的字段解析规则".into());
+                }
+                let fields = value
+                    .as_array()
+                    .filter(|items| items.len() <= 200)
+                    .ok_or("字段解析规则需要字段名称")?;
                 let mut seen = HashSet::new();
                 for field in fields {
-                    if !field_name(field) || !seen.insert(field.as_str()) { return Err("字段解析规则需要不重复的字段名称".into()); }
+                    if !field_name(field) || !seen.insert(field.as_str()) {
+                        return Err("字段解析规则需要不重复的字段名称".into());
+                    }
                 }
             }
         }
     }
     if let Some(groups) = definition.get("fieldGroups") {
-        let groups = groups.as_array().filter(|items| items.len() <= 50).ok_or("字段分组无效")?;
+        let groups = groups
+            .as_array()
+            .filter(|items| items.len() <= 50)
+            .ok_or("字段分组无效")?;
         let mut seen = HashSet::new();
         for group in groups {
-            if !field_name(&group["title"]) { return Err("字段分组需要名称".into()); }
-            let fields = group["fields"].as_array().filter(|items| !items.is_empty() && items.len() <= 200).ok_or("字段分组需要字段")?;
+            if !field_name(&group["title"]) {
+                return Err("字段分组需要名称".into());
+            }
+            let fields = group["fields"]
+                .as_array()
+                .filter(|items| !items.is_empty() && items.len() <= 200)
+                .ok_or("字段分组需要字段")?;
             for field in fields {
-                if !field_name(field) || !seen.insert(field.as_str()) { return Err("分组字段无效或重复".into()); }
+                if !field_name(field) || !seen.insert(field.as_str()) {
+                    return Err("分组字段无效或重复".into());
+                }
             }
         }
     }
@@ -348,30 +407,84 @@ fn data_file(root: &Path, relative: &str) -> Result<PathBuf> {
     }
 }
 
-fn require_registered_assets(root: &Path) -> Result<()> {
-    let directory = root.join("metadata/assets");
-    if !directory.exists() {
-        return Ok(());
-    }
-    require_real_dir(&directory)?;
-    let store = asset_root(root)?;
-    for entry in fs::read_dir(directory).map_err(io_error)? {
-        let entry = entry.map_err(io_error)?;
-        if !entry.file_type().map_err(io_error)?.is_file() {
-            return Err("素材登记项必须是实际文件".into());
-        }
-        let record: serde_json::Value =
-            serde_json::from_slice(&fs::read(entry.path()).map_err(io_error)?).map_err(io_error)?;
-        let relative = record["location"]["path"]
-            .as_str()
-            .ok_or("素材登记项缺少路径")?;
-        if record["location"]["store"] != "main"
-            || !portable_path(&format!("assets/{relative}"))
-            || !store.join(relative).is_file()
-        {
-            return Err(format!(
-                "素材缺失或登记位置无效，无法生成完整备份：{relative}"
-            ));
+// Validate the bytes actually archived/extracted, not just the existence of a
+// live asset path. ZIP checksums alone cannot establish registry consistency.
+fn validate_archive_registry(root: &Path, version: u32, files: &[Entry]) -> Result<()> {
+    let contents: BTreeMap<_, _> = files
+        .iter()
+        .map(|entry| (entry.path.as_str(), entry))
+        .collect();
+    let mut ids = HashSet::new();
+    let mut asset_ids = HashSet::new();
+    for (kind, format) in [("assets", "viento-asset"), ("documents", "viento-document")] {
+        let prefix = format!("metadata/{kind}/");
+        let mut locations = HashSet::new();
+        for entry in files.iter().filter(|entry| entry.path.starts_with(&prefix)) {
+            let bytes = fs::read(root.join(&entry.path)).map_err(io_error)?;
+            if bytes.len() as u64 != entry.size
+                || format!("{:x}", Sha256::digest(&bytes)) != entry.sha256
+            {
+                return Err(format!("归档期间登记发生变化，请重试：{}", entry.path));
+            }
+            let record: serde_json::Value = serde_json::from_slice(&bytes)
+                .map_err(|error| format!("登记无法读取：{}：{error}", entry.path))?;
+            let id = record["id"].as_str().ok_or("登记缺少身份")?;
+            if Uuid::parse_str(id)
+                .map(|uuid| uuid.to_string() != id)
+                .unwrap_or(true)
+                || entry.path != format!("{prefix}{id}.json")
+                || !ids.insert(id.to_string())
+                || record["format"] != format
+                || record["version"] != 1
+            {
+                return Err(format!("登记身份或格式无效：{}", entry.path));
+            }
+            if kind == "assets" {
+                asset_ids.insert(id.to_string());
+                let relative = record["location"]["path"]
+                    .as_str()
+                    .ok_or("素材登记项缺少路径")?;
+                let source = format!("assets/{relative}");
+                if record["location"]["store"] != "main"
+                    || !portable_path(&source)
+                    || !locations.insert(portable_key(relative))
+                {
+                    return Err(format!("素材登记位置无效或重复：{relative}"));
+                }
+                let actual = contents
+                    .get(source.as_str())
+                    .ok_or_else(|| format!("登记的素材缺失：{relative}"))?;
+                let expected = record.get("content").ok_or("素材登记项缺少内容指纹")?;
+                if !expected.is_null()
+                    && (expected["size"].as_u64() != Some(actual.size)
+                        || expected["sha256"].as_str() != Some(actual.sha256.as_str()))
+                {
+                    return Err(format!("素材内容与登记指纹不一致：{relative}"));
+                }
+            } else {
+                let source = record["sourcePath"]
+                    .as_str()
+                    .ok_or("文档登记项缺少正文路径")?;
+                if !portable_path(source)
+                    || !source.starts_with(&format!("{}/", data_roots(version)[0]))
+                    || !locations.insert(portable_key(source))
+                    || !contents.contains_key(source)
+                {
+                    return Err(format!("登记的正文缺失或位置无效：{source}"));
+                }
+                let bindings = record["assetBindings"]
+                    .as_array()
+                    .ok_or("文档素材绑定必须为数组")?;
+                for binding in bindings {
+                    if !binding["role"].is_string()
+                        || !binding["assetId"]
+                            .as_str()
+                            .is_some_and(|id| asset_ids.contains(id))
+                    {
+                        return Err(format!("文档引用的素材未登记或绑定无效：{source}"));
+                    }
+                }
+            }
         }
     }
     Ok(())
@@ -539,12 +652,7 @@ fn list_files(root: &Path) -> Result<Vec<String>> {
         return Err("文件数量超过迁移包限制".into());
     }
     files.sort();
-    let mut unique = HashSet::new();
-    for name in &files {
-        if !unique.insert(name.to_lowercase()) {
-            return Err(format!("文件名大小写冲突，无法安全迁移：{name}"));
-        }
-    }
+    validate_file_tree(files.iter().map(String::as_str))?;
     Ok(files)
 }
 
@@ -614,6 +722,7 @@ pub fn create_workspace(
         "metadata/assets",
         "assets/media/images",
         "assets/media/videos",
+        "assets/media/audio",
         ".viento/cache",
     ] {
         fs::create_dir_all(temporary.path().join(folder)).map_err(io_error)?;
@@ -645,10 +754,50 @@ fn copy_hashed(
     Ok((size, format!("{:x}", hash.finalize())))
 }
 
+fn file_snapshot(path: &Path) -> Result<fs::Metadata> {
+    let metadata = fs::symlink_metadata(path).map_err(io_error)?;
+    if !metadata.is_file() || metadata.file_type().is_symlink() {
+        return Err(format!("归档文件必须是实际文件：{}", path.display()));
+    }
+    Ok(metadata)
+}
+
+fn same_file_version(expected: &fs::Metadata, actual: &fs::Metadata) -> Result<bool> {
+    if !actual.is_file()
+        || expected.len() != actual.len()
+        || expected.modified().map_err(io_error)? != actual.modified().map_err(io_error)?
+    {
+        return Ok(false);
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+        if expected.dev() != actual.dev()
+            || expected.ino() != actual.ino()
+            || expected.ctime() != actual.ctime()
+            || expected.ctime_nsec() != actual.ctime_nsec()
+        {
+            return Ok(false);
+        }
+    }
+    Ok(expected.created().ok() == actual.created().ok())
+}
+
 pub fn export_workspace(root: &Path, destination: &Path) -> Result<usize> {
     let workspace = ensure_workspace(root)?;
+    let asset_directory = asset_root(root)?;
     let files = list_files(root)?;
-    require_registered_assets(root)?;
+    let snapshots: Vec<_> = files
+        .iter()
+        .map(|relative| {
+            let absolute = relative
+                .strip_prefix("assets/")
+                .map(|file| asset_directory.join(file))
+                .unwrap_or_else(|| root.join(relative));
+            let metadata = file_snapshot(&absolute)?;
+            Ok((absolute, metadata))
+        })
+        .collect::<Result<_>>()?;
     // Do not archive a partially written export inside the workspace itself.
     let parent = destination
         .parent()
@@ -659,7 +808,7 @@ pub fn export_workspace(root: &Path, destination: &Path) -> Result<usize> {
     if data_roots(workspace.version)
         .iter()
         .any(|folder| parent.starts_with(canonical_root.join(folder)))
-        || parent.starts_with(asset_root(root)?.canonicalize().map_err(io_error)?)
+        || parent.starts_with(asset_directory.canonicalize().map_err(io_error)?)
         || parent.starts_with(canonical_root.join(".viento"))
         || parent.join(destination.file_name().ok_or("无效的导出文件名")?)
             == canonical_root.join("workspace.json")
@@ -669,12 +818,13 @@ pub fn export_workspace(root: &Path, destination: &Path) -> Result<usize> {
     let mut temporary = NamedTempFile::new_in(parent).map_err(io_error)?;
     let mut writer = ZipWriter::new(temporary.as_file_mut());
     let mut entries = Vec::new();
-    let mut snapshots = Vec::new();
     let mut total = 0u64;
-    for relative in &files {
-        let absolute = data_file(root, relative)?;
-        let mut input = fs::File::open(&absolute).map_err(io_error)?;
+    for (relative, (absolute, expected)) in files.iter().zip(&snapshots) {
+        let mut input = fs::File::open(absolute).map_err(io_error)?;
         let metadata = input.metadata().map_err(io_error)?;
+        if !same_file_version(expected, &metadata)? {
+            return Err(format!("导出时文件发生变化，请重试：{relative}"));
+        }
         if metadata.len() > MAX_FILE_BYTES {
             return Err(format!("文件超过 8 GiB 限制：{relative}"));
         }
@@ -704,23 +854,29 @@ pub fn export_workspace(root: &Path, destination: &Path) -> Result<usize> {
         if size != metadata.len() {
             return Err(format!("导出时文件发生变化，请重试：{relative}"));
         }
-        snapshots.push((
-            absolute,
-            metadata.len(),
-            metadata.modified().map_err(io_error)?,
-        ));
         entries.push(Entry {
             path: relative.clone(),
             size,
             sha256,
         });
     }
-    if list_files(root)? != files {
+    validate_archive_registry(root, workspace.version, &entries)?;
+    let manifest_file = if root.join("workspace.json").exists() {
+        root.join("workspace.json")
+    } else {
+        root.join(".viento/workspace.json")
+    };
+    let current: Workspace =
+        serde_json::from_slice(&fs::read(manifest_file).map_err(io_error)?).map_err(io_error)?;
+    if list_files(root)? != files
+        || asset_root(root)? != asset_directory
+        || serde_json::to_value(current).map_err(io_error)?
+            != serde_json::to_value(&workspace).map_err(io_error)?
+    {
         return Err("导出时作品库发生变化，请重试".into());
     }
-    for (absolute, size, modified) in snapshots {
-        let current = fs::metadata(&absolute).map_err(io_error)?;
-        if current.len() != size || current.modified().map_err(io_error)? != modified {
+    for (absolute, expected) in snapshots {
+        if !same_file_version(&expected, &file_snapshot(&absolute)?)? {
             return Err("导出时作品库发生变化，请保存后重试".into());
         }
     }
@@ -789,7 +945,7 @@ pub fn import_workspace(archive_path: &Path, parent: &Path) -> Result<PathBuf> {
                 && entry.path != ".viento/workspace.json"
                 && !data_roots(manifest.workspace.version)
                     .contains(&entry.path.split('/').next().unwrap_or("")))
-            || !names.insert(entry.path.to_lowercase())
+            || !names.insert(portable_key(&entry.path))
             || entry.size > MAX_FILE_BYTES
             || entry.sha256.len() != 64
             || !entry.sha256.bytes().all(|b| b.is_ascii_hexdigit())
@@ -802,6 +958,7 @@ pub fn import_workspace(archive_path: &Path, parent: &Path) -> Result<PathBuf> {
             return Err("迁移包展开后超过 64 GiB 限制".into());
         }
     }
+    validate_file_tree(manifest.files.iter().map(|entry| entry.path.as_str()))?;
     let mut zip_names = HashSet::new();
     for index in 0..archive.len() {
         let entry = archive.by_index(index).map_err(io_error)?;
@@ -823,7 +980,8 @@ pub fn import_workspace(archive_path: &Path, parent: &Path) -> Result<PathBuf> {
     for folder in data_roots(manifest.workspace.version) {
         fs::create_dir(temporary.path().join(folder)).map_err(io_error)?;
     }
-    for expected in manifest.files {
+    let mut extracted = Vec::new();
+    for expected in &manifest.files {
         let mut entry = archive.by_name(&expected.path).map_err(io_error)?;
         if entry.size() != expected.size {
             return Err(format!("文件大小校验失败：{}", expected.path));
@@ -840,6 +998,11 @@ pub fn import_workspace(archive_path: &Path, parent: &Path) -> Result<PathBuf> {
             return Err(format!("文件完整性校验失败：{}", expected.path));
         }
         output.sync_all().map_err(io_error)?;
+        extracted.push(Entry {
+            path: expected.path.clone(),
+            size,
+            sha256,
+        });
     }
     let public = temporary.path().join("workspace.json");
     if public.exists() {
@@ -872,13 +1035,215 @@ pub fn import_workspace(archive_path: &Path, parent: &Path) -> Result<PathBuf> {
         }
         ensure_v2_guard(temporary.path())?;
     }
-    require_registered_assets(temporary.path())?;
+    validate_archive_registry(temporary.path(), manifest.workspace.version, &extracted)?;
     Ok(temporary.keep())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn registered_asset(root: &Path, relative: &str, bytes: &[u8]) -> String {
+        let id = Uuid::new_v4().to_string();
+        fs::create_dir_all(root.join("assets").join(relative).parent().unwrap()).unwrap();
+        fs::write(root.join("assets").join(relative), bytes).unwrap();
+        write_json(&root.join(format!("metadata/assets/{id}.json")), &serde_json::json!({
+            "format":"viento-asset", "version":1, "id":id, "name":"素材", "kind":"other", "tags":[],
+            "location":{"store":"main","path":relative}, "content":{"size":bytes.len(), "sha256":format!("{:x}", Sha256::digest(bytes))}, "legacyPaths":[]
+        })).unwrap();
+        id
+    }
+
+    // Build a checksum-correct ZIP without the exporter's registry/tree checks,
+    // so import validation is tested independently from export validation.
+    fn unchecked_archive(root: &Path, target: &Path, extra: &[(&str, &[u8])]) {
+        let workspace = ensure_workspace(root).unwrap();
+        let mut files: BTreeMap<String, Vec<u8>> = list_files(root)
+            .unwrap()
+            .into_iter()
+            .map(|name| {
+                let bytes = fs::read(data_file(root, &name).unwrap()).unwrap();
+                (name, bytes)
+            })
+            .collect();
+        files.extend(
+            extra
+                .iter()
+                .map(|(name, bytes)| (name.to_string(), bytes.to_vec())),
+        );
+        let mut writer = ZipWriter::new(fs::File::create(target).unwrap());
+        let entries = files
+            .iter()
+            .map(|(name, bytes)| Entry {
+                path: name.clone(),
+                size: bytes.len() as u64,
+                sha256: format!("{:X}", Sha256::digest(bytes)),
+            })
+            .collect();
+        for (name, bytes) in files {
+            writer
+                .start_file(name, SimpleFileOptions::default())
+                .unwrap();
+            writer.write_all(&bytes).unwrap();
+        }
+        writer
+            .start_file("manifest.json", SimpleFileOptions::default())
+            .unwrap();
+        serde_json::to_writer(
+            &mut writer,
+            &ArchiveManifest {
+                format: "viento-archive".into(),
+                version: if workspace.version == 3 { 3 } else { 2 },
+                exported_at: now(),
+                workspace,
+                files: entries,
+            },
+        )
+        .unwrap();
+        writer.finish().unwrap();
+    }
+
+    #[test]
+    fn registered_asset_fingerprints_protect_backup_and_restore_even_when_zip_checksums_match() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = create_workspace(temp.path(), "素材完整性", None, None).unwrap();
+        let id = registered_asset(&root, "audio/theme.bin", b"original");
+        let target = temp.path().join("backup.zip");
+        export_workspace(&root, &target).unwrap();
+        let previous = fs::read(&target).unwrap();
+        let uppercase = temp.path().join("uppercase-hashes.zip");
+        unchecked_archive(&root, &uppercase, &[]);
+        let restored_uppercase = import_workspace(&uppercase, temp.path()).unwrap();
+        assert_eq!(
+            fs::read(restored_uppercase.join("assets/audio/theme.bin")).unwrap(),
+            b"original"
+        );
+        let registry_before = fs::read(root.join(format!("metadata/assets/{id}.json"))).unwrap();
+        fs::write(root.join("assets/audio/theme.bin"), b"tampered").unwrap();
+        assert!(export_workspace(&root, &target)
+            .unwrap_err()
+            .contains("登记"));
+        assert_eq!(fs::read(&target).unwrap(), previous);
+        assert_eq!(
+            fs::read(root.join(format!("metadata/assets/{id}.json"))).unwrap(),
+            registry_before
+        );
+        let bad = temp.path().join("bad.zip");
+        unchecked_archive(&root, &bad, &[]);
+        let before = fs::read_dir(temp.path()).unwrap().count();
+        assert!(import_workspace(&bad, temp.path())
+            .unwrap_err()
+            .contains("登记"));
+        assert_eq!(fs::read_dir(temp.path()).unwrap().count(), before);
+        let restored = import_workspace(&target, temp.path()).unwrap();
+        assert_eq!(
+            fs::read(restored.join("assets/audio/theme.bin")).unwrap(),
+            b"original"
+        );
+    }
+
+    #[test]
+    fn missing_registered_sources_and_asset_bindings_cannot_be_reported_as_complete_archives() {
+        for missing in ["source", "binding"] {
+            let temp = tempfile::tempdir().unwrap();
+            let root = create_workspace(temp.path(), "档案完整性", None, None).unwrap();
+            let doc_id = Uuid::new_v4().to_string();
+            fs::write(root.join("documents/story.md"), b"# preserved story\r\n").unwrap();
+            write_json(&root.join(format!("metadata/documents/{doc_id}.json")), &serde_json::json!({
+                "format":"viento-document", "version":1, "id":doc_id, "sourcePath":"documents/story.md", "assetBindings":[]
+            })).unwrap();
+            let target = temp.path().join("backup.zip");
+            export_workspace(&root, &target).unwrap();
+            let previous = fs::read(&target).unwrap();
+            if missing == "source" {
+                fs::remove_file(root.join("documents/story.md")).unwrap();
+            } else {
+                write_json(&root.join(format!("metadata/documents/{doc_id}.json")), &serde_json::json!({
+                    "format":"viento-document", "version":1, "id":doc_id, "sourcePath":"documents/story.md",
+                    "assetBindings":[{"assetId":Uuid::new_v4().to_string(),"role":"attachment"}]
+                })).unwrap();
+            }
+            assert!(export_workspace(&root, &target).is_err(), "{missing}");
+            assert_eq!(fs::read(&target).unwrap(), previous);
+            let bad = temp.path().join("bad.zip");
+            unchecked_archive(&root, &bad, &[]);
+            let before = fs::read_dir(temp.path()).unwrap().count();
+            assert!(import_workspace(&bad, temp.path()).is_err(), "{missing}");
+            assert_eq!(fs::read_dir(temp.path()).unwrap().count(), before);
+        }
+    }
+
+    #[test]
+    fn imports_reject_portable_directory_file_and_unicode_collisions_before_restore() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = create_workspace(temp.path(), "路径完整性", None, None).unwrap();
+        for (first, second) in [
+            ("assets/Book/a.bin", "assets/book/b.bin"),
+            ("assets/Book", "assets/book/b.bin"),
+            ("assets/café.bin", "assets/cafe\u{301}.bin"),
+            ("assets/café/a.bin", "assets/cafe\u{301}/b.bin"),
+        ] {
+            let target = temp.path().join("conflict.zip");
+            unchecked_archive(&root, &target, &[(first, b"first"), (second, b"second")]);
+            let before = fs::read_dir(temp.path()).unwrap().count();
+            assert!(
+                import_workspace(&target, temp.path()).is_err(),
+                "{first}, {second}"
+            );
+            assert_eq!(fs::read_dir(temp.path()).unwrap().count(), before);
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn native_exports_reject_paths_that_would_merge_on_another_filesystem() {
+        for (first, second) in [
+            ("assets/Book/a.bin", "assets/book/b.bin"),
+            ("assets/Book", "assets/book/b.bin"),
+            ("assets/café.bin", "assets/cafe\u{301}.bin"),
+            ("assets/café/a.bin", "assets/cafe\u{301}/b.bin"),
+        ] {
+            let temp = tempfile::tempdir().unwrap();
+            let root = create_workspace(temp.path(), "迁移路径", None, None).unwrap();
+            let target = temp.path().join("backup.zip");
+            export_workspace(&root, &target).unwrap();
+            let previous = fs::read(&target).unwrap();
+            for name in [first, second] {
+                fs::create_dir_all(root.join(name).parent().unwrap()).unwrap();
+                fs::write(root.join(name), b"preserved").unwrap();
+            }
+            assert!(
+                export_workspace(&root, &target).is_err(),
+                "{first}, {second}"
+            );
+            assert_eq!(fs::read(&target).unwrap(), previous);
+            assert_eq!(fs::read(root.join(first)).unwrap(), b"preserved");
+            assert_eq!(fs::read(root.join(second)).unwrap(), b"preserved");
+        }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn backup_snapshots_detect_replaced_files_even_when_size_and_modified_time_are_preserved() {
+        let temp = tempfile::tempdir().unwrap();
+        let file = temp.path().join("story.md");
+        fs::write(&file, b"original").unwrap();
+        let snapshot = file_snapshot(&file).unwrap();
+        assert!(same_file_version(&snapshot, &file_snapshot(&file).unwrap()).unwrap());
+        let replacement = temp.path().join("new.md");
+        fs::write(&replacement, b"modified").unwrap();
+        fs::File::open(&replacement)
+            .unwrap()
+            .set_times(fs::FileTimes::new().set_modified(snapshot.modified().unwrap()))
+            .unwrap();
+        fs::rename(replacement, &file).unwrap();
+        let current = file_snapshot(&file).unwrap();
+        assert_eq!(snapshot.len(), current.len());
+        assert_eq!(snapshot.modified().unwrap(), current.modified().unwrap());
+        assert!(!same_file_version(&snapshot, &current).unwrap());
+        assert_eq!(fs::read(file).unwrap(), b"modified");
+    }
+
     fn legacy_workspace(parent: &Path, name: &str) -> PathBuf {
         let directory = Builder::new()
             .prefix("v2-test-")
@@ -942,6 +1307,7 @@ mod tests {
     fn v2_archive_carries_metadata_and_external_assets_but_not_local_bindings() {
         let temp = tempfile::tempdir().unwrap();
         let root = legacy_workspace(temp.path(), "独立作品");
+        registered_asset(&root, "image.png", &[0, 255, 128]);
         let external = temp.path().join("external");
         fs::rename(root.join("assets"), &external).unwrap();
         fs::write(external.join("image.png"), [0, 255, 128]).unwrap();
@@ -949,11 +1315,6 @@ mod tests {
         write_json(
             &root.join(".viento/local.json"),
             &serde_json::json!({"version":1,"assetStores":{"main":external}}),
-        )
-        .unwrap();
-        write_json(
-            &root.join("metadata/assets/test.json"),
-            &serde_json::json!({"location":{"store":"main","path":"image.png"}}),
         )
         .unwrap();
         fs::write(root.join("metadata/custom.json"), b"{\"userField\":true}").unwrap();

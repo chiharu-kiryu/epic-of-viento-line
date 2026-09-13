@@ -8,11 +8,8 @@ function normalizeFilterPath(rawPath) {
 }
 
 function normalizeComparablePath(rawPath) {
-  return toPosix((rawPath || '').trim())
-    .replace(/^\.\/+/u, '')
-    .replace(/\/+$/, '')
-    .replace(/\/+/g, '/')
-    .replace(/\.[A-Za-z0-9]{1,10}$/u, '');
+  // Extensions and dotted directory names are part of a document's identity.
+  return normalizeFilterPath(rawPath);
 }
 
 function isPathMatch(candidate, filter) {
@@ -29,7 +26,6 @@ function isPathMatch(candidate, filter) {
   return (
     normalizedCandidate === normalizedFilter
     || normalizedCandidate.startsWith(`${normalizedFilter}/`)
-    || normalizedFilter.startsWith(`${normalizedCandidate}/`)
   );
 }
 

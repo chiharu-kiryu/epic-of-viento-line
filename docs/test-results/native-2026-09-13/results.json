@@ -1,0 +1,76 @@
+{
+  "date": "2026-09-13",
+  "system": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39",
+  "appVersion": "b.2.8.1",
+  "embeddedNode": "v24.20.0",
+  "tauriDriver": "2.0.6",
+  "webkit": "2.52.6-0ubuntu0.24.04.1",
+  "appBuild": "debug --no-bundle",
+  "sha256": {
+    "viento-studio": "0ec82f0bb14451ac8fd2211d242a1a05539eb310a664e4563d931e6d4b96725b",
+    "viento-node": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+  },
+  "workflows": {
+    "legacy": {
+      "exitCode": 0,
+      "log": "legacy-complete.log"
+    },
+    "generic": {
+      "exitCode": 0,
+      "log": "generic-complete.log"
+    }
+  },
+  "transportProbe": {
+    "urllib-close": {
+      "requests": 2000,
+      "errors": {}
+    },
+    "persistent": {
+      "requests": 2000,
+      "errors": {}
+    }
+  },
+  "screenshots": {
+    "desktop-close-en-accept.png": "ed752f8573b46fef76a9040363587f154c0cdd871014e4a15bbba5cd91083d22",
+    "desktop-close-zh-CN-cancel.png": "4c90bd3d1086a6bd7a81c7fa40439d071d44de55c47c23d8c0876b7d966ba5a7",
+    "desktop-editor-en.png": "90c795ef30f2c9e69a17218a58c7d0011122f4e5b3872f145ac49aa4b6774e86",
+    "desktop-export-workspace.png": "09541595a360e242769fa9f6fa90bc191d698636e83db3a342922b8791e28033",
+    "desktop-generic-species.png": "de3fa0804b09efb55e82bdbda23b6a93e36c27b57029fc330575c5a76e4bb520",
+    "desktop-media-editor.png": "d292a3dd38312a6871d961f377bc11e102aa95f886c027375dbb21dc27e92609",
+    "desktop-project-template-preview.png": "51ffa2d4b3d8e2b9e13c7ca5905657795209281e0bf13b203c82a1c07c0c0112",
+    "desktop-type-cancel-narrow.png": "9dfcef2876d5330401dc3f1e2f9f9d6b8eec62dfc37ed6e04a5c903254054231"
+  },
+  "regression": {
+    "application": {
+      "passed": 188,
+      "failed": 0,
+      "skipped": 0,
+      "log": "application-summary.log"
+    },
+    "rustLibrary": {
+      "passed": 20,
+      "failed": 0,
+      "ignored": 1,
+      "log": "rust-library.log"
+    },
+    "closeBridge": {
+      "passed": 3,
+      "failed": 0,
+      "log": "close-bridge.log"
+    }
+  },
+  "sourceFingerprints": {
+    "desktop/tests/native-smoke.py": "ca3dab672a6e177ce15536fc9da63d4b433a2abfeff01480daf9440f8ba59a16",
+    "desktop/tests/project_settings_navigation.py": "8a339101a64b4ff96d5a535470422c8069d6fbc32a6939d2ae90be7eeb52bfc3",
+    "src-tauri/src/lib.rs": "caf2264164d0ac9b9fbf19ba8ac89d9728fbb5fa8cde3b460fba07fae862f78d",
+    "src-tauri/src/workspace.rs": "3e18656e36b99ab630bc888f8b3a0e49438b7dfe9377fe79835434e5e97a8c7e"
+  },
+  "cleanup": {
+    "completed": true,
+    "approximateAllocatedBytesRemoved": 2159923200,
+    "remainingOwnedProcesses": 0,
+    "remainingOwnedMounts": 0,
+    "installedAppReplaced": false,
+    "realProjectDataModified": false
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "version": "b.2.8.2",
+  "buildVersion": "2.8.2",
+  "date": "2026-09-13T07:29:10.903996+00:00",
+  "gitBase": "51d522cb919c20b15815b129bd62e859af9a97a0",
+  "application": {
+    "runtime": "v24.20.0",
+    "passed": 193,
+    "failed": 0,
+    "skipped": 0,
+    "archiveInterop": "v2/v3 Node export → Rust import/export → Node export; exact sources, metadata and external media",
+    "log": "application-bundled-node.log"
+  },
+  "rust": {
+    "libraryPassed": 22,
+    "startupPassed": 1,
+    "ignored": 1,
+    "ignoredReason": "existing full-size workspace migration requires VIENTO_TEST_SOURCE_ROOT",
+    "log": "rust-tests.log"
+  },
+  "systemRuntimeObservation": {
+    "runtime": "v18.19.1",
+    "initialRun": "193 assertions passed; request-lifecycle worker remained CPU-active after its four assertions. Terminated that worker after about three minutes; run reported an additional failed file (SIGTERM).",
+    "rerun": "request-lifecycle: 4 passed, normal exit on both system and bundled runtimes",
+    "rootCause": "unconfirmed; not reproduced in the isolated rerun",
+    "logs": [
+      "application-system-node.log",
+      "requests-system-node.log",
+      "requests-bundled-node.log"
+    ]
+  },
+  "nativeWindows": "Not rerun after version bump; pre-release b.2.8.1 native test evidence retained.",
+  "preparedRuntime": {
+    "nodeSha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+    "archiveCliSha256": "f8661cd318f01facfa71b0ba2ee86c970f629d573ddda253b11f2e4e1bdae5c2"
+  },
+  "projectData": "temporary test workspaces only",
+  "cleanup": "Temporary target and generated desktop resources removed after checks; installed app and daily workspace untouched."
+}

@@ -1,0 +1,17 @@
+
+> epic-of-viento-line@2.8.1 check
+> node scripts/check-project.mjs --app-only
+
+版本一致性检查通过：b.2.8.1（构建 2.8.1）
+语法检查通过：117 个 JavaScript 文件
+API 契约预检通过
+  ...
+1..193
+# tests 193
+# suites 0
+# pass 193
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 9918.849087

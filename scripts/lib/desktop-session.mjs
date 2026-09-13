@@ -34,7 +34,11 @@ export function createDesktopSession(token = process.env.VIENTO_SESSION_TOKEN, {
         if (req.method === 'GET') {
           let language = 'zh-CN';
           if (process.env.VIENTO_PREFERENCES_PATH) {
-            try { language = JSON.parse(await fs.readFile(process.env.VIENTO_PREFERENCES_PATH, 'utf8')).language || language; }
+            try {
+              const preferences = JSON.parse(await fs.readFile(process.env.VIENTO_PREFERENCES_PATH, 'utf8'));
+              if (!preferences || typeof preferences !== 'object' || Array.isArray(preferences)) return reject(400, 'Invalid language preference');
+              if (Object.hasOwn(preferences, 'language')) language = preferences.language;
+            }
             catch (error) { if (error.code !== 'ENOENT') throw error; }
           }
           if (!['zh-CN', 'en'].includes(language)) return reject(400, 'Invalid language preference');
@@ -63,8 +67,9 @@ export function createDesktopSession(token = process.env.VIENTO_SESSION_TOKEN, {
     if (pathname === '/__desktop/close-response' && req.method === 'POST') {
       try {
         const body = await readRequestJsonBody(req);
-        if (typeof body.allow !== 'boolean') return reject(400, 'Invalid close response');
-        emit({ type: 'close-response', allow: body.allow }); res.writeHead(204); res.end();
+        if (!body || typeof body.id !== 'string' || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(body.id)
+          || typeof body.busy !== 'boolean' || typeof body.dirty !== 'boolean') return reject(400, 'Invalid close response');
+        emit({ type: 'close-response', id: body.id, busy: body.busy, dirty: body.dirty }); res.writeHead(204); res.end();
       } catch { return reject(400, 'Invalid close response'); }
       return true;
     }

@@ -283,11 +283,14 @@
 .project-settings #projectTemplateContent { font-family: ui-monospace, monospace; tab-size: 2; }
 .project-settings input[readonly] { color: #93a7bb; }
 .project-settings button { border-radius: 8px; border: 1px solid #43617a; padding: 9px 14px; background: #21384e; color: #edf7ff; cursor: pointer; }
-.project-settings button:disabled { opacity: .5; cursor: wait; }
+.project-settings button:disabled { opacity: .5; cursor: not-allowed; }
+.project-settings[aria-busy="true"] button:disabled { cursor: wait; }
 .project-settings #projectTemplateSave { background: #85d8ba; color: #10251f; border-color: transparent; }
 .project-type-properties { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
 .project-settings summary { cursor: pointer; padding: 12px 0; }
-.project-settings-actions { justify-content: flex-end; padding-top: 20px; }
+.project-settings-actions { justify-content: flex-end; flex-wrap: wrap; padding-top: 20px; }
+.project-settings #projectSettingsClose { flex-shrink: 0; }
+.project-settings #projectTypeCancel { margin-right: auto; }
 .project-field-group { display: grid; grid-template-columns: 1fr 2fr auto; gap: 8px; align-items: start; margin: 10px 0; }
 .project-template-preview { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 @media (max-width: 720px) { .project-settings { padding: 16px; } .project-settings-grid, .project-type-properties, .project-template-preview { grid-template-columns: 1fr; } .project-settings aside select { max-height: 120px; } .project-field-group { grid-template-columns: 1fr; } }

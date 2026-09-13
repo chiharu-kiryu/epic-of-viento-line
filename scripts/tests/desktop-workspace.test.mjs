@@ -7,6 +7,7 @@ import { fixture, write, serve } from './helpers.mjs';
 import { runCommand } from '../lib/process.mjs';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
+import { setTimeout as delay } from 'node:timers/promises';
 
 test('desktop workspaces keep sources, cache and installed application files separate through save and rebuild', async (t) => {
   const app = await fixture(t);
@@ -96,4 +97,46 @@ test('an empty desktop workspace starts successfully and its engine exits when t
   assert.equal(JSON.parse(await fs.readFile(path.join(workspace, '.viento/cache/web/data/index.json'), 'utf8')).count, 0);
   child.stdin.end();
   assert.equal((await engineExited)[0], 0);
+});
+
+for (const phase of ['startup', 'rebuild']) test(`desktop shutdown during ${phase} stops and reaps the running index worker`, async (t) => {
+  const app = await fixture(t);
+  await write(app, '.viento/workspace.json', JSON.stringify({ format: 'viento-workspace', version: 1, id: '84ac1b82-c5d5-4b55-b50c-d046347741a7', name: '退出验证', createdAt: 1 }));
+  const marker = path.join(app, 'worker.pid');
+  const blockBuild = () => write(app, 'scripts/standardize-docs.mjs', `import fs from 'node:fs';\nfs.writeFileSync(${JSON.stringify(marker)}, String(process.pid));\nsetInterval(() => {}, 1000);\n`);
+  if (phase === 'startup') await blockBuild();
+  const token = 'd'.repeat(32);
+  const child = spawn(process.execPath, [path.join(app, 'scripts/desktop-server.mjs')], {
+    cwd: app,
+    env: { ...process.env, VIENTO_APP_ROOT: app, VIENTO_WORKSPACE_ROOT: app, VIENTO_SESSION_TOKEN: token, DOC_API_HOST: '127.0.0.1', DOC_API_REQUIRE_WRITE_AUTH: '0', PORT: '0' },
+    stdio: ['pipe', 'pipe', 'pipe'],
+  });
+  let output = '', worker;
+  child.stdout.on('data', chunk => { output += chunk; });
+  child.stderr.on('data', chunk => { output += chunk; });
+  const exited = once(child, 'exit');
+  t.after(async () => {
+    if (worker) { try { process.kill(worker, 'SIGKILL'); } catch (error) { if (error.code !== 'ESRCH') throw error; } }
+    if (child.exitCode === null && child.signalCode === null) { child.kill('SIGKILL'); await exited; }
+  });
+  async function waitFor(check) {
+    const deadline = Date.now() + 5000;
+    while (Date.now() < deadline) { const value = await check(); if (value) return value; await delay(20); }
+    throw new Error(`Desktop did not reach ${phase}: ${output}`);
+  }
+  if (phase === 'rebuild') {
+    const ready = await waitFor(() => output.match(/VIENTO_EVENT (\{"type":"ready",[^\n]+\})/));
+    const base = `http://127.0.0.1:${JSON.parse(ready[1]).port}`;
+    const handshake = await fetch(`${base}/__desktop/session/${token}`, { redirect: 'manual' });
+    const cookie = handshake.headers.get('set-cookie').split(';')[0];
+    await blockBuild();
+    void fetch(`${base}/api/rebuild`, { method: 'POST', headers: { Cookie: cookie, 'Content-Type': 'application/json' }, body: '{}' }).catch(() => {});
+  }
+  worker = Number(await waitFor(() => fs.readFile(marker, 'utf8').catch(() => '')));
+  if (phase === 'startup') child.stdin.end();
+  else child.stdin.write('VIENTO_SHUTDOWN\n');
+  const result = await Promise.race([exited, delay(2500).then(() => null)]);
+  assert.ok(result, 'closing the owner must stop an in-progress build promptly');
+  assert.equal(result[0], 0);
+  assert.throws(() => process.kill(worker, 0), { code: 'ESRCH' }, 'the index worker must be reaped before its engine exits');
 });

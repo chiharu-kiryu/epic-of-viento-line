@@ -22,6 +22,7 @@ import {
   API_RESPONSE_DEFAULTS,
   normalizeRebuildRequest,
   normalizeDocWriteRequest,
+  getCreatePathError,
   normalizeRequestId,
 } from './doc-api-contract.mjs';
 import { createApiMetrics } from './doc-api-metrics.mjs';
@@ -219,6 +220,8 @@ function createDocumentService(options = {}) {
     }
 
     const createMode = normalized.create === true;
+    const pathError = createMode && getCreatePathError(filePath);
+    if (pathError) throw createError(400, pathError, {}, API_ERRORS.badPath);
     const forceOverwrite = normalized.force === true;
     const expectedVersion = normalizeLockVersion(normalized.expectedVersion);
     return withDocumentTransaction(filePath, async () => {

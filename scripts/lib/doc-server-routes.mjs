@@ -347,10 +347,13 @@ async function handleExport(response, request, requestUrl, service, requestId = 
   response.on('close', cancel);
   try {
     if (request.method === API_METHODS.GET) {
-      const job = service.exports.get(requestUrl.searchParams.get('id'));
-      response.setHeader('Content-Disposition', `attachment; filename="viento-export.zip"; filename*=UTF-8''${encodeURIComponent(job.fileName)}`);
-      response.setHeader('Cache-Control', 'no-store');
-      await sendFile(job.file, response, request);
+      await service.exports.download(requestUrl.searchParams.get('id'), async (job) => {
+        response.setHeader('Content-Disposition', `attachment; filename="viento-export.zip"; filename*=UTF-8''${encodeURIComponent(job.fileName)}`);
+        response.setHeader('Cache-Control', 'no-store');
+        await sendFile(job.file, response, request);
+        return response.writableFinished && (response.statusCode === 200
+          || (response.statusCode === 206 && Number(response.getHeader('Content-Length')) === job.bytes));
+      });
     } else {
       const payload = await readRequestJsonBody(request);
       const result = payload?.action === 'release'
@@ -358,7 +361,7 @@ async function handleExport(response, request, requestUrl, service, requestId = 
         : await service.exports.create(payload, controller.signal);
       sendApiResponse(response, result, requestId);
     }
-    return 200;
+    return response.destroyed && !response.writableFinished ? 499 : response.statusCode;
   } catch (error) {
     if (response.destroyed) return 499;
     if (response.headersSent) { response.destroy(); return 500; }

@@ -5,8 +5,9 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { fixture, write, node, serve } from './helpers.mjs';
 import { PROJECT_DEFAULTS, projectDefinition } from '../lib/project-layout.mjs';
-import { readWorkspace, readRegistry, registerWorkspace, verifyWorkspace } from '../lib/workspace.mjs';
-import { editorHarness, Element } from './editor-harness.mjs';
+import { readWorkspace, readRegistry, registerWorkspace, verifyWorkspace, withRegistryLock } from '../lib/workspace.mjs';
+import { createRegisteredDocument } from '../lib/project-documents.mjs';
+import { editorHarness, Element, deferred } from './editor-harness.mjs';
 
 const species = { id: 'species', label: '种族', directory: 'species', parserProfile: 'structured', template: 'species.md' };
 async function genericProject(t) {
@@ -28,6 +29,94 @@ async function rebuild(root) {
   return JSON.parse(await fs.readFile(path.join(root, '.viento/cache/indexes/documents.json'), 'utf8'));
 }
 const post = (base, endpoint, value) => fetch(base + endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(value) });
+
+for (const [first, second] of [
+  ['documents/Hero.md', 'documents/hero.md'],
+  ['documents/Café.md', 'documents/Cafe\u0301.md'],
+  ['documents/Characters/one.md', 'documents/characters/two.md'],
+]) test(`creation rejects portable path collisions without poisoning the registry: ${second}`, async (t) => {
+  const { root } = await genericProject(t);
+  const base = await serve(t, root);
+  assert.equal((await post(base, '/api/doc', { path: first, content: '原始内容', create: true, documentType: 'character' })).status, 200);
+  const before = await readRegistry(root);
+  const result = await post(base, '/api/doc', { path: second, content: '不应写入', create: true, documentType: 'species' });
+  assert.equal(result.status, 409, await result.clone().text());
+  assert.deepEqual(await readRegistry(root), before);
+  assert.equal(await fs.readFile(path.join(root, first), 'utf8'), '原始内容');
+  assert.equal((await fetch(base + '/api/index')).status, 200);
+});
+
+test('unregistered files and concurrent creates also reserve their portable source locations', async (t) => {
+  const { root } = await genericProject(t);
+  await write(root, 'documents/Existing.md', '手动创建的原文');
+  const base = await serve(t, root);
+  const refused = await post(base, '/api/doc', { path: 'documents/existing.md', content: '不能覆盖', create: true, documentType: 'document' });
+  assert.equal(refused.status, 409, await refused.clone().text());
+  assert.equal((await readRegistry(root)).documents.length, 0);
+  const results = await Promise.all(['Concurrent', 'concurrent'].map((name) => post(base, '/api/doc', {
+    path: `documents/${name}.md`, content: name, create: true, documentType: 'character',
+  })));
+  assert.deepEqual(results.map((result) => result.status).sort(), [200, 409]);
+  assert.equal((await readRegistry(root)).documents.length, 1);
+  assert.equal(await fs.readFile(path.join(root, 'documents/Existing.md'), 'utf8'), '手动创建的原文');
+});
+
+test('a missing registered source cannot silently donate its identity and type to a new document', async (t) => {
+  const { root } = await genericProject(t);
+  const base = await serve(t, root);
+  const source = 'documents/原角色.md';
+  assert.equal((await post(base, '/api/doc', { path: source, content: '原文', create: true, documentType: 'character' })).status, 200);
+  const before = await readRegistry(root);
+  await fs.rm(path.join(root, source));
+  const result = await post(base, '/api/doc', { path: source, content: '另一种族', create: true, documentType: 'species' });
+  assert.equal(result.status, 409, await result.clone().text());
+  assert.deepEqual(await readRegistry(root), before);
+  await assert.rejects(fs.stat(path.join(root, source)), { code: 'ENOENT' });
+  assert.equal((await post(base, '/api/doc', { path: 'documents/新种族.md', content: '新档案', create: true, documentType: 'species' })).status, 200);
+});
+
+test('creation rejects unindexable and nonportable paths before creating metadata or source files', async (t) => {
+  const { root } = await genericProject(t);
+  const base = await serve(t, root);
+  for (const name of ['new.bin', '.hidden.md', '.private/one.md', 'node_modules/one.md', 'folder./one.md', 'folder /one.md', 'CON.md', 'bad\u0001.md']) {
+    const result = await post(base, '/api/doc', { path: `documents/${name}`, content: '不会丢失的草稿', create: true, documentType: 'document' });
+    assert.equal(result.status, 400, `${name}: ${await result.clone().text()}`);
+    assert.equal((await readRegistry(root)).documents.length, 0);
+  }
+  assert.deepEqual(await fs.readdir(path.join(root, 'documents')), []);
+  for (const [name, content] of [['原文', '无后缀原文'], ['大写.MD', '# 标题'], ['版本.v1.md', '# 多点号标题'], ['文字.txt', '正文'], ['数据.json', '{"title":"结构化"}'], ['数据.yaml', 'title: YAML'], ['另一份.yml', 'title: YML']]) {
+    assert.equal((await post(base, '/api/doc', { path: `documents/${name}`, content, create: true, documentType: 'document' })).status, 200, name);
+  }
+  assert.equal((await rebuild(root)).count, 7);
+});
+
+test('queued creation validates the current project definition after an earlier configuration change', async (t) => {
+  const { root, manifest } = await genericProject(t);
+  const started = deferred(), finish = deferred();
+  const updating = withRegistryLock(root, async () => {
+    started.resolve(); await finish.promise;
+    await write(root, 'workspace.json', JSON.stringify({ ...manifest, documentTypes: PROJECT_DEFAULTS.documentTypes }));
+  });
+  await started.promise;
+  const creating = createRegisteredDocument(root, 'documents/不能新建.md', 'species', () => write(root, 'documents/不能新建.md', '旧类型'));
+  const refused = assert.rejects(creating, (error) => error.errorCode === 'invalid_document_type');
+  finish.resolve(); await updating; await refused;
+  assert.equal((await readRegistry(root)).documents.length, 0);
+  assert.deepEqual(await fs.readdir(path.join(root, 'documents')), []);
+});
+
+test('a failed source publication removes only its new descriptor and permits a clean retry', async (t) => {
+  const { root } = await genericProject(t);
+  const source = 'documents/重试.md';
+  await assert.rejects(createRegisteredDocument(root, source, 'species', async () => {
+    assert.equal((await readRegistry(root)).documents.length, 1);
+    throw new Error('模拟磁盘写入失败');
+  }), /模拟磁盘写入失败/);
+  assert.equal((await readRegistry(root)).documents.length, 0);
+  await createRegisteredDocument(root, source, 'species', () => write(root, source, '成功写入'));
+  assert.equal((await readRegistry(root)).documents[0].documentType, 'species');
+  assert.equal(await fs.readFile(path.join(root, source), 'utf8'), '成功写入');
+});
 
 test('generic registration preserves version, project-owned types and templates without legacy directories', async (t) => {
   const { root, manifest } = await genericProject(t);

@@ -21,11 +21,13 @@ export function setupMediaEditor(adapter) {
     if (editableInput(document.activeElement)) lastInput = document.activeElement;
     return adapter.getContext(lastInput);
   };
+  const pausePreview = () => preview.querySelectorAll('audio, video').forEach((player) => player.pause());
   function showPreview(media) {
     const signature = JSON.stringify(media);
     preview.hidden = !adapter.isEditable() || media.length === 0;
     if (signature === previewSignature) return;
     previewSignature = signature;
+    pausePreview();
     preview.replaceChildren();
     if (!media.length) return;
     const title = document.createElement('h3');
@@ -37,7 +39,7 @@ export function setupMediaEditor(adapter) {
   function schedulePreview() {
     clearTimeout(previewTimer);
     const generation = ++previewGeneration;
-    if (!adapter.isEditable()) { preview.hidden = true; return; }
+    if (!adapter.isEditable()) { preview.hidden = true; pausePreview(); return; }
     if (adapter.isBusy()) return;
     const current = capture();
     if (current?.path !== previewPath) { previewPath = current?.path; showPreview([]); }
@@ -65,12 +67,12 @@ export function setupMediaEditor(adapter) {
         item.appendChild(thumbnail);
       } else {
         const thumbnail = document.createElement('span');
-        thumbnail.className = 'doc-media-video-icon'; thumbnail.textContent = asset.kind === 'video' ? '▶' : '▧';
+        thumbnail.className = 'doc-media-kind-icon'; thumbnail.textContent = asset.kind === 'audio' ? '♫' : asset.kind === 'video' ? '▶' : '▧';
         item.appendChild(thumbnail);
       }
       const label = document.createElement('span'); label.textContent = asset.name; item.appendChild(label);
       const detail = document.createElement('small');
-      detail.textContent = `${asset.kind === 'video' ? t('视频') : t('图片')} · ${fileSize(asset.size)}${asset.status === 'available' ? '' : t(' · 离线或缺失')}`;
+      detail.textContent = `${t({ image: '图片', video: '视频', audio: '音频' }[asset.kind])} · ${fileSize(asset.size)}${asset.status === 'available' ? '' : t(' · 离线或缺失')}`;
       item.appendChild(detail);
       item.addEventListener('click', () => void insertExisting(asset));
       list.appendChild(item);
@@ -86,7 +88,7 @@ export function setupMediaEditor(adapter) {
     try {
       const result = await loadMediaAssets();
       if (generation !== listGeneration) return;
-      assets = result.assets || []; renderList(); status(t`作品中有 ${assets.length} 份图片和视频。`);
+      assets = result.assets || []; renderList(); status(t`作品中有 ${assets.length} 份图片、视频和音频。`);
     } catch (error) { if (generation === listGeneration) status(error.message, true); }
   }
   function setBusy(busy) {
@@ -96,14 +98,24 @@ export function setupMediaEditor(adapter) {
     picker.disabled = busy; cancel.hidden = !importing; progress.hidden = !importing; progressLabel.hidden = !importing;
     list.querySelectorAll('button').forEach((item) => { item.disabled = busy || assets.find((asset) => asset.id === item.dataset.assetId)?.status !== 'available'; });
   }
-  async function insert(selected) {
-    if (!context || !adapter.isEditable() || adapter.getContext(context.input)?.path !== context.path) throw new Error(t('正在编辑的文档已变化，请重新选择插入位置。'));
-    if (/\.(json|ya?ml)$/i.test(context.path)) {
-      const result = await prepareDraftMedia(context.content, context.path, selected.map((asset) => asset.id), context.documentType);
+  async function insert(selected, signal) {
+    const target = context;
+    const checkDraft = () => {
+      if (signal?.aborted) throw new DOMException(t('已取消导入'), 'AbortError');
+      const current = target && adapter.getContext(target.input);
+      if (!target || context !== target || !adapter.isEditable() || current?.path !== target.path
+        || current.input !== target.input || current.content !== target.content || current.documentType !== target.documentType) {
+        throw new Error(t('正在编辑的文档已变化，请重新选择插入位置。'));
+      }
+    };
+    checkDraft();
+    if (/\.(json|ya?ml)$/i.test(target.path)) {
+      const result = await prepareDraftMedia(target.content, target.path, selected.map((asset) => asset.id), target.documentType, signal);
+      checkDraft();
       adapter.replaceSource(result.content);
       showPreview(result.media || []);
     } else {
-      adapter.insertText(context, `\n\n${selected.map(mediaMarkup).join('\n\n')}\n\n`);
+      adapter.insertText(target, `\n\n${selected.map(mediaMarkup).join('\n\n')}\n\n`);
     }
     adapter.changed();
   }
@@ -137,7 +149,7 @@ export function setupMediaEditor(adapter) {
         } });
         imported.push(result.asset);
       }
-      await insert(imported);
+      await insert(imported, aborter.signal);
       dialog.close();
       adapter.status(t`已插入 ${imported.length} 份素材，保存文档后生效。`);
     } catch (error) {

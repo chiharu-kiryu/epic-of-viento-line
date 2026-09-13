@@ -1,3 +1,4 @@
+mod close_state;
 mod export;
 mod preferences;
 pub mod workspace;
@@ -35,6 +36,7 @@ struct Engine {
     child: CommandChild,
     workspace: Recent,
     _lock: fs::File,
+    terminated: oneshot::Receiver<()>,
 }
 
 #[derive(Default)]
@@ -43,8 +45,7 @@ struct DesktopState {
     settings_lock: Mutex<()>,
     operation_active: AtomicBool,
     engine_alive: AtomicBool,
-    close_pending: AtomicBool,
-    exit_after_close: AtomicBool,
+    closing: Mutex<close_state::CloseState>,
 }
 
 struct Operation<'a>(&'a AtomicBool);
@@ -54,6 +55,10 @@ impl Drop for Operation<'_> {
     }
 }
 fn operation(state: &DesktopState) -> Result<Operation<'_>> {
+    let closing = state.closing.lock().map_err(|e| e.to_string())?;
+    if closing.is_pending() {
+        return Err("正在确认关闭，请先完成当前确认".into());
+    }
     state
         .operation_active
         .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
@@ -63,6 +68,18 @@ fn operation(state: &DesktopState) -> Result<Operation<'_>> {
 fn home_only(window: &WebviewWindow) -> Result<()> {
     if window.label() != "main" {
         return Err("此操作仅限作品库窗口".into());
+    }
+    Ok(())
+}
+fn require_closed_editor(app: &AppHandle) -> Result<()> {
+    // Check the window, including a draft retained after an engine failure.
+    if app.get_webview_window("editor").is_some() {
+        return Err(language(app)
+            .text(
+                "请先保存并关闭当前编辑窗口，再切换作品库",
+                "Save and close the current editor before switching libraries",
+            )
+            .into());
     }
     Ok(())
 }
@@ -205,11 +222,20 @@ fn library_state(app: AppHandle, window: WebviewWindow) -> Result<LibraryState> 
         .as_ref()
         .map(|engine| engine.workspace.clone());
     let recent = workspace::read_settings(&settings_path(&app)?)?.recent;
-    let examples = recent.iter().filter(|item| {
-        std::fs::read(std::path::Path::new(&item.path).join("workspace.json")).ok()
-            .and_then(|bytes| serde_json::from_slice::<serde_json::Value>(&bytes).ok())
-            .is_some_and(|manifest| manifest["example"]["id"].as_str().is_some_and(|id| !id.is_empty()))
-    }).map(|item| item.path.clone()).collect();
+    let examples = recent
+        .iter()
+        .filter(|item| {
+            std::fs::read(std::path::Path::new(&item.path).join("workspace.json"))
+                .ok()
+                .and_then(|bytes| serde_json::from_slice::<serde_json::Value>(&bytes).ok())
+                .is_some_and(|manifest| {
+                    manifest["example"]["id"]
+                        .as_str()
+                        .is_some_and(|id| !id.is_empty())
+                })
+        })
+        .map(|item| item.path.clone())
+        .collect();
     Ok(LibraryState {
         recent,
         active,
@@ -223,6 +249,7 @@ async fn choose_workspace(app: AppHandle, window: WebviewWindow) -> Result<Optio
     home_only(&window)?;
     let state = app.state::<DesktopState>();
     let _operation = operation(&state)?;
+    require_closed_editor(&app)?;
     let directory = storage_directory(&app, "workspaces")?;
     let lang = language(&app);
     let Some(folder) = select_path(&app, move || {
@@ -247,6 +274,7 @@ async fn new_workspace(
     home_only(&window)?;
     let state = app.state::<DesktopState>();
     let _operation = operation(&state)?;
+    require_closed_editor(&app)?;
     let directory = storage_directory(&app, "workspaces")?;
     let lang = language(&app);
     let Some(folder) = select_path(&app, move || {
@@ -272,6 +300,7 @@ async fn restore_workspace(app: AppHandle, window: WebviewWindow) -> Result<Opti
     home_only(&window)?;
     let state = app.state::<DesktopState>();
     let _operation = operation(&state)?;
+    require_closed_editor(&app)?;
     let backups = storage_directory(&app, "backups")?;
     let directory = storage_directory(&app, "workspaces")?;
     let parent = window.clone();
@@ -385,6 +414,11 @@ async fn save_editor_export(app: AppHandle, engine_id: String, id: String, file_
             .map(|engine| PathBuf::from(&engine.workspace.path))
             .ok_or("作品已关闭")?;
         let editor = app.get_webview_window("editor").ok_or("编辑窗口已关闭")?;
+        let job_id = id.clone();
+        let prepared =
+            tauri::async_runtime::spawn_blocking(move || export::prepare_export(&root, &job_id))
+                .await
+                .map_err(|e| e.to_string())??;
         let directory = match app.path().download_dir() {
             Ok(directory) => directory,
             Err(_) => storage_directory(&app, "exports")?,
@@ -404,9 +438,8 @@ async fn save_editor_export(app: AppHandle, engine_id: String, id: String, file_
             return Ok(None);
         };
         let output = destination.to_string_lossy().into_owned();
-        let job_id = id.clone();
         tauri::async_runtime::spawn_blocking(move || {
-            export::save_prepared_export(&root, &job_id, &destination)
+            export::save_prepared_export(prepared, &destination)
         })
         .await
         .map_err(|e| e.to_string())??;
@@ -424,78 +457,197 @@ async fn save_editor_export(app: AppHandle, engine_id: String, id: String, file_
         ));
     }
 }
-fn stop_engine(app: &AppHandle) {
+async fn stop_engine(app: &AppHandle) {
     let state = app.state::<DesktopState>();
-    if let Ok(mut engine) = state.engine.lock() {
-        if let Some(engine) = engine.take() {
+    let engine = state
+        .engine
+        .lock()
+        .ok()
+        .and_then(|mut engine| engine.take());
+    state.engine_alive.store(false, Ordering::SeqCst);
+    if let Some(mut engine) = engine {
+        // Keep the workspace lock until the engine has reaped its workers.
+        let requested = engine.child.write(b"VIENTO_SHUTDOWN\n").is_ok();
+        if !requested
+            || tokio::time::timeout(std::time::Duration::from_secs(5), &mut engine.terminated)
+                .await
+                .is_err()
+        {
             let _ = engine.child.kill();
         }
     }
-    state.engine_alive.store(false, Ordering::SeqCst);
 }
-fn finish_close(app: &AppHandle, allow: bool) {
+fn restore_close_guard(app: &AppHandle, id: &str) {
+    if let Some(editor) = app.get_webview_window("editor") {
+        let id = serde_json::json!(id);
+        let _ = editor.eval(&format!("if (window.__vientoCloseGuard?.id === {id}) {{ document.body.inert = window.__vientoCloseGuard.inert; delete window.__vientoCloseGuard; }}"));
+    }
+}
+fn finish_close(app: &AppHandle, id: &str, allow: bool) {
     let state = app.state::<DesktopState>();
-    if !state.close_pending.swap(false, Ordering::SeqCst) {
+    let exit = {
+        let Ok(mut closing) = state.closing.lock() else {
+            return;
+        };
+        let Some(exit) = closing.finish(id) else {
+            return;
+        };
+        if allow {
+            state.operation_active.store(true, Ordering::SeqCst);
+        }
+        exit
+    };
+    if !allow {
+        restore_close_guard(app, id);
         return;
     }
-    let exit = state.exit_after_close.swap(false, Ordering::SeqCst);
-    if allow {
-        if let Some(editor) = app.get_webview_window("editor") {
-            let _ = editor.destroy();
+    let handle = app.clone();
+    let id = id.to_string();
+    tauri::async_runtime::spawn(async move {
+        let state = handle.state::<DesktopState>();
+        let operation = Operation(&state.operation_active);
+        if let Some(editor) = handle.get_webview_window("editor") {
+            if let Err(error) = editor.destroy() {
+                restore_close_guard(&handle, &id);
+                let _ = handle.emit_to(
+                    "main",
+                    "library-error",
+                    format!("编辑窗口关闭失败：{error}"),
+                );
+                return;
+            }
         }
-        stop_engine(app);
+        stop_engine(&handle).await;
+        drop(operation);
         if exit {
-            app.exit(0);
+            handle.exit(0);
         } else {
-            show_library(app);
+            show_library(&handle);
         }
+    });
+}
+fn close_dialog_allowed(result: rfd::MessageDialogResult, confirm_label: &str) -> bool {
+    // GTK's async dialog returns Ok; other backends return the custom label.
+    match result {
+        rfd::MessageDialogResult::Ok => true,
+        rfd::MessageDialogResult::Custom(label) => label == confirm_label,
+        _ => false,
+    }
+}
+fn confirm_close(app: &AppHandle, id: String, recovery: bool) {
+    let Some(editor) = app.get_webview_window("editor") else {
+        finish_close(app, &id, true);
+        return;
+    };
+    let handle = app.clone();
+    let failure_id = id.clone();
+    let lang = language(app);
+    let confirm_label = if recovery {
+        lang.text("关闭窗口", "Close window")
+    } else {
+        lang.text("关闭并丢弃", "Discard and close")
+    };
+    if app.run_on_main_thread(move || {
+        let dialog = rfd::AsyncMessageDialog::new()
+            .set_parent(&editor)
+            .set_description(if recovery {
+                lang.text("无法确认编辑状态。请先取消并复制保存未保存的内容；确认已妥善保存后，再关闭编辑窗口。", "Cannot verify the editor state. Cancel and copy unsaved work somewhere safe, then close the editor when ready.")
+            } else {
+                lang.text("还有未保存的修改。关闭编辑窗口将丢弃这些修改，确定关闭？", "There are unsaved changes. Closing the editor will discard them. Close anyway?")
+            })
+            .set_title(lang.text("关闭编辑窗口", "Close editor"))
+            .set_buttons(rfd::MessageButtons::OkCancelCustom(
+                confirm_label.into(),
+                lang.text("继续编辑", "Keep editing").into(),
+            ))
+            .show();
+        tauri::async_runtime::spawn(async move {
+            finish_close(&handle, &id, close_dialog_allowed(dialog.await, confirm_label));
+        });
+    }).is_err() { finish_close(app, &failure_id, false); }
+}
+fn receive_close_state(app: &AppHandle, id: &str, busy: bool, dirty: bool) {
+    let state = app.state::<DesktopState>();
+    if !state
+        .closing
+        .lock()
+        .map(|mut closing| closing.confirm(id))
+        .unwrap_or(false)
+    {
+        return;
+    }
+    if busy || state.operation_active.load(Ordering::SeqCst) {
+        finish_close(app, id, false);
+        if let Some(editor) = app.get_webview_window("editor") {
+            let message = serde_json::json!(language(app).text(
+                "正在保存、导出或更新预览，请完成后再关闭。",
+                "Saving, exporting or updating the preview. Wait until it finishes before closing."
+            ));
+            let _ = editor.eval(&format!("window.alert({message});"));
+        }
+    } else if dirty {
+        confirm_close(app, id.into(), false);
+    } else {
+        finish_close(app, id, true);
     }
 }
 const CLOSE_SCRIPT: &str = r#"(async () => {
-  const {t} = await import('/web/i18n/index.js');
-  let allow = false;
-  if (document.querySelector('#docEditPanel')?.getAttribute('aria-busy') === 'true' || document.querySelector('#projectSettingsDialog')?.getAttribute('aria-busy') === 'true') {
-    window.alert(t('正在保存、导出或更新预览，请完成后再关闭。'));
-  } else {
-    const dirty = document.querySelector('#docEditDirtyIndicator')?.classList.contains('is-unsaved') || document.querySelector('#projectSettingsDialog')?.dataset.dirty === 'true';
-    allow = !dirty || window.confirm(t('还有未保存的修改。关闭编辑窗口将丢弃这些修改，确定关闭？')) === true;
-  }
-  await fetch('/__desktop/close-response', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({allow})});
-})().catch(() => window.alert(document.documentElement.lang === 'en' ? 'Cannot contact the local service. Copy your unsaved work somewhere safe before closing.' : '无法联系本地服务，请先复制保存未保存的内容，再关闭窗口。'));"#;
+  const id = __VIENTO_CLOSE_ID__;
+  const panel = document.querySelector('#docEditPanel');
+  const indicator = document.querySelector('#docEditDirtyIndicator');
+  if (!panel || !indicator || !document.body) return;
+  const busy = panel.getAttribute('aria-busy') === 'true' || document.querySelector('#projectSettingsDialog')?.getAttribute('aria-busy') === 'true';
+  const dirty = indicator.classList.contains('is-unsaved') || document.querySelector('#projectSettingsDialog')?.dataset.dirty === 'true';
+  window.__vientoCloseGuard = {id, inert: document.body.inert};
+  document.body.inert = true;
+  await fetch('/__desktop/close-response', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id, busy, dirty})});
+})().catch(() => {});"#;
 fn request_close(app: &AppHandle, exit: bool) {
     let state = app.state::<DesktopState>();
-    if state.close_pending.swap(true, Ordering::SeqCst) {
-        return;
+    let id = Uuid::new_v4().to_string();
+    {
+        let Ok(mut closing) = state.closing.lock() else {
+            return;
+        };
+        if state.operation_active.load(Ordering::SeqCst) {
+            let _ = app.emit_to("main", "library-error", "正在处理文件，请完成后再关闭。");
+            return;
+        }
+        if !closing.begin(id.clone(), exit) {
+            return;
+        }
     }
-    state.exit_after_close.store(exit, Ordering::SeqCst);
     if let Some(editor) = app.get_webview_window("editor") {
         let _ = editor.show();
         let _ = editor.set_focus();
-        if state.engine_alive.load(Ordering::SeqCst) && editor.eval(CLOSE_SCRIPT).is_ok() {
+        let script =
+            CLOSE_SCRIPT.replace("__VIENTO_CLOSE_ID__", &serde_json::json!(id).to_string());
+        if state.engine_alive.load(Ordering::SeqCst) && editor.eval(script).is_ok() {
+            let handle = app.clone();
+            tauri::async_runtime::spawn(async move {
+                tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                let state = handle.state::<DesktopState>();
+                if state
+                    .closing
+                    .lock()
+                    .map(|mut closing| closing.confirm(&id))
+                    .unwrap_or(false)
+                {
+                    confirm_close(&handle, id, true);
+                }
+            });
             return;
         }
-        let handle = app.clone();
-        let lang = language(app);
-        if app
-            .run_on_main_thread(move || {
-                let dialog = rfd::AsyncMessageDialog::new()
-                    .set_parent(&editor)
-                    .set_description(
-                        lang.text("本地服务已停止。请确认未保存内容已复制到安全位置，然后关闭编辑窗口。", "The local service stopped. Copy unsaved work somewhere safe before closing."),
-                    )
-                    .set_title(lang.text("关闭编辑窗口", "Close editor"))
-                    .set_buttons(rfd::MessageButtons::OkCancel)
-                    .show();
-                tauri::async_runtime::spawn(async move {
-                    finish_close(&handle, dialog.await == rfd::MessageDialogResult::Ok);
-                });
-            })
-            .is_err()
+        if state
+            .closing
+            .lock()
+            .map(|mut closing| closing.confirm(&id))
+            .unwrap_or(false)
         {
-            finish_close(app, false);
+            confirm_close(app, id, true);
         }
     } else {
-        finish_close(app, true);
+        finish_close(app, &id, true);
     }
 }
 #[tauri::command]
@@ -516,9 +668,7 @@ fn close_editor(app: AppHandle, window: WebviewWindow) -> Result<()> {
 }
 
 async fn start_editor(app: &AppHandle, root: &Path) -> Result<()> {
-    if app.get_webview_window("editor").is_some() {
-        return Err("请先保存并关闭当前编辑窗口，再切换作品库".into());
-    }
+    require_closed_editor(app)?;
     let recent = remember(app, root)?;
     let lock_path = root.join(".viento/session.lock");
     if fs::symlink_metadata(&lock_path)
@@ -560,12 +710,14 @@ async fn start_editor(app: &AppHandle, root: &Path) -> Result<()> {
         .spawn()
         .map_err(|e| format!("无法启动内置处理服务：{e}"))?;
     let state = app.state::<DesktopState>();
+    let (terminated_tx, terminated) = oneshot::channel();
     state.engine_alive.store(true, Ordering::SeqCst);
     *state.engine.lock().map_err(|e| e.to_string())? = Some(Engine {
         id: id.clone(),
         child,
         workspace: recent.clone(),
         _lock: lock,
+        terminated,
     });
     let (ready_tx, ready_rx) = oneshot::channel::<Result<u16>>();
     let handle = app.clone();
@@ -581,7 +733,10 @@ async fn start_editor(app: &AppHandle, root: &Path) -> Result<()> {
                 .and_then(|engine| engine.as_ref().map(|engine| engine.id == id))
                 .unwrap_or(false);
             if !is_current {
-                break;
+                if matches!(event, CommandEvent::Terminated(_)) {
+                    break;
+                }
+                continue;
             }
             match event {
                 CommandEvent::Stdout(bytes) => {
@@ -630,8 +785,12 @@ async fn start_editor(app: &AppHandle, root: &Path) -> Result<()> {
                                 }
                             }
                             Some("close-response") => {
-                                if let Some(allow) = event["allow"].as_bool() {
-                                    finish_close(&handle, allow);
+                                if let (Some(request_id), Some(busy), Some(dirty)) = (
+                                    event["id"].as_str(),
+                                    event["busy"].as_bool(),
+                                    event["dirty"].as_bool(),
+                                ) {
+                                    receive_close_state(&handle, request_id, busy, dirty);
                                 }
                             }
                             _ => {}
@@ -648,7 +807,6 @@ async fn start_editor(app: &AppHandle, root: &Path) -> Result<()> {
                 }
                 CommandEvent::Terminated(_) => {
                     state.engine_alive.store(false, Ordering::SeqCst);
-                    state.close_pending.store(false, Ordering::SeqCst);
                     let message = format!("本地处理服务已停止。{}", errors.trim());
                     if let Some(sender) = ready.take() {
                         let _ = sender.send(Err(message.clone()));
@@ -659,15 +817,16 @@ async fn start_editor(app: &AppHandle, root: &Path) -> Result<()> {
                 _ => {}
             }
         }
+        let _ = terminated_tx.send(());
     });
     let port = match tokio::time::timeout(std::time::Duration::from_secs(120), ready_rx).await {
         Ok(Ok(Ok(port))) => port,
         Ok(Ok(Err(error))) => {
-            stop_engine(app);
+            stop_engine(app).await;
             return Err(error);
         }
         _ => {
-            stop_engine(app);
+            stop_engine(app).await;
             return Err("作品库打开超时，请检查数据目录与磁盘空间后重试".into());
         }
     };
@@ -698,7 +857,7 @@ async fn start_editor(app: &AppHandle, root: &Path) -> Result<()> {
             }
         }
         Err(error) => {
-            stop_engine(app);
+            stop_engine(app).await;
             return Err(format!("编辑窗口创建失败：{error}"));
         }
     }
@@ -776,8 +935,59 @@ pub fn run() {
                         request_close(app, true);
                     }
                 }
-                tauri::RunEvent::Exit => stop_engine(app),
+                tauri::RunEvent::Exit => {
+                    // Confirmed exits already awaited shutdown. On an external
+                    // forced exit, dropping stdin still notifies the engine.
+                    if let Ok(mut engine) = app.state::<DesktopState>().engine.lock() {
+                        if let Some(mut engine) = engine.take() {
+                            let _ = engine.child.write(b"VIENTO_SHUTDOWN\n");
+                        }
+                    }
+                }
                 _ => {}
             }
         });
+}
+
+#[cfg(test)]
+mod session_tests {
+    use super::*;
+
+    #[test]
+    fn native_close_accepts_only_the_confirmation_across_dialog_backends() {
+        use rfd::MessageDialogResult::{Cancel, Custom, No, Ok, Yes};
+        for label in [
+            "关闭并丢弃",
+            "Discard and close",
+            "关闭窗口",
+            "Close window",
+        ] {
+            assert!(close_dialog_allowed(Ok, label));
+            assert!(close_dialog_allowed(Custom(label.into()), label));
+            for rejected in [
+                Cancel,
+                No,
+                Yes,
+                Custom("继续编辑".into()),
+                Custom("Keep editing".into()),
+                Custom(String::new()),
+            ] {
+                assert!(!close_dialog_allowed(rejected, label));
+            }
+        }
+    }
+
+    #[test]
+    fn file_operations_wait_for_close_confirmation_or_cancellation() {
+        let state = DesktopState::default();
+        assert!(state.closing.lock().unwrap().begin("close".into(), false));
+        assert!(operation(&state).is_err());
+        assert!(state.closing.lock().unwrap().confirm("close"));
+        assert!(operation(&state).is_err());
+        state.closing.lock().unwrap().finish("close");
+        let active = operation(&state).unwrap();
+        assert!(operation(&state).is_err());
+        drop(active);
+        assert!(operation(&state).is_ok());
+    }
 }

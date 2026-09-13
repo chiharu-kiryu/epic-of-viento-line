@@ -15,7 +15,7 @@ test('custom output preserves the default catalog, prunes its own stale files an
   assert.equal(first.stdout, second.stdout);
   assert.equal(await fs.readFile(path.join(root, 'docs-standard/keep.json'), 'utf8'), '{"sentinel":true}');
   await assert.rejects(fs.access(path.join(root, 'generated/stale.json')));
-  const result = JSON.parse(await fs.readFile(path.join(root, 'generated/design-data/design-rules/example.json'), 'utf8'));
+  const result = JSON.parse(await fs.readFile(path.join(root, 'generated/design-data/design-rules/example.txt.json'), 'utf8'));
   assert.equal(result.source.path, 'design-data/design-rules/example.txt');
   await assert.rejects(fs.access(path.join(root, 'generated/generated')));
   for (const output of ['.', 'design-data', 'scripts/generated', '.viento', '.viento/cache', 'desktop', 'src-tauri']) {
@@ -35,7 +35,7 @@ test('no-build still standardizes selected sources without rewriting the static 
     if (!result.performedStandardize || result.performedBuild) throw new Error('Incorrect rebuild plan');
   `]);
   assert.equal(await fs.readFile(path.join(root, 'web/data/index.json'), 'utf8'), sentinel);
-  await fs.access(path.join(root, 'docs-standard/design-data/design-rules/example.json'));
+  await fs.access(path.join(root, 'docs-standard/design-data/design-rules/example.txt.json'));
 });
 
 test('API preflight validates the extracted request service and still rejects broken requests', async (t) => {

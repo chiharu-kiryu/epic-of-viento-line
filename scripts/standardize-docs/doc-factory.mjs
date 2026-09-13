@@ -57,9 +57,11 @@ function normalizeParserStats(parserStats, fallback = {}) {
 }
 
 function buildStandardOutputPath(sourceRelativePath) {
+  // Keep the source extension: role.md, role.json and extensionless role are
+  // separate documents and must never share a derived cache file.
   return toPosix(path.join(
     path.dirname(sourceRelativePath),
-    `${trimName(path.basename(sourceRelativePath))}.json`
+    `${path.basename(sourceRelativePath)}.json`
   ));
 }
 

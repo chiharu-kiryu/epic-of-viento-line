@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { toPosix } from './paths.mjs';
+import { DOCUMENT_SOURCE_EXTENSIONS } from './doc-api-contract.mjs';
 
 const DEFAULT_SKIP_DIRS = new Set(['.git', '.DS_Store', 'node_modules', '.tmp']);
 const DEFAULT_FILE_SCAN_CONCURRENCY = 8;
@@ -24,7 +25,7 @@ function normalizeNumericConfigValue(name, fallback, min = 1) {
   return parsed;
 }
 
-function isTextPath(filePath, allowedExtensions = new Set(['.md', '.txt', '.json', '.yml', '.yaml'])) {
+function isTextPath(filePath, allowedExtensions = new Set(DOCUMENT_SOURCE_EXTENSIONS)) {
   const ext = path.extname(filePath).toLowerCase();
   return ext === '' || allowedExtensions.has(ext);
 }
@@ -109,7 +110,7 @@ async function collectFiles(rootDir, {
 async function collectFilesRecursive(rootDir, {
   relativeBase = '',
   skipDirs = DEFAULT_SKIP_DIRS,
-  acceptedExtensions = new Set(['.md', '.txt', '.json', '.yml', '.yaml']),
+  acceptedExtensions = new Set(DOCUMENT_SOURCE_EXTENSIONS),
 } = {}) {
   return collectFiles(rootDir, {
     relativeBase,

@@ -1,0 +1,38 @@
+PASS: cancel name form / native creation picker; invalid name reports failure without creating files; retry remains available
+Library failure: V
+VIENTO STUDIO · b.2.8.1
+
+你的故事，从这里继续。
+作品、设定和素材，都留在你自己的文件夹里。
+新建作品库
+打开已有文件夹
+导入迁移包
+设置
+正在编辑：原生作品 #100%
+编辑窗口中的草稿会保留。切换作品前，请先保存并关闭当前编辑窗口。
+继续编辑
+关闭编辑窗口
+最近使用
+2 个作品库
+不应提前创建的作品
+/tmp/viento-native-library-6xzekqrx/位置 A #100%/原生作品 #100%-p6EesY/不应提前创建的作品-LJRXJ6
+
+上次打开 2026年9月13日 14:21
+文件夹
+导出备份
+打开
+原生作品 #100%
+/tmp/viento-native-library-6xzekqrx/位置 A #100%/原生作品 #100%-p6EesY
+
+上次打开 2026年9月13日 14:20
+文件夹
+导出备份
+继续编辑
+完整迁移包包含已保存的正文、模板、元数据和素材。预览缓存会在打开时自动生成。
+
+请先保存并关闭当前编辑窗口，再切换作品库
+Traceback (most recent call last):
+  File "/home/chiharukiryu/cdev/epic-of-viento-line/desktop/tests/native-library.py", line 243, in <module>
+    assert script('return document.querySelector(arguments[0]).disabled', selector), selector
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: #createBtn

@@ -233,7 +233,7 @@ export const APP_RUNTIME_TEXTS = localize({
     blockTypePrefix: '段落',
     blockTypeSeparator: '·',
     defaultBlockType: '正文',
-    typeLabels: { heading: '标题', text: '正文', kv: '字段', table: '表格', list: '列表', code: '代码', media: '图片 / 视频' },
+    typeLabels: { heading: '标题', text: '正文', kv: '字段', table: '表格', list: '列表', code: '代码', media: '素材' },
   },
   runtimeContext: {
     contentRender: '内容渲染',

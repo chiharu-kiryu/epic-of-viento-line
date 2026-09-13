@@ -1,0 +1,104 @@
+{
+  "date": "2026-09-13",
+  "version": "b.2.8.1",
+  "buildVersion": "2.8.1",
+  "gitBase": "51d522cb919c20b15815b129bd62e859af9a97a0",
+  "environment": {
+    "os": "Ubuntu 24.04 x86_64",
+    "webKit": "2.52.6",
+    "tauriDriver": "2.0.6",
+    "nodeRuntime": "24.20.0"
+  },
+  "fixes": [
+    "N44: hold the prepared export file before opening the native save picker",
+    "N45: discard expired tasks and allow regeneration in the same export dialog"
+  ],
+  "nativeWorkflow": {
+    "result": "passed",
+    "exitCode": 0,
+    "log": "native-complete.log",
+    "expiry": "Real authenticated release endpoint runs the TTL cleanup; did not wait 15 minutes",
+    "coverage": [
+      "real save after cache removal, exact share ZIP",
+      "cancel then expiry then regeneration in English",
+      "invalid destination and retry",
+      "GTK overwrite cancel keeps old bytes",
+      "explicit Replace writes exact complete project",
+      "ZIP CRC, per-file size/SHA-256 and authoritative bytes",
+      "staging cleanup and unchanged original/restored projects",
+      "complete prior library workflow also passes"
+    ]
+  },
+  "regressions": {
+    "application": {
+      "passed": 193,
+      "failed": 0,
+      "skipped": 0,
+      "archiveInterop": true,
+      "syntaxFiles": 117
+    },
+    "rust": {
+      "passed": 22,
+      "failed": 0,
+      "ignored": 1
+    },
+    "dialogsAndLanguage": {
+      "passed": 15,
+      "failed": 0
+    }
+  },
+  "sourceFingerprints": {
+    "src-tauri/src/lib.rs": "97cd3f23229ae76afee946a1961bce15b8185bba86bc9099089ccbe630e5b0cc",
+    "src-tauri/src/export.rs": "5df6d3f84c1fea268802b9a0d508c7ce282af40ac105bd940b2c40b7a2503446",
+    "web/modules/app-export.js": "cde4d7f5d05e2eb2b1bb5ac91fbb4bd6b34c3038e659b5405dc7c516685ed32d",
+    "web/i18n/en.js": "5e2d02d7aee18c8d3a194401bfc24b3f1b36b71482bc4120c4a29d220aff3590",
+    "scripts/tests/editor-dialogs.test.mjs": "fa983a5ef5be9f0f008abc5b224073d01cd05439005efb7e844012fc4bc64a0a",
+    "desktop/tests/native-library.py": "7bcdaf1283b0e7b9691819e7a494df065d5b8b39d6aba5fa7b772f6ebda1dafe",
+    "desktop/tests/native_export_workflow.py": "c31e811182f66e632c78d9ffcbc26c17adce5d4c4a78be3ef4e96c96fb566add"
+  },
+  "testBinarySha256": "cd1ef5fb27d62f6352e74b6d218da4e4acec174e7ad068a039b7623376cb6dd5",
+  "boundaries": [
+    "Linux test build only; installed app not replaced",
+    "Windows/macOS unlink and overwrite behavior not validated",
+    "No user project or large real asset migration",
+    "Native test automation corrected GTK filename completion and title/focus assumptions; final run identifies overwrite by its transient parent"
+  ],
+  "cleanup": {
+    "removed": [
+      {
+        "path": "/tmp/viento-export-audit.x7hmd7cn",
+        "bytes": 1966651496
+      },
+      {
+        "path": "/home/chiharukiryu/cdev/epic-of-viento-line/desktop/.cache",
+        "bytes": 31996513
+      },
+      {
+        "path": "/home/chiharukiryu/cdev/epic-of-viento-line/desktop/resources",
+        "bytes": 4605626
+      },
+      {
+        "path": "/home/chiharukiryu/cdev/epic-of-viento-line/desktop/ui/i18n",
+        "bytes": 43977
+      },
+      {
+        "path": "/home/chiharukiryu/cdev/epic-of-viento-line/src-tauri/binaries",
+        "bytes": 126458664
+      },
+      {
+        "path": "/home/chiharukiryu/cdev/epic-of-viento-line/src-tauri/gen/schemas",
+        "bytes": 368432
+      },
+      {
+        "path": "/home/chiharukiryu/cdev/epic-of-viento-line/desktop/tests/__pycache__/native_export_workflow.cpython-312.pyc",
+        "bytes": 9427
+      }
+    ],
+    "totalBytes": 2130134135,
+    "testProcessesRemaining": 0,
+    "testMountsRemaining": 0,
+    "testFixturesRemaining": 0,
+    "userProjectsModified": false,
+    "installedApplicationReplaced": false
+  }
+}

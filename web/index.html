@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Epic of Viento Line · b.2.8.1</title>
+    <title>Epic of Viento Line · b.2.8.2</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="stylesheet" href="/web/styles.css" />
     <link rel="stylesheet" href="/web/editor-layout.css" />
@@ -24,7 +24,7 @@
                 <h1 id="siteTitle">Viento Studio</h1>
                 <p id="siteSubtitle" data-i18n="角色、故事与世界设定">角色、故事与世界设定</p>
               </div>
-              <span id="appVersion" class="release-version">b.2.8.1</span>
+              <span id="appVersion" class="release-version">b.2.8.2</span>
             </div>
           </div>
           <nav id="topbarNav" class="topbar-nav" aria-label="—">
@@ -105,7 +105,7 @@
                     <button id="docCreateBtn" type="button" class="doc-btn doc-btn-ghost">—</button>
                     <button id="docEditBtn" type="button" class="doc-btn">—</button>
                     <button id="docCancelBtn" type="button" class="doc-btn doc-btn-ghost">—</button>
-                    <button id="docMediaInsertBtn" type="button" class="doc-btn doc-btn-ghost" hidden data-i18n="插入图片 / 视频">插入图片 / 视频</button>
+                    <button id="docMediaInsertBtn" type="button" class="doc-btn doc-btn-ghost" hidden data-i18n="插入素材">插入素材</button>
                     <button id="docRebuildBtn" type="button" class="doc-btn doc-btn-ghost">—</button>
                     <button id="docSaveBtn" type="button" class="doc-btn doc-btn-success" aria-keyshortcuts="Control+s Meta+s Control+Enter Meta+Enter">—</button>
                   </div>
@@ -161,7 +161,7 @@
       <p id="docExportContext" class="muted"></p>
       <fieldset id="docExportOptions" class="doc-export-options">
         <legend data-i18n="导出用途">导出用途</legend>
-        <label class="doc-export-choice"><input type="radio" name="exportKind" value="document" checked><span><strong data-i18n="文档分享">文档分享</strong><small data-i18n="当前档案与引用的图片、视频，打包后便于分享。">当前档案与引用的图片、视频，打包后便于分享。</small></span></label>
+        <label class="doc-export-choice"><input type="radio" name="exportKind" value="document" checked><span><strong data-i18n="文档分享">文档分享</strong><small data-i18n="当前档案与引用的图片、视频、音频，打包后便于分享。">当前档案与引用的图片、视频、音频，打包后便于分享。</small></span></label>
         <label class="doc-export-choice"><input type="radio" name="exportKind" value="workspace"><span><strong data-i18n="完整项目包">完整项目包</strong><small data-i18n="全部正文、模板、元数据和素材，可在作品库中导入恢复。">全部正文、模板、元数据和素材，可在作品库中导入恢复。</small></span></label>
         <div id="docExportDocumentOptions" class="doc-export-document-options">
           <label for="docExportFormat" data-i18n="分享格式">分享格式</label>
@@ -169,7 +169,7 @@
           <label class="doc-export-children"><input id="docExportChildren" type="checkbox" checked><span data-i18n="包含附属内容（如角色背景故事）">包含附属内容（如角色背景故事）</span></label>
         </div>
       </fieldset>
-      <p id="docExportHint" class="muted" data-i18n="导出已保存的内容，图片与视频会一起打包。原始项目保留在原处。">导出已保存的内容，图片与视频会一起打包。原始项目保留在原处。</p>
+      <p id="docExportHint" class="muted" data-i18n="导出已保存的内容，图片、视频与音频会一起打包。原始项目保留在原处。">导出已保存的内容，图片、视频与音频会一起打包。原始项目保留在原处。</p>
       <p id="docExportMessage" class="doc-media-message" role="status" aria-live="polite"></p>
       <div class="doc-export-actions">
         <button id="docExportStartBtn" type="button" class="doc-btn doc-btn-success" data-i18n="开始导出">开始导出</button>
@@ -180,18 +180,18 @@
     </dialog>
     <dialog id="docMediaDialog" class="doc-media-dialog" aria-labelledby="docMediaDialogTitle">
       <div class="doc-media-dialog-heading">
-        <h2 id="docMediaDialogTitle" data-i18n="插入图片或视频">插入图片或视频</h2>
+        <h2 id="docMediaDialogTitle" data-i18n="插入图片、视频或音频">插入图片、视频或音频</h2>
         <button id="docMediaCloseBtn" type="button" class="doc-btn doc-btn-ghost" aria-label="关闭素材窗口" data-i18n-aria-label="关闭素材窗口" data-i18n="关闭">关闭</button>
       </div>
       <p class="muted" data-i18n="导入的文件保存在当前作品的素材目录中，可以在其他档案里复用。也可以直接粘贴图片，或将文件拖入编辑区。">导入的文件保存在当前作品的素材目录中，可以在其他档案里复用。也可以直接粘贴图片，或将文件拖入编辑区。</p>
       <div class="doc-media-picker-actions">
         <button id="docMediaImportBtn" type="button" class="doc-btn doc-btn-success" data-i18n="从电脑导入">从电脑导入</button>
-        <input id="docMediaFileInput" type="file" accept=".png,.jpg,.jpeg,.webp,.gif,.svg,.mp4,.webm,.mov" multiple hidden />
+        <input id="docMediaFileInput" type="file" accept=".png,.jpg,.jpeg,.webp,.gif,.svg,.mp4,.webm,.mov,.mp3,.wav,.ogg,.oga,.opus,.flac,.m4a,.aac" multiple hidden />
         <span class="muted" data-i18n="单个文件最多 256 MB">单个文件最多 256 MB</span>
       </div>
       <div class="doc-media-filter">
-        <input id="docMediaSearch" type="search" placeholder="搜索作品中的图片或视频" data-i18n-placeholder="搜索作品中的图片或视频" aria-label="搜索作品素材" data-i18n-aria-label="搜索作品素材" />
-        <select id="docMediaKind" aria-label="素材类型" data-i18n-aria-label="素材类型"><option value="" data-i18n="全部素材">全部素材</option><option value="image" data-i18n="图片">图片</option><option value="video" data-i18n="视频">视频</option></select>
+        <input id="docMediaSearch" type="search" placeholder="搜索图片、视频或音频" data-i18n-placeholder="搜索图片、视频或音频" aria-label="搜索作品素材" data-i18n-aria-label="搜索作品素材" />
+        <select id="docMediaKind" aria-label="素材类型" data-i18n-aria-label="素材类型"><option value="" data-i18n="全部素材">全部素材</option><option value="image" data-i18n="图片">图片</option><option value="video" data-i18n="视频">视频</option><option value="audio" data-i18n="音频">音频</option></select>
       </div>
       <p id="docMediaMessage" class="doc-media-message" role="status" aria-live="polite"></p>
       <div class="doc-media-progress-row">

@@ -1,4 +1,4 @@
-import { t, getLanguage, applyLanguage, onLanguageChange, translateMessage } from './i18n/index.js';
+import { t, getLanguage, onLanguageChange, translateMessage } from './i18n/index.js';
 import { setupSettings } from './i18n/settings.js';
 const byId = (id) => document.getElementById(id);
 const status = byId('status');
@@ -11,18 +11,29 @@ function setStatus(message, error = false) {
   status.classList.toggle('error', error);
 }
 
+function updateControls() {
+  // Settings owns its own pending-save controls; library refreshes must not
+  // unlock them. Reapply session guards whenever recent rows are recreated.
+  for (const container of [document.querySelector('.library'), byId('createForm')]) {
+    container.querySelectorAll('button').forEach((button) => {
+      button.disabled = busy || (button.dataset.requiresClosedEditor === 'true' && !!currentLibrary?.active);
+    });
+  }
+}
+
 function setBusy(value) {
   busy = value;
   document.body.classList.toggle('busy', value);
-  document.querySelectorAll('button').forEach((button) => { button.disabled = value; });
+  updateControls();
   byId('workspaces').setAttribute('aria-busy', String(value));
 }
 
-function makeButton(label, action, className = '') {
+function makeButton(label, action, className = '', requiresClosedEditor = false) {
   const button = document.createElement('button');
   button.textContent = label;
   button.type = 'button';
   button.className = className;
+  button.dataset.requiresClosedEditor = String(requiresClosedEditor);
   button.disabled = busy;
   button.addEventListener('click', action);
   return button;
@@ -65,10 +76,11 @@ function renderLibrary() {
         const output = await invoke('backup_workspace', { path: item.path });
         return output ? t`备份已保存到 ${output}` : t('已取消导出');
       })),
-      makeButton(current ? t('继续编辑') : t('打开'), () => run(t('正在打开作品库并准备预览…'), () => current ? invoke('resume_editor') : invoke('launch_workspace', { path: item.path })), 'open'),
+      makeButton(current ? t('继续编辑') : t('打开'), () => run(t('正在打开作品库并准备预览…'), () => current ? invoke('resume_editor') : invoke('launch_workspace', { path: item.path })), 'open', !current),
     );
     row.append(copy, actions); list.append(row);
   }
+  updateControls();
 }
 
 async function run(message, action) {
@@ -105,14 +117,17 @@ byId('importBtn').addEventListener('click', () => run(t('正在导入迁移包�
 byId('resumeBtn').addEventListener('click', () => run(t('正在返回编辑器…'), () => invoke('resume_editor')));
 byId('closeEditorBtn').addEventListener('click', () => run(t('请在编辑窗口确认关闭…'), () => invoke('close_editor')));
 
-await setupSettings(invoke ? { load: () => invoke('get_language'), save: (language) => invoke('set_language', { language }) } : {});
+await setupSettings(invoke ? {
+  load: () => invoke('get_language'),
+  save: (language) => invoke('set_language', { language }),
+  subscribe: (listener) => window.__TAURI__.event.listen('language-changed', (event) => listener(event.payload)),
+} : {});
 onLanguageChange(() => {
   renderLibrary();
   status.textContent = translateMessage(status.textContent);
 });
 
 if (invoke) {
-  await window.__TAURI__.event.listen('language-changed', (event) => applyLanguage(event.payload));
   await window.__TAURI__.event.listen('library-changed', () => refresh().catch((error) => setStatus(String(error), true)));
   await window.__TAURI__.event.listen('library-error', (event) => setStatus(event.payload, true));
   await run(t('正在读取作品库…'), () => Promise.resolve());

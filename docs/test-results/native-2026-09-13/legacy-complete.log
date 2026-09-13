@@ -1,0 +1,14 @@
+PASS: settings language survives a full native application restart
+PASS: a new editor origin loads the language saved by the library
+PASS: 配音样例.wav plays and seeks
+PASS: 配音样例.mp3 plays and seeks
+PASS: 配音样例.ogg plays and seeks
+PASS: 配音样例.opus plays and seeks
+PASS: 配音样例.flac plays and seeks
+PASS: 配音样例.m4a plays and seeks
+PASS: 配音样例.aac plays and seeks
+PASS: WAV / MP3 / Ogg / Opus / FLAC / M4A / AAC playback, pause and seeking; audio filter, original download and stable-ID reuse
+PASS: media picker → PNG / WebM / MP4 import → unsaved draft preview → native playback + seeking → responsive editor → reuse + paste + block drop → stable IDs → save → reopen + inline media
+PASS: language switch preserves source / block DOM, drafts, paths and project bytes; export guard is translated
+PASS: language synchronizes between library and editor without losing the active draft
+PASS: native library → authenticated editor → request recovery + link isolation → encoded SVG + range request → native access denied → universal fields + separate attributes + narrow card → character-owned background → edit background + save + search + return → edit → block/source conversion → save → cancel discard → library → cancel close → discard confirmed → engine shutdown

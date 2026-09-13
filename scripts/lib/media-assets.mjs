@@ -4,7 +4,7 @@ import path from 'node:path';
 import { randomUUID, createHash } from 'node:crypto';
 import { readWorkspace, resolveAssetRoot, readRegistry, withRegistryLock, writeJson, fingerprint } from './workspace.mjs';
 import { resolveContainedPath } from './contained-path.mjs';
-import { MEDIA_MAX_BYTES, mediaKindForName } from './media-format.mjs';
+import { MEDIA_KINDS, MEDIA_MAX_BYTES, mediaKindForName } from './media-format.mjs';
 
 const reject = (statusCode, message) => Object.assign(new Error(message), { statusCode, errorCode: 'media_import_rejected' });
 
@@ -18,6 +18,15 @@ function matchesFormat(bytes, extension) {
   if (extension === 'webm') return bytes.subarray(0, 4).equals(Buffer.from([26, 69, 223, 163]));
   if (extension === 'mp4') return bytes.subarray(4, 8).toString('ascii') === 'ftyp';
   if (extension === 'mov') return ['ftyp', 'moov', 'mdat', 'wide'].includes(bytes.subarray(4, 8).toString('ascii'));
+  if (extension === 'wav') return ['RIFF', 'RF64'].includes(ascii.slice(0, 4)) && bytes.subarray(8, 12).toString('ascii') === 'WAVE';
+  if (['ogg', 'oga', 'opus'].includes(extension)) return ascii.startsWith('OggS') && bytes[4] === 0
+    && (extension !== 'opus' || bytes.includes(Buffer.from('OpusHead')));
+  if (extension === 'flac') return ascii.startsWith('fLaC');
+  if (extension === 'm4a') return bytes.subarray(4, 8).toString('ascii') === 'ftyp';
+  if (extension === 'mp3') return (bytes.length >= 10 && ascii.startsWith('ID3') && [2, 3, 4].includes(bytes[3]))
+    || (bytes.length >= 4 && bytes[0] === 255 && (bytes[1] & 0xe6) === 0xe2 && (bytes[1] & 0x18) !== 0x08
+      && (bytes[2] & 0xf0) !== 0xf0 && (bytes[2] & 0x0c) !== 0x0c);
+  if (extension === 'aac') return bytes.length >= 7 && bytes[0] === 255 && (bytes[1] & 0xf6) === 0xf0;
   return false;
 }
 
@@ -29,7 +38,7 @@ function summary(asset, status = 'available') {
 export async function listMediaAssets(root) {
   const registry = await readRegistry(root);
   const store = resolveAssetRoot(root);
-  const assets = await Promise.all(registry.assets.filter((asset) => ['image', 'video'].includes(asset.kind)).map(async (asset) => {
+  const assets = await Promise.all(registry.assets.filter((asset) => MEDIA_KINDS.includes(asset.kind)).map(async (asset) => {
     let status = 'missing';
     try {
       const file = await resolveContainedPath(store, path.join(store, asset.location.path));
@@ -45,7 +54,7 @@ export async function importMediaAsset(root, request, rawName, { maxBytes = MEDI
   if (![2, 3].includes(readWorkspace(root)?.version)) throw reject(400, '请先在作品库中打开或登记当前作品，再导入素材。');
   const name = String(rawName || '').replaceAll('\\', '/').split('/').at(-1).trim();
   const kind = mediaKindForName(name);
-  if (!name || name.length > 240 || /[\x00-\x1f\x7f]/.test(name) || !kind) throw reject(415, '请选择 PNG、JPEG、WebP、GIF、SVG 图片或 MP4、WebM、MOV 视频。');
+  if (!name || name.length > 240 || /[\x00-\x1f\x7f]/.test(name) || !kind) throw reject(415, '请选择支持的图片、视频或音频文件。');
   const extension = name.split('.').at(-1).toLowerCase();
   const length = Number(request.headers?.['content-length']);
   if (Number.isFinite(length) && length > maxBytes) throw reject(413, '素材超过单个文件 256 MB 的限制。');
@@ -70,7 +79,7 @@ export async function importMediaAsset(root, request, rawName, { maxBytes = MEDI
       }
       await handle.sync();
     } finally { await handle.close(); }
-    if (!size || !matchesFormat(prefix, extension)) throw reject(415, '文件内容与图片或视频格式不符，未导入。');
+    if (!size || !matchesFormat(prefix, extension)) throw reject(415, '文件内容与图片、视频或音频格式不符，未导入。');
     const content = { size, sha256: hash.digest('hex') };
     return await withRegistryLock(root, async () => {
       const registry = await readRegistry(root);
@@ -81,7 +90,8 @@ export async function importMediaAsset(root, request, rawName, { maxBytes = MEDI
         } catch { /* Keep a missing/changed old asset and import the new bytes. */ }
       }
       const id = randomUUID();
-      const relative = `media/${kind === 'image' ? 'images' : 'videos'}/${id}.${extension}`;
+      const directory = { image: 'images', video: 'videos', audio: 'audio' }[kind];
+      const relative = `media/${directory}/${id}.${extension}`;
       const destination = await resolveContainedPath(store, path.join(store, relative), { allowMissing: true });
       const metadata = await resolveContainedPath(root, path.join(root, 'metadata/assets', `${id}.json`), { allowMissing: true });
       await fs.mkdir(path.dirname(destination), { recursive: true });

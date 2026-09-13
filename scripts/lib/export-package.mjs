@@ -5,7 +5,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { Readable, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import yazl from 'yazl';
-import { portablePath, readWorkspace, readRegistry, resolveAssetRoot, walkFiles } from './workspace.mjs';
+import { portablePath, readWorkspace, readRegistry, resolveAssetRoot, walkFiles, assertPortableFileTree } from './workspace.mjs';
 import { workspacePaths, resolveDocumentDefinition } from './project-layout.mjs';
 import { resolveContainedPath } from './contained-path.mjs';
 import { mediaUrl } from './media-format.mjs';
@@ -123,7 +123,8 @@ export async function planExport(root, options = {}, signal) {
     const assetsByUrl = new Map(), usedAssets = new Map();
     for (const asset of registry.assets) {
       assetsByUrl.set(`/asset-files/${asset.id}`, asset);
-      for (const alias of [`assets/${asset.location.path}`, ...asset.legacyPaths]) assetsByUrl.set(mediaUrl(alias), asset);
+      // Registry paths are literal filenames, not already encoded URLs.
+      for (const alias of [`assets/${asset.location.path}`, ...asset.legacyPaths]) assetsByUrl.set(`/${alias.split('/').map(encodeURIComponent).join('/')}`, asset);
     }
     function resolveMedia(src) {
       const url = mediaUrl(src);
@@ -164,8 +165,8 @@ export async function planExport(root, options = {}, signal) {
       documents: selected.map(({ sourcePath, descriptor, depth }) => ({ id: descriptor.id || null, sourcePath, depth })),
       assets: [...usedAssets.values()].map(({ id, path: target, relative }) => ({ id, path: target, originalPath: `assets/${relative}` })) };
   }
-  const names = [...entries.keys()].map((name) => name.normalize('NFC').toLowerCase());
-  if (names.length > MAX_FILES || new Set(names).size !== names.length) throw exportError('导出文件过多或文件名存在跨系统冲突');
+  if (entries.size > MAX_FILES) throw exportError('导出文件过多');
+  try { assertPortableFileTree(entries.keys()); } catch (error) { throw exportError(error.message); }
   if ([...entries.values()].reduce((total, entry) => total + (entry.buffer?.length ?? entry.stat.size), 0) > MAX_TOTAL_BYTES) throw exportError('导出内容超过 64 GiB 限制');
   return { entries: [...entries.values()], archiveManifest, validateSnapshot, documentCount, assetCount,
     fileName: exportFileName(title, options.kind === 'workspace' ? '.viento.zip' : `-${options.format === 'html' ? '网页' : 'Markdown'}.zip`) };

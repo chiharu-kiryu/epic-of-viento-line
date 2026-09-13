@@ -1,0 +1,82 @@
+PASS: cancel name form / native creation picker; invalid name reports failure without creating files; retry remains available
+PASS: real GTK creation → empty generic editor; active session blocks create/open/import before any picker, registration or file creation
+PASS: open cancellation / invalid folder / successful open and deduplication; backup cancel / forbidden destination / retry → verified complete ZIP
+Library failure: 作品库
+
+收起目录
+V
+Viento Studio
+b.2.8.1
+设置
+项目类型与模板
+导出
+浏览
+编辑
+×
+全部（1）
+档案（0）
+角色（1）
+故事（0）
+地点（0）
+组织（0）
+设定（0）
+当前显示 1 个文档（共 1 个） （静态生成 2026/9/13 14:52:27）
+分类 角色（1）
+角色（1）
+
+旅人 #100%
+角色 · 角色
+可编辑
+类型：角色
+分组：角色
+路径：DOCS-STANDARD/DOCUMENTS/CHARACTERS/旅人 #100%.MD
+旅人
+角色 · 角色 · md
+新建文档
+开始编辑
+刷新预览
+源文件：documents/characters/旅人 #100%.md
+
+旅人
+分类：角色
+角色
+类型：角色
+文件信息
+内容
+
+身份
+旅人
+
+参考
+
+导出作品
+关闭
+当前文档：旅人
+
+导出用途
+
+文档分享
+当前档案与引用的图片、视频、音频，打包后便于分享。
+
+完整项目包
+全部正文、模板、元数据和素材，可在作品库中导入恢复。
+分享格式
+
+
+包含附属内容（如角色背景故事）
+原始正文与引用素材一并打包。解压后即可阅读；音视频保留原始格式。
+
+导出文件已过期，请重新导出
+
+开始导出
+选择保存位置
+Traceback (most recent call last):
+  File "/home/chiharukiryu/cdev/epic-of-viento-line/desktop/tests/native-library.py", line 356, in <module>
+    exercise_editor_exports(root=root, workspace=restored, expected=expected,
+  File "/home/chiharukiryu/cdev/epic-of-viento-line/desktop/tests/native_export_workflow.py", line 57, in exercise_editor_exports
+    ready_message('已保存到')
+  File "/home/chiharukiryu/cdev/epic-of-viento-line/desktop/tests/native_export_workflow.py", line 14, in ready_message
+    wait_for(lambda: script('return document.querySelector("#docExportMessage").textContent.includes(arguments[0]) && !document.querySelector("#docExportCloseBtn").disabled', text))
+  File "/home/chiharukiryu/cdev/epic-of-viento-line/desktop/tests/native-library.py", line 37, in wait_for
+    raise AssertionError(f'Timed out: {last}')
+AssertionError: Timed out: None

@@ -17,7 +17,7 @@ function serializeSourceDraft(source, value) {
 
 function blockType(text) {
   if (/^\s*(`{3,}|~{3,})/.test(text)) return 'code';
-  if (/^\s*(?:!video|!)\[/.test(text)) return 'media';
+  if (/^\s*(?:!audio|!video|!)\[/.test(text)) return 'media';
   if (/^#{1,6}\s/.test(text)) return 'heading';
   if (/^\s*(?:[-*+] |\d+[.)] )/.test(text)) return 'list';
   if (/^\s*\|/.test(text)) return 'table';

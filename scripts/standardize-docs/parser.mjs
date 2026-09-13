@@ -261,7 +261,7 @@ function parseJsonContent(rawText, relPath) {
 
 function parseYamlContent(rawText, relPath) {
   try {
-    return parseStructuredData(parseYaml(rawText, { maxAliasCount: 100 }), rawText, relPath, 'yaml');
+    return parseStructuredData(parseYaml(rawText.replace(/^\uFEFF/, ''), { maxAliasCount: 100 }), rawText, relPath, 'yaml');
   } catch (error) {
     return invalidStructuredContent(rawText, relPath, 'yaml', error);
   }

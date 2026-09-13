@@ -47,7 +47,7 @@ import { createBlockDraft, serializeBlockDraft, serializeSourceDraft } from './a
 import { setupMediaEditor } from './app-media-editor.js';
 import { setupExport } from './app-export.js';
 import { setupProjectSettings } from './app-project-settings.js';
-import { API_ERRORS, API_RESPONSE } from '../../scripts/lib/doc-api-contract.mjs';
+import { API_ERRORS, API_RESPONSE, getCreatePathError } from '../../scripts/lib/doc-api-contract.mjs';
 import {
   detectEditBackendAvailability,
   loadDocIndexPayload,
@@ -2120,7 +2120,7 @@ async function applyCreateTemplate(type = '') {
     syncEditSessionBaseline();
     if (templateContent === '' && createTemplateLoadErrorCache.has(templatePath)) {
       setEditorStatus(`${APP_ERROR_MESSAGES.templateLoadFallback}：${createTemplateLoadErrorCache.get(templatePath)}`);
-    }
+    } else setEditorStatus(APP_ERROR_MESSAGES.createDocHintTemplate(t('创建文档')));
   } finally {
     if (requestToken === createTemplateToken) {
       state.isLoadingTemplate = false;
@@ -2179,7 +2179,7 @@ function getCreateFileExtension(type) {
 
 function getSuggestedCreatePath(sourcePath = '', createType = 'document') {
   const base = getCreateTypeBasePath(createType, sourcePath) || 'design-data/';
-  const defaultName = getCreateDefaultNameByType(createType);
+  const defaultName = Array.from(getCreateDefaultNameByType(createType).replace(/[<>:"/\\|?*\x00-\x1f\x7f-\x9f]/g, '_')).slice(0, 40).join('');
   const timestamp = new Date().toISOString().replace(/[-:.T]/g, '').replace(/Z$/, '');
   return `${base}${defaultName}_${timestamp}.${getCreateFileExtension(createType)}`;
 }
@@ -2213,7 +2213,7 @@ function isInvalidCreatePath(pathValue) {
   if (/[<>:"|?*]/.test(normalizedPath)) {
     return APP_ERROR_MESSAGES.createPathValidation.invalidChars;
   }
-  return '';
+  return t(getCreatePathError(normalizedPath));
 }
 
 function validateCreatePath(rawPath) {
@@ -3482,6 +3482,10 @@ async function enterCreateMode() {
     isCreating: true,
     canEdit: true,
   });
+  setEditInputMode('source');
+  contentEl.classList.add('is-hidden');
+  contentEl.hidden = true;
+  contentEl.classList.toggle('is-empty', false);
   const createState = await setCreateTypeState(defaultCreateType, {
     referenceSourcePath: baseSourcePath,
     loadTemplate: true,
@@ -3489,13 +3493,8 @@ async function enterCreateMode() {
   if (!state.isCreating || !createState) return;
   state.activeCreatePath = createState?.path || getCreateInputPath() || suggestedPath;
   updateCreatePathValidation();
-  setEditInputMode('source');
-  contentEl.classList.add('is-hidden');
-  contentEl.hidden = true;
-  contentEl.classList.toggle('is-empty', false);
   editEditorEl?.setSelectionRange?.(0, 0);
   if (editEditorEl) editEditorEl.scrollTop = 0;
-  setEditorStatus(APP_ERROR_MESSAGES.createDocHintTemplate(t('创建文档')));
 }
 
 async function fetchEditableSource(pathValue) {
@@ -3898,6 +3897,7 @@ async function rebuildIndexForDoc(doc, options = {}) {
     await loadData(preferredPath, {
       preferredSourcePath: options.preferredSourcePath || '',
       allowDuringWrite: true,
+      throwOnError: true,
     });
     const elapsed = formatElapsedSeconds(rebuildProgressStart);
     setEditorStatus(`${APP_ERROR_MESSAGES.rebuildSuccess}${APP_ERROR_MESSAGES.rebuildElapsedTemplate(elapsed)}`);
@@ -4881,16 +4881,15 @@ async function loadData(preferredPath = '', options = {}) {
       return;
     }
 
+    const incomingDocs = payload.docs ?? payload.state?.docs;
+    if (!Array.isArray(incomingDocs)) throw new Error(APP_RUNTIME_TEXTS.runtimeContext.indexFormatInvalid);
+    const nextDocs = incomingDocs.map((doc) => normalizeDocFromIndex(doc)).filter(Boolean);
     state.workspace = payload.workspace || null;
     for (const type of state.workspace?.documentTypes || []) {
       Object.defineProperty(CATEGORY_LABELS, type.id, { value: type.label, configurable: true, enumerable: true, writable: true });
     }
     renderCreateTypeOptions();
-    state.docs = payload?.docs || payload?.state?.docs || [];
-    if (!Array.isArray(state.docs)) {
-      throw new Error(APP_RUNTIME_TEXTS.runtimeContext.indexFormatInvalid);
-    }
-    state.docs = state.docs.map((doc) => normalizeDocFromIndex(doc)).filter(Boolean);
+    state.docs = nextDocs;
     hideLoadRetry();
     if (currentLoadToken !== dataLoadToken) {
       clearListSkeletonState();
@@ -4961,6 +4960,7 @@ async function loadData(preferredPath = '', options = {}) {
       isRetryAttempt && forceCacheBust ? 'force' : (isRetryAttempt ? 'force' : 'normal'),
     );
     logRuntimeErrorOrMessage(APP_REQUEST_LABELS.loadDocIndex, error);
+    if (loadArgs.throwOnError) throw error;
   }
 }
 
@@ -4969,7 +4969,7 @@ async function initApp() {
   setupProjectSettings({
     getContext: () => ({ workspace: state.workspace, editable: isEditModeActive(), dirty: state.editHasUnsavedChanges, creating: state.isCreating, busy: isEditorBusy() }),
     setBusy: (busy) => { state.isConfiguringProject = busy; refreshEditButtons(); },
-    applied: async () => { createTemplateCache.clear(); createTemplateLoadErrorCache.clear(); await loadData(state.activePath, { forceCacheBust: true }); },
+    applied: async () => { createTemplateCache.clear(); createTemplateLoadErrorCache.clear(); await loadData(state.activePath, { forceCacheBust: true, throwOnError: true }); },
   });
   onLanguageChange(refreshLanguageUi);
   setupExport({

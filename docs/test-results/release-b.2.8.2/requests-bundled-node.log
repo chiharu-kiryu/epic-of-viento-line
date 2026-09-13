@@ -1,0 +1,12 @@
+✔ JSON and template timeouts remain active while response bodies are loading (315.522526ms)
+✔ timeouts before response headers preserve the useful error instead of mutating a DOMException (153.350266ms)
+✔ a caller can cancel a request after its headers without losing the cancellation reason (152.509459ms)
+✔ media insertion propagates cancellation through the API client while a response body is pending (159.594457ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 870.329938

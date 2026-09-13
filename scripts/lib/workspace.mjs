@@ -5,6 +5,10 @@ import { createHash, randomUUID } from 'node:crypto';
 import { legacyDocumentDefaults, validateDocumentModels } from './document-model.mjs';
 import { workspacePaths, validateProjectTypes, projectDocumentDefaults } from './project-layout.mjs';
 import { resolveContainedPath } from './contained-path.mjs';
+import { mediaKindForName } from './media-format.mjs';
+import { portablePath, DOCUMENT_SOURCE_EXTENSIONS } from './doc-api-contract.mjs';
+
+export { portablePath };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 export const WORKSPACE_PATHS = Object.freeze({ documents: 'design-data', templates: 'data-template', metadata: 'metadata' });
@@ -12,12 +16,6 @@ export const ASSET_STORES = Object.freeze({ main: { path: 'assets' } });
 // Older applications only inspect .viento/workspace.json. Keep a permanent guard
 // there so they cannot open v2 and silently export an archive without metadata.
 export const V2_GUARD = Object.freeze({ format: 'viento-workspace', version: 2, id: '00000000-0000-0000-0000-000000000000', name: 'Viento Studio 0.2+ required', createdAt: 0, compatibilityGuard: true });
-
-export function portablePath(value) {
-  return typeof value === 'string' && value.length > 0 && value.split('/').every((part) => part
-    && part !== '.' && part !== '..' && !/[<>:"\\|?*\x00-\x1f\x7f-\x9f]/.test(part) && !/[. ]$/.test(part)
-    && !/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)/i.test(part));
-}
 
 function portableName(value) {
   return portablePath(value) && !value.includes('/');
@@ -113,6 +111,21 @@ export async function ensureV2Guard(root) {
   await writeJson(file, V2_GUARD);
 }
 
+export function assertPortableFileTree(files) {
+  const nodes = new Map();
+  for (const file of files) {
+    const parts = file.split('/');
+    let prefix = '';
+    for (const [index, part] of parts.entries()) {
+      prefix += (index ? '/' : '') + part;
+      const key = portableKey(prefix), isFile = index === parts.length - 1;
+      const existing = nodes.get(key);
+      if (existing && (existing.path !== prefix || existing.isFile || isFile)) throw new Error(`文件或目录名称跨系统冲突：${file}`);
+      if (!existing) nodes.set(key, { path: prefix, isFile });
+    }
+  }
+}
+
 export async function walkFiles(root) {
   const result = [];
   async function visit(dir, prefix = '') {
@@ -128,12 +141,7 @@ export async function walkFiles(root) {
     }
   }
   await visit(root);
-  const names = new Set();
-  for (const file of result) {
-    const key = file.normalize('NFC').toLowerCase();
-    if (names.has(key)) throw new Error(`文件名跨系统冲突：${file}`);
-    names.add(key);
-  }
+  assertPortableFileTree(result);
   return result.sort();
 }
 
@@ -190,8 +198,10 @@ export async function readRegistry(root) {
 }
 
 function mediaKind(file) {
+  const media = mediaKindForName(file);
+  if (media) return media;
   const ext = path.extname(file).toLowerCase();
-  for (const [kind, types] of Object.entries({ image: ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg'], video: ['.mp4', '.webm', '.mov'], audio: ['.mp3', '.wav', '.ogg', '.flac'], font: ['.ttf', '.otf', '.woff', '.woff2'], text: ['', '.md', '.txt', '.json', '.yml', '.yaml'] })) {
+  for (const [kind, types] of Object.entries({ font: ['.ttf', '.otf', '.woff', '.woff2'], text: ['', '.md', '.txt', '.json', '.yml', '.yaml'] })) {
     if (types.includes(ext)) return kind;
   }
   return 'other';
@@ -272,7 +282,7 @@ export async function registerWorkspace(root, { name, legacyIndex, scanAssets = 
     const assetRoot = resolveAssetRoot(root);
     // Validate the whole inventory before writing registration files; missing stores are retained.
     const assetFiles = scanAssets && fs.existsSync(assetRoot) ? await walkFiles(assetRoot) : [];
-    const documentFiles = (await walkFiles(path.join(root, paths.documents))).filter((file) => ['', '.md', '.txt', '.json', '.yml', '.yaml'].includes(path.extname(file).toLowerCase()));
+    const documentFiles = (await walkFiles(path.join(root, paths.documents))).filter((file) => DOCUMENT_SOURCE_EXTENSIONS.includes(path.extname(file).toLowerCase()));
     const reservedAliases = new Set(registry.assets.flatMap((asset) => [
       `assets/${asset.location.path}`, ...asset.legacyPaths,
     ]).map(portableKey));

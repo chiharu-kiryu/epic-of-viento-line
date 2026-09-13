@@ -4,11 +4,12 @@ Usage: python3 desktop/tests/native-smoke.py /path/to/tauri-driver /path/to/WebK
 Build with `npm run desktop:build -- --debug --no-bundle` first, or pass a packaged executable.
 The test creates isolated settings, workspace data and package extraction output.
 Set VIENTO_TEST_SCREENSHOT_DIR explicitly to retain screenshots after the test.
-Media checks require ffmpeg with PNG, VP8 and H.264 encoders.
+Media checks require ffmpeg with PNG, VP8, H.264, MP3, Vorbis, Opus, FLAC and AAC encoders.
 Set VIENTO_TEST_GENERIC_CREATE to the workspace-archive example executable to
 exercise new generic projects, project templates and a complete backup restore.
 """
 import base64
+import http.client
 import json
 import os
 from pathlib import Path
@@ -24,6 +25,7 @@ import urllib.request
 import uuid
 import zipfile
 import hashlib
+from project_settings_navigation import exercise_project_settings_navigation
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -56,6 +58,11 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
     subprocess.run(['ffmpeg', '-loglevel', 'error', '-f', 'lavfi', '-i', 'color=c=0x76b6a6:s=320x180', '-frames:v', '1', str(imported_image)], check=True, timeout=30)
     for file, codec in [(imported_webm, ['-c:v', 'libvpx', '-b:v', '250k']), (imported_mp4, ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-movflags', '+faststart'])]:
         subprocess.run(['ffmpeg', '-loglevel', 'error', '-f', 'lavfi', '-i', 'testsrc2=size=320x180:rate=15', '-t', '3', *codec, str(file)], check=True, timeout=30)
+    imported_audio = []
+    for extension, codec in [('wav', 'pcm_s16le'), ('mp3', 'libmp3lame'), ('ogg', 'libvorbis'), ('opus', 'libopus'), ('flac', 'flac'), ('m4a', 'aac'), ('aac', 'aac')]:
+        file = test_root / f'配音样例.{extension}'
+        subprocess.run(['ffmpeg', '-loglevel', 'error', '-f', 'lavfi', '-i', 'sine=frequency=440:sample_rate=44100', '-t', '3', '-c:a', codec, str(file)], check=True, timeout=30)
+        imported_audio.append(file)
     data = test_root / 'data'
     app_data = data / 'io.viento.studio'
     workspace = app_data / 'workspaces' / '桌面流程验证'
@@ -118,7 +125,11 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
         identifier = manifest['id']
     recent = dict(path=str(workspace), name=manifest['name'], id=identifier, lastOpened=int(time.time() * 1000))
     (app_data / 'library.json').write_text(json.dumps(dict(recent=[recent])))
-    environment = dict(os.environ, XDG_DATA_HOME=str(data), XDG_CONFIG_HOME=str(test_root / 'config'), XDG_CACHE_HOME=str(test_root / 'cache'), WEBKIT_DISABLE_DMABUF_RENDERER='1')
+    runtime = test_root / 'runtime'
+    runtime.mkdir(mode=0o700)
+    environment = dict(os.environ, XDG_DATA_HOME=str(data), XDG_CONFIG_HOME=str(test_root / 'config'), XDG_CACHE_HOME=str(test_root / 'cache'), XDG_RUNTIME_DIR=str(runtime), GSETTINGS_BACKEND='memory', GIO_USE_VFS='local', GVFS_DISABLE_FUSE='1', WEBKIT_DISABLE_DMABUF_RENDERER='1')
+    for key in ['SESSION_MANAGER', 'GNOME_KEYRING_CONTROL', 'SSH_AUTH_SOCK', 'WAYLAND_DISPLAY']:
+        environment.pop(key, None)
     application = Path(sys.argv[3]).resolve() if len(sys.argv) > 3 else ROOT / 'src-tauri/target/debug/viento-studio'
     if application.suffix == '.AppImage':
         # WebDriver terminates the process group, which can kill an AppImage's
@@ -133,20 +144,26 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
     screenshots = Path(os.environ.get('VIENTO_TEST_SCREENSHOT_DIR', test_root / 'screenshots')).resolve()
     screenshots.mkdir(parents=True, exist_ok=True)
     port, native_port = free_port(), free_port()
-    endpoint = f'http://127.0.0.1:{port}'
-    log = open('/tmp/viento-native-driver.log', 'w')
+    webdriver = http.client.HTTPConnection('127.0.0.1', port, timeout=45)
+    log = open(screenshots / 'native-driver.log', 'w')
     process = subprocess.Popen(['dbus-run-session', '--', 'xvfb-run', '-a', sys.argv[1], '--native-driver', sys.argv[2], '--port', str(port), '--native-port', str(native_port)], env=environment, stdout=log, stderr=log, start_new_session=True)
     session = None
     library_returns = 0
 
     def request(method, url, payload=None):
         body = None if payload is None else json.dumps(payload).encode()
-        req = urllib.request.Request(endpoint + url, data=body, headers={'Content-Type': 'application/json'}, method=method)
         try:
-            with urllib.request.urlopen(req, timeout=45) as response:
-                result = json.load(response).get('value')
-        except urllib.error.HTTPError as error:
-            raise AssertionError(error.read().decode()) from error
+            # Keep sequential commands on one connection. urllib instead
+            # adds Connection: close, which tauri-driver forwards downstream.
+            webdriver.request(method, url, body=body, headers={'Content-Type': 'application/json'})
+            response = webdriver.getresponse()
+            content = response.read()
+        except (OSError, http.client.HTTPException):
+            webdriver.close()
+            raise
+        if response.status >= 400:
+            raise AssertionError(content.decode())
+        result = json.loads(content).get('value')
         if isinstance(result, dict) and result.get('error'):
             raise AssertionError(result)
         return result
@@ -218,6 +235,35 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
           return true;''', encoded, event)
         wait_for(lambda: script('return !document.querySelector("#docMediaDialog").open && !document.querySelector("#docSaveBtn").disabled'))
 
+    def exercise_audio_preview():
+        for index, file in enumerate(imported_audio):
+            wait_for(lambda: script('const a=document.querySelectorAll("#docMediaPreview audio")[arguments[0]];return a?.readyState >= 1 && a.duration > 2', index))
+            assert script('const a=document.querySelectorAll("#docMediaPreview audio")[arguments[0]];return Math.abs(a.duration-3)<.25', index), file.name
+            assert script('const a=document.querySelectorAll("#docMediaPreview audio")[arguments[0]];return a.paused && !a.autoplay && a.controls', index), file.name
+            script('const a=document.querySelectorAll("#docMediaPreview audio")[arguments[0]];a.muted=true;a.play().catch(error => window.audioPlaybackError=String(error));return true', index)
+            wait_for(lambda: script('return document.querySelectorAll("#docMediaPreview audio")[arguments[0]].currentTime > .2', index))
+            script('const a=document.querySelectorAll("#docMediaPreview audio")[arguments[0]];a.pause();a.currentTime=1.5;return true', index)
+            try:
+                wait_for(lambda: script('const a=document.querySelectorAll("#docMediaPreview audio")[arguments[0]];return !a.seeking && a.currentTime >= 1.4', index))
+            except AssertionError:
+                state = script('const a=document.querySelectorAll("#docMediaPreview audio")[arguments[0]];return {time:a.currentTime,duration:a.duration,seeking:a.seeking,paused:a.paused,ready:a.readyState,error:a.error?.message,seekable:Array.from({length:a.seekable.length},(_,i)=>[a.seekable.start(i),a.seekable.end(i)]),buffered:Array.from({length:a.buffered.length},(_,i)=>[a.buffered.start(i),a.buffered.end(i)])}', index)
+                raise AssertionError(f'{file.name}: audio seek did not finish: {state}')
+            print(f'PASS: {file.name} plays and seeks', flush=True)
+        assert script('return [...document.querySelectorAll("#docMediaPreview a")].filter(a => a.textContent === "下载原音频").length') == len(imported_audio)
+        click('#docMediaInsertBtn')
+        wait_for(lambda: script('return [...document.querySelectorAll("#docMediaList .doc-media-choice")].some(b => b.title === "配音样例.wav")'))
+        script('const select=document.querySelector("#docMediaKind");select.value="audio";select.dispatchEvent(new Event("change",{bubbles:true}));return true')
+        assert script('return document.querySelectorAll("#docMediaList .doc-media-choice").length') == len(imported_audio)
+        assert script('return [...document.querySelectorAll("#docMediaList .doc-media-choice small")].every(n => n.textContent.startsWith("音频"))')
+        (screenshots / 'desktop-audio-picker.png').write_bytes(base64.b64decode(command('GET', '/screenshot')))
+        script('[...document.querySelectorAll("#docMediaList .doc-media-choice")].find(b => b.title === "配音样例.wav").click();return true')
+        wait_for(lambda: script('return !document.querySelector("#docMediaDialog").open'))
+        script('document.querySelector("#docMediaKind").value="";return true')
+        wait_for(lambda: script('return document.querySelectorAll("#docMediaPreview audio").length') == len(imported_audio) + 1)
+        script('document.querySelector("#docMediaPreview audio").scrollIntoView({block:"center"});return true')
+        (screenshots / 'desktop-audio-preview.png').write_bytes(base64.b64decode(command('GET', '/screenshot')))
+        print('PASS: WAV / MP3 / Ogg / Opus / FLAC / M4A / AAC playback, pause and seeking; audio filter, original download and stable-ID reuse', flush=True)
+
     def element(selector):
         value = command('POST', '/element', dict(using='css selector', value=selector))
         return value['element-6066-11e4-a52e-4f735466cecf']
@@ -251,11 +297,7 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
         ]}]})
         command('POST', f'/element/{element("#docSourceEditor")}/value', dict(text=text, value=list(text)))
 
-    def exercise_exports():
-        """Optional native save-picker checks, isolated inside our Xvfb display."""
-        xdotool = os.environ.get('VIENTO_TEST_XDOTOOL')
-        if not xdotool:
-            return
+    def test_display_environment():
         candidates = []
         for proc in Path('/proc').iterdir():
             if not proc.name.isdigit():
@@ -270,6 +312,37 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
         picker_env = candidates[-1]
         # Use the data-home marker, never the user's desktop display.
         assert picker_env['XDG_DATA_HOME'] == str(data)
+        return picker_env
+
+    def respond_to_close(accept):
+        """Closing uses a native confirmation so a failed web service cannot trap it."""
+        xdotool = os.environ.get('VIENTO_TEST_XDOTOOL') or shutil.which('xdotool')
+        assert xdotool, 'Native close checks require xdotool or VIENTO_TEST_XDOTOOL'
+        picker_env = test_display_environment()
+        title = '^(关闭编辑窗口|Close editor)$'
+        def find_dialog():
+            result = subprocess.run([xdotool, 'search', '--onlyvisible', '--name', title], env=picker_env, capture_output=True, text=True, timeout=10)
+            return result.stdout.splitlines()[-1] if result.returncode == 0 and result.stdout.strip() else None
+        window_id = wait_for(find_dialog)
+        subprocess.run([xdotool, 'windowfocus', '--sync', window_id], env=picker_env, check=True, capture_output=True, timeout=10)
+        preference = test_root / 'config/io.viento.studio/preferences.json'
+        language = json.loads(preference.read_text())['language'] if preference.exists() else 'zh-CN'
+        geometry = dict(line.split('=', 1) for line in subprocess.check_output([xdotool, 'getwindowgeometry', '--shell', window_id], env=picker_env, timeout=10).decode().splitlines())
+        subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-f', 'x11grab', '-video_size', f'{geometry["WIDTH"]}x{geometry["HEIGHT"]}', '-i', f'{picker_env["DISPLAY"]}+{geometry["X"]},{geometry["Y"]}', '-frames:v', '1', str(screenshots / f'desktop-close-{language}-{"accept" if accept else "cancel"}.png')], env=picker_env, check=True, capture_output=True, timeout=10)
+        # The GTK custom dialog has two equal-width buttons below the text:
+        # confirm on the left, continue editing on the right. Activate that
+        # button explicitly; Return may only target the selectable message.
+        button_x = int(geometry['WIDTH']) * (1 if accept else 3) // 4
+        button_y = int(geometry['HEIGHT']) - 20
+        subprocess.run([xdotool, 'mousemove', '--window', window_id, str(button_x), str(button_y), 'click', '1'], env=picker_env, check=True, capture_output=True, timeout=10)
+        wait_for(lambda: find_dialog() is None)
+
+    def exercise_exports():
+        """Optional native save-picker checks, isolated inside our Xvfb display."""
+        xdotool = os.environ.get('VIENTO_TEST_XDOTOOL')
+        if not xdotool:
+            return
+        picker_env = test_display_environment()
         def key(*args):
             window_id = subprocess.check_output([xdotool, 'search', '--onlyvisible', '--name', '保存导出文件'], env=picker_env, timeout=10).decode().splitlines()[-1]
             subprocess.run([xdotool, 'windowfocus', '--sync', window_id], env=picker_env, check=True, capture_output=True, timeout=10)
@@ -307,7 +380,7 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
                     assert hashlib.sha256(content).hexdigest() == file['sha256']
                 if kind == 'document':
                     html = archive.read('index.html').decode()
-                    assert '旅人' in html and '<video controls' in html and '<img ' in html
+                    assert '旅人' in html and '<video controls' in html and '<img ' in html and '<audio controls' in html
                 else:
                     assert descriptor['format'] == 'viento-archive'
                     restored = subprocess.run([generic_tool, 'import', str(output), str(test_root)], capture_output=True, text=True, check=True, timeout=30)
@@ -400,7 +473,8 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
             (screenshots / 'desktop-generic-create.png').write_bytes(base64.b64decode(command('GET', '/screenshot')))
             character_source = workspace / 'documents/characters/旅人.md'
             script('const path=document.querySelector("#docCreatePathInput");path.value="documents/characters/旅人.md";path.dispatchEvent(new Event("input",{bubbles:true}));const e=document.querySelector("#docSourceEditor");e.value="# 旅人\\n\\n身份：旅人\\n\\n## 背景与经历\\n属于角色自己的背景。\\n\\n";e.dispatchEvent(new Event("input",{bubbles:true}));e.focus();e.setSelectionRange(e.value.length,e.value.length);return true')
-            insert_files([imported_image, imported_webm, imported_mp4])
+            insert_files([imported_image, imported_webm, imported_mp4, *imported_audio])
+            exercise_audio_preview()
             assert not character_source.exists()
             wait_for(lambda: script('return document.querySelector("#docMediaPreview img")?.naturalWidth === 320 && [...document.querySelectorAll("#docMediaPreview video")].filter(v => v.readyState >= 1).length === 2'))
             click('#docSaveBtn')
@@ -409,9 +483,12 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
             assert len(list((workspace / 'metadata/documents').glob('*.json'))) == 1
             index = json.loads((private / 'cache/indexes/documents.json').read_text())
             assert index['docs'][0]['category'] == 'character'
-            assert len(index['docs'][0]['assetRefs']) == 3
+            assert len(index['docs'][0]['assetRefs']) == 3 + len(imported_audio)
+            script('window.lastAudioPreview=document.querySelector("#docMediaPreview audio");lastAudioPreview.muted=true;lastAudioPreview.play();return true')
+            wait_for(lambda: script('return !window.lastAudioPreview.paused'))
             click('#docEditBtn')
             wait_for(lambda: script('return !document.querySelector("#workspaceShell").classList.contains("is-writing")'))
+            assert script('return window.lastAudioPreview.paused'), 'Hidden draft audio must stop when leaving edit mode'
             # Exercise the real project settings UI before creating the next
             # document. Existing source bytes and identities must stay intact.
             saved_character = character_source.read_bytes()
@@ -419,6 +496,7 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
             click('#projectSettingsBtn')
             wait_for(lambda: script('return document.querySelector("#projectSettingsDialog").open && document.querySelector("#projectTypeList").options.length === 7 && !document.querySelector("#projectTypeFields").disabled'))
             script('const select=document.querySelector("#projectTypeList");select.value="species";select.dispatchEvent(new Event("change",{bubbles:true}));return true')
+            exercise_project_settings_navigation(script=script, click=click, command=command, wait_for=wait_for, workspace=workspace, screenshots=screenshots)
             assert script('return document.querySelector("#projectTypeId").readOnly')
             script('const e=document.querySelector("#projectTemplateContent");e.value+="存在: false\\n备注: null\\n";e.dispatchEvent(new Event("input",{bubbles:true}));document.querySelector("#projectTypeFields details").open=true;document.querySelector("#projectTitleField").value="title";return true')
             click('#projectGroupAdd')
@@ -447,6 +525,8 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
             assert script(r'return /^documents\/species\/.+\.yaml$/.test(document.querySelector("#docCreatePathInput").value)')
             species_source = workspace / 'documents/自定义目录/星裔.yaml'
             script('const path=document.querySelector("#docCreatePathInput");path.value="documents/自定义目录/星裔.yaml";path.dispatchEvent(new Event("input",{bubbles:true}));const e=document.querySelector("#docSourceEditor");e.value=e.value.replace("新建种族","星裔");e.dispatchEvent(new Event("input",{bubbles:true}));return true')
+            insert_files([imported_audio[0]])
+            wait_for(lambda: script('return document.querySelector("#docMediaPreview audio")?.readyState >= 1'))
             species_draft = script('return document.querySelector("#docSourceEditor").value')
             if os.environ.get('VIENTO_TEST_LANGUAGE'):
                 check_draft_language_switch()
@@ -460,6 +540,7 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
             assert index['count'] == 2
             species_record = next(doc for doc in index['docs'] if doc['source']['path'].endswith('星裔.yaml'))
             assert species_record['category'] == 'species', species_record
+            assert len(species_record['assetRefs']) == 1
             script('[...document.querySelectorAll("#categoryTabs button")].find(node => node.textContent.startsWith("种族")).click();return true')
             wait_for(lambda: script('return document.querySelectorAll("#docList button[data-path-key]").length === 1'))
             assert script('return document.querySelector("#docList button[data-path-key]").title') == '星裔'
@@ -468,6 +549,7 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
             script('[...document.querySelectorAll("#categoryTabs button")].find(node => node.textContent.startsWith("全部")).click();return true')
             select_document('旅人')
             wait_for(lambda: script('return document.querySelectorAll(".document-section video").length === 2 && document.querySelector(".document-section img")?.naturalWidth === 320'))
+            assert script('return document.querySelectorAll(".document-section audio").length') == len(imported_audio) + 1
             exercise_exports()
             return_to_library()
             click('#closeEditorBtn')
@@ -582,7 +664,8 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
         script('const e=document.querySelector("#docSourceEditor");e.focus();e.setSelectionRange(e.value.length,e.value.length);return true')
         click('#docMediaInsertBtn')
         wait_for(lambda: script('return document.querySelector("#docMediaList .doc-media-choice") !== null'))
-        insert_files([imported_image, imported_webm, imported_mp4])
+        insert_files([imported_image, imported_webm, imported_mp4, *imported_audio])
+        exercise_audio_preview()
         assert character_source.read_text() == character_original
         assert script('return document.querySelector("#docSourceEditor").value.includes("!video[动作预览.mp4](asset:")')
         wait_for(lambda: script('return document.querySelector("#docMediaPreview img")?.naturalWidth === 320'))
@@ -605,7 +688,7 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
         # Existing selection, paste and drop reuse exactly the same imported
         # asset; switching source/block modes must not damage their references.
         assets_before = len(list((workspace / 'metadata/assets').glob('*.json')))
-        assert assets_before == 4
+        assert assets_before == 4 + len(imported_audio)
         script('const e=document.querySelector("#docSourceEditor");e.focus();e.setSelectionRange(e.value.length,e.value.length);return true')
         click('#docMediaInsertBtn')
         wait_for(lambda: script('return [...document.querySelectorAll(".doc-media-choice")].some(button => button.title === "角色参考 #1.png")'))
@@ -614,12 +697,13 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
         click('#docEditBlockModeBtn')
         script('const e=[...document.querySelectorAll("#docBlockEditor textarea")].at(-1);e.focus();e.setSelectionRange(e.value.length,e.value.length);return true')
         insert_files([imported_image], 'paste')
-        insert_files([imported_image], 'drop')
+        insert_files([imported_image, imported_audio[0]], 'drop')
         assert len(list((workspace / 'metadata/assets').glob('*.json'))) == assets_before
         click('#docEditSourceModeBtn')
         media_draft = script('return document.querySelector("#docSourceEditor").value')
         assert media_draft.count('![角色参考 #1.png](asset:') == 4, media_draft
         assert media_draft.count('!video[') == 2
+        assert media_draft.count('!audio[') == len(imported_audio) + 2
         click('#docSaveBtn')
         wait_for(lambda: script('return !document.querySelector("#docSaveBtn").disabled && !document.querySelector("#docEditDirtyIndicator").classList.contains("is-unsaved")'))
         assert character_source.read_text() == media_draft
@@ -629,11 +713,13 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
         select_document('测试角色')
         wait_for(lambda: script('return document.querySelectorAll(".document-section video").length === 2 && [...document.querySelectorAll(".document-section img")].filter(img => img.naturalWidth === 320).length === 4'))
         assert script('return [...document.querySelectorAll(".document-section video")].every(video => video.paused && video.controls)')
+        assert script('return document.querySelectorAll(".document-section audio").length') == len(imported_audio) + 2
+        assert script('return [...document.querySelectorAll(".document-section audio")].every(audio => audio.paused && audio.controls)')
         script('document.querySelector(".document-section video").scrollIntoView({block:"center"});return true')
         (screenshots / 'desktop-media-saved.png').write_bytes(base64.b64decode(command('GET', '/screenshot')))
         document_index = json.loads((private / 'cache/indexes/documents.json').read_text())
         character_record = next(doc for doc in document_index['docs'] if doc['id'] == character_id)
-        assert len(character_record['assetRefs']) == 3, character_record['assetRefs']
+        assert len(character_record['assetRefs']) == 3 + len(imported_audio), character_record['assetRefs']
         print('PASS: media picker → PNG / WebM / MP4 import → unsaved draft preview → native playback + seeking → responsive editor → reuse + paste + block drop → stable IDs → save → reopen + inline media', flush=True)
         select_document('原生桌面测试')
         click('#docEditBtn')
@@ -673,16 +759,15 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
             print('PASS: language synchronizes between library and editor without losing the active draft', flush=True)
         click('#closeEditorBtn')
         command('POST', '/window', dict(handle=editor))
-        text = wait_for(lambda: command('GET', '/alert/text'))
-        assert '未保存' in text
-        command('POST', '/alert/dismiss', {})
-        wait_for(lambda: script('return document.querySelector("#docSourceEditor").value.includes("未保存草稿保留测试")'))
+        respond_to_close(False)
+        wait_for(lambda: script('return !document.body.inert && document.querySelector("#docSourceEditor").value.includes("未保存草稿保留测试")'))
         return_to_library()
         wait_for(lambda: script('return !document.querySelector("#closeEditorBtn").disabled'))
+        if os.environ.get('VIENTO_TEST_LANGUAGE'):
+            switch_language('en')
         click('#closeEditorBtn')
         command('POST', '/window', dict(handle=editor))
-        wait_for(lambda: command('GET', '/alert/text'))
-        command('POST', '/alert/accept', {})
+        respond_to_close(True)
         wait_for(lambda: len(command('GET', '/window/handles')) == 1)
         command('POST', '/window', dict(handle=main))
         assert '未保存草稿保留测试'.encode() not in source.read_bytes()
@@ -704,6 +789,10 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
     except Exception:
         if session:
             try:
+                (screenshots / 'desktop-failure.png').write_bytes(base64.b64decode(command('GET', '/screenshot')))
+            except Exception:
+                pass
+            try:
                 print('Native page at failure:', script('return document.body.innerText').__str__()[:2500], flush=True)
                 print('Editor at failure:', script('const e=document.querySelector("#docSourceEditor");return e ? {value:e.value, disabled:e.disabled, readOnly:e.readOnly, focus:document.activeElement.id} : null'), flush=True)
             except Exception:
@@ -715,6 +804,7 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
                 request('DELETE', f'/session/{session}')
             except Exception:
                 pass
+        webdriver.close()
         try:
             os.killpg(process.pid, signal.SIGTERM)
             process.wait(timeout=10)
@@ -724,3 +814,14 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
             os.killpg(process.pid, signal.SIGKILL)
             process.wait()
         log.close()
+        # Portal daemons may briefly leave a disconnected FUSE mount after
+        # the private bus exits. Detach only mounts under this test's runtime.
+        for line in Path('/proc/self/mountinfo').read_text().splitlines():
+            target = line.split()[4]
+            if target.startswith(str(runtime) + '/'):
+                detached = subprocess.run(['fusermount3', '-uz', target], capture_output=True, text=True, timeout=10)
+                # The portal can finish unmounting between inspection and our
+                # request. Only fail if the mount actually remains present.
+                remaining = {entry.split()[4] for entry in Path('/proc/self/mountinfo').read_text().splitlines()}
+                if detached.returncode and target in remaining:
+                    raise RuntimeError(detached.stderr)

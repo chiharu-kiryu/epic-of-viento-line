@@ -454,10 +454,10 @@ export async function requestProject(action = 'read', payload) {
   return (await fetchJsonApiRequest(url, options, 120000, t('项目类型与模板'))).payload;
 }
 
-export async function prepareDraftMedia(content, sourcePath, assetIds = [], documentType) {
+export async function prepareDraftMedia(content, sourcePath, assetIds = [], documentType, signal) {
   return (await fetchJsonApiRequest(API_PATHS.MEDIA_INSERT, withAuthHeaders({
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content, sourcePath, assetIds, documentType }),
+    body: JSON.stringify({ content, sourcePath, assetIds, documentType }), signal,
   }), 15000, t('更新素材预览'))).payload;
 }
 

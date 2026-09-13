@@ -54,6 +54,20 @@ test('desktop language preferences require the local session and stay outside th
   assert.deepEqual(await (await fetch(`${base}/__desktop/preferences`, { headers })).json(), { language: 'zh-CN' });
   await fs.writeFile(file, JSON.stringify({ language: 'en' }));
   assert.deepEqual(await (await fetch(`${base}/__desktop/preferences`, { headers })).json(), { language: 'en' });
+  for (const value of ['', null, false, 0, 'unsupported']) {
+    const bytes = JSON.stringify({ language: value, futureOption: { enabled: true } });
+    await fs.writeFile(file, bytes);
+    assert.equal((await fetch(`${base}/__desktop/preferences`, { headers })).status, 400, `invalid stored language: ${value}`);
+    assert.equal(await fs.readFile(file, 'utf8'), bytes, 'reading a bad preference must not rewrite it');
+  }
+  for (const value of [null, [], 'en']) {
+    await fs.writeFile(file, JSON.stringify(value));
+    assert.equal((await fetch(`${base}/__desktop/preferences`, { headers })).status, 400);
+    assert.equal(await fs.readFile(file, 'utf8'), JSON.stringify(value));
+  }
+  await fs.writeFile(file, JSON.stringify({ futureOption: { enabled: true } }));
+  assert.deepEqual(await (await fetch(`${base}/__desktop/preferences`, { headers })).json(), { language: 'zh-CN' });
+  await fs.writeFile(file, JSON.stringify({ language: 'en' }));
   const post = (body, extra = {}) => fetch(`${base}/__desktop/preferences`, { method: 'POST', headers: { ...headers, ...extra }, body: JSON.stringify(body) });
   assert.equal((await post({ language: 'en', id: randomUUID() }, { Origin: 'https://example.org' })).status, 403);
   assert.equal((await post({ language: '../en', id: randomUUID() })).status, 400);

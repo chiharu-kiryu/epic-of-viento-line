@@ -1,0 +1,97 @@
+{
+  "date": "2026-09-13",
+  "version": "b.2.8.1",
+  "buildVersion": "2.8.1",
+  "gitBase": "51d522cb919c20b15815b129bd62e859af9a97a0",
+  "environment": {
+    "os": "Ubuntu 24.04 x86_64",
+    "webKit": "2.52.6",
+    "tauriDriver": "2.0.6",
+    "nodeRuntime": "24.20.0"
+  },
+  "nativeLibraryWorkflow": {
+    "result": "passed",
+    "exitCode": 0,
+    "fixture": "isolated temporary generic v3 project with Unicode / # / % names, BOM/CRLF source, image, audio and empty file",
+    "log": "native-library-complete.log",
+    "archiveVerification": "CRC, per-entry sizes and SHA-256, exact authoritative file sets and bytes after restore, original project unchanged",
+    "operations": [
+      "new/cancel/invalid name/retry",
+      "active-editor UI and native command guards",
+      "resume/close/reopen",
+      "open cancel/invalid folder/retry/recent deduplication",
+      "backup cancel/forbidden target/retry",
+      "import cancel at both pickers/corrupt archive rollback/retry",
+      "English folder picker/cancel",
+      "restored document and image rendered in the editor"
+    ]
+  },
+  "regressions": {
+    "application": {
+      "passed": 191,
+      "failed": 0,
+      "skipped": 0,
+      "archiveInterop": true,
+      "syntaxFiles": 117
+    },
+    "rust": {
+      "passed": 20,
+      "failed": 0,
+      "ignored": 1
+    },
+    "libraryAndSettingsControllers": {
+      "passed": 12,
+      "failed": 0
+    }
+  },
+  "fixedBug": "N43: require an absent editor before new/open/import pickers, file writes and registration; retain active-editor UI guards across backup, refresh and language changes",
+  "sourceFingerprints": {
+    "desktop/ui/app.js": "c240d6c2260a25c0a0a1fc08efa56b3f19f92c59e64a74bd18c369f91e55ba7a",
+    "desktop/ui/index.html": "c93feeddd32e5a44abb2c184089ad2e97cb0923bf41e8162d9d2613c70d6ce3b",
+    "src-tauri/src/lib.rs": "4ec1d7a8ada92b276b60692d487f8c1a7bb7c43b7cd04940d4dcd109bfb811fd",
+    "desktop/tests/native-library.py": "b5f081cf9e537877c806253ae980d9734c63b3accedc4cb09ce959fff3741ce5",
+    "scripts/tests/desktop-library.test.mjs": "3d89bca0ce2ed8f900ea6f37236752c15932b02f492361cead7dfb2087298c19",
+    "scripts/tests/dialog-harness.mjs": "19a19c068305a38851dc1ac1e8287d7f83720e5e22e8fc4509de33ac83b7f6a9"
+  },
+  "testBinarySha256": "f249e2ee7d17c4362f23dbc993f8f6da94c6c25ba1b94df87f72fea1a9ba4501",
+  "boundaries": [
+    "Linux GTK test build only; installed application not replaced",
+    "No Windows/macOS or installed AppImage packaging test in this round",
+    "No real user project or large asset migration used",
+    "Initial test iterations fixed Unicode XTest input, async clipboard/navigation timing, WebDriver error-object handling, and an overbroad event counter before the complete run passed"
+  ],
+  "cleanup": {
+    "removed": [
+      {
+        "path": "/tmp/viento-library-audit.4evtzR",
+        "bytes": 1963894428
+      },
+      {
+        "path": "/home/chiharukiryu/cdev/epic-of-viento-line/desktop/.cache",
+        "bytes": 31996513
+      },
+      {
+        "path": "/home/chiharukiryu/cdev/epic-of-viento-line/desktop/resources",
+        "bytes": 4605279
+      },
+      {
+        "path": "/home/chiharukiryu/cdev/epic-of-viento-line/desktop/ui/i18n",
+        "bytes": 43879
+      },
+      {
+        "path": "/home/chiharukiryu/cdev/epic-of-viento-line/src-tauri/binaries",
+        "bytes": 126458664
+      },
+      {
+        "path": "/home/chiharukiryu/cdev/epic-of-viento-line/src-tauri/gen/schemas",
+        "bytes": 368432
+      }
+    ],
+    "totalBytes": 2127367195,
+    "testProcessesRemaining": 0,
+    "testMountsRemaining": 0,
+    "testFixturesRemaining": 0,
+    "userProjectsModified": false,
+    "installedApplicationReplaced": false
+  }
+}

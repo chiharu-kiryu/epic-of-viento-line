@@ -1,0 +1,993 @@
+
+> epic-of-viento-line@2.8.2 check
+> node scripts/check-project.mjs --app-only
+
+版本一致性检查通过：b.2.8.2（构建 2.8.2）
+语法检查通过：117 个 JavaScript 文件
+API 契约预检通过
+/usr/bin/node failed with exit code 1. TAP version 13
+# Subtest: application storage matches native platform paths and ignores relative XDG locations
+ok 1 - application storage matches native platform paths and ignores relative XDG locations
+  ---
+  duration_ms: 2.595473
+  ...
+# Subtest: local selection and native recent workspaces resolve outside application source
+ok 2 - local selection and native recent workspaces resolve outside application source
+  ---
+  duration_ms: 39.561074
+  ...
+# Subtest: explicit workspace and workspace cwd take precedence over damaged default settings
+ok 3 - explicit workspace and workspace cwd take precedence over damaged default settings
+  ---
+  duration_ms: 7.428522
+  ...
+# Subtest: legacy explicit source selectors remain usable but fresh installs never default to the application directory
+ok 4 - legacy explicit source selectors remain usable but fresh installs never default to the application directory
+  ---
+  duration_ms: 5.860145
+  ...
+# Subtest: cleanup protects local selections and application data placed beneath build directories
+ok 5 - cleanup protects local selections and application data placed beneath build directories
+  ---
+  duration_ms: 11.453733
+  ...
+# Subtest: build cleanup preserves source, releases and every workspace state file
+ok 6 - build cleanup preserves source, releases and every workspace state file
+  ---
+  duration_ms: 298.665196
+  ...
+# Subtest: build cleanup does not follow symlinks into other data
+ok 7 - build cleanup does not follow symlinks into other data
+  ---
+  duration_ms: 57.599895
+  ...
+# Subtest: build cleanup refuses a configured workspace or asset store inside generated directories
+ok 8 - build cleanup refuses a configured workspace or asset store inside generated directories
+  ---
+  duration_ms: 22.360967
+  ...
+# Subtest: custom output preserves the default catalog, prunes its own stale files and excludes itself from sources
+ok 9 - custom output preserves the default catalog, prunes its own stale files and excludes itself from sources
+  ---
+  duration_ms: 3581.047066
+  ...
+# Subtest: no-build still standardizes selected sources without rewriting the static index
+ok 10 - no-build still standardizes selected sources without rewriting the static index
+  ---
+  duration_ms: 700.123232
+  ...
+# Subtest: API preflight validates the extracted request service and still rejects broken requests
+ok 11 - API preflight validates the extracted request service and still rejects broken requests
+  ---
+  duration_ms: 638.310852
+  ...
+# Subtest: static indexing rejects duplicate document identities before replacing an existing index
+ok 12 - static indexing rejects duplicate document identities before replacing an existing index
+  ---
+  duration_ms: 362.478617
+  ...
+# Subtest: document GET/save/create cannot follow links out of the selected workspace
+ok 13 - document GET/save/create cannot follow links out of the selected workspace
+  ---
+  duration_ms: 1167.697095
+  ...
+# Subtest: static document URLs cannot expose server modules through a directory link
+ok 14 - static document URLs cannot expose server modules through a directory link
+  ---
+  duration_ms: 640.862999
+  ...
+# Subtest: a malformed request target is rejected without terminating the edit server
+ok 15 - a malformed request target is rejected without terminating the edit server
+  ---
+  duration_ms: 502.89629
+  ...
+# Subtest: a failed page read leaves the API available and the page can be recovered
+ok 16 - a failed page read leaves the API available and the page can be recovered
+  ---
+  duration_ms: 669.125097
+  ...
+# Subtest: invalid partial rebuild requests never fall back to pruning the entire catalog
+ok 17 - invalid partial rebuild requests never fall back to pruning the entire catalog
+  ---
+  duration_ms: 471.439783
+  ...
+# Subtest: an explicit rebuild workspace overrides the parent workspace environment in both child scripts
+ok 18 - an explicit rebuild workspace overrides the parent workspace environment in both child scripts
+  ---
+  duration_ms: 1070.281159
+  ...
+# Subtest: an index build already in flight cannot reinsert a stale catalog after a successful save
+ok 19 - an index build already in flight cannot reinsert a stale catalog after a successful save
+  ---
+  duration_ms: 523.264389
+  ...
+# Subtest: all 360 story chapters retain distinct IDs and remain individually selectable after grouping
+ok 20 - all 360 story chapters retain distinct IDs and remain individually selectable after grouping
+  ---
+  duration_ms: 18.91147
+  ...
+# Subtest: hero profiles still link to their matching standalone backstory
+ok 21 - hero profiles still link to their matching standalone backstory
+  ---
+  duration_ms: 0.335185
+  ...
+# Subtest: desktop close reports document and template drafts and busy operations without discarding input
+ok 22 - desktop close reports document and template drafts and busy operations without discarding input
+  ---
+  duration_ms: 147.951106
+  ...
+# Subtest: an incomplete editor or an unavailable bridge cannot report that it is safe to close
+ok 23 - an incomplete editor or an unavailable bridge cannot report that it is safe to close
+  ---
+  duration_ms: 133.938688
+  ...
+# Subtest: desktop close bridge requires a request identity and strictly typed editor state
+ok 24 - desktop close bridge requires a request identity and strictly typed editor state
+  ---
+  duration_ms: 171.499799
+  ...
+# Subtest: an active editor blocks new/open/import and other projects across backup completion and language changes
+ok 25 - an active editor blocks new/open/import and other projects across backup completion and language changes
+  ---
+  duration_ms: 237.092077
+  ...
+# Subtest: a cancelled picker or failed backup permits retry while preserving the current session guard
+ok 26 - a cancelled picker or failed backup permits retry while preserving the current session guard
+  ---
+  duration_ms: 181.800501
+  ...
+# Subtest: library refreshes cannot unlock settings while a language write is pending
+ok 27 - library refreshes cannot unlock settings while a language write is pending
+  ---
+  duration_ms: 119.552442
+  ...
+# Subtest: desktop workspaces keep sources, cache and installed application files separate through save and rebuild
+ok 28 - desktop workspaces keep sources, cache and installed application files separate through save and rebuild
+  ---
+  duration_ms: 2631.772723
+  ...
+# Subtest: an empty desktop workspace starts successfully and its engine exits when the owning app closes stdin
+ok 29 - an empty desktop workspace starts successfully and its engine exits when the owning app closes stdin
+  ---
+  duration_ms: 1245.057561
+  ...
+# Subtest: desktop shutdown during startup stops and reaps the running index worker
+ok 30 - desktop shutdown during startup stops and reaps the running index worker
+  ---
+  duration_ms: 631.196149
+  ...
+# Subtest: desktop shutdown during rebuild stops and reaps the running index worker
+ok 31 - desktop shutdown during rebuild stops and reaps the running index worker
+  ---
+  duration_ms: 1106.645188
+  ...
+# Subtest: capability discovery includes the live project configuration and preview routes
+ok 32 - capability discovery includes the live project configuration and preview routes
+  ---
+  duration_ms: 1128.246515
+  ...
+# Subtest: browser module graph is served as JavaScript; server-only modules stay private
+ok 33 - browser module graph is served as JavaScript; server-only modules stay private
+  ---
+  duration_ms: 1057.708545
+  ...
+# Subtest: same-version concurrent edits accept one writer, including source-path aliases
+ok 34 - same-version concurrent edits accept one writer, including source-path aliases
+  ---
+  duration_ms: 1011.740357
+  ...
+# Subtest: concurrent creation is exclusive and a rejected write does not block subsequent saves
+ok 35 - concurrent creation is exclusive and a rejected write does not block subsequent saves
+  ---
+  duration_ms: 650.535731
+  ...
+# Subtest: atomic saves preserve permissions and advance numeric versions on coarse clocks
+ok 36 - atomic saves preserve permissions and advance numeric versions on coarse clocks
+  ---
+  duration_ms: 106.263421
+  ...
+# Subtest: static resources do not consume the API rate limit or leak active request counts
+ok 37 - static resources do not consume the API rate limit or leak active request counts
+  ---
+  duration_ms: 498.507086
+  ...
+# Subtest: mutable workspace files revalidate and If-None-Match takes precedence over dates
+ok 38 - mutable workspace files revalidate and If-None-Match takes precedence over dates
+  ---
+  duration_ms: 548.636089
+  ...
+# Subtest: media responses identify their format and support bounded seeking without downloading the whole file
+ok 39 - media responses identify their format and support bounded seeking without downloading the whole file
+  ---
+  duration_ms: 422.957012
+  ...
+# Subtest: an unreadable asset cannot terminate the editing service
+ok 40 - an unreadable asset cannot terminate the editing service
+  ---
+  duration_ms: 331.192196
+  ...
+# Subtest: the core parser is independent of paths and game vocabulary; compatibility is explicit
+ok 41 - the core parser is independent of paths and game vocabulary; compatibility is explicit
+  ---
+  duration_ms: 8.900559
+  ...
+# Subtest: arbitrary OC fields and typed nested values render from one layout without category templates
+ok 42 - arbitrary OC fields and typed nested values render from one layout without category templates
+  ---
+  duration_ms: 3.477009
+  ...
+# Subtest: heading order, repeated prose, tables and multiline bonuses survive the universal layout
+ok 43 - heading order, repeated prose, tables and multiline bonuses survive the universal layout
+  ---
+  duration_ms: 2.338914
+  ...
+# Subtest: ownership supports several parents and custom types; missing owners keep the source visible
+ok 44 - ownership supports several parents and custom types; missing owners keep the source visible
+  ---
+  duration_ms: 1.530116
+  ...
+# Subtest: ambiguous legacy names remain visible and invalid or cyclic ownership is rejected
+ok 45 - ambiguous legacy names remain visible and invalid or cyclic ownership is rejected
+  ---
+  duration_ms: 4.094871
+  ...
+# Subtest: descriptor migration, shared-story editing, partial rebuild and relocation preserve identity and ownership
+ok 46 - descriptor migration, shared-story editing, partial rebuild and relocation preserve identity and ownership
+  ---
+  duration_ms: 4103.349022
+  ...
+# Subtest: reopening an aborted export ignores its late failure and allows a fresh export
+ok 47 - reopening an aborted export ignores its late failure and allows a fresh export
+  ---
+  duration_ms: 79.39228
+  ...
+# Subtest: an aborted export arriving after reopen is released without blocking the new dialog
+ok 48 - an aborted export arriving after reopen is released without blocking the new dialog
+  ---
+  duration_ms: 59.177058
+  ...
+# Subtest: opening export during a save cannot leave a permanently busy snapshot
+ok 49 - opening export during a save cannot leave a permanently busy snapshot
+  ---
+  duration_ms: 40.559857
+  ...
+# Subtest: an expired native export can be regenerated in the same dialog after cancelling its save picker
+ok 50 - an expired native export can be regenerated in the same dialog after cancelling its save picker
+  ---
+  duration_ms: 52.627666
+  ...
+# Subtest: native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+ok 51 - native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+  ---
+  duration_ms: 34.97203
+  ...
+# Subtest: cancelling media import during structured insertion keeps the draft and uploaded assets
+ok 52 - cancelling media import during structured insertion keeps the draft and uploaded assets
+  ---
+  duration_ms: 26.59617
+  ...
+# Subtest: late media preparation cannot overwrite a draft whose content changed
+ok 53 - late media preparation cannot overwrite a draft whose content changed
+  ---
+  duration_ms: 32.585236
+  ...
+# Subtest: existing media still inserts into an unchanged structured draft and releases the editor
+ok 54 - existing media still inserts into an unchanged structured draft and releases the editor
+  ---
+  duration_ms: 42.972779
+  ...
+# Subtest: template preview and save retain original BOM and line endings when only its label changes
+ok 55 - template preview and save retain original BOM and line endings when only its label changes
+  ---
+  duration_ms: 78.581598
+  ...
+# Subtest: returning from saved project settings keeps editing locked until the new index applies
+ok 56 - returning from saved project settings keeps editing locked until the new index applies
+  ---
+  duration_ms: 28.500804
+  ...
+# Subtest: discarding edits after a template save cannot leave a closed dialog marked dirty
+ok 57 - discarding edits after a template save cannot leave a closed dialog marked dirty
+  ---
+  duration_ms: 45.900102
+  ...
+# Subtest: a failed project index application keeps the settings available for retry without another save
+ok 58 - a failed project index application keeps the settings available for retry without another save
+  ---
+  duration_ms: 44.440108
+  ...
+# Subtest: source drafting restores browser-normalized newlines and preserves untouched mixed-ending lines
+ok 59 - source drafting restores browser-normalized newlines and preserves untouched mixed-ending lines
+  ---
+  duration_ms: 2.276037
+  ...
+# Subtest: block mode round trips source exactly, including whitespace, fences and table alignment
+ok 60 - block mode round trips source exactly, including whitespace, fences and table alignment
+  ---
+  duration_ms: 1.737422
+  ...
+# Subtest: editing a block changes only that source span and preserves original line endings
+ok 61 - editing a block changes only that source span and preserves original line endings
+  ---
+  duration_ms: 0.340124
+  ...
+# Subtest: tilde and nested backtick fences keep blank lines inside one editable block
+ok 62 - tilde and nested backtick fences keep blank lines inside one editable block
+  ---
+  duration_ms: 0.303657
+  ...
+# Subtest: new document validation refuses paths that cannot be indexed or migrated before submitting
+ok 63 - new document validation refuses paths that cannot be indexed or migrated before submitting
+  ---
+  duration_ms: 218.646006
+  ...
+# Subtest: suggested filenames sanitize arbitrary type labels and fit filesystem filename limits
+ok 64 - suggested filenames sanitize arbitrary type labels and fit filesystem filename limits
+  ---
+  duration_ms: 93.522438
+  ...
+# Subtest: the initial creation hint cannot hide a failed template load
+ok 65 - the initial creation hint cannot hide a failed template load
+  ---
+  duration_ms: 58.088717
+  ...
+# Subtest: a failed index reload after saving is reported as a rebuild failure while the saved editor survives
+ok 66 - a failed index reload after saving is reported as a rebuild failure while the saved editor survives
+  ---
+  duration_ms: 83.887629
+  ...
+# Subtest: an invalid replacement index preserves the current document list and project types
+ok 67 - an invalid replacement index preserves the current document list and project types
+  ---
+  duration_ms: 30.692384
+  ...
+# Subtest: source/block switches retain new edits and do not duplicate display-only headings
+ok 68 - source/block switches retain new edits and do not duplicate display-only headings
+  ---
+  duration_ms: 25.977104
+  ...
+# Subtest: an unchanged source stays clean across modes and index refresh preserves a dirty editor
+ok 69 - an unchanged source stays clean across modes and index refresh preserves a dirty editor
+  ---
+  duration_ms: 39.519646
+  ...
+# Subtest: late source responses cannot reopen a cancelled session; empty sources stay empty
+ok 70 - late source responses cannot reopen a cancelled session; empty sources stay empty
+  ---
+  duration_ms: 24.251666
+  ...
+# Subtest: saving serializes shortcut requests and locks editing until rebuilding finishes
+ok 71 - saving serializes shortcut requests and locks editing until rebuilding finishes
+  ---
+  duration_ms: 34.408829
+  ...
+# Subtest: a changed creation path is an unsaved draft and cancel restores the current document path
+ok 72 - a changed creation path is an unsaved draft and cancel restores the current document path
+  ---
+  duration_ms: 35.417521
+  ...
+# Subtest: suggested creation paths reuse same-type directories and never treat a filename as a folder
+ok 73 - suggested creation paths reuse same-type directories and never treat a filename as a folder
+  ---
+  duration_ms: 20.557932
+  ...
+# Subtest: an older template response cannot replace a newer type or reopen a cancelled creation
+ok 74 - an older template response cannot replace a newer type or reopen a cancelled creation
+  ---
+  duration_ms: 18.025868
+  ...
+# Subtest: conflict reload uses the newly read version, even if the server changed again after the conflict
+ok 75 - conflict reload uses the newly read version, even if the server changed again after the conflict
+  ---
+  duration_ms: 25.687284
+  ...
+# Subtest: switching from the editor to browse makes the document content visible again
+ok 76 - switching from the editor to browse makes the document content visible again
+  ---
+  duration_ms: 31.057495
+  ...
+# Subtest: a successful creation stays editable as an existing file if rebuilding fails
+ok 77 - a successful creation stays editable as an existing file if rebuilding fails
+  ---
+  duration_ms: 39.975467
+  ...
+# Subtest: browser textarea normalization preserves source line endings through switches, edits and saves
+ok 78 - browser textarea normalization preserves source line endings through switches, edits and saves
+  ---
+  duration_ms: 36.903814
+  ...
+# Subtest: first index refresh maps a created source to its catalog ID without closing its editor
+ok 79 - first index refresh maps a created source to its catalog ID without closing its editor
+  ---
+  duration_ms: 49.306087
+  ...
+# Subtest: discard cancellation protects dirty drafts on document, mode and editor exit
+ok 80 - discard cancellation protects dirty drafts on document, mode and editor exit
+  ---
+  duration_ms: 22.139342
+  ...
+# Subtest: document exports include owned stories, exact sources and referenced external media in both formats
+ok 81 - document exports include owned stories, exact sources and referenced external media in both formats
+  ---
+  duration_ms: 781.299968
+  ...
+# Subtest: JSON and YAML typed fields export using the generic layout and media bindings
+ok 82 - JSON and YAML typed fields export using the generic layout and media bindings
+  ---
+  duration_ms: 150.749743
+  ...
+# Subtest: explicit audio bindings export a player even when the source does not embed the audio
+ok 83 - explicit audio bindings export a player even when the source does not embed the audio
+  ---
+  duration_ms: 304.312066
+  ...
+# Subtest: sharing preserves distinct percent and space filenames, registered identities and renamed aliases
+ok 84 - sharing preserves distinct percent and space filenames, registered identities and renamed aliases
+  ---
+  duration_ms: 645.376576
+  ...
+# Subtest: owned stories retain nested heading levels in HTML and Markdown shares
+ok 85 - owned stories retain nested heading levels in HTML and Markdown shares
+  ---
+  duration_ms: 320.551659
+  ...
+# Subtest: v2 complete project packages preserve migration contract, metadata and all external media
+ok 86 - v2 complete project packages preserve migration contract, metadata and all external media
+  ---
+  duration_ms: 610.54847
+  ...
+# Subtest: v3 complete project packages preserve migration contract, metadata and all external media
+ok 87 - v3 complete project packages preserve migration contract, metadata and all external media
+  ---
+  duration_ms: 442.727637
+  ...
+# Subtest: missing assets, traversal, symlinks and changed source snapshots cannot produce a successful export
+ok 88 - missing assets, traversal, symlinks and changed source snapshots cannot produce a successful export
+  ---
+  duration_ms: 666.091792
+  ...
+# Subtest: complete exports reject directory aliases and file-directory conflicts without changing project bytes
+ok 89 - complete exports reject directory aliases and file-directory conflicts without changing project bytes
+  ---
+  duration_ms: 747.795134
+  ...
+# Subtest: editor and native v2/v3 archives round-trip with exact sources, metadata and external media
+ok 90 - editor and native v2/v3 archives round-trip with exact sources, metadata and external media
+  ---
+  duration_ms: 617.976121
+  ...
+# Subtest: HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup
+ok 91 - HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup
+  ---
+  duration_ms: 1054.201481
+  ...
+# Subtest: consecutive browser exports recycle completed downloads instead of exhausting the three-job limit
+ok 92 - consecutive browser exports recycle completed downloads instead of exhausting the three-job limit
+  ---
+  duration_ms: 424.246764
+  ...
+# Subtest: releasing or expiring an export cannot remove a file being downloaded
+ok 93 - releasing or expiring an export cannot remove a file being downloaded
+  ---
+  duration_ms: 164.054021
+  ...
+# Subtest: export range requests keep their real status in diagnostics and remain retryable
+ok 94 - export range requests keep their real status in diagnostics and remain retryable
+  ---
+  duration_ms: 348.893646
+  ...
+# Subtest: pending and interrupted exports remain protected from automatic quota eviction
+ok 95 - pending and interrupted exports remain protected from automatic quota eviction
+  ---
+  duration_ms: 119.878464
+  ...
+# Subtest: export entry blocks unsaved and new drafts without changing editor state
+ok 96 - export entry blocks unsaved and new drafts without changing editor state
+  ---
+  duration_ms: 1.830896
+  ...
+# Subtest: expired and interrupted jobs release temporary disk space while retaining source files
+ok 97 - expired and interrupted jobs release temporary disk space while retaining source files
+  ---
+  duration_ms: 176.426642
+  ...
+# Subtest: creation rejects portable path collisions without poisoning the registry: documents/hero.md
+ok 98 - creation rejects portable path collisions without poisoning the registry: documents/hero.md
+  ---
+  duration_ms: 963.722841
+  ...
+# Subtest: creation rejects portable path collisions without poisoning the registry: documents/Café.md
+ok 99 - creation rejects portable path collisions without poisoning the registry: documents/Café.md
+  ---
+  duration_ms: 923.121161
+  ...
+# Subtest: creation rejects portable path collisions without poisoning the registry: documents/characters/two.md
+ok 100 - creation rejects portable path collisions without poisoning the registry: documents/characters/two.md
+  ---
+  duration_ms: 767.260659
+  ...
+# Subtest: unregistered files and concurrent creates also reserve their portable source locations
+ok 101 - unregistered files and concurrent creates also reserve their portable source locations
+  ---
+  duration_ms: 762.2423
+  ...
+# Subtest: a missing registered source cannot silently donate its identity and type to a new document
+ok 102 - a missing registered source cannot silently donate its identity and type to a new document
+  ---
+  duration_ms: 725.578031
+  ...
+# Subtest: creation rejects unindexable and nonportable paths before creating metadata or source files
+ok 103 - creation rejects unindexable and nonportable paths before creating metadata or source files
+  ---
+  duration_ms: 1197.385591
+  ...
+# Subtest: queued creation validates the current project definition after an earlier configuration change
+ok 104 - queued creation validates the current project definition after an earlier configuration change
+  ---
+  duration_ms: 91.884819
+  ...
+# Subtest: a failed source publication removes only its new descriptor and permits a clean retry
+ok 105 - a failed source publication removes only its new descriptor and permits a clean retry
+  ---
+  duration_ms: 123.695775
+  ...
+# Subtest: generic registration preserves version, project-owned types and templates without legacy directories
+ok 106 - generic registration preserves version, project-owned types and templates without legacy directories
+  ---
+  duration_ms: 449.658421
+  ...
+# Subtest: custom type survives a user-selected file location, partial rebuild, save and reload
+ok 107 - custom type survives a user-selected file location, partial rebuild, save and reload
+  ---
+  duration_ms: 1389.682034
+  ...
+# Subtest: invalid types and simultaneous creates never leave orphaned metadata or overwrite a source
+ok 108 - invalid types and simultaneous creates never leave orphaned metadata or overwrite a source
+  ---
+  duration_ms: 264.969916
+  ...
+# Subtest: generic documents, project templates and media IDs survive a different workspace root
+ok 109 - generic documents, project templates and media IDs survive a different workspace root
+  ---
+  duration_ms: 1138.577157
+  ...
+# Subtest: generic editor offers only project types, uses local templates and accepts the new document root
+ok 110 - generic editor offers only project types, uses local templates and accepts the new document root
+  ---
+  duration_ms: 10.112398
+  ...
+# Subtest: new manifest layout and template paths are validated while legacy projects keep their original layout
+ok 111 - new manifest layout and template paths are validated while legacy projects keep their original layout
+  ---
+  duration_ms: 108.794742
+  ...
+# Subtest: an empty project exposes creation in edit mode and recovers after cancelling its first draft
+ok 112 - an empty project exposes creation in edit mode and recovers after cancelling its first draft
+  ---
+  duration_ms: 19.943921
+  ...
+# Subtest: project category tabs, counts and searches follow custom types without old game categories
+ok 113 - project category tabs, counts and searches follow custom types without old game categories
+  ---
+  duration_ms: 14.984829
+  ...
+# Subtest: language changes update retained UI references while preserving authored labels and interpolation values
+ok 114 - language changes update retained UI references while preserving authored labels and interpolation values
+  ---
+  duration_ms: 6.06625
+  ...
+# Subtest: English catalogue preserves all message parameters
+ok 115 - English catalogue preserves all message parameters
+  ---
+  duration_ms: 4.605634
+  ...
+# Subtest: desktop language preferences require the local session and stay outside the project
+ok 116 - desktop language preferences require the local session and stay outside the project
+  ---
+  duration_ms: 1214.330618
+  ...
+# Subtest: inline images and videos parse at the start, in prose and fields, but never inside code
+ok 117 - inline images and videos parse at the start, in prose and fields, but never inside code
+  ---
+  duration_ms: 14.58182
+  ...
+# Subtest: media URLs reject executable, remote and escaping sources while preserving local encoded names
+ok 118 - media URLs reject executable, remote and escaping sources while preserving local encoded names
+  ---
+  duration_ms: 1.214556
+  ...
+# Subtest: stable media URL forms normalize UUID casing to the registered identity
+ok 119 - stable media URL forms normalize UUID casing to the registered identity
+  ---
+  duration_ms: 0.276295
+  ...
+# Subtest: audio references render in prose, custom fields and structured media without autoplay or source loss
+ok 120 - audio references render in prose, custom fields and structured media without autoplay or source loss
+  ---
+  duration_ms: 15.007294
+  ...
+# Subtest: JSON and YAML insertion preserves existing source bytes, comments and structured values
+ok 121 - JSON and YAML insertion preserves existing source bytes, comments and structured values
+  ---
+  duration_ms: 35.085061
+  ...
+# Subtest: media insertion keeps indented YAML maps valid, including BOM, comments and existing lists
+ok 122 - media insertion keeps indented YAML maps valid, including BOM, comments and existing lists
+  ---
+  duration_ms: 60.233258
+  ...
+# Subtest: preview tolerates cyclic YAML aliases and interrupted imports leave no partial files
+ok 123 - preview tolerates cyclic YAML aliases and interrupted imports leave no partial files
+  ---
+  duration_ms: 425.869207
+  ...
+# Subtest: concurrent imports reuse identical bytes, keep names independent of paths and clean rejected uploads
+ok 124 - concurrent imports reuse identical bytes, keep names independent of paths and clean rejected uploads
+  ---
+  duration_ms: 428.422619
+  ...
+# Subtest: audio imports share registry formats, reuse existing audio and reject mislabeled or oversized files
+ok 125 - audio imports share registry formats, reuse existing audio and reject mislabeled or oversized files
+  ---
+  duration_ms: 487.171777
+  ...
+# Subtest: imports respect an external asset store and reject linked destination directories
+ok 126 - imports respect an external asset store and reject linked destination directories
+  ---
+  duration_ms: 379.232861
+  ...
+# Subtest: image: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+ok 127 - image: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+  ---
+  duration_ms: 2795.827812
+  ...
+# Subtest: audio: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+ok 128 - audio: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+  ---
+  duration_ms: 1691.191997
+  ...
+# Subtest: media import locks editing navigation without discarding the source draft
+ok 129 - media import locks editing navigation without discarding the source draft
+  ---
+  duration_ms: 24.355494
+  ...
+# Subtest: draft preview requests cannot consume the allowance for document reads and writes
+ok 130 - draft preview requests cannot consume the allowance for document reads and writes
+  ---
+  duration_ms: 297.526858
+  ...
+# Subtest: JSON and empty source documents survive standardization, indexing and editor API reads
+ok 131 - JSON and empty source documents survive standardization, indexing and editor API reads
+  ---
+  duration_ms: 2808.778199
+  ...
+# Subtest: merged backstory source strings normalize to path objects without character-index properties
+ok 132 - merged backstory source strings normalize to path objects without character-index properties
+  ---
+  duration_ms: 1.718166
+  ...
+# Subtest: same-stem sources keep separate caches and identities (legacy)
+ok 133 - same-stem sources keep separate caches and identities (legacy)
+  ---
+  duration_ms: 1760.970703
+  ...
+# Subtest: same-stem sources keep separate caches and identities (generic v3)
+ok 134 - same-stem sources keep separate caches and identities (generic v3)
+  ---
+  duration_ms: 1261.978107
+  ...
+# Subtest: partial rebuild respects dotted folders and migrates only matching legacy cache entries
+ok 135 - partial rebuild respects dotted folders and migrates only matching legacy cache entries
+  ---
+  duration_ms: 229.016959
+  ...
+# Subtest: legacy display-path disambiguation preserves document IDs and part-of navigation
+ok 136 - legacy display-path disambiguation preserves document IDs and part-of navigation
+  ---
+  duration_ms: 418.120705
+  ...
+# Subtest: metadata sorting supports buildings, first-line fields, BOM and original line endings, and is idempotent
+ok 137 - metadata sorting supports buildings, first-line fields, BOM and original line endings, and is idempotent
+  ---
+  duration_ms: 581.286531
+  ...
+# Subtest: metadata sorting leaves JSON/YAML, fenced examples and separate heading sections intact
+ok 138 - metadata sorting leaves JSON/YAML, fenced examples and separate heading sections intact
+  ---
+  duration_ms: 169.691049
+  ...
+# Subtest: invalid metadata sort options fail without expanding the write scope
+ok 139 - invalid metadata sort options fail without expanding the write scope
+  ---
+  duration_ms: 546.022294
+  ...
+# Subtest: Markdown titles, skipped heading levels and repeated headings retain a consistent outline
+ok 140 - Markdown titles, skipped heading levels and repeated headings retain a consistent outline
+  ---
+  duration_ms: 5.370892
+  ...
+# Subtest: fenced code stays verbatim and cannot create metadata, tables or outline headings
+ok 141 - fenced code stays verbatim and cannot create metadata, tables or outline headings
+  ---
+  duration_ms: 2.279775
+  ...
+# Subtest: tables preserve escaped pipes, empty columns and alignment without repeating their header
+ok 142 - tables preserve escaped pipes, empty columns and alignment without repeating their header
+  ---
+  duration_ms: 0.867999
+  ...
+# Subtest: inline and multiline hero skills retain their description without swallowing hero metadata
+ok 143 - inline and multiline hero skills retain their description without swallowing hero metadata
+  ---
+  duration_ms: 5.500184
+  ...
+# Subtest: story dialogue and repeated paragraphs remain body content in their original order
+ok 144 - story dialogue and repeated paragraphs remain body content in their original order
+  ---
+  duration_ms: 0.679167
+  ...
+# Subtest: CR-only sources and metadata labels that resemble object properties are preserved
+ok 145 - CR-only sources and metadata labels that resemble object properties are preserved
+  ---
+  duration_ms: 0.973747
+  ...
+# Subtest: YAML retains typed values, quotes, hash fragments, nested maps and block scalars consistently
+ok 146 - YAML retains typed values, quotes, hash fragments, nested maps and block scalars consistently
+  ---
+  duration_ms: 17.811598
+  ...
+# Subtest: JSON/YAML scalar and array documents keep values and accurate metadata counts
+ok 147 - JSON/YAML scalar and array documents keep values and accurate metadata counts
+  ---
+  duration_ms: 3.508617
+  ...
+# Subtest: invalid structured input is clearly marked and retains the entire raw text
+ok 148 - invalid structured input is clearly marked and retains the entire raw text
+  ---
+  duration_ms: 2.666416
+  ...
+# Subtest: type/template API applies live to creation, indexing and exports at an arbitrary document location
+ok 149 - type/template API applies live to creation, indexing and exports at an arbitrary document location
+  ---
+  duration_ms: 2681.703648
+  ...
+# Subtest: template edits preserve source and descriptors, reject stale saves, and prune only their own previous revision
+ok 150 - template edits preserve source and descriptors, reject stale saves, and prune only their own previous revision
+  ---
+  duration_ms: 437.774691
+  ...
+# Subtest: malformed templates and escaping configuration cannot publish changes
+ok 151 - malformed templates and escaping configuration cannot publish changes
+  ---
+  duration_ms: 224.15472
+  ...
+# Subtest: project rules replace historical notation and path guesses in the same parser
+ok 152 - project rules replace historical notation and path guesses in the same parser
+  ---
+  duration_ms: 1.310596
+  ...
+# Subtest: official example is an independent definition; adoption preserves IDs, sources, ownership and original templates
+ok 153 - official example is an independent definition; adoption preserves IDs, sources, ownership and original templates
+  ---
+  duration_ms: 751.173644
+  ...
+# Subtest: JSON and template timeouts remain active while response bodies are loading
+ok 154 - JSON and template timeouts remain active while response bodies are loading
+  ---
+  duration_ms: 339.482759
+  ...
+# Subtest: timeouts before response headers preserve the useful error instead of mutating a DOMException
+ok 155 - timeouts before response headers preserve the useful error instead of mutating a DOMException
+  ---
+  duration_ms: 154.312461
+  ...
+# Subtest: a caller can cancel a request after its headers without losing the cancellation reason
+ok 156 - a caller can cancel a request after its headers without losing the cancellation reason
+  ---
+  duration_ms: 160.129506
+  ...
+# Subtest: media insertion propagates cancellation through the API client while a response body is pending
+ok 157 - media insertion propagates cancellation through the API client while a response body is pending
+  ---
+  duration_ms: 190.825326
+  ...
+1..4
+# Subtest: /home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/request-lifecycle.test.mjs
+not ok 21 - /home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/request-lifecycle.test.mjs
+  ---
+  duration_ms: 183707.474466
+  location: '/home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/request-lifecycle.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  signal: 'SIGTERM'
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: a late initial language read cannot overwrite a newer desktop notification or touch the draft
+ok 159 - a late initial language read cannot overwrite a newer desktop notification or touch the draft
+  ---
+  duration_ms: 58.318936
+  ...
+# Subtest: the library subscribes before its initial language read and retains newer editor changes
+ok 160 - the library subscribes before its initial language read and retains newer editor changes
+  ---
+  duration_ms: 18.592264
+  ...
+# Subtest: a late save acknowledgement cannot undo a newer language from another desktop window
+ok 161 - a late save acknowledgement cannot undo a newer language from another desktop window
+  ---
+  duration_ms: 100.017055
+  ...
+# Subtest: language changes also translate settings progress and saved status while preserving the pending guard
+ok 162 - language changes also translate settings progress and saved status while preserving the pending guard
+  ---
+  duration_ms: 100.875838
+  ...
+# Subtest: a timed out language request is aborted and a late reply cannot finish its retry
+ok 163 - a timed out language request is aborted and a late reply cannot finish its retry
+  ---
+  duration_ms: 43.531832
+  ...
+# Subtest: a settings timeout actually closes an unfinished HTTP request
+ok 164 - a settings timeout actually closes an unfinished HTTP request
+  ---
+  duration_ms: 181.092604
+  ...
+# Subtest: native preference write failures leave the language unchanged and permit a successful retry
+ok 165 - native preference write failures leave the language unchanged and permit a successful retry
+  ---
+  duration_ms: 74.3662
+  ...
+# Subtest: a failed initial read stays localized and clears after saving; invalid values are not a successful default
+ok 166 - a failed initial read stays localized and clears after saving; invalid values are not a successful default
+  ---
+  duration_ms: 102.474942
+  ...
+# Subtest: browser language follows current local storage, ignores session storage, and handles cleared settings
+ok 167 - browser language follows current local storage, ignores session storage, and handles cleared settings
+  ---
+  duration_ms: 110.72719
+  ...
+# Subtest: item cards split source attribute lines into named values without changing the source fields
+ok 168 - item cards split source attribute lines into named values without changing the source fields
+  ---
+  duration_ms: 61.661212
+  ...
+# Subtest: item attribute aliases preserve reductions, formulas, qualifiers and unstructured notes
+ok 169 - item attribute aliases preserve reductions, formulas, qualifiers and unstructured notes
+  ---
+  duration_ms: 5.93195
+  ...
+# Subtest: item attributes support structured fields and complementary alias blocks without losing zero
+ok 170 - item attributes support structured fields and complementary alias blocks without losing zero
+  ---
+  duration_ms: 5.982263
+  ...
+# Subtest: table display keeps empty and placeholder cells in their original columns
+ok 171 - table display keeps empty and placeholder cells in their original columns
+  ---
+  duration_ms: 0.999676
+  ...
+# Subtest: document and image path conversion preserves full-width filename characters and local images resolve
+ok 172 - document and image path conversion preserves full-width filename characters and local images resolve
+  ---
+  duration_ms: 7.445052
+  ...
+# Subtest: image URLs treat registered filenames as literal paths, including hashes and percent signs
+ok 173 - image URLs treat registered filenames as literal paths, including hashes and percent signs
+  ---
+  duration_ms: 0.532584
+  ...
+# Subtest: metadata conversion preserves zero, false and nested object arrays and finds nonempty aliases
+ok 174 - metadata conversion preserves zero, false and nested object arrays and finds nonempty aliases
+  ---
+  duration_ms: 0.587175
+  ...
+# Subtest: prose punctuation, repeated paragraphs, list entries and headings survive rendering in order
+ok 175 - prose punctuation, repeated paragraphs, list entries and headings survive rendering in order
+  ---
+  duration_ms: 3.784142
+  ...
+# Subtest: story previews include dialogue and rules retain tables outside metadata cards
+ok 176 - story previews include dialogue and rules retain tables outside metadata cards
+  ---
+  duration_ms: 1.653005
+  ...
+# Subtest: the editor uses the complete JSON source path and preserves empty source and real fallback newlines
+ok 177 - the editor uses the complete JSON source path and preserves empty source and real fallback newlines
+  ---
+  duration_ms: 47.672899
+  ...
+# Subtest: runtime content rendering suppresses only fields that were actually displayed in cards
+ok 178 - runtime content rendering suppresses only fields that were actually displayed in cards
+  ---
+  duration_ms: 10.724081
+  ...
+# Subtest: templates accept arbitrary OC fields, ignore sidecars and reject malformed structured input
+ok 179 - templates accept arbitrary OC fields, ignore sidecars and reject malformed structured input
+  ---
+  duration_ms: 1615.799111
+  ...
+# Subtest: release numbers retain their letter and map optional patches to installer versions
+ok 180 - release numbers retain their letter and map optional patches to installer versions
+  ---
+  duration_ms: 9.714517
+  ...
+# Subtest: release numbers reject ambiguous, missing and extra components
+ok 181 - release numbers reject ambiguous, missing and extra components
+  ---
+  duration_ms: 4.154974
+  ...
+# Subtest: registration preserves raw bytes and stable IDs; indexing never accepts changed content as the original
+ok 182 - registration preserves raw bytes and stable IDs; indexing never accepts changed content as the original
+  ---
+  duration_ms: 285.914188
+  ...
+# Subtest: separate application/workspace roots support editing, external media, offline metadata and legacy/ID URLs
+ok 183 - separate application/workspace roots support editing, external media, offline metadata and legacy/ID URLs
+  ---
+  duration_ms: 2747.699043
+  ...
+# Subtest: reference indexes include image, video and audio paths in every source format, including renamed aliases
+ok 184 - reference indexes include image, video and audio paths in every source format, including renamed aliases
+  ---
+  duration_ms: 719.437599
+  ...
+# Subtest: reference indexes exclude fenced code examples while retaining bare IDs and explicit attachments
+ok 185 - reference indexes exclude fenced code examples while retaining bare IDs and explicit attachments
+  ---
+  duration_ms: 463.575818
+  ...
+# Subtest: v1 registration retains workspace identity and the old manifest; unsupported versions do not mutate sources
+ok 186 - v1 registration retains workspace identity and the old manifest; unsupported versions do not mutate sources
+  ---
+  duration_ms: 21.825183
+  ...
+# Subtest: ambiguous registry identities and unsafe paths fail before replacing existing metadata
+ok 187 - ambiguous registry identities and unsafe paths fail before replacing existing metadata
+  ---
+  duration_ms: 17.145542
+  ...
+# Subtest: registration refuses symlinked metadata directories without writing outside the workspace
+ok 188 - registration refuses symlinked metadata directories without writing outside the workspace
+  ---
+  duration_ms: 1.793406
+  ...
+# Subtest: read-only preview serves a separate workspace and refuses write requests
+ok 189 - read-only preview serves a separate workspace and refuses write requests
+  ---
+  duration_ms: 621.677409
+  ...
+# Subtest: registration keeps a live lock and recovers a lock whose owner no longer exists
+ok 190 - registration keeps a live lock and recovers a lock whose owner no longer exists
+  ---
+  duration_ms: 14.395801
+  ...
+# Subtest: reusing a renamed asset alias cannot write a conflicting registry
+ok 191 - reusing a renamed asset alias cannot write a conflicting registry
+  ---
+  duration_ms: 18.799127
+  ...
+# Subtest: automatic workspace names and manifests stay compatible with the native importer
+ok 192 - automatic workspace names and manifests stay compatible with the native importer
+  ---
+  duration_ms: 11.280839
+  ...
+# Subtest: image references support any asset folder and encoded filenames
+ok 193 - image references support any asset folder and encoded filenames
+  ---
+  duration_ms: 439.487906
+  ...
+# Subtest: custom standardization output cannot prune application files or an external asset store
+ok 194 - custom standardization output cannot prune application files or an external asset store
+  ---
+  duration_ms: 572.294419
+  ...
+1..194
+# tests 194
+# suites 0
+# pass 193
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 184523.890608

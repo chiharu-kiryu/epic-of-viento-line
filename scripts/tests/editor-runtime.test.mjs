@@ -2,6 +2,85 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { deferred, editorHarness } from './editor-harness.mjs';
 
+test('new document validation refuses paths that cannot be indexed or migrated before submitting', async () => {
+  const writes = [];
+  const { runtime, source, state, element } = await editorHarness({ writeDoc: async (payload) => { writes.push(payload); return { version: '2' }; } });
+  runtime.rebuildIndexForDoc = async () => {};
+  await runtime.enterCreateMode();
+  source.value = '草稿始终保留';
+  for (const relative of ['wrong.bin', '.hidden.md', '.private/one.md', 'node_modules/one.md', 'CON.md', 'folder./one.md', 'bad\u0001.md']) {
+    element('docCreatePathInput').value = `design-data/${relative}`;
+    runtime.updateCreatePathValidation();
+    assert.equal(element('docSaveBtn').disabled, true, relative);
+    await runtime.saveCurrentDoc();
+    assert.equal(writes.length, 0, relative);
+    assert.equal(state.isCreating, true);
+    assert.equal(source.value, '草稿始终保留');
+  }
+  element('docCreatePathInput').value = 'design-data/正确名字';
+  await runtime.saveCurrentDoc();
+  assert.equal(writes.length, 1);
+  assert.equal(writes[0].pathValue, 'design-data/正确名字.txt');
+});
+
+test('suggested filenames sanitize arbitrary type labels and fit filesystem filename limits', async () => {
+  const { runtime, state } = await editorHarness();
+  for (const label of ['角色 / NPC：主角?', '设定'.repeat(60), '🤔'.repeat(60)]) {
+    state.workspace = { version: 3, projectTypes: true, paths: { documents: 'documents' },
+      documentTypes: [{ id: 'custom', label, directory: 'custom', parserProfile: 'structured', template: 'custom.md' }],
+    };
+    const suggested = runtime.getSuggestedCreatePath('', 'custom');
+    assert.equal(suggested.split('/').length, 3, suggested);
+    assert.equal(runtime.isInvalidCreatePath(suggested), '', suggested);
+    assert.ok(Buffer.byteLength(suggested.split('/').at(-1)) <= 255);
+    assert.equal(state.workspace.documentTypes[0].label, label);
+  }
+});
+
+test('the initial creation hint cannot hide a failed template load', async () => {
+  const { runtime, source, state, element } = await editorHarness({ loadTemplateContent: async () => { throw new Error('模板读取连接中断'); } });
+  runtime.logRuntimeErrorOrMessage = (_label, error) => error.message;
+  await runtime.enterCreateMode();
+  assert.equal(state.isCreating, true);
+  assert.equal(state.isLoadingTemplate, false);
+  assert.equal(source.value, '');
+  assert.match(element('docEditStatus').textContent, /模板加载失败.*模板读取连接中断/);
+  runtime.loadTemplateContent = async () => '重新读取的模板';
+  await runtime.setCreateTypeState(state.activeCreateType);
+  assert.equal(source.value, '重新读取的模板');
+  assert.doesNotMatch(element('docEditStatus').textContent, /模板加载失败/);
+});
+
+test('a failed index reload after saving is reported as a rebuild failure while the saved editor survives', async () => {
+  const { runtime, state, source, doc, element, begin } = await editorHarness({
+    rebuildDocIndex: async () => ({}), loadDocIndexPayload: async () => { throw new Error('索引读取连接中断'); },
+  });
+  for (const name of ['setLoadingState', 'setListSkeletonState', 'hideLoadRetry', 'showLoadRetry']) runtime[name] = () => {};
+  runtime.logRuntimeErrorOrMessage = (_label, error) => error.message;
+  begin('原文', '1'); source.value = '已保存的内容';
+  await runtime.saveCurrentDoc();
+  assert.equal(state.isEditing, true);
+  assert.equal(state.isSaving, false);
+  assert.equal(state.isRebuilding, false);
+  assert.equal(state.editHasUnsavedChanges, false);
+  assert.equal(source.value, '已保存的内容');
+  assert.equal(state.activeEditSourceVersion, '2');
+  assert.equal(state.docs[0], doc);
+  assert.match(element('docEditStatus').textContent, /失败.*索引读取连接中断/);
+});
+
+test('an invalid replacement index preserves the current document list and project types', async () => {
+  const { runtime, state, doc, begin } = await editorHarness({ loadDocIndexPayload: async () => ({ payload: { workspace: { name: '不能应用' }, docs: {} } }) });
+  for (const name of ['setLoadingState', 'setListSkeletonState', 'hideLoadRetry', 'showLoadRetry', 'logRuntimeErrorOrMessage']) runtime[name] = () => {};
+  state.workspace = { name: '原项目' };
+  const workspace = state.workspace, documents = state.docs;
+  begin('未保存的正文');
+  await runtime.loadData();
+  assert.equal(state.docs, documents);
+  assert.equal(state.docs[0], doc);
+  assert.equal(state.workspace, workspace);
+});
+
 test('source/block switches retain new edits and do not duplicate display-only headings', async () => {
   const { runtime, state, source, begin, element } = await editorHarness();
   begin('# 标题\n\n原文\n');

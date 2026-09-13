@@ -7,7 +7,7 @@ import {
   parseSourceContent,
 } from './doc-factory.mjs';
 import { collectSourcePaths } from './sources.mjs';
-import { normalizeFilterPath } from '../lib/path-filter.mjs';
+import { normalizeFilterPath, inSourceScopes } from '../lib/path-filter.mjs';
 import { resolveDocumentDefinition } from '../lib/project-layout.mjs';
 import { IS_MANAGED_WORKSPACE, DOCUMENTS_PATH, WORKSPACE_MANIFEST } from '../lib/paths.mjs';
 import { readRegistry } from '../lib/workspace.mjs';
@@ -68,12 +68,24 @@ async function cleanupStandardStaleFiles(sourcePaths, options = {}) {
   const outputRoot = options.outputRoot || STANDARD_ROOT;
   const { scope = [] } = options;
   const normalizedScope = scope.map(normalizeFilterPath);
-  const existing = await collectSourcePaths(outputRoot, { sourceFilters: normalizedScope });
+  const existing = await collectSourcePaths(outputRoot);
   const validSet = new Set(sourcePaths.map((item) =>
     buildStandardOutputPath(item.source)
   ));
   for (const relStandard of existing) {
     if (!validSet.has(relStandard)) {
+      if (normalizedScope.length) {
+        // Cache names changed from stem.json to source.ext.json. Use the
+        // recorded source when pruning, so old caches migrate without touching
+        // another format or a document outside the requested scope.
+        let source = relStandard.replace(/\.json$/i, '');
+        try {
+          const cached = JSON.parse(await fs.readFile(path.join(outputRoot, relStandard), 'utf8'));
+          const recorded = typeof cached.source === 'string' ? cached.source : cached.source?.path;
+          if (typeof recorded === 'string' && recorded) source = recorded.replace(/^docs-standard\//, '');
+        } catch { /* A damaged cache can still be matched by its filename. */ }
+        if (!inSourceScopes(source, normalizedScope)) continue;
+      }
       await fs.rm(path.join(outputRoot, relStandard));
     }
   }
