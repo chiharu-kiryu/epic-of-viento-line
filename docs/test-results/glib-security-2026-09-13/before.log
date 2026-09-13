@@ -1,0 +1,15 @@
+    Finished `test` profile [unoptimized] target(s) in 1m 01s
+     Running tests/glib_variant_iter.rs (/tmp/viento-glib-security.0eavsj4u/target/debug/deps/glib_variant_iter-4ba02d3ef09ed1c0)
+
+running 5 tests
+
+thread 'forward_string_iteration_preserves_empty_and_unicode_values' (1587092) panicked at /home/chiharukiryu/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ffi/c_str.rs:264:54:
+unsafe precondition(s) violated: slice::from_raw_parts requires the pointer to be aligned and non-null, and the total size of the slice not to exceed `isize::MAX`
+
+This indicates a bug in the program. This Undefined Behavior check is optional, and cannot be relied on for safety.
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+thread caused non-unwinding panic. aborting.
+error: test failed, to rerun pass `--test glib_variant_iter`
+
+Caused by:
+  process didn't exit successfully: `/tmp/viento-glib-security.0eavsj4u/target/debug/deps/glib_variant_iter-4ba02d3ef09ed1c0` (signal: 6, SIGABRT: process abort signal)

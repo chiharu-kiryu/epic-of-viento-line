@@ -1,6 +1,6 @@
 # Viento Studio 功能链路网络
 
-此页枚举 **2026-09-13、b.2.9 发布源码**的实际功能入口、业务步骤、接口和数据落点，包含音频支持、类型取消/返回及[按图排查的十轮修复](NETWORK_BUGFIX_b.2.8.1.md)。此为修订 13，将版本更正为 b.2.9，并落实测试版的单数字进位规则、正式版转换及打包校验；JSON 记录相关源码、清单、锁文件和页面版本指纹。基线提交为 `51d522cb919c20b15815b129bd62e859af9a97a0`；逐文件 SHA-256 保存在 JSON 快照中。
+此页枚举 **2026-09-13、b.2.9 发布源码**的实际功能入口、业务步骤、接口和数据落点，包含音频支持、类型取消/返回及[按图排查的十一轮修复](NETWORK_BUGFIX_b.2.8.1.md)。此为修订 14，补齐 [glib 安全修复](SECURITY_GLIB_b.2.9.md) 的依赖覆盖与优化回归；JSON 记录源码、构建清单和第三方原包指纹。基线提交为 `51d522cb919c20b15815b129bd62e859af9a97a0`；逐文件 SHA-256 保存在 JSON 快照中。
 
 - [离线交互浏览器](function-network.html)：筛选业务链路，点击节点查看上下游，查询真实模块导入及接口。下载后双击即可使用，不访问外网。
 - [机器可读快照](function-network.json)：完整节点、边、源码引用、模块导入、事件绑定、路由、命令和扫描文件指纹。
@@ -13,7 +13,7 @@
 | 已枚举业务链路 | 50 |
 | 功能及数据节点 | 66 |
 | 业务步骤连接（去重） | 173 |
-| 扫描代码文件（JS / MJS / Rust / Python / Shell） | 141 |
+| 扫描代码文件（JS / MJS / Rust / Python / Shell） | 143 |
 | 其中 JavaScript 模块 | 123 |
 | 本地模块导入语句 | 355 |
 | 字面量事件名的显式事件绑定 | 95 |
@@ -24,7 +24,7 @@
 
 业务图的箭头表示请求、数据传递或处理步骤；同一节点可以再次出现，且分支可能在文字中展开。**它不是逐函数调用图**。JSON 的 `moduleImports` 才是代码中实际声明的本地导入；它也不能表示调用次数或性能。桌面归档示例 CLI 另有 4 个操作，不计入 7 个作品维护命令。
 
-网络从代码静态梳理，不是运行时追踪。随后按图排查并修复问题，此前启用原生归档互通的 app-only 检查通过 193 项测试，在此前 [编辑器](NATIVE_WORKFLOW_TEST_b.2.8.1.md) 与 [作品库](NATIVE_LIBRARY_TEST_b.2.8.1.md) 实测上补齐了 [编辑器导出、原生保存与过期重试](NATIVE_EXPORT_TEST_b.2.8.1.md)；每条链路附的“已有验证入口”仍不代表该链路所有运行状态均已覆盖。测试使用临时作品，没有修改日常作品。业务枚举按职责归并，并不声称覆盖所有运行时状态组合。
+网络从代码静态梳理，不是运行时追踪。随后按图排查并修复问题，本轮启用原生归档互通的 app-only 检查通过 195 项测试，在此前 [编辑器](NATIVE_WORKFLOW_TEST_b.2.8.1.md) 与 [作品库](NATIVE_LIBRARY_TEST_b.2.8.1.md) 实测上补齐了 [编辑器导出、原生保存与过期重试](NATIVE_EXPORT_TEST_b.2.8.1.md)；每条链路附的“已有验证入口”仍不代表该链路所有运行状态均已覆盖。测试使用临时作品，没有修改日常作品。业务枚举按职责归并，并不声称覆盖所有运行时状态组合。
 
 ## 2. 总体网络
 
@@ -799,7 +799,7 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 
 检查版本、JavaScript 语法、API 契约、临时测试；可另校验当前作品。 --app-only 不依赖日常作品；测试入口存在不等于本轮已重新执行全部测试。
 
-已有验证入口：[scripts/check-project.mjs](../scripts/check-project.mjs)、[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py)、[desktop/tests/project_settings_navigation.py](../desktop/tests/project_settings_navigation.py)。
+已有验证入口：[scripts/check-project.mjs](../scripts/check-project.mjs)、[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py)、[desktop/tests/project_settings_navigation.py](../desktop/tests/project_settings_navigation.py)、[src-tauri/tests/glib_variant_iter.rs](../src-tauri/tests/glib_variant_iter.rs)。
 
 <a id="f47"></a>
 
@@ -809,9 +809,9 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 
 [桌面与源码打包](#node-packaging) → [语言与设置](#node-language_ui) → [应用安装包](#node-app_bundle) → [应用源码归档](#node-source_archive)
 
-准备内置 Node 和运行资源，同步桌面语言字典，按发布版本生成平台包和可重建源码归档。 不携带具体作品数据；CI 手动构建 Linux/Windows/macOS 构件，不自动发布或安装。
+准备内置 Node 和运行资源，同步桌面语言字典，按发布版本生成平台包和可重建源码归档。 不携带具体作品数据；CI 手动构建 Linux/Windows/macOS 构件，不自动发布或安装。glib 使用本地修复副本，源码归档保留 vendor，Linux 测试启用优化。
 
-已有验证入口：[scripts/tests/version.test.mjs](../scripts/tests/version.test.mjs)、[scripts/tests/build-cleanup.test.mjs](../scripts/tests/build-cleanup.test.mjs)。
+已有验证入口：[scripts/tests/version.test.mjs](../scripts/tests/version.test.mjs)、[scripts/tests/build-cleanup.test.mjs](../scripts/tests/build-cleanup.test.mjs)、[src-tauri/tests/glib_variant_iter.rs](../src-tauri/tests/glib_variant_iter.rs)。
 
 <a id="f48"></a>
 
@@ -867,7 +867,7 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 
 | 节点 | 职责 | 代码依据 |
 | --- | --- | --- |
-| <a id="node-host"></a>Tauri 桌面宿主 `host` | 11 个首页命令；在文件选择和写入前检查活动编辑窗口，按请求 ID 管理关闭确认、操作互斥和引擎退出。 | [run](../src-tauri/src/lib.rs#L874)<br>[start_editor](../src-tauri/src/lib.rs#L670)<br>[request_close](../src-tauri/src/lib.rs#L605)<br>[CloseState](../src-tauri/src/close_state.rs#L4)<br>[stop_engine](../src-tauri/src/lib.rs#L460)<br>[require_closed_editor](../src-tauri/src/lib.rs#L74) |
+| <a id="node-host"></a>Tauri 桌面宿主 `host` | 11 个首页命令；在文件选择和写入前检查活动编辑窗口，按请求 ID 管理关闭确认、操作互斥和引擎退出。 | [run](../src-tauri/src/lib.rs#L874)<br>[start_editor](../src-tauri/src/lib.rs#L670)<br>[request_close](../src-tauri/src/lib.rs#L605)<br>[CloseState](../src-tauri/src/close_state.rs#L4)<br>[stop_engine](../src-tauri/src/lib.rs#L460)<br>[require_closed_editor](../src-tauri/src/lib.rs#L74)<br>[VariantStrIter::impl_get](../src-tauri/vendor/glib/src/variant_iter.rs#L118) |
 | <a id="node-native_workspace"></a>原生作品与归档 `native_workspace` | 创建兼容作品；Rust 流式备份与恢复，校验文件树、正文/素材登记及指纹，核对快照后发布。 | [create_workspace](../src-tauri/src/workspace.rs#L659)<br>[export_workspace](../src-tauri/src/workspace.rs#L786)<br>[import_workspace](../src-tauri/src/workspace.rs#L906)<br>[validate_archive_registry](../src-tauri/src/workspace.rs#L412)<br>[validate_file_tree](../src-tauri/src/workspace.rs#L168) |
 | <a id="node-native_export"></a>原生保存导出结果 `native_export` | 按任务 ID 在选择保存位置前持有实际归档文件，缓存过期不影响当前保存；复核后原子发布，取消或失败保留旧目标。 | [save_editor_export](../src-tauri/src/lib.rs#L395)<br>[save_prepared_export](../src-tauri/src/export.rs#L55)<br>[prepare_export](../src-tauri/src/export.rs#L18) |
 | <a id="node-native_language"></a>原生语言偏好 `native_language` | 读写本机语言配置，并同步作品库与编辑窗口。 | [src-tauri/src/preferences.rs](../src-tauri/src/preferences.rs#L1)<br>[update_language](../src-tauri/src/lib.rs#L120) |
@@ -916,8 +916,8 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 | <a id="node-cli"></a>浏览/编辑命令入口 `cli` | 解析 npm/脚本参数，预检契约，可选重建，然后选择浏览或编辑服务。 | [scripts/ops/site.mjs](../scripts/ops/site.mjs#L1)<br>[launchDocSite](../scripts/lib/site-launcher.mjs#L42)<br>[scripts/lib/site-options.mjs](../scripts/lib/site-options.mjs#L1) |
 | <a id="node-workspace_cli"></a>登记与迁移维护入口 `workspace_cli` | paths、register、verify、migrate-documents、check-project、apply-definition、bind-assets。 | [scripts/workspace.mjs](../scripts/workspace.mjs#L1) |
 | <a id="node-definition_tool"></a>官方示范定义与采用 `definition_tool` | 把轻量类型/规则示范应用到独立旧作品，保留 UUID、正文、附件与归属。 | [applyProjectDefinition](../scripts/lib/project-definition.mjs#L10)<br>[docs/examples/epic-of-viento-line.project.json](../docs/examples/epic-of-viento-line.project.json#L1) |
-| <a id="node-checks"></a>校验与回归入口 `checks` | 版本、语法、接口契约、数据格式/模板对齐、Node/Rust/桌面原生工作流。 | [scripts/check-project.mjs](../scripts/check-project.mjs#L1)<br>[scripts/validate-standard-docs.mjs](../scripts/validate-standard-docs.mjs#L1)<br>[scripts/validate-data-template-alignment.mjs](../scripts/validate-data-template-alignment.mjs#L1)<br>[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py#L1) |
-| <a id="node-packaging"></a>桌面与源码打包 `packaging` | 统一版本，准备 Node/资源/语言字典，构建平台包与独立源码归档；CI 手动触发。 | [desktop/version.mjs](../desktop/version.mjs#L1)<br>[desktop/prepare.mjs](../desktop/prepare.mjs#L1)<br>[desktop/build.mjs](../desktop/build.mjs#L1)<br>[desktop/package-source.py](../desktop/package-source.py#L1)<br>[.github/workflows/desktop.yml](../.github/workflows/desktop.yml#L1) |
+| <a id="node-checks"></a>校验与回归入口 `checks` | 版本、语法、接口契约、数据格式/模板对齐、Node/Rust/桌面原生工作流。 | [scripts/check-project.mjs](../scripts/check-project.mjs#L1)<br>[scripts/validate-standard-docs.mjs](../scripts/validate-standard-docs.mjs#L1)<br>[scripts/validate-data-template-alignment.mjs](../scripts/validate-data-template-alignment.mjs#L1)<br>[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py#L1)<br>[字符串迭代安全回归](../src-tauri/tests/glib_variant_iter.rs#L1) |
+| <a id="node-packaging"></a>桌面与源码打包 `packaging` | 统一版本，准备 Node/资源/语言字典，构建平台包与独立源码归档；统一使用 glib 修复副本并携带 vendor；CI 手动触发。 | [desktop/version.mjs](../desktop/version.mjs#L1)<br>[desktop/prepare.mjs](../desktop/prepare.mjs#L1)<br>[desktop/build.mjs](../desktop/build.mjs#L1)<br>[desktop/package-source.py](../desktop/package-source.py#L1)<br>[.github/workflows/desktop.yml](../.github/workflows/desktop.yml#L1)<br>[Cargo 依赖覆盖](../src-tauri/Cargo.toml#L36) |
 | <a id="node-cleanup"></a>构建目录清理 `cleanup` | 只清理已知构建目录，先检查与作品/素材位置是否重叠。 | [cleanBuilds](../desktop/clean.mjs#L12) |
 
 ### 数据
@@ -1104,7 +1104,7 @@ JSON 保留逐条本地 ESM 导入语句、命名导入和行号；同一对文�
 - 本次未找到面向用户的正文重命名/删除工作流、持久化自动草稿恢复或导入后未引用素材自动清理入口。
 - 音视频在正文中通过嵌入引用播放；仅增加元数据绑定不保证当前编辑器自动出现播放器。
 
-上述职责区别和兼容边界继续保留；已修复的具体缺陷按 N01–N45 记在[连续修复记录](NETWORK_BUGFIX_b.2.8.1.md)。
+上述职责区别和兼容边界继续保留；已修复的具体缺陷按 N01–N46 记在[连续修复记录](NETWORK_BUGFIX_b.2.8.1.md)。
 
 ## 10. 快照结构与后续更新
 
@@ -1112,6 +1112,6 @@ JSON 保留逐条本地 ESM 导入语句、命名导入和行号；同一对文�
 
 本次使用本机 Acorn 解析 ESM 声明、字面量动态导入、显式事件绑定及路由对象，再人工核对关键业务调用与文件读写。模块统计不包含 HTML/CSS 的资源链接、Rust 的 crate 内部依赖、计算出的动态导入或内联属性事件；Python、Rust 和 shell 记录源码指纹及人工确认的入口。已有测试声明可能来自参数化模板，不能用声明数量推断实际测试用例数。
 
-修订 13 更新 141 份源码指纹、134 处节点源码引用及导入记录，将发布编号更正为 b.2.9，并同步版本与源码归档规则；交互页内嵌数据与 JSON 保持一致。修订 11 已通过启用原生归档互通的 193 项应用回归和 22 项 Rust 测试，原有 1 项真实大体积作品测试忽略；版本规则与验证范围见 [发布记录](RELEASE_b.2.9.md)。升版前的 [编辑器导出实测](NATIVE_EXPORT_TEST_b.2.8.1.md) 补齐保存等待期间清理缓存、过期后生成、原生覆盖取消与替换，之前的编辑器和作品库记录继续保留，原生报告版本和指纹不改写。功能图仍是静态梳理；内置浏览器此前拒绝本地 HTML 导航，图页面的浏览器交互实测仍未完成。
+修订 14 记录 143 份源码指纹、137 处节点源码引用及导入记录，补齐 glib 修复文件和优化回归；第三方包的其余文件通过独立原包清单核验；交互页内嵌数据与 JSON 保持一致。本轮通过启用原生归档互通的 195 项应用回归和 28 项 Rust 测试，原有 1 项真实大体积作品测试忽略；版本规则与验证范围见 [发布记录](RELEASE_b.2.9.md)。升版前的 [编辑器导出实测](NATIVE_EXPORT_TEST_b.2.8.1.md) 补齐保存等待期间清理缓存、过期后生成、原生覆盖取消与替换，之前的编辑器和作品库记录继续保留，原生报告版本和指纹不改写。功能图仍是静态梳理；内置浏览器此前拒绝本地 HTML 导航，图页面的浏览器交互实测仍未完成。
 
 此文件组是版本快照，不会随应用自动更新。下次更新时：先按 `sourceInventory.sha256` 确认变更范围；重新检查路由表、原生命令注册及本地导入；沿受影响的业务链核对读写和失败分支；保留稳定节点 ID / F 编号，再同步 JSON、本文、HTML 和总图。增加日期或版本，并明确实际运行了哪些验证。交互页内嵌快照供离线打开，无需启动作品服务。

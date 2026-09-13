@@ -48,6 +48,7 @@ Linux 默认作品目录为 `~/.local/share/io.viento.studio/workspaces/`，本�
 
 - 当前功能链路网络：[完整枚举与总图](docs/FUNCTION_NETWORK.md) · [离线交互图](docs/function-network.html) · [JSON 快照](docs/function-network.json)（2026-09-13，b.2.9）
 - 按图排查与修复：[连续修复记录](docs/NETWORK_BUGFIX_b.2.8.1.md)
+- Linux 桌面依赖安全修复：[glib 上游补丁与验证](docs/SECURITY_GLIB_b.2.9.md)
 - 系统整体架构：[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 - 脚本职责说明：[`scripts/README.md`](scripts/README.md)
 

@@ -1,0 +1,55 @@
+{
+  "date": "2026-09-13T08:06:03.834096+00:00",
+  "version": "b.2.9",
+  "gitBase": "c3524bec73590dcc959f64fe878aa7934c6e806a",
+  "advisory": "RUSTSEC-2024-0429",
+  "githubAlert": "https://github.com/chiharu-kiryu/epic-of-viento-line/security/dependabot/1",
+  "compiler": "rustc 1.95.0 (59807616e 2026-04-14)",
+  "platform": "Linux x86_64",
+  "profile": "test; glib override opt-level=3",
+  "before": {
+    "exitCode": 101,
+    "signal": "SIGABRT",
+    "result": "original glib 0.18.5 failed its safe public string-iterator API with a null-pointer precondition violation",
+    "log": "before.log"
+  },
+  "after": {
+    "exitCode": 0,
+    "securityTestsPassed": 5,
+    "coreTestsPassed": 22,
+    "startupTestsPassed": 1,
+    "ignoredTests": 1,
+    "log": "after.log"
+  },
+  "application": {
+    "runtime": "Node v24.20.0",
+    "passed": 195,
+    "failed": 0,
+    "skipped": 0,
+    "archiveInterop": true,
+    "log": "application.log"
+  },
+  "upstreamPackageFiles": 121,
+  "unchangedUpstreamFiles": 120,
+  "changedUpstreamFiles": [
+    "src/variant_iter.rs"
+  ],
+  "files": {
+    "src-tauri/Cargo.toml": "99e8c9f6068fa9c0f1de0c2906ae6261134d0b43a9cb502b570304cd06dbdfcd",
+    "src-tauri/Cargo.lock": "12e5eaff8ba585c1458e60510bdb5972fa4e47e5fccaa96c196645a31ec690e4",
+    "src-tauri/tests/glib_variant_iter.rs": "5ff1e921944fd3bf73354d483ef732f28da1f4f6f1bb1310c0a5d8e0204ba48f",
+    "src-tauri/vendor/glib/src/variant_iter.rs": "a0f5ee8acb8faa089bcdfbc9a57372609fce7654026ccef7d9a224d05a654ccc",
+    "src-tauri/vendor/glib-upstream.json": "24a6eb2a105cabd51beec1dc217935b4a5806ae0031902ee901ff5efb0192e55",
+    "src-tauri/vendor/glib-variant-iter.patch": "75eceb13b4489dc53f2b9b0f81c867d763b5d6295ee809e310834678cbb131d5"
+  },
+  "installedApplicationUpdated": false,
+  "sourceArchive": {
+    "files": 383,
+    "archiveBytes": 5780162,
+    "allArchiveBytesVerified": true,
+    "upstreamPackageFilesVerified": 121,
+    "patchAndLicenseIncluded": true,
+    "unpackedCargoMetadata": "offline locked; exactly one glib resolved to unpacked vendor/glib",
+    "temporaryArchiveRemoved": true
+  }
+}

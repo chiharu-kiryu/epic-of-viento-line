@@ -3,3 +3,7 @@
 *.mp4 binary
 *.ttf binary
 *.jpg filter=lfs diff=lfs merge=lfs -text
+
+# Preserve upstream release bytes and unified-diff context for vendor verification.
+src-tauri/vendor/glib/** -text -whitespace
+src-tauri/vendor/*.patch -text -whitespace

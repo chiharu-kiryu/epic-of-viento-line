@@ -27,3 +27,16 @@ zip = { version = "4", default-features = false, features = ["deflate"] }
 tempfile = "3"
 fs2 = "0.4"
 tokio = { version = "1", features = ["sync", "time"] }
+
+[target.'cfg(target_os = "linux")'.dev-dependencies]
+glib = "=0.18.5"
+
+# GTK3 still requires glib 0.18. Apply the upstream RUSTSEC-2024-0429 fix
+# locally for every transitive GTK/WebKit consumer. See vendor/README.md.
+[patch.crates-io]
+glib = { path = "vendor/glib" }
+
+# The advisory's invalid immutable out-pointer can fail only after optimization.
+# Keep the dependency optimized even in the normal desktop regression suite.
+[profile.test.package.glib]
+opt-level = 3

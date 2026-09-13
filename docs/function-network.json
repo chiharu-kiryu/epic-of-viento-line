@@ -5,19 +5,19 @@
     "version": "b.2.9",
     "date": "2026-09-13",
     "gitBase": "51d522cb919c20b15815b129bd62e859af9a97a0",
-    "sourceState": "b.2.9 发布快照；落实 b.X.Y 的单数字进位规则和 b.9.9 → 1.0.0，同步构建及源码归档版本校验；编辑器与作品处理代码沿用修订 12",
+    "sourceState": "b.2.9 工作树：在修订 13 基础上回移 glib RUSTSEC-2024-0429 上游修复，统一桌面依赖来源并加入优化回归",
     "method": "人工核对业务入口与关键调用；使用本机 Acorn 解析 ES 模块声明、静态字面量动态导入、显式事件绑定和路由表",
     "runtimeTrace": false,
     "verification": {
-      "sourceFingerprints": "141 scanned code files matched the worktree",
-      "references": "134 node source references, module imports and document links checked",
+      "sourceFingerprints": "143 selected code files matched the worktree; remaining vendored glib files verified separately against the 121-file upstream manifest",
+      "references": "137 node source references, module imports and document links checked",
       "graphIntegrity": "workflow edges and module SCCs recomputed",
       "pageScript": "JavaScript syntax checked; embedded snapshot matches JSON",
       "browserPreview": "not executed: in-app browser URL policy rejected local HTML navigation",
-      "applicationRegression": "b.2.8.2, bundled Node v24.20.0 with VIENTO_TEST_ARCHIVE_BINARY: scripts/check-project.mjs --app-only; 193 passed, 0 failed, 0 skipped; version, 117 JavaScript syntax checks and API preflight passed",
-      "nativeRegression": "b.2.8.2, cargo test --offline --locked: 22 library tests and 1 startup test passed, 0 failed, 1 existing full-workspace test ignored; actual prepared desktop resources and temporary target used",
+      "applicationRegression": "b.2.9, bundled Node v24.20.0 and compiled native archive CLI: app-only 195 passed, 0 failed, 0 skipped; version, 117 JavaScript syntax checks and API contract passed",
+      "nativeRegression": "b.2.9, cargo test --offline --locked: 22 core + 1 startup + 5 optimized glib regressions passed; 1 existing large-workspace test ignored",
       "nativeWindowInteraction": "Pre-release b.2.8.1 evidence retained; native windows not rerun for the version bump. Passed: current rebuilt Linux library workflow and editor save extension; actual GTK save after cache cleanup, cancellation/expiry/regeneration, invalid destination, overwrite cancel/replace, exact share/full ZIPs and staging cleanup. Prior editor workflow evidence retained.",
-      "applicationTestsPassed": 193,
+      "applicationTestsPassed": 195,
       "archiveInterop": "v2/v3 Node export → Rust import/export → Node export passed; exact sources, metadata, stable IDs and external image/video/audio bytes compared",
       "nativeTestReport": "docs/NATIVE_WORKFLOW_TEST_b.2.8.1.md",
       "closeBridgeRegression": "3 passed after localized native close confirmation change",
@@ -30,7 +30,11 @@
       "systemNodeObservation": "Initial Node v18.19.1 full run: 193 assertions passed, request-lifecycle worker did not exit and was terminated. Isolated reruns on system and bundled runtimes both passed all 4 tests with normal exit; root cause unconfirmed.",
       "releaseValidation": "docs/test-results/release-b.2.8.2/results.json",
       "versionCorrection": "Corrected to b.2.9 / 0.2.9; beta digits are 0–9, b.9.9 advances to 1.0.0. Earlier regression logs retain their original versions.",
-      "versionRuleRegression": "b.2.9: 4 version tests passed (all 100 beta transitions, stable carry, invalid formats); JavaScript/Python agreed on 122 cases; next-version CLI, release manifest/lock/UI consistency and Cargo metadata passed. Source archive verified 253 files and was removed after validation. Full application/Rust regressions were not rerun for this version-rule change."
+      "versionRuleRegression": "b.2.9: 4 version tests passed (all 100 beta transitions, stable carry, invalid formats); JavaScript/Python agreed on 122 cases; next-version CLI, release manifest/lock/UI consistency and Cargo metadata passed. Source archive verified 253 files and was removed after validation. Full application/Rust regressions were not rerun for this version-rule change.",
+      "securityRegression": "Unpatched glib 0.18.5 reproduced a null-pointer precondition violation (SIGABRT); exact two-line upstream backport passes all 5 iterator tests with glib opt-level=3. All other 120 of 121 upstream package files match.",
+      "securityReport": "docs/SECURITY_GLIB_b.2.9.md",
+      "securityValidation": "docs/test-results/glib-security-2026-09-13/results.json",
+      "securitySourceArchive": "383 archive files verified; all 121 glib source files, license and patch included; unpacked offline locked Cargo metadata resolves exactly one glib from the unpacked vendor directory. Temporary archive removed."
     },
     "scope": "功能级有向业务步骤 + 文件级静态相对导入；不穷举运行时动态路径、第三方库内部或每次函数调用",
     "projectDataRead": false,
@@ -39,7 +43,7 @@
       "workflows": 50,
       "functionalNodes": 66,
       "functionalEdges": 173,
-      "sourceFiles": 141,
+      "sourceFiles": 143,
       "jsModules": 123,
       "relativeImportStatements": 355,
       "explicitEventBindings": 95,
@@ -53,72 +57,43 @@
     "limitations": [
       "workflow-step 是业务步骤顺序，不能当作直接函数调用边。",
       "文件导入关系不代表调用次数、调用顺序、用户使用频率或性能。",
-      "测试声明包含参数化模板，声明数不等于执行数；此前完整 app-only 校验通过 193 项；本次版本规则调整单独运行 4 项版本回归。",
+      "测试声明包含参数化模板，声明数不等于执行数；本轮完整 app-only 校验通过 195 项；另有 28 项 Rust 测试通过。",
       "没有读取实际作品正文、素材内容、本机秘密或网络服务。",
-      "归档互通回归需设置 VIENTO_TEST_ARCHIVE_BINARY；此前完整回归已启用；本次版本规则调整未重跑归档互通，未设置时该项明确跳过。"
+      "归档互通回归需设置 VIENTO_TEST_ARCHIVE_BINARY；本轮已启用，未设置时该项明确跳过。",
+      "第三方 glib 仅将实际修复文件加入功能图源码清单；其余文件通过 vendor/glib-upstream.json 的原包指纹核验，不展开第三方模块调用图。"
     ],
-    "snapshotRevision": 13,
+    "snapshotRevision": 14,
     "repairLog": "docs/NETWORK_BUGFIX_b.2.8.1.md",
     "previousSnapshot": {
-      "revision": 12,
-      "commit": "147f9b06e1d3e4d67df56eecb5c58e0cd65ede18",
+      "revision": 13,
+      "commit": "c3524bec73590dcc959f64fe878aa7934c6e806a",
       "changedSources": [
         {
-          "file": "desktop/package-source.py",
-          "before": "b8f2ffbd79a28a9c9a63578682746b789af696e4177df046104b83615a3d1ee2",
-          "after": "08b271e057cc791364f7c3b19d082ca720e9490e58cfe3f69c47fc368cabb5e6"
+          "file": "src-tauri/tests/glib_variant_iter.rs",
+          "before": null,
+          "after": "5ff1e921944fd3bf73354d483ef732f28da1f4f6f1bb1310c0a5d8e0204ba48f"
         },
         {
-          "file": "desktop/version.mjs",
-          "before": "b58df440b1596a2d3dde004bc6deb71cbfe9805dea35433877cde110b97f07f3",
-          "after": "aede5caa36dcb5d712332f451611eb0379877097e015dd3072aeeacdfdd86a22"
-        },
-        {
-          "file": "scripts/tests/version.test.mjs",
-          "before": "988856bbadebc9047d52c5d2d53fea5a9755f24f8dd0382ac29e8aaf43e22393",
-          "after": "0b9e0f332dd07cfc3b358a96d38d18e5235af5cadb3091a32e529c7d54e46222"
+          "file": "src-tauri/vendor/glib/src/variant_iter.rs",
+          "before": null,
+          "after": "a0f5ee8acb8faa089bcdfbc9a57372609fce7654026ccef7d9a224d05a654ccc"
         }
       ],
-      "releaseFiles": [
-        {
-          "file": "VERSION",
-          "before": "559a97a6134a2d90c269196c1f19cd3961130152dbeb65505984dda6856522f3",
-          "after": "684ebca53692ec56454478a5762c9ac7f79386d773169dcb0774b5f5b8e7541f"
-        },
-        {
-          "file": "package.json",
-          "before": "4203122c8d34f110afbae31bca057ba0e58484bde78759c4661662ecab312362",
-          "after": "ffb22f214f29fab894b9d685b165daef31bcd411bfcb1a3532238a7d2788b4db"
-        },
-        {
-          "file": "package-lock.json",
-          "before": "e704b7b9375e77ef6ec9faac41031940af18f7d372df3dc17ead810a1b4bdd93",
-          "after": "8474547479702e90939271e5f92d8e6cd04837bde388b54535b5203d6c541bb6"
-        },
+      "buildFiles": [
         {
           "file": "src-tauri/Cargo.toml",
-          "before": "89e7d267b0b4822320b379a3d9e47a7c1876f66bca39a941517db365cbb65271",
-          "after": "7c81bf5f313309b8db43549fefd09813e592ebf23c6d3c8bb7d539d2ffd00c0c"
+          "before": "7c81bf5f313309b8db43549fefd09813e592ebf23c6d3c8bb7d539d2ffd00c0c",
+          "after": "99e8c9f6068fa9c0f1de0c2906ae6261134d0b43a9cb502b570304cd06dbdfcd"
         },
         {
           "file": "src-tauri/Cargo.lock",
-          "before": "2de472ac89a75c546edebd410bcb5736d1573d33456b28f50ff8a5c52d3c74fe",
-          "after": "42e01f9591cff82b82713b2bcd6ba75d7dc99fe65afbfc8ee96dac4cc3a4656f"
+          "before": "42e01f9591cff82b82713b2bcd6ba75d7dc99fe65afbfc8ee96dac4cc3a4656f",
+          "after": "12e5eaff8ba585c1458e60510bdb5972fa4e47e5fccaa96c196645a31ec690e4"
         },
         {
-          "file": "src-tauri/tauri.conf.json",
-          "before": "23df6fce778a20360af905f3ef4cee2a7e4744271fd7b57cfec528eb01c9405b",
-          "after": "d0a2fd22886fa95918adf60860e3f561d13d1950fe326eac58be21a74627f2a6"
-        },
-        {
-          "file": "web/index.html",
-          "before": "03fe12e0dcba3a72ac6fad0035de028ad0a2fdd6a96e4b7e6f19341acd917223",
-          "after": "e6d6154feebc472b2e26e7f03855f8d306037aed111149e603b339c942d5c2fd"
-        },
-        {
-          "file": "desktop/ui/index.html",
-          "before": "0eae7ad55a6120f3b16d75c0ac3ac7829a8160a18c0bdfe365f9f4eda6236624",
-          "after": "3381eca659a4a2365030c6f9e08896058c80d2bc9b62592cd2a8ac6051b423e9"
+          "file": ".gitattributes",
+          "before": "52ad86b74eb19799e83f80ed8c42feb6b97b46f33b75f5765eb1d6ea2b2c97d0",
+          "after": "7babc07ef117b705aa7aba04cd1dd01d51448c77d7ce3403db91f8f047894a8c"
         }
       ]
     },
@@ -620,6 +595,84 @@
             "after": "0eae7ad55a6120f3b16d75c0ac3ac7829a8160a18c0bdfe365f9f4eda6236624"
           }
         ]
+      },
+      {
+        "fromRevision": 12,
+        "toRevision": 13,
+        "commit": "147f9b06e1d3e4d67df56eecb5c58e0cd65ede18",
+        "changedSources": [
+          {
+            "file": "desktop/package-source.py",
+            "before": "b8f2ffbd79a28a9c9a63578682746b789af696e4177df046104b83615a3d1ee2",
+            "after": "08b271e057cc791364f7c3b19d082ca720e9490e58cfe3f69c47fc368cabb5e6"
+          },
+          {
+            "file": "desktop/version.mjs",
+            "before": "b58df440b1596a2d3dde004bc6deb71cbfe9805dea35433877cde110b97f07f3",
+            "after": "aede5caa36dcb5d712332f451611eb0379877097e015dd3072aeeacdfdd86a22"
+          },
+          {
+            "file": "scripts/tests/version.test.mjs",
+            "before": "988856bbadebc9047d52c5d2d53fea5a9755f24f8dd0382ac29e8aaf43e22393",
+            "after": "0b9e0f332dd07cfc3b358a96d38d18e5235af5cadb3091a32e529c7d54e46222"
+          }
+        ],
+        "releaseFiles": [
+          {
+            "file": "VERSION",
+            "before": "559a97a6134a2d90c269196c1f19cd3961130152dbeb65505984dda6856522f3",
+            "after": "684ebca53692ec56454478a5762c9ac7f79386d773169dcb0774b5f5b8e7541f"
+          },
+          {
+            "file": "package.json",
+            "before": "4203122c8d34f110afbae31bca057ba0e58484bde78759c4661662ecab312362",
+            "after": "ffb22f214f29fab894b9d685b165daef31bcd411bfcb1a3532238a7d2788b4db"
+          },
+          {
+            "file": "package-lock.json",
+            "before": "e704b7b9375e77ef6ec9faac41031940af18f7d372df3dc17ead810a1b4bdd93",
+            "after": "8474547479702e90939271e5f92d8e6cd04837bde388b54535b5203d6c541bb6"
+          },
+          {
+            "file": "src-tauri/Cargo.toml",
+            "before": "89e7d267b0b4822320b379a3d9e47a7c1876f66bca39a941517db365cbb65271",
+            "after": "7c81bf5f313309b8db43549fefd09813e592ebf23c6d3c8bb7d539d2ffd00c0c"
+          },
+          {
+            "file": "src-tauri/Cargo.lock",
+            "before": "2de472ac89a75c546edebd410bcb5736d1573d33456b28f50ff8a5c52d3c74fe",
+            "after": "42e01f9591cff82b82713b2bcd6ba75d7dc99fe65afbfc8ee96dac4cc3a4656f"
+          },
+          {
+            "file": "src-tauri/tauri.conf.json",
+            "before": "23df6fce778a20360af905f3ef4cee2a7e4744271fd7b57cfec528eb01c9405b",
+            "after": "d0a2fd22886fa95918adf60860e3f561d13d1950fe326eac58be21a74627f2a6"
+          },
+          {
+            "file": "web/index.html",
+            "before": "03fe12e0dcba3a72ac6fad0035de028ad0a2fdd6a96e4b7e6f19341acd917223",
+            "after": "e6d6154feebc472b2e26e7f03855f8d306037aed111149e603b339c942d5c2fd"
+          },
+          {
+            "file": "desktop/ui/index.html",
+            "before": "0eae7ad55a6120f3b16d75c0ac3ac7829a8160a18c0bdfe365f9f4eda6236624",
+            "after": "3381eca659a4a2365030c6f9e08896058c80d2bc9b62592cd2a8ac6051b423e9"
+          }
+        ]
+      }
+    ],
+    "vendoredDependencies": [
+      {
+        "name": "glib",
+        "version": "0.18.5",
+        "path": "src-tauri/vendor/glib",
+        "advisory": "RUSTSEC-2024-0429",
+        "provenance": "src-tauri/vendor/glib-upstream.json",
+        "upstreamFiles": 121,
+        "changedFiles": [
+          "src/variant_iter.rs"
+        ],
+        "regression": "src-tauri/tests/glib_variant_iter.rs"
       }
     ]
   },
@@ -857,6 +910,11 @@
           "file": "src-tauri/src/lib.rs",
           "line": 74,
           "symbol": "require_closed_editor"
+        },
+        {
+          "file": "src-tauri/vendor/glib/src/variant_iter.rs",
+          "line": 118,
+          "symbol": "VariantStrIter::impl_get"
         }
       ]
     },
@@ -1517,6 +1575,10 @@
         {
           "file": "desktop/tests/native-smoke.py",
           "line": 1
+        },
+        {
+          "file": "src-tauri/tests/glib_variant_iter.rs",
+          "line": 1
         }
       ]
     },
@@ -1524,7 +1586,7 @@
       "id": "packaging",
       "label": "桌面与源码打包",
       "layer": "工具",
-      "description": "统一版本，准备 Node/资源/语言字典，构建平台包与独立源码归档；CI 手动触发。",
+      "description": "统一版本，准备 Node/资源/语言字典，构建平台包与独立源码归档；CI 手动触发。 通过本地覆盖统一 GTK/WebKit 的 glib 修复副本，源码包携带完整依赖补丁。",
       "sources": [
         {
           "file": "desktop/version.mjs",
@@ -1545,6 +1607,11 @@
         {
           "file": ".github/workflows/desktop.yml",
           "line": 1
+        },
+        {
+          "file": "src-tauri/Cargo.toml",
+          "line": 36,
+          "symbol": "[patch.crates-io]"
         }
       ]
     },
@@ -4298,7 +4365,8 @@
       "tests": [
         "scripts/check-project.mjs",
         "desktop/tests/native-smoke.py",
-        "desktop/tests/project_settings_navigation.py"
+        "desktop/tests/project_settings_navigation.py",
+        "src-tauri/tests/glib_variant_iter.rs"
       ]
     },
     {
@@ -4313,10 +4381,11 @@
         "source_archive"
       ],
       "effect": "准备内置 Node 和运行资源，同步桌面语言字典，按发布版本生成平台包和可重建源码归档。",
-      "boundary": "不携带具体作品数据；CI 手动构建 Linux/Windows/macOS 构件，不自动发布或安装。",
+      "boundary": "不携带具体作品数据；CI 手动构建 Linux/Windows/macOS 构件，不自动发布或安装。 glib 使用本地安全修复副本，源码归档必须包含 vendor；Linux 桌面回归对 glib 启用优化。",
       "tests": [
         "scripts/tests/version.test.mjs",
-        "scripts/tests/build-cleanup.test.mjs"
+        "scripts/tests/build-cleanup.test.mjs",
+        "src-tauri/tests/glib_variant_iter.rs"
       ]
     },
     {
@@ -11914,6 +11983,18 @@
       "area": "native",
       "lines": 1625,
       "sha256": "3e18656e36b99ab630bc888f8b3a0e49438b7dfe9377fe79835434e5e97a8c7e"
+    },
+    {
+      "path": "src-tauri/tests/glib_variant_iter.rs",
+      "area": "test",
+      "lines": 67,
+      "sha256": "5ff1e921944fd3bf73354d483ef732f28da1f4f6f1bb1310c0a5d8e0204ba48f"
+    },
+    {
+      "path": "src-tauri/vendor/glib/src/variant_iter.rs",
+      "area": "vendor",
+      "lines": 372,
+      "sha256": "a0f5ee8acb8faa089bcdfbc9a57372609fce7654026ccef7d9a224d05a654ccc"
     },
     {
       "path": "web/app.js",
