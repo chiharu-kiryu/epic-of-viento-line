@@ -57,9 +57,10 @@ export function createDesktopSession(token = process.env.VIENTO_SESSION_TOKEN, {
     if (pathname === '/__desktop/export' && req.method === 'POST') {
       try {
         const body = await readRequestJsonBody(req);
+        if (!body || typeof body.requestId !== 'string' || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(body.requestId)) return reject(400, '无效的导出任务');
         const job = exports?.get(body.id);
         if (!job) return reject(410, '导出文件已过期，请重新导出');
-        emit({ type: 'export', id: job.id, fileName: job.fileName });
+        emit({ type: 'export', id: job.id, requestId: body.requestId, fileName: job.fileName });
         res.writeHead(204); res.end();
       } catch (error) { return reject(error.statusCode || 400, error.message || '无法保存导出文件'); }
       return true;

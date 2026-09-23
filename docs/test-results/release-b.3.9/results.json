@@ -1,0 +1,79 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.9",
+  "buildVersion": "0.3.9",
+  "gitBase": "35d3ddadedc327cf3b1d835ba5480b5b398bf1af",
+  "bugs": [
+    "N101",
+    "N102",
+    "N103"
+  ],
+  "application": {
+    "runtime": "Node v24.19.0 with VIENTO_TEST_ARCHIVE_BINARY configured",
+    "tests": 440,
+    "passed": 440,
+    "failed": 0,
+    "skipped": 0,
+    "javascriptSyntaxFiles": 132,
+    "apiContractPassed": true,
+    "log": "application.log"
+  },
+  "native": {
+    "scope": "Production workspace.rs archive module plus unchanged official CLI entry; full Tauri library audit evidence retained and source hashes rechecked",
+    "tests": 14,
+    "passed": 13,
+    "failed": 0,
+    "ignored": 1,
+    "ignoredReason": "Existing real full-size migration test requires VIENTO_TEST_SOURCE_ROOT; daily works untouched",
+    "log": "native.log",
+    "buildEvidence": "native-build.json",
+    "resolvedDependenciesVerified": 61
+  },
+  "retainedTauriLibrary": {
+    "versionAtTest": "b.3.8 before the release-only version bump",
+    "passed": 22,
+    "failed": 0,
+    "ignored": 1,
+    "sourceFingerprintsMatch": true,
+    "evidence": "docs/test-results/export-bridge-2026-09-23/native-build.json"
+  },
+  "cargoMetadata": "offline locked; application 0.3.9 and a single glib 0.18.5 from src-tauri/vendor/glib",
+  "cargoMetadataEvidence": "cargo.json",
+  "nextVersion": "b.4.0",
+  "functionNetworkRevision": 46,
+  "files": {
+    "VERSION": "3039e3d48888c87c081abbd10bcf6ef233b13af713feaef375e6304a8a226c6a",
+    "package.json": "dbbaa0fa46ea9134b39d520cbb69887a6e067fd47e8ba170b1e3119c13b1c269",
+    "package-lock.json": "1eb0d4d5d03a1b1cf191aa651179300e38070ff81eb1b87bd2be784694fa3aa7",
+    "src-tauri/Cargo.toml": "0797bfc5b900e31ef4aae073aa4d2f3ae18a70fecaa6ff1a7d3b37e85aad1d08",
+    "src-tauri/Cargo.lock": "63a26f733c0111d725759ec4115fc742993ccbfdd2765142f6c7bd614dab2ff3",
+    "src-tauri/tauri.conf.json": "7f3ece33067406fa5bc0c82b91f3c1eb3499e6e785b11a68d50d3f7afcc22579",
+    "web/index.html": "4913298cfd0707b2a925d33844031b104931761f7aaf2d5aec3f5fe318471d9d",
+    "desktop/ui/index.html": "6100e45fbbddc87637f96c5a4b2796676593d309c35218a5950d0c8ccbc93f19",
+    "README.md": "10c43e7a9a2cbe64c7e4346a5a6fb92002d1d043695f15d13cb20177aba39a56",
+    "desktop/README.md": "fed5e9aa303f36715cb2f4a5c1e8b7687db62aa79be10df827dc00865a92a9af",
+    "scripts/lib/export-service.mjs": "4e915ba699c154cd47394bb898bcec6a64864029f2a2016d3e01bef8e5759be6",
+    "scripts/tests/export-cleanup.test.mjs": "fc864a32b0a4a6377adef8f147ff60e00a02b9ace04436c0a168bb42d1a16f51",
+    "scripts/lib/desktop-session.mjs": "866787fd536fa90f857662ea81b4179f9b6b1607aeb6e297a4f15006103c20e8",
+    "scripts/tests/editor-dialogs.test.mjs": "fce1b40c31b639c5a4cc7905a9af7643be7bc8797244b54d75344b2b9e736365",
+    "scripts/tests/export-bridge.test.mjs": "64b87229ab624c9f3f96e3244042cc288fb7bac377bbb0118a756f648cc037ab",
+    "src-tauri/src/lib.rs": "360893da8f9abf9d6778c45a9b227677a7194245951d3ed019e8994dec9931fa",
+    "web/modules/app-export.js": "c94d24aca6e452f3709107e14797f2a31c1153ebf6008abf549bcd68614f873b"
+  },
+  "nativeArchiveTestsRerun": true,
+  "fullTauriLibraryTestsRerun": false,
+  "nativeWindowTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "functionNetworkValidation": "network.json",
+  "temporaryNativeBuildRemoved": true,
+  "sourceArchive": {
+    "filesVerified": 591,
+    "allArchivedBytesMatchSource": true,
+    "fileModesVerified": true,
+    "vendoredGlibFilesVerified": 121,
+    "unpackedCargoMetadataVerified": true,
+    "unpackedSourceFingerprintsVerified": 158,
+    "temporaryFilesRemoved": true
+  }
+}

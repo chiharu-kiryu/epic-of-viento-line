@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import { randomUUID } from 'node:crypto';
 import { deferred, editorHarness } from './editor-harness.mjs';
 import { dialogHarness, flushDialogs } from './dialog-harness.mjs';
 import { API_PATHS } from '../lib/doc-api-contract.mjs';
@@ -64,10 +65,11 @@ test('opening export during a save cannot leave a permanently busy snapshot', as
 async function nativeExportHarness() {
   const requests = [];
   const h = await exportHarness({
+    crypto: { randomUUID },
     location: { href: 'http://127.0.0.1/?desktop=1' },
     fetch: (url, options) => { const pending = deferred(); requests.push({ ...pending, url, options }); return pending.promise; },
   });
-  const result = (detail) => h.runtime.window.dispatch('viento-export-result', { detail });
+  const result = (detail) => h.runtime.window.dispatch('viento-export-result', { detail: { ...JSON.parse(requests.at(-1).options.body), ...detail } });
   h.element('docExportBtn').click(); h.element('docExportStartBtn').click();
   h.calls[0].resolve({ id: 'prepared', fileName: '角色.zip', bytes: 123, assetCount: 1 });
   await flushDialogs();

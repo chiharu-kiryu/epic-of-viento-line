@@ -51,15 +51,18 @@ export function setupExport({ getContext, setBusy }) {
   });
   function nativeSave() {
     const id = job.id;
+    const requestId = crypto.randomUUID();
     return new Promise((resolve, reject) => {
       const receive = (event) => {
-        if (event.detail?.id !== id) return;
+        // The same prepared ZIP can be saved again after a transport failure.
+        // A late result belongs to that earlier attempt, not the current picker.
+        if (event.detail?.id !== id || event.detail?.requestId !== requestId) return;
         cleanup();
         event.detail.ok ? resolve(event.detail) : reject(new Error(event.detail.error || t('无法保存导出文件')));
       };
       const cleanup = () => window.removeEventListener('viento-export-result', receive);
       window.addEventListener('viento-export-result', receive);
-      fetch('/__desktop/export', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })
+      fetch('/__desktop/export', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, requestId }) })
         .then(async (response) => {
           if (!response.ok) {
             const error = new Error((await response.json()).error || t('无法打开保存窗口'));

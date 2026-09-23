@@ -1,0 +1,135 @@
+TAP version 13
+# Subtest: a late saved result from a disconnected save attempt cannot settle its retry
+not ok 1 - a late saved result from a disconnected save attempt cannot settle its retry
+  ---
+  duration_ms: 25.938539
+  location: 'file:///tmp/viento-export-bridge-before-zbikpf1t/scripts/tests/export-bridge.test.mjs:38:57'
+  failureType: 'testCodeFailure'
+  error: 'the current save picker must remain pending until its own result'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-export-bridge-before-zbikpf1t/scripts/tests/export-bridge.test.mjs:48:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async startSubtest (node:internal/test_runner/harness:214:3)
+  ...
+# Subtest: a late cancelled result from a disconnected save attempt cannot settle its retry
+not ok 2 - a late cancelled result from a disconnected save attempt cannot settle its retry
+  ---
+  duration_ms: 20.767852
+  location: 'file:///tmp/viento-export-bridge-before-zbikpf1t/scripts/tests/export-bridge.test.mjs:38:57'
+  failureType: 'testCodeFailure'
+  error: 'the current save picker must remain pending until its own result'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-export-bridge-before-zbikpf1t/scripts/tests/export-bridge.test.mjs:48:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: a late failed result from a disconnected save attempt cannot settle its retry
+not ok 3 - a late failed result from a disconnected save attempt cannot settle its retry
+  ---
+  duration_ms: 10.60766
+  location: 'file:///tmp/viento-export-bridge-before-zbikpf1t/scripts/tests/export-bridge.test.mjs:38:57'
+  failureType: 'testCodeFailure'
+  error: 'the current save picker must remain pending until its own result'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-export-bridge-before-zbikpf1t/scripts/tests/export-bridge.test.mjs:48:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: native export results require both the current request and package identities
+not ok 4 - native export results require both the current request and package identities
+  ---
+  duration_ms: 10.492798
+  location: 'file:///tmp/viento-export-bridge-before-zbikpf1t/scripts/tests/export-bridge.test.mjs:67:1'
+  failureType: 'testCodeFailure'
+  error: 'unrelated or uncorrelated results must not unlock the editor'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-export-bridge-before-zbikpf1t/scripts/tests/export-bridge.test.mjs:76:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: a matching native result can arrive before its HTTP acknowledgement and settle only once
+ok 5 - a matching native result can arrive before its HTTP acknowledgement and settle only once
+  ---
+  duration_ms: 10.123181
+  ...
+# Subtest: authenticated native export handoffs forward a separate request identity while retaining the same ZIP
+not ok 6 - authenticated native export handoffs forward a separate request identity while retaining the same ZIP
+  ---
+  duration_ms: 143.867022
+  location: 'file:///tmp/viento-export-bridge-before-zbikpf1t/scripts/tests/export-bridge.test.mjs:127:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+        fileName: '保存交接验证.viento.zip',
+        id: 'd2e6bdd0-8bee-4962-b58e-fb71c9c9a506',
+    -   requestId: 'd8224b47-b48f-49e4-868d-e89bc9bd78e2',
+        type: 'export'
+      }
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    type: 'export'
+    id: 'd2e6bdd0-8bee-4962-b58e-fb71c9c9a506'
+    requestId: 'd8224b47-b48f-49e4-868d-e89bc9bd78e2'
+    fileName: '保存交接验证.viento.zip'
+  actual:
+    type: 'export'
+    id: 'd2e6bdd0-8bee-4962-b58e-fb71c9c9a506'
+    fileName: '保存交接验证.viento.zip'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-export-bridge-before-zbikpf1t/scripts/tests/export-bridge.test.mjs:133:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: native export handoffs reject missing or invalid request identities without opening a picker
+not ok 7 - native export handoffs reject missing or invalid request identities without opening a picker
+  ---
+  duration_ms: 81.531755
+  location: 'file:///tmp/viento-export-bridge-before-zbikpf1t/scripts/tests/export-bridge.test.mjs:138:1'
+  failureType: 'testCodeFailure'
+  error: '[]'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 400
+  actual: 410
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-export-bridge-before-zbikpf1t/scripts/tests/export-bridge.test.mjs:143:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 1
+# fail 6
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 517.52025

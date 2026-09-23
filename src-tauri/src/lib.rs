@@ -392,7 +392,13 @@ fn show_library(app: &AppHandle) {
     let _ = app.emit_to("main", "library-changed", ());
 }
 
-async fn save_editor_export(app: AppHandle, engine_id: String, id: String, file_name: String) {
+async fn save_editor_export(
+    app: AppHandle,
+    engine_id: String,
+    id: String,
+    request_id: String,
+    file_name: String,
+) {
     let result: Result<Option<String>> = async {
         let state = app.state::<DesktopState>();
         let _operation = operation(&state)?;
@@ -400,6 +406,10 @@ async fn save_editor_export(app: AppHandle, engine_id: String, id: String, file_
             .map(|value| value.to_string())
             .as_deref()
             != Ok(id.as_str())
+            || Uuid::parse_str(&request_id)
+                .map(|value| value.to_string())
+                .as_deref()
+                != Ok(request_id.as_str())
             || file_name.contains(['/', '\\'])
             || !file_name.ends_with(".zip")
         {
@@ -447,9 +457,15 @@ async fn save_editor_export(app: AppHandle, engine_id: String, id: String, file_
     }
     .await;
     let detail = match result {
-        Ok(Some(path)) => serde_json::json!({ "id": id, "ok": true, "path": path }),
-        Ok(None) => serde_json::json!({ "id": id, "ok": true, "cancelled": true }),
-        Err(error) => serde_json::json!({ "id": id, "ok": false, "error": error }),
+        Ok(Some(path)) => {
+            serde_json::json!({ "id": id, "requestId": request_id, "ok": true, "path": path })
+        }
+        Ok(None) => {
+            serde_json::json!({ "id": id, "requestId": request_id, "ok": true, "cancelled": true })
+        }
+        Err(error) => {
+            serde_json::json!({ "id": id, "requestId": request_id, "ok": false, "error": error })
+        }
     };
     if let Some(editor) = app.get_webview_window("editor") {
         let _ = editor.eval(&format!(
@@ -773,13 +789,16 @@ async fn start_editor(app: &AppHandle, root: &Path) -> Result<()> {
                                 }
                             }
                             Some("export") => {
-                                if let (Some(job_id), Some(file_name)) =
-                                    (event["id"].as_str(), event["fileName"].as_str())
-                                {
+                                if let (Some(job_id), Some(request_id), Some(file_name)) = (
+                                    event["id"].as_str(),
+                                    event["requestId"].as_str(),
+                                    event["fileName"].as_str(),
+                                ) {
                                     tauri::async_runtime::spawn(save_editor_export(
                                         handle.clone(),
                                         id.clone(),
                                         job_id.into(),
+                                        request_id.into(),
                                         file_name.into(),
                                     ));
                                 }

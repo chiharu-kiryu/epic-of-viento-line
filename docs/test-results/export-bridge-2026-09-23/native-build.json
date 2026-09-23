@@ -1,0 +1,32 @@
+{
+  "temporaryDirectory": "/tmp/viento-export-bridge-3m79xtwt",
+  "command": "cargo test --manifest-path src-tauri/Cargo.toml --lib --offline --locked --jobs 2",
+  "runtime": "rustc 1.95.0 (59807616e 2026-04-14)",
+  "cargo": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)",
+  "targetDirectory": "/tmp/viento-export-bridge-3m79xtwt/target",
+  "tauriConfigOverride": {
+    "bundle": {
+      "active": false,
+      "externalBin": [],
+      "resources": []
+    }
+  },
+  "purpose": "Compile and run the real Tauri library unit tests without creating an installation bundle or copying the Node runtime; no GUI launched.",
+  "projectLockSha256": "13d76f9403e3d7f18b9ab25de6599023722359edae15d74acfa6dc8bc10963d4",
+  "temporaryArtifactsRemoved": true,
+  "exitCode": 0,
+  "testBinarySha256": "fac25f83e17cc5b4c9f2e19e13949a09309e3eef8bc2cf3d27d5fc69545b0e47",
+  "sourceSha256": {
+    "src-tauri/src/lib.rs": "360893da8f9abf9d6778c45a9b227677a7194245951d3ed019e8994dec9931fa",
+    "src-tauri/src/export.rs": "5df6d3f84c1fea268802b9a0d508c7ce282af40ac105bd940b2c40b7a2503446",
+    "src-tauri/src/workspace.rs": "31517d2900ca84286dc86f549f89895581f3be45d0f05d9a27b8272b7b6fbf8c"
+  },
+  "libraryTests": {
+    "passed": 22,
+    "failed": 0,
+    "ignored": 1
+  },
+  "rustfmtPassed": true,
+  "ignoredReason": "Existing full-size migration test requires a real workspace; daily works were not used.",
+  "removedFileBytes": 1429682214
+}

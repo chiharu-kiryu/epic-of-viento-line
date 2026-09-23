@@ -1,0 +1,78 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.8",
+  "gitBase": "35d3ddadedc327cf3b1d835ba5480b5b398bf1af",
+  "scope": "Export generation, download, cancellation, release, expiry and quota eviction retain cleanup ownership until deletion succeeds; retries protect transfer outcomes and original source bytes",
+  "workflows": [
+    "F32",
+    "F33",
+    "F34",
+    "F35"
+  ],
+  "bugs": [
+    "N101",
+    "N102"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 9,
+    "passed": 0,
+    "failed": 9,
+    "skipped": 0,
+    "log": "before.log",
+    "sourceState": "Unchanged b.3.8 release export-service.mjs; new tests run before production edits",
+    "files": {
+      "scripts/lib/export-service.mjs": "8405f80d91b51379bea145c5c55850fc45a7c8c8d463f904daff1a0a19ab5fc4"
+    },
+    "testFileSha256": "fc864a32b0a4a6377adef8f147ff60e00a02b9ace04436c0a168bb42d1a16f51",
+    "reproduction": "All nine cases failed on their intended outcome assertions: HTTP retry leaves ZIP, concurrent release reports success early, expiry never retries, cleanup replaces completed/interrupted/cancelled/I/O outcomes, and quota eviction permits accumulation. The same test file passed after the fix."
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 60,
+    "passed": 59,
+    "failed": 0,
+    "skipped": 1,
+    "log": "after.log",
+    "newCases": 9
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 385,
+    "passed": 383,
+    "failed": 0,
+    "skipped": 2,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 131,
+    "apiContractPassed": true,
+    "versionValidationPassed": true,
+    "nativeArchiveBinaryConfigured": false,
+    "skipReason": "Both native archive interoperability and native registry-contract groups require VIENTO_TEST_ARCHIVE_BINARY; this audit changes Node cleanup only, and keeps the actual native verification from release b.3.8."
+  },
+  "commands": {
+    "before": "/usr/bin/node --test scripts/tests/export-cleanup.test.mjs",
+    "after": "/usr/bin/node --test scripts/tests/export-cleanup.test.mjs scripts/tests/export-cancellation.test.mjs scripts/tests/export.test.mjs scripts/tests/editor-dialogs.test.mjs",
+    "application": "env -u VIENTO_TEST_ARCHIVE_BINARY /home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node scripts/check-project.mjs --app-only"
+  },
+  "files": {
+    "scripts/lib/export-service.mjs": "4e915ba699c154cd47394bb898bcec6a64864029f2a2016d3e01bef8e5759be6",
+    "scripts/tests/export-cleanup.test.mjs": "fc864a32b0a4a6377adef8f147ff60e00a02b9ace04436c0a168bb42d1a16f51"
+  },
+  "testEnvironment": "Actual production export planning, ZIP writer, API route and HTTP streaming operate on temporary v3 projects in isolated Node processes. Exact staging-directory EBUSY and final-stat EIO faults are injected; short TTLs exercise automatic recovery. Each new case compares workspace.json, documents (including BOM/CRLF), templates, registry metadata and assets byte for byte. HTTP download compares all ZIP bytes. This is not a Windows native file-lock experiment.",
+  "nativeArchiveTestsRerun": false,
+  "fullTauriLibraryTestsRerun": false,
+  "nativeWindowTested": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "temporaryFixtureProjectsRemoved": true,
+  "functionNetwork": {
+    "revision": 44,
+    "sourceFingerprints": 157,
+    "nodeSources": 178,
+    "localImportStatements": 417,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

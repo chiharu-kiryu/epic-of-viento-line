@@ -1,0 +1,14 @@
+{
+  "application": "0.3.9",
+  "cargoMetadata": "offline locked",
+  "glib": {
+    "version": "0.18.5",
+    "manifest": "src-tauri/vendor/glib/Cargo.toml"
+  },
+  "upstreamFileCount": 121,
+  "unmodifiedUpstreamFilesVerified": 120,
+  "patchedFilesVerified": [
+    "src/variant_iter.rs"
+  ],
+  "reversePatchMatchesOriginal": true
+}

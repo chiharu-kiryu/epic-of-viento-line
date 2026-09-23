@@ -1,0 +1,298 @@
+TAP version 13
+# Subtest: HTTP release can retry a failed removal without reviving the download or leaking its ZIP
+not ok 1 - HTTP release can retry a failed removal without reviving the download or leaking its ZIP
+  ---
+  duration_ms: 367.060611
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-cleanup.test.mjs:66:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: a successful retry must really remove the old staging directory
+        at file:///tmp/viento-test-PAoreF/[eval1]:63:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: true,
+      expected: false,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-PAoreF/[eval1]:63:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: concurrent releases wait for the same removal and both report its failure before a successful retry
+not ok 2 - concurrent releases wait for the same removal and both report its failure before a successful retry
+  ---
+  duration_ms: 247.31882
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-cleanup.test.mjs:101:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: another caller must not receive success while deletion is still pending
+        at file:///tmp/viento-test-xUAy2h/[eval1]:47:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: true,
+      expected: false,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-xUAy2h/[eval1]:47:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: expired exports automatically retry transient cleanup failures without another user request
+not ok 3 - expired exports automatically retry transient cleanup failures without another user request
+  ---
+  duration_ms: 3269.334958
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-cleanup.test.mjs:122:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: expiry cleanup must recover automatically from temporary EBUSY
+        at until (file:///tmp/viento-test-xW72xw/[eval1]:13:37)
+        at async file:///tmp/viento-test-xW72xw/[eval1]:42:5 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: false,
+      expected: true,
+      operator: '=='
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    until (file:///tmp/viento-test-xW72xw/[eval1]:13:37)
+    async file:///tmp/viento-test-xW72xw/[eval1]:42:5 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: two active downloads retain exact ZIP bytes until both finish and cleanup failure cannot fail the completed download
+not ok 4 - two active downloads retain exact ZIP bytes until both finish and cleanup failure cannot fail the completed download
+  ---
+  duration_ms: 304.281952
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-cleanup.test.mjs:134:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: a finished download must not become a cleanup error
+        at file:///tmp/viento-test-W13ey2/[eval1]:52:34 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: Error: temporary export file busy
+          at file:///tmp/viento-test-W13ey2/[eval1]:26:30 {
+        code: 'EBUSY'
+      },
+      expected: null,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-W13ey2/[eval1]:52:34 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: an interrupted download keeps its original failure when releasing the last reader also fails
+not ok 5 - an interrupted download keeps its original failure when releasing the last reader also fails
+  ---
+  duration_ms: 205.370591
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-cleanup.test.mjs:156:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: cleanup must not replace the actual download failure
+        at file:///tmp/viento-test-e4cWyL/[eval1]:44:12 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: Error: temporary export file busy
+          at file:///tmp/viento-test-e4cWyL/[eval1]:26:30 {
+        code: 'EBUSY'
+      },
+      expected: Error: reader disconnected
+          at file:///tmp/viento-test-e4cWyL/[eval1]:40:25,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-e4cWyL/[eval1]:44:12 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: cancelled document generation preserves cancellation and retries failed staging cleanup
+not ok 6 - cancelled document generation preserves cancellation and retries failed staging cleanup
+  ---
+  duration_ms: 213.104283
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-cleanup.test.mjs:169:47'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: the cancellation outcome must survive a cleanup failure
+        at file:///tmp/viento-test-T6LWkv/[eval1]:50:12 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: Error: temporary export file busy
+          at file:///tmp/viento-test-T6LWkv/[eval1]:26:30 {
+        code: 'EBUSY'
+      },
+      expected: Error: cancel after writing the ZIP
+          at file:///tmp/viento-test-T6LWkv/[eval1]:39:59,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-T6LWkv/[eval1]:50:12 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    Socket.<anonymous> (node:internal/child_process:450:11)
+    Socket.emit (node:events:517:28)
+    Pipe.<anonymous> (node:net:351:12)
+  ...
+# Subtest: cancelled workspace generation preserves cancellation and retries failed staging cleanup
+not ok 7 - cancelled workspace generation preserves cancellation and retries failed staging cleanup
+  ---
+  duration_ms: 213.430865
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-cleanup.test.mjs:169:47'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: the cancellation outcome must survive a cleanup failure
+        at file:///tmp/viento-test-zqvtcZ/[eval1]:50:12 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: Error: temporary export file busy
+          at file:///tmp/viento-test-zqvtcZ/[eval1]:26:30 {
+        code: 'EBUSY'
+      },
+      expected: Error: cancel after writing the ZIP
+          at file:///tmp/viento-test-zqvtcZ/[eval1]:39:59,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-zqvtcZ/[eval1]:50:12 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: generation I/O failure survives a cleanup failure and the next successful export starts cleanly
+not ok 8 - generation I/O failure survives a cleanup failure and the next successful export starts cleanly
+  ---
+  duration_ms: 209.267803
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-cleanup.test.mjs:191:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: the original I/O failure must not be replaced by EBUSY during cleanup
+        at file:///tmp/viento-test-lE02LJ/[eval1]:48:12
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: Error: temporary export file busy
+          at file:///tmp/viento-test-lE02LJ/[eval1]:26:30 {
+        code: 'EBUSY'
+      },
+      expected: Error: final ZIP stat failed
+          at file:///tmp/viento-test-lE02LJ/[eval1]:39:38 {
+        code: 'EIO'
+      },
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-lE02LJ/[eval1]:48:12
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: failed quota eviction retains the pending cleanup and protects all unfinished exports until recovery
+not ok 9 - failed quota eviction retains the pending cleanup and protects all unfinished exports until recovery
+  ---
+  duration_ms: 247.463609
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-cleanup.test.mjs:210:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: Missing expected rejection.
+        at async file:///tmp/viento-test-lDoaJx/[eval1]:45:7 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: undefined,
+      expected: [Function (anonymous)],
+      operator: 'rejects'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    async file:///tmp/viento-test-lDoaJx/[eval1]:45:7 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 0
+# fail 9
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5403.832639

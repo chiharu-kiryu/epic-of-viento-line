@@ -1,0 +1,100 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.8",
+  "gitBase": "35d3ddadedc327cf3b1d835ba5480b5b398bf1af",
+  "scope": "Correlate each native save attempt through the editor, authenticated desktop bridge and Tauri completion; retries on the same ZIP ignore stale results and preserve busy guards",
+  "workflows": [
+    "F34",
+    "F35"
+  ],
+  "bugs": [
+    "N103"
+  ],
+  "retainedBugs": [
+    "N101",
+    "N102"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 7,
+    "passed": 1,
+    "failed": 6,
+    "skipped": 0,
+    "log": "before.log",
+    "sourceState": "The final test file replayed in an isolated temporary copy with release app-export.js and desktop-session.mjs from 35d3dda; the worktree and previous cleanup fix were preserved",
+    "files": {
+      "web/modules/app-export.js": "cde4d7f5d05e2eb2b1bb5ac91fbb4bd6b34c3038e659b5405dc7c516685ed32d",
+      "scripts/lib/desktop-session.mjs": "9348013b30624996bd0a9f075a04066b64cbbb3aaac151046606801be725b3cc"
+    },
+    "testFileSha256": "64b87229ab624c9f3f96e3244042cc288fb7bac377bbb0118a756f648cc037ab",
+    "reproduction": "Three stale outcome cases unlocked the current picker; uncorrelated results also settled it; bridge events dropped requestId and accepted missing identities. Six intended regressions and one early-result compatibility pass."
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 82,
+    "passed": 81,
+    "failed": 0,
+    "skipped": 1,
+    "log": "after.log",
+    "newCases": 7
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 392,
+    "passed": 390,
+    "failed": 0,
+    "skipped": 2,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 132,
+    "apiContractPassed": true,
+    "versionValidationPassed": true,
+    "nativeArchiveBinaryConfigured": false,
+    "skipReason": "Node-driven native archive interop and registry-agreement groups require VIENTO_TEST_ARCHIVE_BINARY; their previous b.3.8 release evidence remains. Native archive module unit tests did run inside the Tauri library tests."
+  },
+  "native": {
+    "runtime": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "tests": 23,
+    "passed": 22,
+    "failed": 0,
+    "ignored": 1,
+    "log": "native.log",
+    "build": "native-build.json",
+    "scope": "Compile and run the real Tauri library unit tests without creating an installation bundle or copying the Node runtime; no GUI launched.",
+    "ignoredReason": "Existing full-size migration test requires a real workspace; daily works were not used."
+  },
+  "commands": {
+    "before": "/usr/bin/node --test scripts/tests/export-bridge.test.mjs (isolated release-module replay)",
+    "after": "/usr/bin/node --test scripts/tests/export-bridge.test.mjs scripts/tests/editor-dialogs.test.mjs scripts/tests/export-cleanup.test.mjs scripts/tests/export-cancellation.test.mjs scripts/tests/export.test.mjs scripts/tests/desktop-close.test.mjs scripts/tests/settings.test.mjs scripts/tests/i18n.test.mjs",
+    "application": "env -u VIENTO_TEST_ARCHIVE_BINARY /home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node scripts/check-project.mjs --app-only",
+    "native": "cargo test --manifest-path src-tauri/Cargo.toml --lib --offline --locked --jobs 2"
+  },
+  "files": {
+    "scripts/lib/desktop-session.mjs": "866787fd536fa90f857662ea81b4179f9b6b1607aeb6e297a4f15006103c20e8",
+    "scripts/tests/editor-dialogs.test.mjs": "fce1b40c31b639c5a4cc7905a9af7643be7bc8797244b54d75344b2b9e736365",
+    "scripts/tests/export-bridge.test.mjs": "64b87229ab624c9f3f96e3244042cc288fb7bac377bbb0118a756f648cc037ab",
+    "src-tauri/src/lib.rs": "360893da8f9abf9d6778c45a9b227677a7194245951d3ed019e8994dec9931fa",
+    "web/modules/app-export.js": "c94d24aca6e452f3709107e14797f2a31c1153ebf6008abf549bcd68614f873b"
+  },
+  "testEnvironment": "Actual controller and event-capable DOM fixture with controlled transport/completion ordering; actual loopback session handshake, desktop bridge and ZIP service on temporary v3 projects. The current textarea value is preserved; HTTP tests preserve exact ZIP, BOM/CRLF source and asset bytes. Native library is compiled/tested with the original lockfile and packaging-only environment override, without running the graphical app.",
+  "nativeArchiveModuleTestsRerun": true,
+  "fullTauriLibraryTestsRerun": true,
+  "nativeWindowTested": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "temporaryFixtureProjectsRemoved": true,
+  "cleanup": {
+    "temporaryBuild": "/tmp/viento-export-bridge-3m79xtwt",
+    "removed": true,
+    "removedFileBytes": 1429682214
+  },
+  "functionNetwork": {
+    "revision": 45,
+    "sourceFingerprints": 158,
+    "nodeSources": 180,
+    "localImportStatements": 425,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

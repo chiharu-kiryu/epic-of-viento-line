@@ -1,0 +1,34 @@
+   Compiling viento-studio v0.3.9 (/tmp/viento-release-b39-el4gjlat)
+    Finished `test` profile [unoptimized] target(s) in 1.50s
+     Running unittests src/lib.rs (/tmp/viento-release-b39-el4gjlat/target/debug/deps/viento_studio-7eb8e5c019990f06)
+
+running 14 tests
+test workspace::tests::full_project_migration_roundtrip ... ignored, full-size source and asset migration; set VIENTO_TEST_SOURCE_ROOT
+test workspace::tests::backup_snapshots_detect_replaced_files_even_when_size_and_modified_time_are_preserved ... ok
+test workspace::tests::imports_legacy_v1_archives_without_changing_identity_or_source_bytes ... ok
+test workspace::tests::wrong_checksum_rolls_back_the_entire_import ... ok
+test workspace::tests::compatibility_guard_blocks_old_readers_and_never_replaces_a_missing_public_manifest ... ok
+test workspace::tests::new_workspaces_copy_seed_or_templates_without_sharing_or_overwriting_data ... ok
+test workspace::tests::imports_are_validated_before_committing_and_existing_folders_are_preserved ... ok
+test workspace::tests::imports_reject_portable_directory_file_and_unicode_collisions_before_restore ... ok
+test workspace::tests::v2_archive_carries_metadata_and_external_assets_but_not_local_bindings ... ok
+test workspace::tests::archive_roundtrip_preserves_sources_binary_assets_and_excludes_cache ... ok
+test workspace::tests::generic_projects_are_empty_and_keep_custom_types_templates_and_media_on_restore ... ok
+test workspace::tests::registered_asset_fingerprints_protect_backup_and_restore_even_when_zip_checksums_match ... ok
+test workspace::tests::native_exports_reject_paths_that_would_merge_on_another_filesystem ... ok
+test workspace::tests::missing_registered_sources_and_asset_bindings_cannot_be_reported_as_complete_archives ... ok
+
+test result: ok. 13 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+     Running unittests src/main.rs (/tmp/viento-release-b39-el4gjlat/target/debug/deps/viento_studio-b1f58eda7d30bf79)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests viento_studio
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
