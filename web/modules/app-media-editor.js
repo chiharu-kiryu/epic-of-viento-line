@@ -13,7 +13,7 @@ export function setupMediaEditor(adapter) {
   const preview = get('docMediaPreview'), surface = document.querySelector('.doc-editor-surface');
   let assets = [], limit = 60, lastInput = null, context = null, aborter = null;
   let previewTimer = null, previewGeneration = 0, previewSignature = '', listGeneration = 0;
-  let lastPreviewRequestAt = 0, previewPath = '';
+  let lastPreviewRequestAt = 0, previewPath = '', previewType = '';
   const fileSize = (bytes) => bytes < 1024 * 1024 ? `${Math.ceil(bytes / 1024)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
   const status = (text, error = false) => { message.textContent = text; message.classList.toggle('is-error', error); };
   const editableInput = (node) => node?.tagName === 'TEXTAREA' && surface.contains(node);
@@ -40,9 +40,13 @@ export function setupMediaEditor(adapter) {
     clearTimeout(previewTimer);
     const generation = ++previewGeneration;
     if (!adapter.isEditable()) { preview.hidden = true; pausePreview(); return; }
-    if (adapter.isBusy()) return;
     const current = capture();
-    if (current?.path !== previewPath) { previewPath = current?.path; showPreview([]); }
+    // A template can change its path or parser before the new source arrives.
+    // Stop the previous draft's players even while that load keeps editing busy.
+    if (current?.path !== previewPath || current?.documentType !== previewType) {
+      previewPath = current?.path; previewType = current?.documentType; showPreview([]);
+    }
+    if (adapter.isBusy()) return;
     if (!current || !/(?:asset:|\/asset-files\/|!?\[.*\]\(|\bsrc\b|媒体)/.test(current.content)) { showPreview([]); return; }
     previewTimer = setTimeout(async () => {
       try {

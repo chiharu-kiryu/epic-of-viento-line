@@ -1,0 +1,365 @@
+TAP version 13
+# Subtest: reopening an aborted export ignores its late failure and allows a fresh export
+ok 1 - reopening an aborted export ignores its late failure and allows a fresh export
+  ---
+  duration_ms: 31.207878
+  ...
+# Subtest: an aborted export arriving after reopen is released without blocking the new dialog
+ok 2 - an aborted export arriving after reopen is released without blocking the new dialog
+  ---
+  duration_ms: 13.066281
+  ...
+# Subtest: opening export during a save cannot leave a permanently busy snapshot
+ok 3 - opening export during a save cannot leave a permanently busy snapshot
+  ---
+  duration_ms: 9.008262
+  ...
+# Subtest: an expired native export can be regenerated in the same dialog after cancelling its save picker
+ok 4 - an expired native export can be regenerated in the same dialog after cancelling its save picker
+  ---
+  duration_ms: 12.852527
+  ...
+# Subtest: native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+ok 5 - native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+  ---
+  duration_ms: 16.441944
+  ...
+# Subtest: cancelling media import during structured insertion keeps the draft and uploaded assets
+ok 6 - cancelling media import during structured insertion keeps the draft and uploaded assets
+  ---
+  duration_ms: 12.314213
+  ...
+# Subtest: late media preparation cannot overwrite a draft whose content changed
+ok 7 - late media preparation cannot overwrite a draft whose content changed
+  ---
+  duration_ms: 10.895028
+  ...
+# Subtest: existing media still inserts into an unchanged structured draft and releases the editor
+ok 8 - existing media still inserts into an unchanged structured draft and releases the editor
+  ---
+  duration_ms: 12.962555
+  ...
+# Subtest: type settings distinguish creation from editing and retain a rejected new draft for retry or cancel
+ok 9 - type settings distinguish creation from editing and retain a rejected new draft for retry or cancel
+  ---
+  duration_ms: 55.380135
+  ...
+# Subtest: template preview and save retain original BOM and line endings when only its label changes
+ok 10 - template preview and save retain original BOM and line endings when only its label changes
+  ---
+  duration_ms: 29.140441
+  ...
+# Subtest: returning from saved project settings keeps editing locked until the new index applies
+ok 11 - returning from saved project settings keeps editing locked until the new index applies
+  ---
+  duration_ms: 19.91409
+  ...
+# Subtest: discarding edits after a template save cannot leave a closed dialog marked dirty
+ok 12 - discarding edits after a template save cannot leave a closed dialog marked dirty
+  ---
+  duration_ms: 24.47092
+  ...
+# Subtest: a failed project index application keeps the settings available for retry without another save
+ok 13 - a failed project index application keeps the settings available for retry without another save
+  ---
+  duration_ms: 23.679777
+  ...
+# Subtest: document exports include owned stories, exact sources and referenced external media in both formats
+ok 14 - document exports include owned stories, exact sources and referenced external media in both formats
+  ---
+  duration_ms: 152.165522
+  ...
+# Subtest: JSON and YAML typed fields export using the generic layout and media bindings
+ok 15 - JSON and YAML typed fields export using the generic layout and media bindings
+  ---
+  duration_ms: 68.192918
+  ...
+# Subtest: explicit audio bindings export a player even when the source does not embed the audio
+ok 16 - explicit audio bindings export a player even when the source does not embed the audio
+  ---
+  duration_ms: 51.936744
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the md reference index
+ok 17 - sharing carries declared asset IDs recognized by the md reference index
+  ---
+  duration_ms: 412.185995
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the txt reference index
+ok 18 - sharing carries declared asset IDs recognized by the txt reference index
+  ---
+  duration_ms: 417.336574
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the json reference index
+ok 19 - sharing carries declared asset IDs recognized by the json reference index
+  ---
+  duration_ms: 389.360647
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the yaml reference index
+ok 20 - sharing carries declared asset IDs recognized by the yaml reference index
+  ---
+  duration_ms: 442.639972
+  ...
+# Subtest: multiple attachment roles share one player per document while keeping each owned story complete
+ok 21 - multiple attachment roles share one player per document while keeping each owned story complete
+  ---
+  duration_ms: 360.958477
+  ...
+# Subtest: declared missing assets reject sharing, then retry succeeds after the reference is repaired
+ok 22 - declared missing assets reject sharing, then retry succeeds after the reference is repaired
+  ---
+  duration_ms: 90.579046
+  ...
+# Subtest: sharing retains indexed legacy image paths, relative links and unregistered local images
+ok 23 - sharing retains indexed legacy image paths, relative links and unregistered local images
+  ---
+  duration_ms: 418.850286
+  ...
+# Subtest: v2 relative image references resolve against the original document directory
+ok 24 - v2 relative image references resolve against the original document directory
+  ---
+  duration_ms: 372.388233
+  ...
+# Subtest: v3 relative image references resolve against the original document directory
+ok 25 - v3 relative image references resolve against the original document directory
+  ---
+  duration_ms: 368.618616
+  ...
+# Subtest: sharing preserves distinct percent and space filenames, registered identities and renamed aliases
+ok 26 - sharing preserves distinct percent and space filenames, registered identities and renamed aliases
+  ---
+  duration_ms: 87.02687
+  ...
+# Subtest: owned stories retain nested heading levels in HTML and Markdown shares
+ok 27 - owned stories retain nested heading levels in HTML and Markdown shares
+  ---
+  duration_ms: 49.391065
+  ...
+# Subtest: v2 complete project packages preserve migration contract, metadata and all external media
+ok 28 - v2 complete project packages preserve migration contract, metadata and all external media
+  ---
+  duration_ms: 79.697895
+  ...
+# Subtest: v3 complete project packages preserve migration contract, metadata and all external media
+ok 29 - v3 complete project packages preserve migration contract, metadata and all external media
+  ---
+  duration_ms: 65.062787
+  ...
+# Subtest: missing assets, traversal, symlinks and changed source snapshots cannot produce a successful export
+ok 30 - missing assets, traversal, symlinks and changed source snapshots cannot produce a successful export
+  ---
+  duration_ms: 72.314577
+  ...
+# Subtest: complete exports reject directory aliases and file-directory conflicts without changing project bytes
+ok 31 - complete exports reject directory aliases and file-directory conflicts without changing project bytes
+  ---
+  duration_ms: 136.503927
+  ...
+# Subtest: editor and native v2/v3 archives round-trip with exact sources, metadata and external media
+ok 32 - editor and native v2/v3 archives round-trip with exact sources, metadata and external media # SKIP
+  ---
+  duration_ms: 0.092404
+  ...
+# Subtest: HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup
+ok 33 - HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup
+  ---
+  duration_ms: 783.385404
+  ...
+# Subtest: consecutive browser exports recycle completed downloads instead of exhausting the three-job limit
+ok 34 - consecutive browser exports recycle completed downloads instead of exhausting the three-job limit
+  ---
+  duration_ms: 350.932276
+  ...
+# Subtest: releasing or expiring an export cannot remove a file being downloaded
+ok 35 - releasing or expiring an export cannot remove a file being downloaded
+  ---
+  duration_ms: 149.199108
+  ...
+# Subtest: export range requests keep their real status in diagnostics and remain retryable
+ok 36 - export range requests keep their real status in diagnostics and remain retryable
+  ---
+  duration_ms: 268.50703
+  ...
+# Subtest: pending and interrupted exports remain protected from automatic quota eviction
+ok 37 - pending and interrupted exports remain protected from automatic quota eviction
+  ---
+  duration_ms: 100.511559
+  ...
+# Subtest: export entry blocks unsaved and new drafts without changing editor state
+ok 38 - export entry blocks unsaved and new drafts without changing editor state
+  ---
+  duration_ms: 1.728608
+  ...
+# Subtest: expired and interrupted jobs release temporary disk space while retaining source files
+ok 39 - expired and interrupted jobs release temporary disk space while retaining source files
+  ---
+  duration_ms: 162.428626
+  ...
+# Subtest: inline images and videos parse at the start, in prose and fields, but never inside code
+ok 40 - inline images and videos parse at the start, in prose and fields, but never inside code
+  ---
+  duration_ms: 8.231477
+  ...
+# Subtest: media URLs reject executable, remote and escaping sources while preserving local encoded names
+ok 41 - media URLs reject executable, remote and escaping sources while preserving local encoded names
+  ---
+  duration_ms: 0.853689
+  ...
+# Subtest: stable media URL forms normalize UUID casing to the registered identity
+ok 42 - stable media URL forms normalize UUID casing to the registered identity
+  ---
+  duration_ms: 0.173778
+  ...
+# Subtest: audio references render in prose, custom fields and structured media without autoplay or source loss
+ok 43 - audio references render in prose, custom fields and structured media without autoplay or source loss
+  ---
+  duration_ms: 9.00767
+  ...
+# Subtest: JSON and YAML insertion preserves existing source bytes, comments and structured values
+ok 44 - JSON and YAML insertion preserves existing source bytes, comments and structured values
+  ---
+  duration_ms: 22.972865
+  ...
+# Subtest: media insertion keeps indented YAML maps valid, including BOM, comments and existing lists
+ok 45 - media insertion keeps indented YAML maps valid, including BOM, comments and existing lists
+  ---
+  duration_ms: 16.798436
+  ...
+# Subtest: media insertion preserves an existing YAML flow list: indented map with BOM/CRLF
+ok 46 - media insertion preserves an existing YAML flow list: indented map with BOM/CRLF
+  ---
+  duration_ms: 3.028059
+  ...
+# Subtest: media insertion preserves an existing YAML flow list: indented flow map
+ok 47 - media insertion preserves an existing YAML flow list: indented flow map
+  ---
+  duration_ms: 2.847748
+  ...
+# Subtest: media insertion preserves an existing YAML flow list: list on a separate indented line
+ok 48 - media insertion preserves an existing YAML flow list: list on a separate indented line
+  ---
+  duration_ms: 2.483611
+  ...
+# Subtest: media insertion accepts an empty YAML document: document end and BOM/CRLF
+ok 49 - media insertion accepts an empty YAML document: document end and BOM/CRLF
+  ---
+  duration_ms: 1.790425
+  ...
+# Subtest: media insertion accepts an empty YAML document: YAML directive
+ok 50 - media insertion accepts an empty YAML document: YAML directive
+  ---
+  duration_ms: 1.490349
+  ...
+# Subtest: media insertion accepts an empty YAML document: start marker without a final newline
+ok 51 - media insertion accepts an empty YAML document: start marker without a final newline
+  ---
+  duration_ms: 0.977773
+  ...
+# Subtest: reused media survives consecutive structured insertion, save, reopen, index and both export formats
+ok 52 - reused media survives consecutive structured insertion, save, reopen, index and both export formats
+  ---
+  duration_ms: 1448.157993
+  ...
+# Subtest: preview tolerates cyclic YAML aliases and interrupted imports leave no partial files
+ok 53 - preview tolerates cyclic YAML aliases and interrupted imports leave no partial files
+  ---
+  duration_ms: 48.655559
+  ...
+# Subtest: concurrent imports reuse identical bytes, keep names independent of paths and clean rejected uploads
+ok 54 - concurrent imports reuse identical bytes, keep names independent of paths and clean rejected uploads
+  ---
+  duration_ms: 66.176727
+  ...
+# Subtest: audio imports share registry formats, reuse existing audio and reject mislabeled or oversized files
+ok 55 - audio imports share registry formats, reuse existing audio and reject mislabeled or oversized files
+  ---
+  duration_ms: 160.291909
+  ...
+# Subtest: imports respect an external asset store and reject linked destination directories
+ok 56 - imports respect an external asset store and reject linked destination directories
+  ---
+  duration_ms: 75.804686
+  ...
+# Subtest: image: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+ok 57 - image: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+  ---
+  duration_ms: 1462.560218
+  ...
+# Subtest: audio: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+ok 58 - audio: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+  ---
+  duration_ms: 1218.238125
+  ...
+# Subtest: media import locks editing navigation without discarding the source draft
+ok 59 - media import locks editing navigation without discarding the source draft
+  ---
+  duration_ms: 19.344115
+  ...
+# Subtest: draft preview requests cannot consume the allowance for document reads and writes
+ok 60 - draft preview requests cannot consume the allowance for document reads and writes
+  ---
+  duration_ms: 216.087887
+  ...
+# Subtest: item cards split source attribute lines into named values without changing the source fields
+ok 61 - item cards split source attribute lines into named values without changing the source fields
+  ---
+  duration_ms: 12.573222
+  ...
+# Subtest: item attribute aliases preserve reductions, formulas, qualifiers and unstructured notes
+ok 62 - item attribute aliases preserve reductions, formulas, qualifiers and unstructured notes
+  ---
+  duration_ms: 1.428843
+  ...
+# Subtest: item attributes support structured fields and complementary alias blocks without losing zero
+ok 63 - item attributes support structured fields and complementary alias blocks without losing zero
+  ---
+  duration_ms: 0.785271
+  ...
+# Subtest: table display keeps empty and placeholder cells in their original columns
+ok 64 - table display keeps empty and placeholder cells in their original columns
+  ---
+  duration_ms: 0.613617
+  ...
+# Subtest: document and image path conversion preserves full-width filename characters and local images resolve
+ok 65 - document and image path conversion preserves full-width filename characters and local images resolve
+  ---
+  duration_ms: 1.269543
+  ...
+# Subtest: image URLs treat registered filenames as literal paths, including hashes and percent signs
+ok 66 - image URLs treat registered filenames as literal paths, including hashes and percent signs
+  ---
+  duration_ms: 0.353467
+  ...
+# Subtest: metadata conversion preserves zero, false and nested object arrays and finds nonempty aliases
+ok 67 - metadata conversion preserves zero, false and nested object arrays and finds nonempty aliases
+  ---
+  duration_ms: 0.413159
+  ...
+# Subtest: prose punctuation, repeated paragraphs, list entries and headings survive rendering in order
+ok 68 - prose punctuation, repeated paragraphs, list entries and headings survive rendering in order
+  ---
+  duration_ms: 0.750795
+  ...
+# Subtest: story previews include dialogue and rules retain tables outside metadata cards
+ok 69 - story previews include dialogue and rules retain tables outside metadata cards
+  ---
+  duration_ms: 1.286345
+  ...
+# Subtest: the editor uses the complete JSON source path and preserves empty source and real fallback newlines
+ok 70 - the editor uses the complete JSON source path and preserves empty source and real fallback newlines
+  ---
+  duration_ms: 14.480056
+  ...
+# Subtest: runtime content rendering suppresses only fields that were actually displayed in cards
+ok 71 - runtime content rendering suppresses only fields that were actually displayed in cards
+  ---
+  duration_ms: 7.423584
+  ...
+1..71
+# tests 71
+# suites 0
+# pass 70
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 6041.557243

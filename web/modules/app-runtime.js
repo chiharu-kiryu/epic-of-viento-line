@@ -1810,7 +1810,7 @@ function setMode(requestedMode, options = {}) {
   setModeUi();
   updateEmptyProject();
 
-  if (prevMode !== finalMode && state.docs?.length) {
+  if (prevMode !== finalMode) {
     if (!isEditModeActive()) {
       resetDocEditorState();
       setEditorPanelVisibility(false);
@@ -1821,7 +1821,7 @@ function setMode(requestedMode, options = {}) {
         updateEditorForDoc(current);
       } else if (state.docs.length > 0) {
         selectDoc(state.docs[0].path);
-      }
+      } else updateEmptyProject();
       syncDocListEditPermissions();
       return;
     }
@@ -2702,6 +2702,7 @@ function resetDocEditorState() {
   }
   state.activeCreateType = getCreateTypeDisplayList()[0] || 'hero';
   syncEditorLayout();
+  mediaEditorController?.refresh();
 }
 
 const NEW_SKILL_MARKERS = /^(?:获得新技能|新增技能|新增被动技能|新增主动技能|新增额外技能)$/;
@@ -3568,6 +3569,7 @@ async function enterEditMode() {
     editEditorEl.focus();
   }
   syncEditSessionBaseline();
+  mediaEditorController?.refresh();
 }
 
 function handleEditorSaveShortcut(event) {

@@ -94,6 +94,7 @@ export async function dialogHarness(module, overrides = {}) {
   document.documentElement = new DialogElement('html', document);
   document.body = new DialogElement('body', document);
   document.createElement = (tag) => new DialogElement(tag, document);
+  document.createDocumentFragment = () => document.createElement('fragment');
   document.getElementById = (id) => document.body.querySelector(`#${id}`);
   document.querySelector = (selector) => document.body.querySelector(selector);
   document.querySelectorAll = (selector) => document.body.querySelectorAll(selector);

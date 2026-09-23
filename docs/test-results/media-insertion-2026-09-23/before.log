@@ -1,0 +1,200 @@
+TAP version 13
+# Subtest: inline images and videos parse at the start, in prose and fields, but never inside code
+ok 1 - inline images and videos parse at the start, in prose and fields, but never inside code # SKIP test name does not match pattern
+  ---
+  duration_ms: 1.744208
+  ...
+# Subtest: media URLs reject executable, remote and escaping sources while preserving local encoded names
+ok 2 - media URLs reject executable, remote and escaping sources while preserving local encoded names # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.081784
+  ...
+# Subtest: stable media URL forms normalize UUID casing to the registered identity
+ok 3 - stable media URL forms normalize UUID casing to the registered identity # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.067337
+  ...
+# Subtest: audio references render in prose, custom fields and structured media without autoplay or source loss
+ok 4 - audio references render in prose, custom fields and structured media without autoplay or source loss # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.064592
+  ...
+# Subtest: JSON and YAML insertion preserves existing source bytes, comments and structured values
+ok 5 - JSON and YAML insertion preserves existing source bytes, comments and structured values # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.065223
+  ...
+# Subtest: media insertion keeps indented YAML maps valid, including BOM, comments and existing lists
+ok 6 - media insertion keeps indented YAML maps valid, including BOM, comments and existing lists # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.060174
+  ...
+# Subtest: media insertion preserves an existing YAML flow list: indented map with BOM/CRLF
+not ok 7 - media insertion preserves an existing YAML flow list: indented map with BOM/CRLF
+  ---
+  duration_ms: 10.426316
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media.test.mjs:159:4'
+  failureType: 'testCodeFailure'
+  error: '当前列表格式无法直接插入素材，请先将其展开为普通列表。'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    invalid (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/media-insertion.mjs:8:44)
+    insertStructuredMedia (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/media-insertion.mjs:48:52)
+    insertStructuredMedia (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/media-insertion.mjs:13:54)
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media.test.mjs:162:17)
+    Test.runInAsyncScope (node:async_hooks:203:9)
+    Test.run (node:internal/test_runner/test:631:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:374:18)
+    Test.postRun (node:internal/test_runner/test:715:19)
+    Test.run (node:internal/test_runner/test:673:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: media insertion preserves an existing YAML flow list: indented flow map
+ok 8 - media insertion preserves an existing YAML flow list: indented flow map
+  ---
+  duration_ms: 6.42922
+  ...
+# Subtest: media insertion preserves an existing YAML flow list: list on a separate indented line
+not ok 9 - media insertion preserves an existing YAML flow list: list on a separate indented line
+  ---
+  duration_ms: 2.039715
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media.test.mjs:159:4'
+  failureType: 'testCodeFailure'
+  error: '当前列表格式无法直接插入素材，请先将其展开为普通列表。'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    invalid (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/media-insertion.mjs:8:44)
+    insertStructuredMedia (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/media-insertion.mjs:48:52)
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media.test.mjs:162:17)
+    Test.runInAsyncScope (node:async_hooks:203:9)
+    Test.run (node:internal/test_runner/test:631:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:374:18)
+    Test.postRun (node:internal/test_runner/test:715:19)
+    Test.run (node:internal/test_runner/test:673:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: media insertion accepts an empty YAML document: document end and BOM/CRLF
+not ok 10 - media insertion accepts an empty YAML document: document end and BOM/CRLF
+  ---
+  duration_ms: 0.662449
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media.test.mjs:177:4'
+  failureType: 'testCodeFailure'
+  error: '素材需要插入到对象或列表中，请先将当前文档整理为对象或列表。'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    invalid (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/media-insertion.mjs:8:44)
+    insertStructuredMedia (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/media-insertion.mjs:26:43)
+    insertStructuredMedia (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/media-insertion.mjs:13:54)
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media.test.mjs:179:18)
+    Test.runInAsyncScope (node:async_hooks:203:9)
+    Test.run (node:internal/test_runner/test:631:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:374:18)
+    Test.postRun (node:internal/test_runner/test:715:19)
+    Test.run (node:internal/test_runner/test:673:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: media insertion accepts an empty YAML document: YAML directive
+not ok 11 - media insertion accepts an empty YAML document: YAML directive
+  ---
+  duration_ms: 0.485996
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media.test.mjs:177:4'
+  failureType: 'testCodeFailure'
+  error: '素材需要插入到对象或列表中，请先将当前文档整理为对象或列表。'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    invalid (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/media-insertion.mjs:8:44)
+    insertStructuredMedia (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/media-insertion.mjs:26:43)
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media.test.mjs:179:18)
+    Test.runInAsyncScope (node:async_hooks:203:9)
+    Test.run (node:internal/test_runner/test:631:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:374:18)
+    Test.postRun (node:internal/test_runner/test:715:19)
+    Test.run (node:internal/test_runner/test:673:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: media insertion accepts an empty YAML document: start marker without a final newline
+not ok 12 - media insertion accepts an empty YAML document: start marker without a final newline
+  ---
+  duration_ms: 0.171734
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media.test.mjs:177:4'
+  failureType: 'testCodeFailure'
+  error: '素材需要插入到对象或列表中，请先将当前文档整理为对象或列表。'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    invalid (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/media-insertion.mjs:8:44)
+    insertStructuredMedia (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/media-insertion.mjs:26:43)
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media.test.mjs:179:18)
+    Test.runInAsyncScope (node:async_hooks:203:9)
+    Test.run (node:internal/test_runner/test:631:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:374:18)
+    Test.postRun (node:internal/test_runner/test:715:19)
+    Test.run (node:internal/test_runner/test:673:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: reused media survives consecutive structured insertion, save, reopen, index and both export formats
+not ok 13 - reused media survives consecutive structured insertion, save, reopen, index and both export formats
+  ---
+  duration_ms: 680.521091
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media.test.mjs:193:1'
+  failureType: 'testCodeFailure'
+  error: '{"status":400,"payload":{"ok":false,"error":"当前列表格式无法直接插入素材，请先将其展开为普通列表。","errorCode":"media_insertion_invalid","requestId":"1790132765746-14"},"data":{"ok":false,"error":"当前列表格式无法直接插入素材，请先将其展开为普通列表。","errorCode":"media_insertion_invalid","requestId":"1790132765746-14"}}'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 400
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media.test.mjs:224:14)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: preview tolerates cyclic YAML aliases and interrupted imports leave no partial files
+ok 14 - preview tolerates cyclic YAML aliases and interrupted imports leave no partial files # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.115067
+  ...
+# Subtest: concurrent imports reuse identical bytes, keep names independent of paths and clean rejected uploads
+ok 15 - concurrent imports reuse identical bytes, keep names independent of paths and clean rejected uploads # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.154411
+  ...
+# Subtest: audio imports share registry formats, reuse existing audio and reject mislabeled or oversized files
+ok 16 - audio imports share registry formats, reuse existing audio and reject mislabeled or oversized files # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.049734
+  ...
+# Subtest: imports respect an external asset store and reject linked destination directories
+ok 17 - imports respect an external asset store and reject linked destination directories # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.036068
+  ...
+# Subtest: image: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+ok 18 - image: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.033893
+  ...
+# Subtest: audio: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+ok 19 - audio: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.043141
+  ...
+# Subtest: media import locks editing navigation without discarding the source draft
+ok 20 - media import locks editing navigation without discarding the source draft # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.04241
+  ...
+# Subtest: draft preview requests cannot consume the allowance for document reads and writes
+ok 21 - draft preview requests cannot consume the allowance for document reads and writes # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.033643
+  ...
+1..21
+# tests 21
+# suites 0
+# pass 1
+# fail 6
+# cancelled 0
+# skipped 14
+# todo 0
+# duration_ms 901.387734

@@ -1,0 +1,70 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.2",
+  "gitBase": "ca8a8d85ca64c040ca80fcf818cf15dadfd0b2e8",
+  "scope": "Source loading, draft media preview, mode/template changes and byte-preserving editor saves",
+  "workflows": [
+    "F15",
+    "F16",
+    "F17",
+    "F18",
+    "F21",
+    "F30"
+  ],
+  "bugs": [
+    "N66",
+    "N67",
+    "N68",
+    "N69"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 21,
+    "passed": 2,
+    "failed": 6,
+    "skipped": 13,
+    "log": "before.log",
+    "implementation": "Original b.3.2 app-runtime.js and app-media-editor.js with current tests in a temporary source copy; copy removed after comparison",
+    "skipReason": "Existing tests excluded by test-name-pattern"
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 97,
+    "passed": 96,
+    "failed": 0,
+    "skipped": 1,
+    "log": "after.log",
+    "newCases": 8
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 258,
+    "passed": 257,
+    "failed": 0,
+    "skipped": 1,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 120,
+    "apiContractPassed": true
+  },
+  "skipReason": "Node/Rust archive interoperability requires VIENTO_TEST_ARCHIVE_BINARY; native archive code unchanged",
+  "files": {
+    "scripts/tests/dialog-harness.mjs": "b675d9727277e6c471e3077909218dfd0159ed5707d382b203c550564d485eb4",
+    "scripts/tests/editor-dialogs.test.mjs": "60fab6ca472d7431a310c2b7b86981c9cd49fbcdaa040d94e3270f022a882da5",
+    "web/modules/app-media-editor.js": "fa03582cc8b56c3ab161acbf28e9cca15da5110e8742f7647fdad39a3cb5fcb2",
+    "web/modules/app-runtime.js": "69f4883ae4314c1ec901009c2738af54bbce9471d43229c97d504a088f39a16a"
+  },
+  "controllerTestEnvironment": "Production editor and media controllers share the real page markup in a DOM fixture; network and audio/video playback are simulated",
+  "nativeTestsRerun": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "functionNetwork": {
+    "revision": 24,
+    "sourceFingerprints": 146,
+    "nodeSources": 150,
+    "localImportStatements": 375,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

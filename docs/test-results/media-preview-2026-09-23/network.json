@@ -1,0 +1,22 @@
+{
+  "revision": 24,
+  "sourceFiles": 146,
+  "jsModules": 126,
+  "changedSources": [
+    "scripts/tests/dialog-harness.mjs",
+    "scripts/tests/editor-dialogs.test.mjs",
+    "web/modules/app-media-editor.js",
+    "web/modules/app-runtime.js"
+  ],
+  "localImports": 375,
+  "externalImports": 272,
+  "eventBindings": 95,
+  "testDeclarations": 228,
+  "nodeSources": 150,
+  "functionalEdges": 173,
+  "moduleCycles": 1,
+  "inlineScriptsChecked": 1,
+  "localMarkdownLinksChecked": 400,
+  "embeddedDataMatches": true,
+  "sourceFingerprintsVerified": true
+}

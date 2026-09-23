@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { deferred } from './editor-harness.mjs';
+import vm from 'node:vm';
+import { deferred, editorHarness } from './editor-harness.mjs';
 import { dialogHarness, flushDialogs } from './dialog-harness.mjs';
 import { API_PATHS } from '../lib/doc-api-contract.mjs';
 import { MEDIA_MAX_BYTES, mediaKindForName, mediaMarkup } from '../lib/media-format.mjs';
@@ -180,6 +181,203 @@ test('existing media still inserts into an unchanged structured draft and releas
   assert.deepEqual(replacements, [content]);
   assert.equal(isBusy(), false);
   assert.equal(element('docMediaDialog').open, false);
+});
+
+const previewMedia = [
+  { type: 'audio', src: 'asset:abcdefab-1234-5678-90ab-abcdefabcdef', caption: '配音' },
+  { type: 'video', src: 'asset:abcdefab-1234-5678-90ab-abcdefabcdea', caption: '片段' },
+];
+const previewSource = `\uFEFF# 角色\r\n\r\n${previewMedia.map((media) => `!${media.type}[${media.caption}](${media.src})`).join('\r\n\r\n')}\r\n`;
+
+// Connect the actual editor and media controllers to the same DOM. Only the
+// network and playback are simulated so delayed responses can be ordered.
+async function mediaPreviewHarness(overrides = {}) {
+  const requests = [], writes = [];
+  const ui = await dialogHarness('app-media-editor', {
+    MEDIA_MAX_BYTES, mediaKindForName, mediaMarkup,
+    prepareDraftMedia: (content, path, ids, documentType) => {
+      const pending = deferred(); requests.push({ ...pending, content, path, ids, documentType }); return pending.promise;
+    },
+    renderMedia: (media) => {
+      const player = ui.document.createElement(media.type);
+      player.src = media.src; player.paused = true;
+      player.play = () => { player.paused = false; };
+      player.pause = () => { player.paused = true; };
+      return player;
+    },
+  });
+  const { runtime, state, doc } = await editorHarness({
+    document: ui.document,
+    readDocSource: async () => ({ content: previewSource, version: '1' }),
+    writeDoc: async (payload) => { writes.push(payload); return { version: '2' }; },
+    ...overrides,
+  });
+  const controller = ui.runtime.setupMediaEditor({
+    isEditable: () => runtime.isInEditSession() && runtime.isEditModeActive(), isBusy: runtime.isEditorBusy,
+    getContext: runtime.mediaDraftContext,
+    setBusy: (busy) => { state.isImportingMedia = busy; runtime.refreshEditButtons(); },
+    replaceSource: runtime.replaceMediaDraftSource, insertText: runtime.insertMediaText,
+    changed: runtime.refreshEditSessionDirtyState, status: runtime.setEditorStatus,
+  });
+  runtime.testMediaController = controller;
+  vm.runInContext('mediaEditorController = testMediaController;', runtime);
+  runtime.rebuildIndexForDoc = async () => {};
+  runtime.updateEditorForDoc(doc);
+  await runtime.enterEditMode();
+  const startPreview = () => {
+    assert.equal(ui.timers.size, 1, 'one debounced preview should be scheduled');
+    const [id, callback] = ui.timers.entries().next().value;
+    ui.timers.delete(id);
+    return callback();
+  };
+  const showMedia = async () => {
+    controller.refresh();
+    const pending = startPreview(); requests.at(-1).resolve({ media: previewMedia }); await pending;
+    const player = ui.element('docMediaPreview').querySelector('audio');
+    assert.ok(player);
+    ui.element('docMediaPreview').querySelectorAll('audio, video').forEach((item) => item.play());
+    return player;
+  };
+  return { ...ui, runtime, state, doc, controller, requests, writes, startPreview, showMedia };
+}
+
+test('media preview loads immediately after reading a document without requiring another input event', async () => {
+  const h = await mediaPreviewHarness();
+  const pending = h.startPreview();
+  assert.equal(h.requests.at(-1).content, previewSource);
+  h.requests.at(-1).resolve({ media: previewMedia }); await pending;
+  assert.equal(h.element('docMediaPreview').hidden, false);
+  assert.equal(h.element('docMediaPreview').querySelector('audio').paused, true);
+  assert.equal(h.state.editHasUnsavedChanges, false);
+  assert.deepEqual(h.writes, []);
+});
+
+for (const empty of [false, true]) test(`media preview stops when switching to browse: ${empty ? 'first unsaved document' : 'existing document'}`, async () => {
+  const h = await mediaPreviewHarness({ loadTemplateContent: async () => previewSource });
+  if (empty) {
+    h.runtime.exitEditMode();
+    h.state.docs = []; h.state.activePath = '';
+    h.state.workspace = { name: '空作品', documentTypes: [{ id: 'document', label: '档案', directory: 'notes', templateSource: 'templates/document.md' }] };
+    await h.runtime.enterCreateMode();
+  }
+  const player = await h.showMedia();
+  const video = h.element('docMediaPreview').querySelector('video');
+  h.runtime.setMode('browse');
+  assert.equal(player.paused, true, 'a hidden editor must not keep playing');
+  assert.equal(video.paused, true);
+  assert.equal(h.element('docMediaPreview').hidden, true);
+  assert.equal(h.timers.size, 0);
+  assert.equal(h.element('docContent').hidden, false);
+  assert.equal(h.state.isEditing, false);
+  assert.equal(h.state.isCreating, false);
+  assert.deepEqual(h.writes, []);
+});
+
+test('media preview clears the previous template immediately while a different type is loading', async () => {
+  const template = deferred(); let loads = 0;
+  const h = await mediaPreviewHarness({ loadTemplateContent: () => ++loads === 1 ? Promise.resolve(previewSource) : template.promise });
+  h.runtime.exitEditMode();
+  await h.runtime.enterCreateMode();
+  const player = await h.showMedia();
+  const loading = h.runtime.setCreateTypeState('item');
+  assert.equal(h.state.isLoadingTemplate, true);
+  assert.equal(player.paused, true);
+  assert.equal(h.element('docMediaPreview').hidden, true);
+  assert.equal(h.timers.size, 0, 'do not preview the old source under the new type');
+  template.resolve('# 道具\n'); await loading;
+  assert.equal(h.element('docSourceEditor').value, '# 道具\n');
+  assert.equal(h.element('docMediaPreview').hidden, true);
+  assert.deepEqual(h.writes, []);
+});
+
+test('media preview clears when types share a source path and ignores the old pending response', async () => {
+  const template = deferred(); let loads = 0;
+  const h = await mediaPreviewHarness({
+    Date: class extends Date { constructor() { super('2026-09-23T00:00:00Z'); } },
+    loadTemplateContent: () => ++loads === 1 ? Promise.resolve(previewSource) : template.promise,
+  });
+  h.runtime.exitEditMode();
+  h.state.workspace = { version: 3, paths: { documents: 'documents' }, documentTypes: ['character', 'story'].map((id) => ({
+    id, label: '档案', directory: 'notes', template: `${id}.md`, templateSource: `.viento/templates/${id}.md`,
+  })) };
+  await h.runtime.enterCreateMode();
+  assert.equal(h.state.activeCreateType, 'character');
+  const previousPath = h.state.activeCreatePath;
+  const player = await h.showMedia();
+  h.controller.refresh(); const pending = h.startPreview();
+  const loading = h.runtime.setCreateTypeState('story');
+  assert.equal(h.state.isLoadingTemplate, true);
+  assert.equal(h.state.activeCreatePath, previousPath);
+  assert.equal(player.paused, true);
+  assert.equal(h.element('docMediaPreview').hidden, true);
+  h.requests.at(-1).resolve({ media: previewMedia }); await pending;
+  assert.equal(h.element('docMediaPreview').hidden, true);
+  template.resolve(previewSource); await loading;
+  const next = h.startPreview();
+  assert.equal(h.requests.at(-1).documentType, 'story');
+  h.requests.at(-1).resolve({ media: [] }); await next;
+  assert.equal(h.element('docMediaPreview').hidden, true);
+});
+
+test('media preview and a first dirty draft survive a cancelled mode switch, then close together after confirmation', async () => {
+  const h = await mediaPreviewHarness({ loadTemplateContent: async () => previewSource });
+  h.runtime.exitEditMode();
+  h.state.docs = []; h.state.activePath = '';
+  h.state.workspace = { name: '空作品', documentTypes: [{ id: 'document', label: '档案', directory: 'notes', templateSource: 'templates/document.md' }] };
+  await h.runtime.enterCreateMode();
+  const player = await h.showMedia();
+  h.element('docSourceEditor').value += '\n尚未保存';
+  h.runtime.refreshEditSessionDirtyState();
+  h.runtime.setMode('browse');
+  assert.equal(h.state.mode, 'edit');
+  assert.equal(h.state.isCreating, true);
+  assert.equal(player.paused, false);
+  h.runtime.window.confirm = () => true;
+  h.runtime.setMode('browse');
+  assert.equal(h.state.isCreating, false);
+  assert.equal(h.state.isEditing, false);
+  assert.equal(h.state.editHasUnsavedChanges, false);
+  assert.equal(player.paused, true);
+  assert.equal(h.element('docContent').hidden, false);
+  assert.deepEqual(h.writes, []);
+});
+
+test('media preview keeps unchanged playback through source/block switches and saving without altering source bytes', async () => {
+  const h = await mediaPreviewHarness();
+  const player = await h.showMedia();
+  h.runtime.setEditInputMode('blocks');
+  h.runtime.setEditInputMode('source');
+  await h.runtime.saveCurrentDoc();
+  const pending = h.startPreview();
+  assert.equal(h.requests.at(-1).content, previewSource);
+  h.requests.at(-1).resolve({ media: previewMedia }); await pending;
+  assert.equal(h.element('docMediaPreview').querySelector('audio'), player);
+  assert.equal(player.paused, false);
+  assert.equal(h.element('docMediaPreview').querySelector('video').paused, false);
+  assert.equal(h.writes.length, 1);
+  assert.equal(h.writes[0].content, previewSource);
+  assert.equal(h.state.editHasUnsavedChanges, false);
+});
+
+test('media preview discards a late result after removing media or leaving and reopening the editor', async () => {
+  const h = await mediaPreviewHarness();
+  const player = await h.showMedia();
+  h.controller.refresh(); const removed = h.startPreview();
+  h.element('docSourceEditor').value = '# 只保留文字\n';
+  h.element('docSourceEditor').dispatch('input', { bubbles: true });
+  assert.equal(player.paused, true);
+  assert.equal(h.element('docMediaPreview').hidden, true);
+  h.requests.at(-1).resolve({ media: previewMedia }); await removed;
+  assert.equal(h.element('docMediaPreview').hidden, true);
+  h.runtime.window.confirm = () => true;
+  h.runtime.exitEditMode(); await h.runtime.enterEditMode();
+  const old = h.startPreview(), request = h.requests.at(-1);
+  h.runtime.setMode('browse'); h.runtime.setMode('edit'); await h.runtime.enterEditMode();
+  request.resolve({ media: previewMedia }); await old;
+  assert.equal(h.element('docMediaPreview').hidden, true);
+  await h.showMedia();
+  assert.equal(h.element('docMediaPreview').hidden, false);
+  assert.deepEqual(h.writes, []);
 });
 
 async function projectHarness(content, apply = async () => {}, save = async () => {}) {

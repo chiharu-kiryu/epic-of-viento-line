@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { parseDocument, isMap, isSeq } from 'yaml';
+import { parseDocument, isMap, isSeq, isScalar } from 'yaml';
 import { readRegistry, readWorkspace } from './workspace.mjs';
 import { resolveDocumentDefinition } from './project-layout.mjs';
 import { MEDIA_KINDS, isMediaValue, splitMediaText } from './media-format.mjs';
@@ -20,9 +20,16 @@ export function insertStructuredMedia(source, extension, media) {
   const root = document.contents;
   const newline = source.match(/\r\n|\r|\n/)?.[0] || '\n';
   const entries = media.map((value) => JSON.stringify(value));
-  if (!root) return source + (source && !source.endsWith('\n') ? newline : '')
-    + (json ? JSON.stringify({ 媒体: media }, null, 2).replace(/\n/g, newline) + newline
-      : `媒体:${newline}${entries.map((entry) => `  - ${entry}${newline}`).join('')}`);
+  if (!root || (isScalar(root) && root.value === null && root.source === '' && !root.tag && !root.anchor)) {
+    // An empty YAML document may have directives, comments and an end marker.
+    // Insert after its comments but before the marker; explicit scalar values
+    // still require the user to choose an object or list first.
+    const at = root?.range[2] ?? source.length;
+    const prefix = source.slice(0, at);
+    return prefix + (prefix && !/[\r\n]$/.test(prefix) ? newline : '')
+      + (json ? JSON.stringify({ 媒体: media }, null, 2).replace(/\n/g, newline) + newline
+        : `媒体:${newline}${entries.map((entry) => `  - ${entry}${newline}`).join('')}`) + source.slice(at);
+  }
   if (!isMap(root) && !isSeq(root)) throw invalid('素材需要插入到对象或列表中，请先将当前文档整理为对象或列表。');
   let target = root;
   let key = '媒体';
@@ -35,7 +42,9 @@ export function insertStructuredMedia(source, extension, media) {
   const end = target.range[1];
   if (target.flow) {
     const close = target.srcToken.end.find((token) => ['flow-map-end', 'flow-seq-end'].includes(token.type)).offset;
-    let output = source.slice(0, close) + `${newline}  ${value}${newline}` + source.slice(close);
+    // Flow continuations must stay inside the surrounding YAML block.
+    const indentation = ' '.repeat(target.srcToken.start.indent);
+    let output = source.slice(0, close) + `${newline}${indentation}  ${value}${newline}${indentation}` + source.slice(close);
     const trailing = target.srcToken.items.at(-1);
     const hasComma = !trailing?.key && !trailing?.value && trailing?.start.some((token) => token.type === 'comma');
     if (target.items.length && !hasComma) {

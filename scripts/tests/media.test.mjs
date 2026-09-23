@@ -12,6 +12,8 @@ import { mediaUrl, mediaMarkup, mediaKindForName } from '../lib/media-format.mjs
 import { insertStructuredMedia, prepareMediaInsertion } from '../lib/media-insertion.mjs';
 import { parseSourceContent } from '../standardize-docs/doc-factory.mjs';
 import { buildDocumentLayout } from '../standardize-docs/layout.mjs';
+import { PROJECT_DEFAULTS } from '../lib/project-layout.mjs';
+import { planExport } from '../lib/export-package.mjs';
 import { createBlockDraft, serializeBlockDraft } from '../../web/modules/app-editor-draft.js';
 import { Element, editorHarness } from './editor-harness.mjs';
 
@@ -148,6 +150,108 @@ test('media insertion keeps indented YAML maps valid, including BOM, comments an
     const repeated = parseDocument(insertStructuredMedia(inserted, '.yaml', [audio]).replace(/^\uFEFF/, ''));
     assert.deepEqual(repeated.errors, []);
   }
+});
+
+for (const [label, source] of [
+  ['indented map with BOM/CRLF', '\uFEFF  title: 角色\r\n  数值: 0\r\n  媒体: [旧素材] # 原始注释\r\n'],
+  ['indented flow map', '    {title: 角色, 媒体: [旧素材], 数值: false} # 原始注释\n'],
+  ['list on a separate indented line', '    title: 角色\n    媒体:\n      [旧素材, # 原始注释\n       第二份]\n'],
+]) test(`media insertion preserves an existing YAML flow list: ${label}`, () => {
+  const original = parseDocument(source.replace(/^\uFEFF/, '')).toJS();
+  const media = [{ type: 'audio', src: `asset:${randomUUID()}`, caption: '配音' }, { type: 'video', src: `asset:${randomUUID()}`, caption: '片段' }];
+  const first = insertStructuredMedia(source, '.yaml', [media[0]]);
+  const second = insertStructuredMedia(first, '.yaml', [media[1]]);
+  const parsed = parseDocument(second.replace(/^\uFEFF/, ''));
+  assert.deepEqual(parsed.errors, []);
+  assert.deepEqual(parsed.toJS(), { ...original, 媒体: [...original.媒体, ...media] });
+  assert.ok(second.includes('# 原始注释'));
+  assert.ok(second.startsWith(source.slice(0, source.indexOf('[') + 1)));
+  if (source.includes('\r\n')) assert.doesNotMatch(second, /(?<!\r)\n/);
+  assert.equal(parseSourceContent(second, '角色.yaml').parseError, undefined);
+});
+
+for (const [label, source] of [
+  ['document end and BOM/CRLF', '\uFEFF---\r\n# 保留的注释\r\n... # 尾注\r\n'],
+  ['YAML directive', '%YAML 1.2\n---\n# 保留的注释\n'],
+  ['start marker without a final newline', '--- # 保留的注释'],
+]) test(`media insertion accepts an empty YAML document: ${label}`, () => {
+  const image = { type: 'image', src: `asset:${randomUUID()}`, caption: '立绘' };
+  const output = insertStructuredMedia(source, '.yaml', [image]);
+  const parsed = parseDocument(output.replace(/^\uFEFF/, ''));
+  assert.deepEqual(parsed.errors, []);
+  assert.deepEqual(parsed.toJS(), { 媒体: [image] });
+  const boundary = source.indexOf('...');
+  const prefix = boundary < 0 ? source : source.slice(0, boundary);
+  assert.ok(output.startsWith(prefix));
+  if (boundary >= 0) assert.ok(output.endsWith(source.slice(boundary)));
+  if (source.includes('\r\n')) assert.doesNotMatch(output, /(?<!\r)\n/);
+  for (const scalar of ['null\n', '~\n', '0\n', 'false\n', '不能替换的正文\n', '!!null\n', '&name\n']) {
+    assert.throws(() => insertStructuredMedia(scalar, '.yaml', [image]), /对象或列表/);
+  }
+});
+
+test('reused media survives consecutive structured insertion, save, reopen, index and both export formats', async (t) => {
+  const root = await fixture(t);
+  await write(root, 'workspace.json', JSON.stringify({ format: 'viento-workspace', version: 3, id: randomUUID(), name: '素材测试', createdAt: 1,
+    paths: PROJECT_DEFAULTS.paths, assetStores: PROJECT_DEFAULTS.assetStores, documentTypes: PROJECT_DEFAULTS.documentTypes }));
+  for (const [file, content] of Object.entries(PROJECT_DEFAULTS.templates)) await write(root, `templates/${file}`, content);
+  const cases = [
+    ['json', '\uFEFF{ "title": "角色", "数值": 0, "媒体": [] }\r\n'],
+    ['yaml', '\uFEFF  title: 角色\r\n  数值: false\r\n  媒体: [] # 原始注释\r\n'],
+    ['yml', '\uFEFF---\r\n# 空模板\r\n... # 尾注\r\n'],
+  ];
+  for (const [extension, content] of cases) await write(root, `documents/角色.${extension}`, content);
+  await registerWorkspace(root);
+  const before = (await readRegistry(root)).documents;
+  const base = await serve(t, root);
+  const imported = [];
+  for (const [name, bytes] of [['立绘.png', png], ['声音.wav', wav], ['片段.mp4', video]]) {
+    const upload = async (fileName) => {
+      const response = await fetch(`${base}/api/assets?name=${encodeURIComponent(fileName)}`, { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: bytes });
+      assert.equal(response.status, 200);
+      return (await response.json()).data;
+    };
+    const first = await upload(name), reused = await upload(`再次-${name}`);
+    assert.equal(reused.reused, true);
+    assert.equal(reused.asset.id, first.asset.id);
+    imported.push({ asset: first.asset, bytes });
+  }
+  for (const [extension, original] of cases) {
+    const sourcePath = `documents/角色.${extension}`;
+    let content = original;
+    for (const selected of [imported.slice(0, 1), imported.slice(1)]) {
+      const prepared = await request(base, '/api/assets/insert', { content, sourcePath, assetIds: selected.map(({ asset }) => asset.id) });
+      assert.equal(prepared.status, 200, JSON.stringify(prepared));
+      content = prepared.data.content;
+    }
+    assert.equal(await fs.readFile(path.join(root, sourcePath), 'utf8'), original, 'preparation must not save the draft');
+    const read = await request(base, `/api/doc?path=${encodeURIComponent(sourcePath)}`);
+    assert.equal((await request(base, '/api/doc', { path: sourcePath, content, expectedVersion: read.data.version })).status, 200);
+    assert.equal((await request(base, '/api/rebuild', { source: sourcePath })).status, 200);
+    const reopened = await request(base, `/api/doc?path=${encodeURIComponent(sourcePath)}`);
+    assert.equal(reopened.data.content, content);
+    const preview = await request(base, '/api/assets/insert', { content: reopened.data.content, sourcePath });
+    assert.deepEqual(preview.data.media.map((value) => value.type), ['image', 'audio', 'video']);
+    const index = JSON.parse(await fs.readFile(path.join(root, '.viento/cache/indexes/documents.json')));
+    assert.deepEqual(new Set(index.docs.find((doc) => doc.source.path.endsWith(sourcePath)).assetRefs), new Set(imported.map(({ asset }) => asset.id)));
+    for (const format of ['html', 'markdown']) {
+      const plan = await planExport(root, { kind: 'document', format, path: sourcePath });
+      assert.equal(plan.assetCount, 3);
+      const body = plan.entries.find((entry) => entry.path === (format === 'html' ? 'index.html' : 'document.md')).buffer.toString();
+      for (const { asset, bytes } of imported) {
+        const entry = plan.entries.find((entry) => entry.path.startsWith(`assets/${asset.id}.`));
+        assert.ok(body.includes(entry.path));
+        assert.deepEqual(await fs.readFile(entry.absolute), bytes);
+      }
+      if (format === 'html') for (const tag of ['img', 'audio', 'video']) assert.equal((body.match(new RegExp(`<${tag} `, 'g')) || []).length, 1);
+      assert.equal(await fs.readFile(plan.entries.find((entry) => entry.path === `sources/${sourcePath}`).absolute, 'utf8'), content);
+      await plan.validateSnapshot();
+    }
+  }
+  assert.deepEqual((await readRegistry(root)).documents, before);
+  assert.equal((await readRegistry(root)).assets.length, 3);
+  assert.deepEqual(await fs.readdir(path.join(root, '.viento/uploads')), []);
+  assert.equal((await verifyWorkspace(root)).ok, true);
 });
 
 test('preview tolerates cyclic YAML aliases and interrupted imports leave no partial files', async (t) => {
