@@ -1,0 +1,21 @@
+{
+  "revision": 26,
+  "sourceFiles": 146,
+  "jsModules": 126,
+  "changedSources": [
+    "scripts/tests/editor-dialogs.test.mjs",
+    "scripts/tests/editor-runtime.test.mjs",
+    "web/modules/app-runtime.js"
+  ],
+  "localImports": 375,
+  "externalImports": 272,
+  "eventBindings": 95,
+  "testDeclarations": 233,
+  "nodeSources": 153,
+  "functionalEdges": 173,
+  "moduleCycles": 1,
+  "inlineScriptsChecked": 1,
+  "localMarkdownLinksChecked": 407,
+  "embeddedDataMatches": true,
+  "sourceFingerprintsVerified": true
+}

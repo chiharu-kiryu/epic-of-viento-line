@@ -1,0 +1,17 @@
+{
+  "version": "b.3.4",
+  "revision": 28,
+  "sourceFingerprints": 146,
+  "jsModules": 126,
+  "localImportStatements": 375,
+  "externalImports": 272,
+  "explicitEventBindings": 95,
+  "testDeclarations": 237,
+  "nodeSources": 156,
+  "functionalEdges": 173,
+  "cycles": 1,
+  "inlinePageScripts": 1,
+  "documentLinks": 455,
+  "embeddedDataMatches": true,
+  "allChecksPassed": true
+}

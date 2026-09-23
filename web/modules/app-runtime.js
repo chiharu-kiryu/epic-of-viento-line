@@ -991,11 +991,11 @@ function getFriendlyRequestError(error, options = {}) {
   const normalizedStatus = parseStatusCode(error?.status);
   if (normalizedStatus) {
     const status = Number(normalizedStatus);
+    const payloadErrorCode = normalizeDisplayValue(error?.code || error?.payload?.[API_RESPONSE.errorCode] || '').toLowerCase();
     const withMeta = (text = '') => {
       const normalized = normalizeDisplayValue(text);
       const suffixes = [];
       const requestId = normalizeDisplayValue(error?.requestId || error?.payload?.[API_RESPONSE.requestId] || '');
-      const payloadErrorCode = normalizeDisplayValue(error?.code || error?.payload?.[API_RESPONSE.errorCode] || '').toLowerCase();
       const attemptSummary = summarizeRequestAttempts(error?.attempts, options);
       if (requestId) {
         suffixes.push(t`请求ID：${requestId}`);
@@ -2077,24 +2077,30 @@ async function loadCreateTypeTemplate(type = '') {
     return createTemplateCache.get(templatePath);
   }
 
+  const requestToken = createTemplateToken;
   try {
     const content = await loadTemplateContent({
       templatePath,
       requestTimeoutMs: DATA_INDEX_REQUEST_TIMEOUT_MS,
       requestLabel: APP_REQUEST_LABELS.templateLoad,
     });
-    createTemplateCache.set(templatePath, content);
-    createTemplateLoadErrorCache.delete(templatePath);
+    // Cancelled loads must not replace a newer cache entry or its error state.
+    if (requestToken === createTemplateToken) {
+      createTemplateCache.set(templatePath, content);
+      createTemplateLoadErrorCache.delete(templatePath);
+    }
     return content;
   } catch (error) {
-    createTemplateLoadErrorCache.set(templatePath, logRuntimeErrorOrMessage(APP_REQUEST_LABELS.templateLoad, error));
+    if (requestToken === createTemplateToken) {
+      createTemplateLoadErrorCache.set(templatePath, logRuntimeErrorOrMessage(APP_REQUEST_LABELS.templateLoad, error));
+    }
     return '';
   }
 }
 
 async function applyCreateTemplate(type = '') {
   if (!editEditorEl) {
-    return;
+    return false;
   }
   const normalizedType = normalizeCreateType(type);
   const templatePath = getCreateTemplateContentPath(normalizedType);
@@ -2103,12 +2109,13 @@ async function applyCreateTemplate(type = '') {
   syncEditorBusyUi();
   try {
     const templateContent = await loadCreateTypeTemplate(normalizedType);
-    if (requestToken !== createTemplateToken || !state.isCreating || state.activeCreateType !== normalizedType) return;
+    if (requestToken !== createTemplateToken || !state.isCreating || state.activeCreateType !== normalizedType) return false;
     setSourceEditorContent(templateContent);
     syncEditSessionBaseline();
     if (templateContent === '' && createTemplateLoadErrorCache.has(templatePath)) {
       setEditorStatus(`${APP_ERROR_MESSAGES.templateLoadFallback}：${createTemplateLoadErrorCache.get(templatePath)}`);
     } else setEditorStatus(APP_ERROR_MESSAGES.createDocHintTemplate(t('创建文档')));
+    return true;
   } finally {
     if (requestToken === createTemplateToken) {
       state.isLoadingTemplate = false;
@@ -2138,7 +2145,7 @@ async function setCreateTypeState(type = '', options = {}) {
   state.activeCreatePath = finalPath;
 
   if (shouldLoadTemplate && isInEditSession()) {
-    await applyCreateTemplate(nextType);
+    if (!await applyCreateTemplate(nextType)) return null;
   }
   if (!state.isCreating || state.activeCreateType !== nextType) return null;
   setStoredCreateType(nextType);
@@ -2256,9 +2263,11 @@ function updateCreatePathValidation(showStatus = false) {
     editSaveBtnEl.disabled = !validation.isValid || isEditorBusy();
   }
   if (state.isCreating) {
+    const pathChanged = state.activeCreatePath !== validation.value;
     state.activeCreatePath = validation.value;
     if (editPathEl) editPathEl.textContent = `${APP_RUNTIME_TEXTS.create.sourcePrefix}${getCreateTypeLabel(state.activeCreateType)}${APP_RUNTIME_TEXTS.create.sourceTypeSuffix}${validation.value}`;
     refreshEditSessionDirtyState();
+    if (pathChanged) mediaEditorController?.refresh();
   }
   return validation;
 }
@@ -3608,9 +3617,10 @@ async function saveNewDoc() {
     return;
   }
   const sourcePath = ensureMarkdownLikeExtension(validation.value);
-  setCreatePath(sourcePath, '', true);
-  if (!sourcePath) {
-    setEditorStatus(APP_ERROR_MESSAGES.createPathRequired);
+  setCreatePath(sourcePath);
+  // The suffix can change both the parser context and the filename's byte length.
+  // Keep the draft on this final path even when the write is rejected.
+  if (!updateCreatePathValidation(true).isValid) {
     return;
   }
 

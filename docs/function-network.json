@@ -2,22 +2,22 @@
   "metadata": {
     "schemaVersion": "viento-function-network-v1",
     "title": "Viento Studio 功能链路网络",
-    "version": "b.3.3",
+    "version": "b.3.4",
     "date": "2026-09-23",
     "gitBase": "51d522cb919c20b15815b129bd62e859af9a97a0",
-    "sourceState": "b.3.3 发布快照：整合 N64–N69 结构化素材插入与编辑预览切换修复，版本和界面清单已同步；安装程序未更新",
+    "sourceState": "b.3.4 发布快照：整合 N70–N75 模板加载、路径同步与保存重试修复，版本和界面清单已同步；安装程序未更新",
     "method": "人工核对业务入口与关键调用；使用本机 Acorn 解析 ES 模块声明、静态字面量动态导入、显式事件绑定和路由表",
     "runtimeTrace": false,
     "verification": {
-      "sourceFingerprints": "146 selected code files matched the release worktree; all 121 vendored glib files reverified against the upstream manifest and recorded iterator patch",
-      "references": "150 node source references, module imports and document links checked",
+      "sourceFingerprints": "146 selected code files matched the worktree; all 121 vendored glib files verified against upstream provenance and the recorded patch",
+      "references": "156 node source references, module imports and document links checked",
       "graphIntegrity": "workflow edges and module SCCs recomputed",
       "pageScript": "JavaScript syntax checked; embedded snapshot matches JSON",
       "browserPreview": "not executed: in-app browser URL policy rejected local HTML navigation",
-      "applicationRegression": "b.3.3 release, Node v24.19.0: app-only 258 tests, 257 passed, 0 failed, 1 native archive interoperability test skipped; version, 120 JavaScript syntax checks and API contract passed",
+      "applicationRegression": "b.3.4 release, Node v24.19.0: app-only 268 tests, 267 passed, 0 failed, 1 native archive interoperability test skipped; version, 120 JavaScript syntax checks and API contract passed",
       "nativeRegression": "Prior 2026-09-13 evidence: b.2.9, cargo test --offline --locked: 22 core + 1 startup + 5 optimized glib regressions passed; 1 existing large-workspace test ignored; not rerun for this JavaScript-only change",
-      "nativeWindowInteraction": "Not rerun on 2026-09-23 for JavaScript editor/media controller changes. New DOM tests simulate network and playback; earlier native editor, library, export and playback evidence retained in linked reports.",
-      "applicationTestsPassed": 257,
+      "nativeWindowInteraction": "Not rerun for b.3.4. Controller/DOM tests simulate template responses, caret, preview and authorization/rebuild errors; temporary live HTTP projects verify duplicate creation, renamed retry, identity and persisted bytes. Earlier native evidence retained.",
+      "applicationTestsPassed": 267,
       "archiveInterop": "Not rerun on 2026-09-23: VIENTO_TEST_ARCHIVE_BINARY was not configured. Previous 2026-09-13 v2/v3 Node/Rust archive tests passed; native archive code unchanged.",
       "nativeTestReport": "docs/NATIVE_WORKFLOW_TEST_b.2.8.1.md",
       "closeBridgeRegression": "3 passed after localized native close confirmation change",
@@ -26,10 +26,10 @@
       "libraryControllerRegression": "3 new library controller tests and 9 settings tests passed",
       "nativeExportTestReport": "docs/NATIVE_EXPORT_TEST_b.2.8.1.md",
       "exportDialogRegression": "12 dialog tests and 3 language tests passed, including 2 new native-save scenarios",
-      "releaseNotes": "docs/RELEASE_b.3.3.md",
+      "releaseNotes": "docs/RELEASE_b.3.4.md",
       "systemNodeObservation": "Initial Node v18.19.1 full run: 193 assertions passed, request-lifecycle worker did not exit and was terminated. Isolated reruns on system and bundled runtimes both passed all 4 tests with normal exit; root cause unconfirmed.",
-      "releaseValidation": "docs/test-results/release-b.3.3/results.json",
-      "versionCorrection": "Historical b.2.9 correction: beta digits are 0–9, b.9.9 advances to 1.0.0. Earlier logs retain their original versions; this release advances b.3.2 to b.3.3.",
+      "releaseValidation": "docs/test-results/release-b.3.4/results.json",
+      "versionCorrection": "Historical b.2.9 correction: beta digits are 0–9, b.9.9 advances to 1.0.0. Earlier logs retain their original versions; this release advances b.3.3 to b.3.4.",
       "versionRuleRegression": "b.2.9: 4 version tests passed (all 100 beta transitions, stable carry, invalid formats); JavaScript/Python agreed on 122 cases; next-version CLI, release manifest/lock/UI consistency and Cargo metadata passed. Source archive verified 253 files and was removed after validation. Full application/Rust regressions were not rerun for this version-rule change.",
       "securityRegression": "Unpatched glib 0.18.5 reproduced a null-pointer precondition violation (SIGABRT); exact two-line upstream backport passes all 5 iterator tests with glib opt-level=3. All other 120 of 121 upstream package files match.",
       "securityReport": "docs/SECURITY_GLIB_b.2.9.md",
@@ -39,8 +39,8 @@
       "saveConflictRegression": "Node v18.19.1: 35 focused tests passed, including 8 new cases; reproduced failed-force retry overwrites, hidden reload failures and preserved-timestamp external edits before fixing them",
       "saveConflictReport": "docs/SAVE_CONFLICT_BUGFIX_b.2.9.md",
       "saveConflictValidation": "docs/test-results/save-conflicts-2026-09-23/results.json",
-      "releaseVersionValidation": "b.3.3 / 0.3.3 matched all manifests, locks and UI labels; next-version CLI returned b.3.4; offline locked Cargo metadata confirmed application 0.3.3 and the sole locally patched glib dependency",
-      "releaseSourceArchive": "b.3.3 source archive: 448 source files and all 121 vendored glib files verified; unpacked offline locked Cargo metadata resolved application 0.3.3 and the package's own patched glib. Temporary archives removed after verification.",
+      "releaseVersionValidation": "b.3.4 / 0.3.4 matched all manifests, locks and UI labels; next-version CLI returned b.3.5; offline locked Cargo metadata confirmed application 0.3.4 and the sole locally patched glib dependency",
+      "releaseSourceArchive": "b.3.4: 465 source files and all 121 vendored glib files verified; unpacked offline locked Cargo metadata resolved application 0.3.4 and the local patched glib. Temporary verification archive removed.",
       "assetBindingRegression": "Node v18.19.1: 78 focused tests, 77 passed, 0 failed, 1 native archive interoperability skipped; 13 new cases reproduce binding lock/config loss, linked paths, invalid verification and rebinding during upload",
       "assetBindingReport": "docs/ASSET_BINDING_BUGFIX_b.3.0.md",
       "assetBindingValidation": "docs/test-results/asset-binding-2026-09-23/results.json",
@@ -58,7 +58,13 @@
       "mediaInsertionValidation": "docs/test-results/media-insertion-2026-09-23/results.json",
       "mediaPreviewRegression": "Node v18.19.1: 97 focused tests, 96 passed, 0 failed, 1 native archive interoperability skipped; 8 new DOM/controller cases cover initial source preview, browse exit, empty-project draft confirmation, template path/type changes, late responses, source/block switches and byte-preserving saves",
       "mediaPreviewReport": "docs/MEDIA_PREVIEW_BUGFIX_b.3.2.md",
-      "mediaPreviewValidation": "docs/test-results/media-preview-2026-09-23/results.json"
+      "mediaPreviewValidation": "docs/test-results/media-preview-2026-09-23/results.json",
+      "templateLoadingRegression": "Node v18.19.1: all 95 focused tests passed; 5 new cases reproduce stale template cache/error writes, cancelled creation caret resets and manual-extension preview drift, and check current YAML/JSON save paths, types and source bytes",
+      "templateLoadingReport": "docs/TEMPLATE_LOADING_BUGFIX_b.3.3.md",
+      "templateLoadingValidation": "docs/test-results/template-loading-2026-09-23/results.json",
+      "saveRecoveryRegression": "Node v18.19.1: all 92 focused tests passed; 5 new cases reproduce 401/403 diagnostic ReferenceErrors, failed-create path drift and suffix length overflow; verify draft/version preservation, source/block retries, live HTTP duplicate/renamed creation and BOM/CRLF",
+      "saveRecoveryReport": "docs/SAVE_RECOVERY_BUGFIX_b.3.3.md",
+      "saveRecoveryValidation": "docs/test-results/save-recovery-2026-09-23/results.json"
     },
     "scope": "功能级有向业务步骤 + 文件级静态相对导入；不穷举运行时动态路径、第三方库内部或每次函数调用",
     "projectDataRead": false,
@@ -81,58 +87,68 @@
     "limitations": [
       "workflow-step 是业务步骤顺序，不能当作直接函数调用边。",
       "文件导入关系不代表调用次数、调用顺序、用户使用频率或性能。",
-      "测试声明包含参数化模板，声明数不等于执行数；本轮完整 app-only 校验通过 257 项，1 项原生归档互通跳过；Rust 和原生窗口测试沿用此前记录。",
+      "测试声明包含参数化模板，声明数不等于执行数；本轮完整 app-only 校验通过 267 项，1 项原生归档互通跳过；Rust 和原生窗口测试沿用此前记录。",
       "没有读取实际作品正文、素材内容、本机秘密或网络服务。",
       "归档互通回归需设置 VIENTO_TEST_ARCHIVE_BINARY；本轮未配置，明确跳过；原生归档代码未变。",
       "第三方 glib 仅将实际修复文件加入功能图源码清单；其余文件通过 vendor/glib-upstream.json 的原包指纹核验，不展开第三方模块调用图。"
     ],
-    "snapshotRevision": 25,
+    "snapshotRevision": 28,
     "repairLog": "docs/NETWORK_BUGFIX_b.2.8.1.md",
     "previousSnapshot": {
-      "revision": 24,
-      "commit": "ca8a8d85ca64c040ca80fcf818cf15dadfd0b2e8",
-      "sourceState": "b.3.2 工作树：保留 N64–N65 结构化素材插入修复，新增 N66–N69 原文预览、浏览退出、空项目草稿及模板切换修复；尚未提交或安装",
+      "revision": 27,
+      "commit": "2731f2ea87b9b67d18b0c08cab6240b132e0e3ab",
+      "sourceState": "b.3.3 工作树：包含 N70–N72 模板加载修复，新增 N73–N75 授权错误提示、失败后的最终路径同步及补后缀长度校验；尚未提交或安装",
       "changedSources": [],
       "releaseFiles": [
         {
           "file": "VERSION",
-          "before": "b65eb60961429ea68f46605be7a84fdab5ad4c4836dfb7769524c16a9515dbc2",
-          "after": "20f9c1addf15d329dadb1fdb3e544872346199985e907cabfb71dd8f6979956b"
+          "before": "20f9c1addf15d329dadb1fdb3e544872346199985e907cabfb71dd8f6979956b",
+          "after": "e24390b097f5005968efbbcfe90eaebcf935315c167402cf4744930eab7a4468"
         },
         {
           "file": "package.json",
-          "before": "dba805ef9ddc98d97c44be8cd56eea5183e110ba9c62aa3067a8b797eac0ad96",
-          "after": "ea6d5da57057a38b0c7d6bc3884d063aa72dd1f4c0d716d3bee33efa73f7d130"
+          "before": "ea6d5da57057a38b0c7d6bc3884d063aa72dd1f4c0d716d3bee33efa73f7d130",
+          "after": "64e344503341236eb8bd53434bf1325446027e099760507321a9eb59df21325d"
         },
         {
           "file": "package-lock.json",
-          "before": "3249f7a2df8b801102c2d0df3e26e97894fedbe42b403e90c17a9fadc615cb54",
-          "after": "ae6881e0f6f372f750941065affa44371d6d45d6a35652d5c1a27b72b0a5c330"
+          "before": "ae6881e0f6f372f750941065affa44371d6d45d6a35652d5c1a27b72b0a5c330",
+          "after": "d834d672499fe5138a0d83159bf4e11d3ee505b7b422a235a1ee3b9739d60824"
         },
         {
           "file": "src-tauri/Cargo.toml",
-          "before": "5b3f7e04312ef68e1ac31b10725495a8a14dc5b90110a09eaa691338a196c1ea",
-          "after": "f4d04de39b3cbc94419667b9a0ba9833609cf5c3da25895cb621635a2b51d400"
+          "before": "f4d04de39b3cbc94419667b9a0ba9833609cf5c3da25895cb621635a2b51d400",
+          "after": "96f197d5ab0cdcb2ae8549793e14aa1aa46638ced6ec2aa9147fb339b74d7231"
         },
         {
           "file": "src-tauri/Cargo.lock",
-          "before": "0fde7c13e93dc8dbda05ad18b2bf8a18b1922e170e86a6593918c67818239b39",
-          "after": "67f6ee53f903f3a703a9984ba6f28624d4ae1c442ebc2aca1fcc7566c94b2485"
+          "before": "67f6ee53f903f3a703a9984ba6f28624d4ae1c442ebc2aca1fcc7566c94b2485",
+          "after": "d43bbaf30a0dcd21c5628df646f0e12b783cb6fb9c19100ca2fdb9bf0d4bcdb9"
         },
         {
           "file": "src-tauri/tauri.conf.json",
-          "before": "02cedbab232596e6c993639ceef984e3f7798bf2e5ece9d80903c27670c38dd1",
-          "after": "7dc33689027abf4678511fb1b1b5461057892c509a79be8df077c4453a4a3fe9"
+          "before": "7dc33689027abf4678511fb1b1b5461057892c509a79be8df077c4453a4a3fe9",
+          "after": "337e6615ba54e6c2424b8cfe392bf018703082642c41842969885b6c538d1772"
         },
         {
           "file": "web/index.html",
-          "before": "cdae10524d60556d45883b7dd4d84e0bc9fb8770b91afb737f6b918dfc0bddbf",
-          "after": "4387119c5a2c1de9ed4b02f8b505ee712c6d0a7aff96ed946c9f6e162ac359de"
+          "before": "4387119c5a2c1de9ed4b02f8b505ee712c6d0a7aff96ed946c9f6e162ac359de",
+          "after": "b8ce1a5d5f319399c6bb87a5856813c1627dc4e3d6ec97e8f6dc3afc26e3a90d"
         },
         {
           "file": "desktop/ui/index.html",
-          "before": "8eeeb1cce0b874e897eb00d251e85b0ef48e498aa3b6bcb5180e31a6b4084ea6",
-          "after": "278d3cf8166730486b992aa61a05481d3dbdb03d1cbf1d3bd4cb50136fb3ed59"
+          "before": "278d3cf8166730486b992aa61a05481d3dbdb03d1cbf1d3bd4cb50136fb3ed59",
+          "after": "de775a8573bf5ed589362a62b112d9a678ee5ecf1d0443fedd091f087b47ce8e"
+        },
+        {
+          "file": "README.md",
+          "before": "a2b11e3afffac9a969172aec127371c1be639e3863c9c59e2de4d39653401354",
+          "after": "01c184a30aa55fc79cdb0546c2aeb87cb6b9d3f62e846c66c726424f81945781"
+        },
+        {
+          "file": "desktop/README.md",
+          "before": "0951adc2971c715ac2bbd29b9c5d5903699e9a941a72683c7783c5303f78fbc0",
+          "after": "49e1222c4dc71c936ae4d769dcbac4f5c47aefc6f38acef8c29f48a403aa0214"
         }
       ]
     },
@@ -1115,6 +1131,98 @@
             "after": "69f4883ae4314c1ec901009c2738af54bbce9471d43229c97d504a088f39a16a"
           }
         ]
+      },
+      {
+        "fromRevision": 24,
+        "toRevision": 25,
+        "commit": "ca8a8d85ca64c040ca80fcf818cf15dadfd0b2e8",
+        "changedSources": [],
+        "releaseFiles": [
+          {
+            "file": "VERSION",
+            "before": "b65eb60961429ea68f46605be7a84fdab5ad4c4836dfb7769524c16a9515dbc2",
+            "after": "20f9c1addf15d329dadb1fdb3e544872346199985e907cabfb71dd8f6979956b"
+          },
+          {
+            "file": "package.json",
+            "before": "dba805ef9ddc98d97c44be8cd56eea5183e110ba9c62aa3067a8b797eac0ad96",
+            "after": "ea6d5da57057a38b0c7d6bc3884d063aa72dd1f4c0d716d3bee33efa73f7d130"
+          },
+          {
+            "file": "package-lock.json",
+            "before": "3249f7a2df8b801102c2d0df3e26e97894fedbe42b403e90c17a9fadc615cb54",
+            "after": "ae6881e0f6f372f750941065affa44371d6d45d6a35652d5c1a27b72b0a5c330"
+          },
+          {
+            "file": "src-tauri/Cargo.toml",
+            "before": "5b3f7e04312ef68e1ac31b10725495a8a14dc5b90110a09eaa691338a196c1ea",
+            "after": "f4d04de39b3cbc94419667b9a0ba9833609cf5c3da25895cb621635a2b51d400"
+          },
+          {
+            "file": "src-tauri/Cargo.lock",
+            "before": "0fde7c13e93dc8dbda05ad18b2bf8a18b1922e170e86a6593918c67818239b39",
+            "after": "67f6ee53f903f3a703a9984ba6f28624d4ae1c442ebc2aca1fcc7566c94b2485"
+          },
+          {
+            "file": "src-tauri/tauri.conf.json",
+            "before": "02cedbab232596e6c993639ceef984e3f7798bf2e5ece9d80903c27670c38dd1",
+            "after": "7dc33689027abf4678511fb1b1b5461057892c509a79be8df077c4453a4a3fe9"
+          },
+          {
+            "file": "web/index.html",
+            "before": "cdae10524d60556d45883b7dd4d84e0bc9fb8770b91afb737f6b918dfc0bddbf",
+            "after": "4387119c5a2c1de9ed4b02f8b505ee712c6d0a7aff96ed946c9f6e162ac359de"
+          },
+          {
+            "file": "desktop/ui/index.html",
+            "before": "8eeeb1cce0b874e897eb00d251e85b0ef48e498aa3b6bcb5180e31a6b4084ea6",
+            "after": "278d3cf8166730486b992aa61a05481d3dbdb03d1cbf1d3bd4cb50136fb3ed59"
+          }
+        ]
+      },
+      {
+        "fromRevision": 25,
+        "toRevision": 26,
+        "commit": "2731f2ea87b9b67d18b0c08cab6240b132e0e3ab",
+        "changedSources": [
+          {
+            "file": "scripts/tests/editor-dialogs.test.mjs",
+            "before": "60fab6ca472d7431a310c2b7b86981c9cd49fbcdaa040d94e3270f022a882da5",
+            "after": "a9ca8ac673d1242372afebd2378e998cecf57426a87a7789cf4a2f738c57e853"
+          },
+          {
+            "file": "scripts/tests/editor-runtime.test.mjs",
+            "before": "4813afeb288d59c7a7cedf97ba768647bef70ebc770c5e18b9b742ed0fa08259",
+            "after": "4278756dc77b5b2586bd8552be22f620bcd90fbf4eecbe87933da6527feb3508"
+          },
+          {
+            "file": "web/modules/app-runtime.js",
+            "before": "69f4883ae4314c1ec901009c2738af54bbce9471d43229c97d504a088f39a16a",
+            "after": "619151b9bbcf65fb1f050e34e397ac28ce1a2cfe4ac20ad70095c2fad090a76d"
+          }
+        ]
+      },
+      {
+        "fromRevision": 26,
+        "toRevision": 27,
+        "commit": "2731f2ea87b9b67d18b0c08cab6240b132e0e3ab",
+        "changedSources": [
+          {
+            "file": "scripts/tests/editor-runtime.test.mjs",
+            "before": "4278756dc77b5b2586bd8552be22f620bcd90fbf4eecbe87933da6527feb3508",
+            "after": "76ac06fbcdf02765af06e5f820d1b2192119c0efbf7425725ea4d3cfba0a586b"
+          },
+          {
+            "file": "scripts/tests/generic-project.test.mjs",
+            "before": "2c5148fb0412029cf6e8fa3787dcf83a1d45edbd86266e5e034cd9ed3da941cb",
+            "after": "0d0b110d88d0271140ff4bf21856dc6efbe28539e08821beae732a9f50721bf8"
+          },
+          {
+            "file": "web/modules/app-runtime.js",
+            "before": "619151b9bbcf65fb1f050e34e397ac28ce1a2cfe4ac20ad70095c2fad090a76d",
+            "after": "09aa911ede404a92b4bf93eab6e63a74d27dad848a8875b9f706132d71f73101"
+          }
+        ]
       }
     ],
     "vendoredDependencies": [
@@ -1154,7 +1262,7 @@
       "sources": [
         {
           "file": "web/modules/app-runtime.js",
-          "line": 4954,
+          "line": 4964,
           "symbol": "initApp"
         },
         {
@@ -1168,7 +1276,7 @@
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 3530,
+          "line": 3539,
           "symbol": "enterEditMode"
         },
         {
@@ -1178,8 +1286,33 @@
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 2639,
+          "line": 2648,
           "symbol": "resetDocEditorState"
+        },
+        {
+          "file": "web/modules/app-runtime.js",
+          "line": 2068,
+          "symbol": "loadCreateTypeTemplate"
+        },
+        {
+          "file": "web/modules/app-runtime.js",
+          "line": 2127,
+          "symbol": "setCreateTypeState"
+        },
+        {
+          "file": "web/modules/app-runtime.js",
+          "line": 2245,
+          "symbol": "updateCreatePathValidation"
+        },
+        {
+          "file": "web/modules/app-runtime.js",
+          "line": 3611,
+          "symbol": "saveNewDoc"
+        },
+        {
+          "file": "web/modules/app-runtime.js",
+          "line": 3711,
+          "symbol": "saveExistingDoc"
         }
       ]
     },
@@ -1201,7 +1334,7 @@
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 2527,
+          "line": 2536,
           "symbol": "setEditInputMode"
         }
       ]
@@ -1351,7 +1484,7 @@
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 3119,
+          "line": 3128,
           "symbol": "renderHeroSkillCards"
         }
       ]
@@ -2067,6 +2200,11 @@
           "file": "web/modules/app-runtime.js",
           "line": 880,
           "symbol": "retryLoadData"
+        },
+        {
+          "file": "web/modules/app-runtime.js",
+          "line": 973,
+          "symbol": "getFriendlyRequestError"
         }
       ]
     },
@@ -4212,7 +4350,7 @@
         "memory"
       ],
       "effect": "优先加载项目模板并建议安全的文件名、目录和扩展名；界面与服务共用新建路径校验。",
-      "boundary": "模板读取失败明确提示空模板；重试成功恢复正常提示。选定类型不会因为更换保存目录而丢失。 模板加载期间先比较草稿路径和文档类型，立即清除上一份预览。",
+      "boundary": "模板读取失败明确提示空模板；重试成功恢复正常提示。选定类型不会因为更换保存目录而丢失。 模板加载期间先比较草稿路径和文档类型，立即清除上一份预览。 只有当前模板请求可更新正文、缓存和错误状态；取消后的旧请求也不能执行后续新建收尾。",
       "tests": [
         "scripts/tests/templates.test.mjs",
         "scripts/tests/generic-project.test.mjs",
@@ -4259,7 +4397,7 @@
         "editor"
       ],
       "effect": "校验 expectedVersion 与当前正文内容指纹，原子保存原文，失效服务缓存，再重建和重新载入。",
-      "boundary": "保留文件时间的外部修改也会触发冲突；旧时间戳普通请求需重新读取。源文件保存和重建是两个阶段；重建或索引读取失败时明确报错，已保存正文继续可编辑并允许重试。 独立短临时文件名避免合法长名称在保存时超限。 保存过程中媒体未改变时保留现有播放器及源文件 BOM、换行和引用。",
+      "boundary": "保留文件时间的外部修改也会触发冲突；旧时间戳普通请求需重新读取。源文件保存和重建是两个阶段；重建或索引读取失败时明确报错，已保存正文继续可编辑并允许重试。 独立短临时文件名避免合法长名称在保存时超限。 保存过程中媒体未改变时保留现有播放器及源文件 BOM、换行和引用。 HTTP 401/403 正常报告权限或令牌问题；失败保留原版本和源码/区块草稿，修改后重试仍执行版本校验。",
       "tests": [
         "scripts/tests/doc-api.test.mjs",
         "scripts/tests/editor-runtime.test.mjs",
@@ -4286,11 +4424,12 @@
         "editor"
       ],
       "effect": "在登记锁内重新读取类型、检查可迁移位置冲突，再建立 UUID 并独占创建源文件。",
-      "boundary": "保护大小写/Unicode 等价名称、父目录和缺失源文件的登记身份；失败回滚本次登记，保存成功后即作为已有文档继续编辑。 成功创建返回内容版本，后续保存沿用同一校验。 合法 255 字节文件名可以新建、再次保存和刷新预览，身份与权限保持完整。",
+      "boundary": "保护大小写/Unicode 等价名称、父目录和缺失源文件的登记身份；失败回滚本次登记，保存成功后即作为已有文档继续编辑。 成功创建返回内容版本，后续保存沿用同一校验。 合法 255 字节文件名可以新建、再次保存和刷新预览，身份与权限保持完整。 取消重试与手动更换扩展名后的保存使用当前路径、类型和源字节，模板缓存保留最新接受的内容。 自动补后缀后同步最终草稿路径和预览上下文，并再次检查文件名长度；重名失败可换名重试，保留原正文、登记及所选类型。",
       "tests": [
         "scripts/tests/generic-project.test.mjs",
         "scripts/tests/editor-runtime.test.mjs",
-        "scripts/tests/creation-workflow.test.mjs"
+        "scripts/tests/creation-workflow.test.mjs",
+        "scripts/tests/editor-dialogs.test.mjs"
       ]
     },
     {
@@ -4323,7 +4462,7 @@
         "editor"
       ],
       "effect": "检测内容及新建路径差异，保留或明确丢弃草稿。",
-      "boundary": "浏览器 beforeunload 和桌面关闭链路也查看脏状态；不提供磁盘自动草稿恢复。 空项目首份草稿也执行退出清理；取消确认保留草稿，确认退出则暂停音视频、隐藏预览并失效旧响应。",
+      "boundary": "浏览器 beforeunload 和桌面关闭链路也查看脏状态；不提供磁盘自动草稿恢复。 空项目首份草稿也执行退出清理；取消确认保留草稿，确认退出则暂停音视频、隐藏预览并失效旧响应。 迟到模板请求不能污染缓存、误报当前错误，或重置新草稿的光标、滚动及未保存状态。",
       "tests": [
         "scripts/tests/editor-runtime.test.mjs",
         "desktop/tests/native-smoke.py",
@@ -4346,7 +4485,7 @@
         "editor"
       ],
       "effect": "按选定源范围更新标准缓存，再生成全库索引。",
-      "boundary": "完整文件名和目录范围精确重建、按 source.path 清理；后续索引读取失败也视为刷新失败，保留已保存内容和可用列表。",
+      "boundary": "完整文件名和目录范围精确重建、按 source.path 清理；后续索引读取失败也视为刷新失败，保留已保存内容和可用列表。 授权拒绝不会导致错误处理自身抛错；保存已成功时保持干净基线，单独重试重建不重复写正文。",
       "tests": [
         "scripts/tests/call-paths.test.mjs",
         "scripts/tests/build.test.mjs",
@@ -4510,7 +4649,7 @@
       "id": "F30",
       "group": "素材",
       "title": "草稿预览与播放",
-      "entry": "读取原文 / 修改草稿 / 播放、暂停、拖动进度",
+      "entry": "读取原文 / 修改草稿或新建路径 / 播放、暂停、拖动进度",
       "steps": [
         "memory",
         "media_ui",
@@ -4524,7 +4663,7 @@
         "assets"
       ],
       "effect": "只从当前草稿提取媒体；本地 URL 提供图片或原生音视频播放与下载。",
-      "boundary": "不自动播放；音频用 auto 预加载修复 Ogg 时长/跳转；离开/替换草稿预览会暂停播放器。 原文加载后自动刷新；忙碌期间也核对路径和类型，旧响应不覆盖当前预览；未变的媒体在源码/区块切换和保存时不重建。",
+      "boundary": "不自动播放；音频用 auto 预加载修复 Ogg 时长/跳转；离开/替换草稿预览会暂停播放器。 原文加载后自动刷新；忙碌期间也核对路径和类型，旧响应不覆盖当前预览；未变的媒体在源码/区块切换和保存时不重建。 手动修改新建路径也通知预览，按当前扩展名和类型重新解析，并使旧路径的响应失效。 保存自动补上的后缀也同步到预览上下文；创建被拒后仍按最终路径解析。",
       "tests": [
         "scripts/tests/media.test.mjs",
         "desktop/tests/native-smoke.py",
@@ -4879,10 +5018,11 @@
         "editor"
       ],
       "effect": "后端统计真实响应状态（含导出 206、416 和断开）；前端收集上下文、去重/筛选和重试。",
-      "boundary": "静态依赖图不能推断真实请求频率或性能；此处是现有诊断通道。",
+      "boundary": "静态依赖图不能推断真实请求频率或性能；此处是现有诊断通道。 HTTP 401/403 先解析错误码再生成说明，保留请求 ID，避免诊断代码自身抛出未初始化变量错误。",
       "tests": [
         "scripts/tests/call-paths.test.mjs",
-        "scripts/tests/request-lifecycle.test.mjs"
+        "scripts/tests/request-lifecycle.test.mjs",
+        "scripts/tests/editor-runtime.test.mjs"
       ]
     },
     {
@@ -8067,7 +8207,7 @@
       "to": "web/modules/app-state.js",
       "kind": "dynamic-import",
       "local": true,
-      "line": 260,
+      "line": 311,
       "symbols": []
     },
     {
@@ -8075,7 +8215,7 @@
       "to": "web/modules/app-helpers.js",
       "kind": "dynamic-import",
       "local": true,
-      "line": 261,
+      "line": 312,
       "symbols": []
     },
     {
@@ -12716,8 +12856,8 @@
     {
       "path": "scripts/tests/editor-dialogs.test.mjs",
       "area": "test",
-      "lines": 496,
-      "sha256": "60fab6ca472d7431a310c2b7b86981c9cd49fbcdaa040d94e3270f022a882da5"
+      "lines": 532,
+      "sha256": "a9ca8ac673d1242372afebd2378e998cecf57426a87a7789cf4a2f738c57e853"
     },
     {
       "path": "scripts/tests/editor-draft.test.mjs",
@@ -12734,8 +12874,8 @@
     {
       "path": "scripts/tests/editor-runtime.test.mjs",
       "area": "test",
-      "lines": 473,
-      "sha256": "4813afeb288d59c7a7cedf97ba768647bef70ebc770c5e18b9b742ed0fa08259"
+      "lines": 688,
+      "sha256": "76ac06fbcdf02765af06e5f820d1b2192119c0efbf7425725ea4d3cfba0a586b"
     },
     {
       "path": "scripts/tests/export.test.mjs",
@@ -12746,8 +12886,8 @@
     {
       "path": "scripts/tests/generic-project.test.mjs",
       "area": "test",
-      "lines": 273,
-      "sha256": "2c5148fb0412029cf6e8fa3787dcf83a1d45edbd86266e5e034cd9ed3da941cb"
+      "lines": 324,
+      "sha256": "0d0b110d88d0271140ff4bf21856dc6efbe28539e08821beae732a9f50721bf8"
     },
     {
       "path": "scripts/tests/helpers.mjs",
@@ -12992,8 +13132,8 @@
     {
       "path": "web/modules/app-runtime.js",
       "area": "editor",
-      "lines": 5302,
-      "sha256": "69f4883ae4314c1ec901009c2738af54bbce9471d43229c97d504a088f39a16a"
+      "lines": 5312,
+      "sha256": "09aa911ede404a92b4bf93eab6e63a74d27dad848a8875b9f706132d71f73101"
     },
     {
       "path": "web/modules/app-services.js",
@@ -13449,231 +13589,231 @@
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 3154,
+      "line": 3163,
       "event": "click",
       "target": "button",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 4315,
+      "line": 4325,
       "event": "click",
       "target": "button",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 4982,
+      "line": 4992,
       "event": "click",
       "target": "sidebarToggleBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 4983,
+      "line": 4993,
       "event": "click",
       "target": "sidebarBackdropEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 4988,
+      "line": 4998,
       "event": "input",
       "target": "searchInput",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5006,
+      "line": 5016,
       "event": "click",
       "target": "searchClearEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5020,
+      "line": 5030,
       "event": "click",
       "target": "loadRetryBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5026,
+      "line": 5036,
       "event": "click",
       "target": "runtimeErrorClearBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5032,
+      "line": 5042,
       "event": "click",
       "target": "runtimeErrorListEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5038,
+      "line": 5048,
       "event": "click",
       "target": "editBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5058,
+      "line": 5068,
       "event": "click",
       "target": "editCreateBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5064,
+      "line": 5074,
       "event": "change",
       "target": "createTypeSelectEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5080,
+      "line": 5090,
       "event": "click",
       "target": "editSourceModeBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5093,
+      "line": 5103,
       "event": "click",
       "target": "editBlockModeBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5106,
+      "line": 5116,
       "event": "input",
       "target": "createPathInputEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5112,
+      "line": 5122,
       "event": "blur",
       "target": "createPathInputEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5118,
+      "line": 5128,
       "event": "keydown",
       "target": "createPathInputEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5133,
+      "line": 5143,
       "event": "click",
       "target": "editSaveBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5148,
+      "line": 5158,
       "event": "input",
       "target": "editEditorEl",
       "handler": "onSourceInput"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5152,
+      "line": 5162,
       "event": "input",
       "target": "editBlockEditorEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5160,
+      "line": 5170,
       "event": "keydown",
       "target": "editBlockEditorEl",
       "handler": "handleEditorSaveShortcut"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5164,
+      "line": 5174,
       "event": "click",
       "target": "editCancelBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5174,
+      "line": 5184,
       "event": "click",
       "target": "button",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5183,
+      "line": 5193,
       "event": "click",
       "target": "saveConflictDialogEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5191,
+      "line": 5201,
       "event": "click",
       "target": "editRebuildBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5204,
+      "line": 5214,
       "event": "click",
       "target": "modeBrowseBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5210,
+      "line": 5220,
       "event": "click",
       "target": "modeEditBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5235,
+      "line": 5245,
       "event": "keydown",
       "target": "editEditorEl",
       "handler": "handleEditorSaveShortcut"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5239,
+      "line": 5249,
       "event": "resize",
       "target": "window",
       "handler": "resizeBlockEditors"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5240,
+      "line": 5250,
       "event": "error",
       "target": "window",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5245,
+      "line": 5255,
       "event": "unhandledrejection",
       "target": "window",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5249,
+      "line": 5259,
       "event": "keydown",
       "target": "window",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5273,
+      "line": 5283,
       "event": "beforeunload",
       "target": "window",
       "handler": "(inline)"
@@ -14076,27 +14216,32 @@
     },
     {
       "file": "scripts/tests/editor-dialogs.test.mjs",
-      "line": 407,
+      "line": 383,
+      "name": "template loading: changing a new draft extension refreshes media parsing and ignores the previous path response"
+    },
+    {
+      "file": "scripts/tests/editor-dialogs.test.mjs",
+      "line": 443,
       "name": "type settings distinguish creation from editing and retain a rejected new draft for retry or cancel"
     },
     {
       "file": "scripts/tests/editor-dialogs.test.mjs",
-      "line": 441,
+      "line": 477,
       "name": "template preview and save retain original BOM and line endings when only its label changes"
     },
     {
       "file": "scripts/tests/editor-dialogs.test.mjs",
-      "line": 455,
+      "line": 491,
       "name": "returning from saved project settings keeps editing locked until the new index applies"
     },
     {
       "file": "scripts/tests/editor-dialogs.test.mjs",
-      "line": 467,
+      "line": 503,
       "name": "discarding edits after a template save cannot leave a closed dialog marked dirty"
     },
     {
       "file": "scripts/tests/editor-dialogs.test.mjs",
-      "line": 481,
+      "line": 517,
       "name": "a failed project index application keeps the settings available for retry without another save"
     },
     {
@@ -14127,106 +14272,141 @@
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
       "line": 26,
+      "name": "save recovery: an auto-completed filename remains the draft and preview path after a rejected creation"
+    },
+    {
+      "file": "scripts/tests/editor-runtime.test.mjs",
+      "line": 65,
+      "name": "save recovery: HTTP ${status} retains the ${mode} draft and reports a rejected rebuild without losing a successful save"
+    },
+    {
+      "file": "scripts/tests/editor-runtime.test.mjs",
+      "line": 115,
+      "name": "save recovery: adding the default extension cannot submit an overlong filename and shortening it permits retry"
+    },
+    {
+      "file": "scripts/tests/editor-runtime.test.mjs",
+      "line": 145,
       "name": "suggested filenames sanitize arbitrary type labels and fit filesystem filename limits"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 40,
+      "line": 159,
       "name": "the initial creation hint cannot hide a failed template load"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 54,
+      "line": 173,
       "name": "a failed index reload after saving is reported as a rebuild failure while the saved editor survives"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 72,
+      "line": 191,
       "name": "an invalid replacement index preserves the current document list and project types"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 84,
+      "line": 203,
       "name": "source/block switches retain new edits and do not duplicate display-only headings"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 108,
+      "line": 227,
       "name": "an unchanged source stays clean across modes and index refresh preserves a dirty editor"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 127,
+      "line": 246,
       "name": "late source responses cannot reopen a cancelled session; empty sources stay empty"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 144,
+      "line": 263,
       "name": "saving serializes shortcut requests and locks editing until rebuilding finishes"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 172,
+      "line": 291,
       "name": "a changed creation path is an unsaved draft and cancel restores the current document path"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 189,
+      "line": 308,
       "name": "suggested creation paths reuse same-type directories and never treat a filename as a folder"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 197,
+      "line": 316,
       "name": "an older template response cannot replace a newer type or reopen a cancelled creation"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 220,
+      "line": 355,
+      "name": "template loading: a cancelled response cannot replace the fresh cache used by the next creation and save"
+    },
+    {
+      "file": "scripts/tests/editor-runtime.test.mjs",
+      "line": 379,
+      "name": "template loading: cancelling a first draft does not cache its late response before reopening"
+    },
+    {
+      "file": "scripts/tests/editor-runtime.test.mjs",
+      "line": 394,
+      "name": "template loading: an old failure cannot poison a valid empty template or report an error in the new session"
+    },
+    {
+      "file": "scripts/tests/editor-runtime.test.mjs",
+      "line": 413,
+      "name": "template loading: a cancelled creation cannot move the caret or scroll of a newer draft of the same type"
+    },
+    {
+      "file": "scripts/tests/editor-runtime.test.mjs",
+      "line": 435,
       "name": "conflict reload uses the newly read version, even if the server changed again after the conflict"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 230,
+      "line": 445,
       "name": "failed forced saves keep the original baseline so a normal retry asks about the conflict again"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 261,
+      "line": 476,
       "name": "a failed conflict reload retains the block draft and its error until a successful retry"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 297,
+      "line": 512,
       "name": "save conflict: ${label} only changes the baseline after an approved successful write"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 330,
+      "line": 545,
       "name": "content revision tokens survive reading, conflict reload and subsequent ordinary saving"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 359,
+      "line": 574,
       "name": "switching from the editor to browse makes the document content visible again"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 370,
+      "line": 585,
       "name": "a successful creation stays editable as an existing file if rebuilding fails"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 396,
+      "line": 611,
       "name": "browser textarea normalization preserves source line endings through switches, edits and saves"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 423,
+      "line": 638,
       "name": "first index refresh maps a created source to its catalog ID without closing its editor"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 449,
+      "line": 664,
       "name": "discard cancellation protects dirty drafts on document, mode and editor exit"
     },
     {
@@ -14336,72 +14516,77 @@
     },
     {
       "file": "scripts/tests/generic-project.test.mjs",
-      "line": 37,
+      "line": 33,
+      "name": "save recovery: a duplicate creation preserves the draft and an HTTP retry registers only the new selected type"
+    },
+    {
+      "file": "scripts/tests/generic-project.test.mjs",
+      "line": 88,
       "name": "creation rejects portable path collisions without poisoning the registry: ${second}"
     },
     {
       "file": "scripts/tests/generic-project.test.mjs",
-      "line": 49,
+      "line": 100,
       "name": "unregistered files and concurrent creates also reserve their portable source locations"
     },
     {
       "file": "scripts/tests/generic-project.test.mjs",
-      "line": 64,
+      "line": 115,
       "name": "a missing registered source cannot silently donate its identity and type to a new document"
     },
     {
       "file": "scripts/tests/generic-project.test.mjs",
-      "line": 78,
+      "line": 129,
       "name": "creation rejects unindexable and nonportable paths before creating metadata or source files"
     },
     {
       "file": "scripts/tests/generic-project.test.mjs",
-      "line": 93,
+      "line": 144,
       "name": "queued creation validates the current project definition after an earlier configuration change"
     },
     {
       "file": "scripts/tests/generic-project.test.mjs",
-      "line": 108,
+      "line": 159,
       "name": "a failed source publication removes only its new descriptor and permits a clean retry"
     },
     {
       "file": "scripts/tests/generic-project.test.mjs",
-      "line": 121,
+      "line": 172,
       "name": "generic registration preserves version, project-owned types and templates without legacy directories"
     },
     {
       "file": "scripts/tests/generic-project.test.mjs",
-      "line": 136,
+      "line": 187,
       "name": "custom type survives a user-selected file location, partial rebuild, save and reload"
     },
     {
       "file": "scripts/tests/generic-project.test.mjs",
-      "line": 163,
+      "line": 214,
       "name": "invalid types and simultaneous creates never leave orphaned metadata or overwrite a source"
     },
     {
       "file": "scripts/tests/generic-project.test.mjs",
-      "line": 175,
+      "line": 226,
       "name": "generic documents, project templates and media IDs survive a different workspace root"
     },
     {
       "file": "scripts/tests/generic-project.test.mjs",
-      "line": 198,
+      "line": 249,
       "name": "generic editor offers only project types, uses local templates and accepts the new document root"
     },
     {
       "file": "scripts/tests/generic-project.test.mjs",
-      "line": 219,
+      "line": 270,
       "name": "new manifest layout and template paths are validated while legacy projects keep their original layout"
     },
     {
       "file": "scripts/tests/generic-project.test.mjs",
-      "line": 235,
+      "line": 286,
       "name": "an empty project exposes creation in edit mode and recovers after cancelling its first draft"
     },
     {
       "file": "scripts/tests/generic-project.test.mjs",
-      "line": 256,
+      "line": 307,
       "name": "project category tabs, counts and searches follow custom types without old game categories"
     },
     {

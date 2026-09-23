@@ -1,0 +1,363 @@
+TAP version 13
+# Subtest: reopening an aborted export ignores its late failure and allows a fresh export
+ok 1 - reopening an aborted export ignores its late failure and allows a fresh export # SKIP test name does not match pattern
+  ---
+  duration_ms: 1.499436
+  ...
+# Subtest: an aborted export arriving after reopen is released without blocking the new dialog
+ok 2 - an aborted export arriving after reopen is released without blocking the new dialog # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.087548
+  ...
+# Subtest: opening export during a save cannot leave a permanently busy snapshot
+ok 3 - opening export during a save cannot leave a permanently busy snapshot # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.065656
+  ...
+# Subtest: an expired native export can be regenerated in the same dialog after cancelling its save picker
+ok 4 - an expired native export can be regenerated in the same dialog after cancelling its save picker # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.06725
+  ...
+# Subtest: native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+ok 5 - native save failures retain a retryable package and keep close/options guarded only while the picker is pending # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.069203
+  ...
+# Subtest: cancelling media import during structured insertion keeps the draft and uploaded assets
+ok 6 - cancelling media import during structured insertion keeps the draft and uploaded assets # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.060586
+  ...
+# Subtest: late media preparation cannot overwrite a draft whose content changed
+ok 7 - late media preparation cannot overwrite a draft whose content changed # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.064363
+  ...
+# Subtest: existing media still inserts into an unchanged structured draft and releases the editor
+ok 8 - existing media still inserts into an unchanged structured draft and releases the editor # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.076948
+  ...
+# Subtest: media preview loads immediately after reading a document without requiring another input event
+ok 9 - media preview loads immediately after reading a document without requiring another input event # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.087749
+  ...
+# Subtest: media preview stops when switching to browse: existing document
+ok 10 - media preview stops when switching to browse: existing document # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.105523
+  ...
+# Subtest: media preview stops when switching to browse: first unsaved document
+ok 11 - media preview stops when switching to browse: first unsaved document # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.071076
+  ...
+# Subtest: media preview clears the previous template immediately while a different type is loading
+ok 12 - media preview clears the previous template immediately while a different type is loading # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.076046
+  ...
+# Subtest: media preview clears when types share a source path and ignores the old pending response
+ok 13 - media preview clears when types share a source path and ignores the old pending response # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.067039
+  ...
+# Subtest: media preview and a first dirty draft survive a cancelled mode switch, then close together after confirmation
+ok 14 - media preview and a first dirty draft survive a cancelled mode switch, then close together after confirmation # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.158725
+  ...
+# Subtest: media preview keeps unchanged playback through source/block switches and saving without altering source bytes
+ok 15 - media preview keeps unchanged playback through source/block switches and saving without altering source bytes # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.061579
+  ...
+# Subtest: media preview discards a late result after removing media or leaving and reopening the editor
+ok 16 - media preview discards a late result after removing media or leaving and reopening the editor # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.066137
+  ...
+# Subtest: template loading: changing a new draft extension refreshes media parsing and ignores the previous path response
+not ok 17 - template loading: changing a new draft extension refreshes media parsing and ignores the previous path response
+  ---
+  duration_ms: 65.10274
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-dialogs.test.mjs:383:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-dialogs.test.mjs:395:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: type settings distinguish creation from editing and retain a rejected new draft for retry or cancel
+ok 18 - type settings distinguish creation from editing and retain a rejected new draft for retry or cancel # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.329354
+  ...
+# Subtest: template preview and save retain original BOM and line endings when only its label changes
+ok 19 - template preview and save retain original BOM and line endings when only its label changes # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.091225
+  ...
+# Subtest: returning from saved project settings keeps editing locked until the new index applies
+ok 20 - returning from saved project settings keeps editing locked until the new index applies # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.066919
+  ...
+# Subtest: discarding edits after a template save cannot leave a closed dialog marked dirty
+ok 21 - discarding edits after a template save cannot leave a closed dialog marked dirty # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.151251
+  ...
+# Subtest: a failed project index application keeps the settings available for retry without another save
+ok 22 - a failed project index application keeps the settings available for retry without another save # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.055637
+  ...
+# Subtest: new document validation refuses paths that cannot be indexed or migrated before submitting
+ok 23 - new document validation refuses paths that cannot be indexed or migrated before submitting # SKIP test name does not match pattern
+  ---
+  duration_ms: 1.458868
+  ...
+# Subtest: suggested filenames sanitize arbitrary type labels and fit filesystem filename limits
+ok 24 - suggested filenames sanitize arbitrary type labels and fit filesystem filename limits # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.075365
+  ...
+# Subtest: the initial creation hint cannot hide a failed template load
+ok 25 - the initial creation hint cannot hide a failed template load # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.073191
+  ...
+# Subtest: a failed index reload after saving is reported as a rebuild failure while the saved editor survives
+ok 26 - a failed index reload after saving is reported as a rebuild failure while the saved editor survives # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.063733
+  ...
+# Subtest: an invalid replacement index preserves the current document list and project types
+ok 27 - an invalid replacement index preserves the current document list and project types # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.071016
+  ...
+# Subtest: source/block switches retain new edits and do not duplicate display-only headings
+ok 28 - source/block switches retain new edits and do not duplicate display-only headings # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.061097
+  ...
+# Subtest: an unchanged source stays clean across modes and index refresh preserves a dirty editor
+ok 29 - an unchanged source stays clean across modes and index refresh preserves a dirty editor # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.084663
+  ...
+# Subtest: late source responses cannot reopen a cancelled session; empty sources stay empty
+ok 30 - late source responses cannot reopen a cancelled session; empty sources stay empty # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.068011
+  ...
+# Subtest: saving serializes shortcut requests and locks editing until rebuilding finishes
+ok 31 - saving serializes shortcut requests and locks editing until rebuilding finishes # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.157924
+  ...
+# Subtest: a changed creation path is an unsaved draft and cancel restores the current document path
+ok 32 - a changed creation path is an unsaved draft and cancel restores the current document path # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.090845
+  ...
+# Subtest: suggested creation paths reuse same-type directories and never treat a filename as a folder
+ok 33 - suggested creation paths reuse same-type directories and never treat a filename as a folder # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.100463
+  ...
+# Subtest: an older template response cannot replace a newer type or reopen a cancelled creation
+ok 34 - an older template response cannot replace a newer type or reopen a cancelled creation # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.077329
+  ...
+# Subtest: template loading: a cancelled response cannot replace the fresh cache used by the next creation and save
+not ok 35 - template loading: a cancelled response cannot replace the fresh cache used by the next creation and save
+  ---
+  duration_ms: 42.37485
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:236:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'title: 过期模板\n'
+    - '﻿title: 最新模板\r\n'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    ﻿title: 最新模板
+    
+  actual: |-
+    title: 过期模板
+    
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:247:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template loading: cancelling a first draft does not cache its late response before reopening
+not ok 36 - template loading: cancelling a first draft does not cache its late response before reopening
+  ---
+  duration_ms: 11.527806
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:260:1'
+  failureType: 'testCodeFailure'
+  error: 'reopening must read the current template, not the cancelled response'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 2
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:268:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template loading: an old failure cannot poison a valid empty template or report an error in the new session
+not ok 37 - template loading: an old failure cannot poison a valid empty template or report an error in the new session
+  ---
+  duration_ms: 10.957929
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:275:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + [
+    +   '过期模板请求失败'
+    + ]
+    - []
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0: '过期模板请求失败'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:283:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template loading: a cancelled creation cannot move the caret or scroll of a newer draft of the same type
+not ok 38 - template loading: a cancelled creation cannot move the caret or scroll of a newer draft of the same type
+  ---
+  duration_ms: 9.973334
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:294:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+    +   0,
+    +   0,
+    +   0
+    -   7,
+    -   9,
+    -   240
+      ]
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 7
+    1: 9
+    2: 240
+  actual:
+    0: 0
+    1: 0
+    2: 0
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:307:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: conflict reload uses the newly read version, even if the server changed again after the conflict
+ok 39 - conflict reload uses the newly read version, even if the server changed again after the conflict # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.323773
+  ...
+# Subtest: failed forced saves keep the original baseline so a normal retry asks about the conflict again
+ok 40 - failed forced saves keep the original baseline so a normal retry asks about the conflict again # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.066689
+  ...
+# Subtest: a failed conflict reload retains the block draft and its error until a successful retry
+ok 41 - a failed conflict reload retains the block draft and its error until a successful retry # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.05731
+  ...
+# Subtest: save conflict: keep draft only changes the baseline after an approved successful write
+ok 42 - save conflict: keep draft only changes the baseline after an approved successful write # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.139549
+  ...
+# Subtest: save conflict: cancel conflict only changes the baseline after an approved successful write
+ok 43 - save conflict: cancel conflict only changes the baseline after an approved successful write # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.052531
+  ...
+# Subtest: save conflict: cancel force confirmation only changes the baseline after an approved successful write
+ok 44 - save conflict: cancel force confirmation only changes the baseline after an approved successful write # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.050337
+  ...
+# Subtest: save conflict: confirm force save only changes the baseline after an approved successful write
+ok 45 - save conflict: confirm force save only changes the baseline after an approved successful write # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.044836
+  ...
+# Subtest: content revision tokens survive reading, conflict reload and subsequent ordinary saving
+ok 46 - content revision tokens survive reading, conflict reload and subsequent ordinary saving # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.038253
+  ...
+# Subtest: switching from the editor to browse makes the document content visible again
+ok 47 - switching from the editor to browse makes the document content visible again # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.036791
+  ...
+# Subtest: a successful creation stays editable as an existing file if rebuilding fails
+ok 48 - a successful creation stays editable as an existing file if rebuilding fails # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.038404
+  ...
+# Subtest: browser textarea normalization preserves source line endings through switches, edits and saves
+ok 49 - browser textarea normalization preserves source line endings through switches, edits and saves # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.034957
+  ...
+# Subtest: first index refresh maps a created source to its catalog ID without closing its editor
+ok 50 - first index refresh maps a created source to its catalog ID without closing its editor # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.035037
+  ...
+# Subtest: discard cancellation protects dirty drafts on document, mode and editor exit
+ok 51 - discard cancellation protects dirty drafts on document, mode and editor exit # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.034446
+  ...
+1..51
+# tests 51
+# suites 0
+# pass 0
+# fail 5
+# cancelled 0
+# skipped 46
+# todo 0
+# duration_ms 212.835643

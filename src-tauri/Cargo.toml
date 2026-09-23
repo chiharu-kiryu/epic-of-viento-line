@@ -1,6 +1,6 @@
 [package]
 name = "viento-studio"
-version = "0.3.3"
+version = "0.3.4"
 description = "Viento 文档与故事编辑器"
 edition = "2021"
 rust-version = "1.85"

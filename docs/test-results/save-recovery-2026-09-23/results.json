@@ -1,0 +1,66 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.3",
+  "gitBase": "2731f2ea87b9b67d18b0c08cab6240b132e0e3ab",
+  "scope": "Save rejection and draft/version preservation, automatic filename completion, renamed creation retries and saved-source rebuild recovery",
+  "workflows": [
+    "F18",
+    "F19",
+    "F22",
+    "F30",
+    "F45"
+  ],
+  "bugs": [
+    "N73",
+    "N74",
+    "N75"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 50,
+    "passed": 0,
+    "failed": 5,
+    "skipped": 45,
+    "log": "before.log",
+    "skipReason": "Existing tests excluded by test-name-pattern"
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 92,
+    "passed": 92,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after.log",
+    "newCases": 5
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 268,
+    "passed": 267,
+    "failed": 0,
+    "skipped": 1,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 120,
+    "apiContractPassed": true
+  },
+  "skipReason": "Node/Rust archive interoperability requires VIENTO_TEST_ARCHIVE_BINARY; native archive code unchanged",
+  "files": {
+    "scripts/tests/editor-runtime.test.mjs": "76ac06fbcdf02765af06e5f820d1b2192119c0efbf7425725ea4d3cfba0a586b",
+    "scripts/tests/generic-project.test.mjs": "0d0b110d88d0271140ff4bf21856dc6efbe28539e08821beae732a9f50721bf8",
+    "web/modules/app-runtime.js": "09aa911ede404a92b4bf93eab6e63a74d27dad848a8875b9f706132d71f73101"
+  },
+  "controllerTestEnvironment": "Production editor controller in DOM fixtures; controlled 401/403 and rebuild errors. Temporary live HTTP v3 workspace verifies duplicate creation, renamed retry, chosen type, unchanged original document/registry and byte-preserving subsequent save.",
+  "nativeTestsRerun": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "functionNetwork": {
+    "revision": 27,
+    "sourceFingerprints": 146,
+    "nodeSources": 156,
+    "localImportStatements": 375,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

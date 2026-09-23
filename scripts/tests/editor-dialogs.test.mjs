@@ -380,6 +380,42 @@ test('media preview discards a late result after removing media or leaving and r
   assert.deepEqual(h.writes, []);
 });
 
+test('template loading: changing a new draft extension refreshes media parsing and ignores the previous path response', async () => {
+  const h = await mediaPreviewHarness({ loadTemplateContent: async () => previewSource });
+  h.runtime.exitEditMode();
+  h.state.workspace = { version: 3, paths: { documents: 'documents' }, documentTypes: [{
+    id: 'character', label: '角色', directory: 'characters', template: 'character.md', templateSource: 'templates/character.md',
+  }] };
+  await h.runtime.enterCreateMode();
+  const player = await h.showMedia();
+  h.controller.refresh(); const old = h.startPreview();
+  const file = 'documents/characters/新的格式.json';
+  h.element('docCreatePathInput').value = file;
+  h.runtime.updateCreatePathValidation(true);
+  assert.equal(player.paused, true);
+  assert.equal(h.element('docMediaPreview').hidden, true);
+  h.requests.at(-1).resolve({ media: previewMedia }); await old;
+  assert.equal(h.element('docMediaPreview').hidden, true);
+  const updated = h.startPreview();
+  assert.equal(h.requests.at(-1).path, file);
+  assert.equal(h.requests.at(-1).documentType, 'character');
+  assert.equal(h.requests.at(-1).content, previewSource);
+  h.requests.at(-1).resolve({ media: [] }); await updated;
+  assert.equal(h.element('docMediaPreview').hidden, true);
+  assert.equal(h.runtime.getCurrentEditContent(), previewSource, 'changing paths must not rewrite the draft');
+  const content = '\uFEFF' + JSON.stringify({ title: '新角色', 媒体: previewMedia });
+  h.element('docSourceEditor').value = content;
+  h.element('docSourceEditor').dispatch('input', { bubbles: true });
+  const valid = h.startPreview();
+  h.requests.at(-1).resolve({ media: previewMedia }); await valid;
+  assert.equal(h.element('docMediaPreview').hidden, false);
+  await h.runtime.saveCurrentDoc();
+  assert.equal(h.writes.length, 1);
+  assert.equal(h.writes[0].pathValue, file);
+  assert.equal(h.writes[0].documentType, 'character');
+  assert.equal(h.writes[0].content, content);
+});
+
 async function projectHarness(content, apply = async () => {}, save = async () => {}) {
   let configuration = { workspace: { name: '测试作品' }, revision: 'one', warnings: [], entries: [{
     type: { id: 'character', label: '角色', directory: 'characters', parserProfile: 'structured' }, format: 'md', content,

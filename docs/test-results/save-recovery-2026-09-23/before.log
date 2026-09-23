@@ -1,0 +1,333 @@
+TAP version 13
+# Subtest: new document validation refuses paths that cannot be indexed or migrated before submitting
+ok 1 - new document validation refuses paths that cannot be indexed or migrated before submitting # SKIP test name does not match pattern
+  ---
+  duration_ms: 1.424702
+  ...
+# Subtest: save recovery: an auto-completed filename remains the draft and preview path after a rejected creation
+not ok 2 - save recovery: an auto-completed filename remains the draft and preview path after a rejected creation
+  ---
+  duration_ms: 31.471819
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:26:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'documents/characters/角色'
+    - 'documents/characters/角色.yaml'
+                              ^
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'documents/characters/角色.yaml'
+  actual: 'documents/characters/角色'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:50:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: save recovery: HTTP 401 retains the source draft and reports a rejected rebuild without losing a successful save
+not ok 3 - save recovery: HTTP 401 retains the source draft and reports a rejected rebuild without losing a successful save
+  ---
+  duration_ms: 8.15665
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:65:4'
+  failureType: 'testCodeFailure'
+  error: "Cannot access 'payloadErrorCode' before initialization"
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    getFriendlyRequestError (evalmachine.<anonymous>:1415:35)
+    saveExistingDoc (evalmachine.<anonymous>:4248:28)
+    async Object.saveCurrentDoc (evalmachine.<anonymous>:4004:10)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:87:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: save recovery: HTTP 403 retains the blocks draft and reports a rejected rebuild without losing a successful save
+not ok 4 - save recovery: HTTP 403 retains the blocks draft and reports a rejected rebuild without losing a successful save
+  ---
+  duration_ms: 9.790837
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:65:4'
+  failureType: 'testCodeFailure'
+  error: "Cannot access 'payloadErrorCode' before initialization"
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    getFriendlyRequestError (evalmachine.<anonymous>:1425:23)
+    saveExistingDoc (evalmachine.<anonymous>:4248:28)
+    async Object.saveCurrentDoc (evalmachine.<anonymous>:4004:10)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:87:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: save recovery: adding the default extension cannot submit an overlong filename and shortening it permits retry
+not ok 5 - save recovery: adding the default extension cannot submit an overlong filename and shortening it permits retry
+  ---
+  duration_ms: 10.469129
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:115:1'
+  failureType: 'testCodeFailure'
+  error: 'validate the final filename before sending it to the service'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:126:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: suggested filenames sanitize arbitrary type labels and fit filesystem filename limits
+ok 6 - suggested filenames sanitize arbitrary type labels and fit filesystem filename limits # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.13263
+  ...
+# Subtest: the initial creation hint cannot hide a failed template load
+ok 7 - the initial creation hint cannot hide a failed template load # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.063951
+  ...
+# Subtest: a failed index reload after saving is reported as a rebuild failure while the saved editor survives
+ok 8 - a failed index reload after saving is reported as a rebuild failure while the saved editor survives # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.159261
+  ...
+# Subtest: an invalid replacement index preserves the current document list and project types
+ok 9 - an invalid replacement index preserves the current document list and project types # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.066215
+  ...
+# Subtest: source/block switches retain new edits and do not duplicate display-only headings
+ok 10 - source/block switches retain new edits and do not duplicate display-only headings # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.090571
+  ...
+# Subtest: an unchanged source stays clean across modes and index refresh preserves a dirty editor
+ok 11 - an unchanged source stays clean across modes and index refresh preserves a dirty editor # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.062288
+  ...
+# Subtest: late source responses cannot reopen a cancelled session; empty sources stay empty
+ok 12 - late source responses cannot reopen a cancelled session; empty sources stay empty # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.052299
+  ...
+# Subtest: saving serializes shortcut requests and locks editing until rebuilding finishes
+ok 13 - saving serializes shortcut requests and locks editing until rebuilding finishes # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.048982
+  ...
+# Subtest: a changed creation path is an unsaved draft and cancel restores the current document path
+ok 14 - a changed creation path is an unsaved draft and cancel restores the current document path # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.131519
+  ...
+# Subtest: suggested creation paths reuse same-type directories and never treat a filename as a folder
+ok 15 - suggested creation paths reuse same-type directories and never treat a filename as a folder # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.054984
+  ...
+# Subtest: an older template response cannot replace a newer type or reopen a cancelled creation
+ok 16 - an older template response cannot replace a newer type or reopen a cancelled creation # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.048682
+  ...
+# Subtest: template loading: a cancelled response cannot replace the fresh cache used by the next creation and save
+ok 17 - template loading: a cancelled response cannot replace the fresh cache used by the next creation and save # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.243129
+  ...
+# Subtest: template loading: cancelling a first draft does not cache its late response before reopening
+ok 18 - template loading: cancelling a first draft does not cache its late response before reopening # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.062668
+  ...
+# Subtest: template loading: an old failure cannot poison a valid empty template or report an error in the new session
+ok 19 - template loading: an old failure cannot poison a valid empty template or report an error in the new session # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.051127
+  ...
+# Subtest: template loading: a cancelled creation cannot move the caret or scroll of a newer draft of the same type
+ok 20 - template loading: a cancelled creation cannot move the caret or scroll of a newer draft of the same type # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.130967
+  ...
+# Subtest: conflict reload uses the newly read version, even if the server changed again after the conflict
+ok 21 - conflict reload uses the newly read version, even if the server changed again after the conflict # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.052049
+  ...
+# Subtest: failed forced saves keep the original baseline so a normal retry asks about the conflict again
+ok 22 - failed forced saves keep the original baseline so a normal retry asks about the conflict again # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.04225
+  ...
+# Subtest: a failed conflict reload retains the block draft and its error until a successful retry
+ok 23 - a failed conflict reload retains the block draft and its error until a successful retry # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.043572
+  ...
+# Subtest: save conflict: keep draft only changes the baseline after an approved successful write
+ok 24 - save conflict: keep draft only changes the baseline after an approved successful write # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.040577
+  ...
+# Subtest: save conflict: cancel conflict only changes the baseline after an approved successful write
+ok 25 - save conflict: cancel conflict only changes the baseline after an approved successful write # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.037291
+  ...
+# Subtest: save conflict: cancel force confirmation only changes the baseline after an approved successful write
+ok 26 - save conflict: cancel force confirmation only changes the baseline after an approved successful write # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.037631
+  ...
+# Subtest: save conflict: confirm force save only changes the baseline after an approved successful write
+ok 27 - save conflict: confirm force save only changes the baseline after an approved successful write # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.037611
+  ...
+# Subtest: content revision tokens survive reading, conflict reload and subsequent ordinary saving
+ok 28 - content revision tokens survive reading, conflict reload and subsequent ordinary saving # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.037501
+  ...
+# Subtest: switching from the editor to browse makes the document content visible again
+ok 29 - switching from the editor to browse makes the document content visible again # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.036469
+  ...
+# Subtest: a successful creation stays editable as an existing file if rebuilding fails
+ok 30 - a successful creation stays editable as an existing file if rebuilding fails # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.040086
+  ...
+# Subtest: browser textarea normalization preserves source line endings through switches, edits and saves
+ok 31 - browser textarea normalization preserves source line endings through switches, edits and saves # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.207973
+  ...
+# Subtest: first index refresh maps a created source to its catalog ID without closing its editor
+ok 32 - first index refresh maps a created source to its catalog ID without closing its editor # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.044244
+  ...
+# Subtest: discard cancellation protects dirty drafts on document, mode and editor exit
+ok 33 - discard cancellation protects dirty drafts on document, mode and editor exit # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.055374
+  ...
+# Subtest: save recovery: a duplicate creation preserves the draft and an HTTP retry registers only the new selected type
+not ok 34 - save recovery: a duplicate creation preserves the draft and an HTTP retry registers only the new selected type
+  ---
+  duration_ms: 326.934084
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/generic-project.test.mjs:33:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'documents/species/已有种族'
+    - 'documents/species/已有种族.md'
+                             ^
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'documents/species/已有种族.md'
+  actual: 'documents/species/已有种族'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/generic-project.test.mjs:59:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async startSubtest (node:internal/test_runner/harness:214:3)
+  ...
+# Subtest: creation rejects portable path collisions without poisoning the registry: documents/hero.md
+ok 35 - creation rejects portable path collisions without poisoning the registry: documents/hero.md # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.167687
+  ...
+# Subtest: creation rejects portable path collisions without poisoning the registry: documents/Café.md
+ok 36 - creation rejects portable path collisions without poisoning the registry: documents/Café.md # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.083558
+  ...
+# Subtest: creation rejects portable path collisions without poisoning the registry: documents/characters/two.md
+ok 37 - creation rejects portable path collisions without poisoning the registry: documents/characters/two.md # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.060925
+  ...
+# Subtest: unregistered files and concurrent creates also reserve their portable source locations
+ok 38 - unregistered files and concurrent creates also reserve their portable source locations # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.069271
+  ...
+# Subtest: a missing registered source cannot silently donate its identity and type to a new document
+ok 39 - a missing registered source cannot silently donate its identity and type to a new document # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.223703
+  ...
+# Subtest: creation rejects unindexable and nonportable paths before creating metadata or source files
+ok 40 - creation rejects unindexable and nonportable paths before creating metadata or source files # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.057218
+  ...
+# Subtest: queued creation validates the current project definition after an earlier configuration change
+ok 41 - queued creation validates the current project definition after an earlier configuration change # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.050726
+  ...
+# Subtest: a failed source publication removes only its new descriptor and permits a clean retry
+ok 42 - a failed source publication removes only its new descriptor and permits a clean retry # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.049885
+  ...
+# Subtest: generic registration preserves version, project-owned types and templates without legacy directories
+ok 43 - generic registration preserves version, project-owned types and templates without legacy directories # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.157307
+  ...
+# Subtest: custom type survives a user-selected file location, partial rebuild, save and reload
+ok 44 - custom type survives a user-selected file location, partial rebuild, save and reload # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.133743
+  ...
+# Subtest: invalid types and simultaneous creates never leave orphaned metadata or overwrite a source
+ok 45 - invalid types and simultaneous creates never leave orphaned metadata or overwrite a source # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.053621
+  ...
+# Subtest: generic documents, project templates and media IDs survive a different workspace root
+ok 46 - generic documents, project templates and media IDs survive a different workspace root # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.149783
+  ...
+# Subtest: generic editor offers only project types, uses local templates and accepts the new document root
+ok 47 - generic editor offers only project types, uses local templates and accepts the new document root # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.091864
+  ...
+# Subtest: new manifest layout and template paths are validated while legacy projects keep their original layout
+ok 48 - new manifest layout and template paths are validated while legacy projects keep their original layout # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.046819
+  ...
+# Subtest: an empty project exposes creation in edit mode and recovers after cancelling its first draft
+ok 49 - an empty project exposes creation in edit mode and recovers after cancelling its first draft # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.190109
+  ...
+# Subtest: project category tabs, counts and searches follow custom types without old game categories
+ok 50 - project category tabs, counts and searches follow custom types without old game categories # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.056116
+  ...
+1..50
+# tests 50
+# suites 0
+# pass 0
+# fail 5
+# cancelled 0
+# skipped 45
+# todo 0
+# duration_ms 489.500635

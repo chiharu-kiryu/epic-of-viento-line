@@ -1,0 +1,65 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.3",
+  "gitBase": "2731f2ea87b9b67d18b0c08cab6240b132e0e3ab",
+  "scope": "Creation template cancellation, cache/error isolation, new draft caret and manual-path media preview through save",
+  "workflows": [
+    "F16",
+    "F19",
+    "F21",
+    "F30"
+  ],
+  "bugs": [
+    "N70",
+    "N71",
+    "N72"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 51,
+    "passed": 0,
+    "failed": 5,
+    "skipped": 46,
+    "log": "before.log",
+    "skipReason": "Existing tests excluded by test-name-pattern"
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 95,
+    "passed": 95,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after.log",
+    "newCases": 5
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 263,
+    "passed": 262,
+    "failed": 0,
+    "skipped": 1,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 120,
+    "apiContractPassed": true
+  },
+  "skipReason": "Node/Rust archive interoperability requires VIENTO_TEST_ARCHIVE_BINARY; native archive code unchanged",
+  "files": {
+    "scripts/tests/editor-dialogs.test.mjs": "a9ca8ac673d1242372afebd2378e998cecf57426a87a7789cf4a2f738c57e853",
+    "scripts/tests/editor-runtime.test.mjs": "4278756dc77b5b2586bd8552be22f620bcd90fbf4eecbe87933da6527feb3508",
+    "web/modules/app-runtime.js": "619151b9bbcf65fb1f050e34e397ac28ce1a2cfe4ac20ad70095c2fad090a76d"
+  },
+  "controllerTestEnvironment": "Production controllers execute in DOM fixtures with simulated responses, caret and playback; save assertions check submitted source bytes, paths and document types",
+  "nativeTestsRerun": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "functionNetwork": {
+    "revision": 26,
+    "sourceFingerprints": 146,
+    "nodeSources": 153,
+    "localImportStatements": 375,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

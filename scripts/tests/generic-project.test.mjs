@@ -30,6 +30,57 @@ async function rebuild(root) {
 }
 const post = (base, endpoint, value) => fetch(base + endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(value) });
 
+test('save recovery: a duplicate creation preserves the draft and an HTTP retry registers only the new selected type', async (t) => {
+  const { root, manifest } = await genericProject(t);
+  const base = await serve(t, root);
+  const existingPath = 'documents/species/已有种族.md';
+  assert.equal((await post(base, '/api/doc', { path: existingPath, content: '已有种族原文', create: true, documentType: 'species' })).status, 200);
+  const originalRegistry = await readRegistry(root);
+  const { runtime, state, source, element } = await editorHarness({
+    writeDoc: async ({ pathValue, content, isCreate, documentType, expectedVersion }) => {
+      const response = await post(base, '/api/doc', {
+        path: pathValue, content, create: isCreate === true, documentType, expectedLastModified: expectedVersion,
+      });
+      const body = await response.json();
+      if (!response.ok) throw Object.assign(new Error(body.error), { status: response.status, payload: body });
+      return body.data || body;
+    },
+  });
+  state.workspace = { ...manifest, projectTypes: true };
+  runtime.rebuildIndexForDoc = async () => {};
+  await runtime.enterCreateMode();
+  await runtime.setCreateTypeState('species');
+  runtime.replaceMediaDraftSource('\uFEFF# 新种族\r\n\r\n灵魂数量：2\r\n');
+  element('docCreatePathInput').value = existingPath.slice(0, -3);
+  await runtime.saveCurrentDoc();
+  assert.equal(state.isCreating, true);
+  assert.equal(state.editHasUnsavedChanges, true);
+  assert.match(element('docEditStatus').textContent, /已存在/);
+  assert.equal(state.activeCreatePath, existingPath);
+  assert.deepEqual(await readRegistry(root), originalRegistry);
+  assert.equal(await fs.readFile(path.join(root, existingPath), 'utf8'), '已有种族原文');
+  const newPath = 'documents/species/新种族.md';
+  element('docCreatePathInput').value = newPath.slice(0, -3);
+  runtime.updateCreatePathValidation();
+  source.value = '\uFEFF# 新种族\n\n灵魂数量：3\n';
+  await runtime.saveCurrentDoc();
+  assert.equal(state.isCreating, false);
+  assert.equal(state.editHasUnsavedChanges, false);
+  assert.equal(await fs.readFile(path.join(root, newPath), 'utf8'), '\uFEFF# 新种族\r\n\r\n灵魂数量：3\r\n');
+  const registry = await readRegistry(root);
+  assert.equal(registry.documents.length, 2);
+  assert.deepEqual(registry.documents.find((doc) => doc.sourcePath === existingPath), originalRegistry.documents[0]);
+  assert.equal(registry.documents.find((doc) => doc.sourcePath === newPath).documentType, 'species');
+  const savedVersion = state.activeEditSourceVersion;
+  source.value = '\uFEFF# 新种族\n\n灵魂数量：4\n';
+  await runtime.saveCurrentDoc();
+  assert.equal(state.editHasUnsavedChanges, false);
+  assert.notEqual(state.activeEditSourceVersion, savedVersion);
+  assert.equal(await fs.readFile(path.join(root, newPath), 'utf8'), '\uFEFF# 新种族\r\n\r\n灵魂数量：4\r\n');
+  assert.equal(await fs.readFile(path.join(root, existingPath), 'utf8'), '已有种族原文');
+  assert.deepEqual(await readRegistry(root), registry);
+});
+
 for (const [first, second] of [
   ['documents/Hero.md', 'documents/hero.md'],
   ['documents/Café.md', 'documents/Cafe\u0301.md'],

@@ -23,6 +23,125 @@ test('new document validation refuses paths that cannot be indexed or migrated b
   assert.equal(writes[0].pathValue, 'design-data/正确名字.txt');
 });
 
+test('save recovery: an auto-completed filename remains the draft and preview path after a rejected creation', async () => {
+  const writes = [];
+  const { runtime, state, source, element } = await editorHarness({ writeDoc: async (payload) => {
+    writes.push(payload);
+    if (writes.length === 1) throw Object.assign(new Error('当前目录不可写'), { status: 500 });
+    return { version: '2' };
+  } });
+  state.workspace = { version: 3, projectTypes: true, paths: { documents: 'documents' }, documentTypes: [
+    { id: 'character', label: '角色', directory: 'characters', parserProfile: 'structured', template: 'character.yaml' },
+  ] };
+  runtime.rebuildIndexForDoc = async () => {};
+  runtime.logRuntimeErrorOrMessage = (_label, error) => error.message;
+  await runtime.enterCreateMode();
+  element('docCreatePathInput').value = 'documents/characters/角色';
+  runtime.updateCreatePathValidation();
+  runtime.replaceMediaDraftSource('\uFEFFtitle: 第一次草稿\r\n');
+  await runtime.saveCurrentDoc();
+  assert.equal(writes[0].pathValue, 'documents/characters/角色.yaml');
+  assert.equal(state.isCreating, true);
+  assert.equal(state.isSaving, false);
+  assert.equal(state.editHasUnsavedChanges, true);
+  assert.equal(source.readOnly, false);
+  assert.equal(element('docSaveBtn').disabled, false);
+  assert.match(element('docEditStatus').textContent, /当前目录不可写/);
+  assert.equal(state.activeCreatePath, element('docCreatePathInput').value);
+  assert.equal(runtime.mediaDraftContext().path, writes[0].pathValue);
+  assert.ok(element('docEditPath').textContent.endsWith(writes[0].pathValue));
+  source.value = '\uFEFFtitle: 修改后重试\n';
+  await runtime.saveCurrentDoc();
+  assert.equal(writes[1].pathValue, writes[0].pathValue);
+  assert.equal(writes[1].documentType, 'character');
+  assert.equal(writes[1].content, '\uFEFFtitle: 修改后重试\r\n');
+  assert.equal(state.isCreating, false);
+  assert.equal(state.editHasUnsavedChanges, false);
+});
+
+for (const [status, code, mode, hint] of [
+  [401, 'AUTH_REQUIRED', 'source', /未检测到编辑令牌/],
+  [403, 'FORBIDDEN', 'blocks', /编辑令牌无效/],
+]) test(`save recovery: HTTP ${status} retains the ${mode} draft and reports a rejected rebuild without losing a successful save`, async () => {
+  const failure = () => Object.assign(new Error(`HTTP ${status}`), {
+    status, payload: { errorCode: code, requestId: `req_recovery_${status}` },
+  });
+  const writes = [];
+  let rebuilds = 0;
+  const { runtime, state, source, doc, begin, element } = await editorHarness({
+    writeDoc: async (payload) => {
+      writes.push(payload);
+      if (writes.length === 1) throw failure();
+      return { version: '2' };
+    },
+    rebuildDocIndex: async () => { if (++rebuilds === 1) throw failure(); },
+  });
+  runtime.renderRuntimeErrorPanel = () => {};
+  runtime.loadData = async () => {};
+  const original = '# 标题\r\n\r\n原文\r\n';
+  begin(original, '1');
+  if (mode === 'blocks') runtime.setEditInputMode('blocks');
+  const input = mode === 'blocks' ? element('docBlockEditor').querySelectorAll('textarea')[1] : source;
+  input.value = mode === 'blocks' ? '待保存内容' : '# 标题\n\n待保存内容\n';
+  const draft = runtime.getCurrentEditContent();
+  await runtime.saveCurrentDoc();
+  assert.equal(state.isSaving, false);
+  assert.equal(state.editHasUnsavedChanges, true);
+  assert.equal(state.activeEditSourceVersion, '1');
+  assert.equal(runtime.getCurrentEditContent(), draft);
+  assert.equal(input.readOnly, false);
+  assert.equal(element('docSaveBtn').disabled, false);
+  assert.match(element('docEditStatus').textContent, hint);
+  assert.match(element('docEditStatus').textContent, new RegExp(`req_recovery_${status}`));
+  input.value = mode === 'blocks' ? '修改后重试' : '# 标题\n\n修改后重试\n';
+  await runtime.saveCurrentDoc();
+  assert.equal(writes[1].content, '# 标题\r\n\r\n修改后重试\r\n');
+  assert.equal(writes[1].expectedVersion, '1');
+  assert.equal(state.activeEditSourceVersion, '2');
+  assert.equal(state.editHasUnsavedChanges, false);
+  assert.equal(state.isSaving, false);
+  assert.equal(state.isRebuilding, false);
+  assert.equal(input.readOnly, false);
+  assert.match(element('docEditStatus').textContent, /失败/);
+  assert.match(element('docEditStatus').textContent, hint);
+  await runtime.rebuildIndexForDoc(doc);
+  assert.equal(writes.length, 2, 'retrying the preview must not submit the source again');
+  assert.equal(rebuilds, 2);
+  assert.equal(state.editHasUnsavedChanges, false);
+  assert.equal(runtime.getCurrentEditContent(), writes[1].content);
+  assert.doesNotMatch(element('docEditStatus').textContent, /失败/);
+});
+
+test('save recovery: adding the default extension cannot submit an overlong filename and shortening it permits retry', async () => {
+  const writes = [];
+  const { runtime, state, source, element } = await editorHarness({ writeDoc: async (payload) => {
+    writes.push(payload); return { version: '2' };
+  } });
+  runtime.rebuildIndexForDoc = async () => {};
+  await runtime.enterCreateMode();
+  source.value = '等待保存的草稿';
+  // 252 UTF-8 bytes fit without a suffix, but the automatic .txt makes 256.
+  element('docCreatePathInput').value = `design-data/${'文'.repeat(84)}`;
+  await runtime.saveCurrentDoc();
+  assert.equal(writes.length, 0, 'validate the final filename before sending it to the service');
+  assert.equal(state.isCreating, true);
+  assert.equal(state.isSaving, false);
+  assert.equal(state.editHasUnsavedChanges, true);
+  assert.equal(source.value, '等待保存的草稿');
+  assert.equal(source.readOnly, false);
+  assert.equal(element('docSaveBtn').disabled, true);
+  assert.match(element('docEditStatus').textContent, /文件名过长/);
+  element('docCreatePathInput').value = 'design-data/缩短名称';
+  runtime.updateCreatePathValidation();
+  assert.equal(element('docSaveBtn').disabled, false);
+  await runtime.saveCurrentDoc();
+  assert.equal(writes.length, 1);
+  assert.equal(writes[0].pathValue, 'design-data/缩短名称.txt');
+  assert.equal(writes[0].content, '等待保存的草稿');
+  assert.equal(state.isCreating, false);
+  assert.equal(state.editHasUnsavedChanges, false);
+});
+
 test('suggested filenames sanitize arbitrary type labels and fit filesystem filename limits', async () => {
   const { runtime, state } = await editorHarness();
   for (const label of ['角色 / NPC：主角?', '设定'.repeat(60), '🤔'.repeat(60)]) {
@@ -215,6 +334,102 @@ test('an older template response cannot replace a newer type or reopen a cancell
   await pending;
   assert.equal(state.isCreating, false);
   assert.notEqual(source.value, '取消后到达的模板');
+});
+
+async function templateLoadingHarness() {
+  const requests = [], errors = [], writes = [];
+  const h = await editorHarness({
+    loadTemplateContent: (options) => { const pending = deferred(); requests.push({ ...pending, ...options }); return pending.promise; },
+    writeDoc: async (payload) => { writes.push(payload); return { version: '2' }; },
+  });
+  h.state.workspace = { version: 3, projectTypes: true, paths: { documents: 'documents' }, documentTypes: [{
+    id: 'character', label: '角色', directory: 'characters', template: 'character.yaml', templateSource: 'templates/character.yaml',
+  }] };
+  h.doc.category = 'character'; h.doc.sourcePath = 'documents/characters/已有角色.md';
+  h.runtime.rebuildDocPathCaches(h.state.docs);
+  h.runtime.rebuildIndexForDoc = async () => {};
+  h.runtime.logRuntimeErrorOrMessage = (_label, error) => { errors.push(error.message); return error.message; };
+  return { ...h, requests, errors, writes };
+}
+
+test('template loading: a cancelled response cannot replace the fresh cache used by the next creation and save', async () => {
+  const h = await templateLoadingHarness();
+  const old = h.runtime.enterCreateMode();
+  h.runtime.exitEditMode({ skipUnsavedConfirm: true });
+  const current = h.runtime.enterCreateMode();
+  const fresh = '\uFEFFtitle: 最新模板\r\n';
+  h.requests[1].resolve(fresh); await current;
+  h.requests[0].resolve('title: 过期模板\n'); await old;
+  assert.equal(h.runtime.getCurrentEditContent(), fresh);
+  h.runtime.exitEditMode({ skipUnsavedConfirm: true });
+  await h.runtime.enterCreateMode();
+  assert.equal(h.runtime.getCurrentEditContent(), fresh);
+  assert.equal(h.requests.length, 2, 'the accepted fresh template should remain reusable');
+  h.element('docCreatePathInput').value = 'documents/characters/确认稿.yaml';
+  h.source.value += 'note: 完成\n';
+  await h.runtime.saveCurrentDoc();
+  assert.equal(h.writes.length, 1);
+  assert.equal(h.writes[0].documentType, 'character');
+  assert.equal(h.writes[0].pathValue, 'documents/characters/确认稿.yaml');
+  assert.equal(h.writes[0].content, `${fresh}note: 完成\r\n`);
+  assert.equal(h.state.isCreating, false);
+  assert.equal(h.state.editHasUnsavedChanges, false);
+});
+
+test('template loading: cancelling a first draft does not cache its late response before reopening', async () => {
+  const h = await templateLoadingHarness();
+  h.state.docs = []; h.state.activePath = '';
+  const old = h.runtime.enterCreateMode();
+  h.runtime.exitEditMode({ skipUnsavedConfirm: true });
+  h.requests[0].resolve('title: 已取消的模板\n'); await old;
+  assert.equal(h.state.isCreating, false);
+  const retry = h.runtime.enterCreateMode();
+  assert.equal(h.requests.length, 2, 'reopening must read the current template, not the cancelled response');
+  h.requests[1].resolve('title: 重新读取\n'); await retry;
+  assert.equal(h.source.value, 'title: 重新读取\n');
+  assert.equal(h.state.isLoadingTemplate, false);
+  assert.deepEqual(h.writes, []);
+});
+
+test('template loading: an old failure cannot poison a valid empty template or report an error in the new session', async () => {
+  const h = await templateLoadingHarness();
+  const old = h.runtime.enterCreateMode();
+  h.runtime.exitEditMode({ skipUnsavedConfirm: true });
+  const current = h.runtime.enterCreateMode();
+  h.requests[1].resolve(''); await current;
+  const status = h.element('docEditStatus').textContent;
+  h.requests[0].reject(new Error('过期模板请求失败')); await old;
+  assert.deepEqual(h.errors, []);
+  assert.equal(h.element('docEditStatus').textContent, status);
+  h.runtime.exitEditMode({ skipUnsavedConfirm: true });
+  await h.runtime.enterCreateMode();
+  assert.equal(h.requests.length, 2);
+  assert.equal(h.source.value, '');
+  assert.doesNotMatch(h.element('docEditStatus').textContent, /加载失败|过期模板/);
+  assert.equal(h.state.editHasUnsavedChanges, false);
+  assert.deepEqual(h.writes, []);
+});
+
+test('template loading: a cancelled creation cannot move the caret or scroll of a newer draft of the same type', async () => {
+  const h = await templateLoadingHarness();
+  h.source.setSelectionRange = (start, end) => { h.source.selectionStart = start; h.source.selectionEnd = end; };
+  const old = h.runtime.enterCreateMode();
+  h.runtime.exitEditMode({ skipUnsavedConfirm: true });
+  const current = h.runtime.enterCreateMode();
+  h.requests[1].resolve('title: 新角色\n'); await current;
+  h.source.value += 'notes: 尚未保存的写作\n';
+  const content = h.source.value, file = 'documents/characters/我的草稿.yaml';
+  h.element('docCreatePathInput').value = file;
+  h.runtime.updateCreatePathValidation();
+  h.source.setSelectionRange(7, 9); h.source.scrollTop = 240;
+  h.requests[0].resolve('title: 旧角色\n'); await old;
+  assert.deepEqual([h.source.selectionStart, h.source.selectionEnd, h.source.scrollTop], [7, 9, 240]);
+  assert.equal(h.source.value, content);
+  assert.equal(h.state.activeCreatePath, file);
+  assert.equal(h.state.editHasUnsavedChanges, true);
+  assert.equal(h.state.isLoadingTemplate, false);
+  assert.equal(h.source.readOnly, false);
+  assert.deepEqual(h.writes, []);
 });
 
 test('conflict reload uses the newly read version, even if the server changed again after the conflict', async () => {
