@@ -1,0 +1,65 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.4",
+  "gitBase": "7a1b5820f5f05fd6bac6fb9a8193272569db3801",
+  "scope": "Source-read cancellation, stale cache/error isolation, index replacement and conflict reload preservation",
+  "workflows": [
+    "F15",
+    "F18",
+    "F20",
+    "F21",
+    "F45"
+  ],
+  "bugs": [
+    "N76",
+    "N77",
+    "N78"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 41,
+    "passed": 3,
+    "failed": 5,
+    "skipped": 33,
+    "log": "before.log",
+    "skipReason": "Existing tests excluded by test-name-pattern"
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 77,
+    "passed": 77,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after.log",
+    "newCases": 8
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 276,
+    "passed": 275,
+    "failed": 0,
+    "skipped": 1,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 120,
+    "apiContractPassed": true
+  },
+  "skipReason": "Node/Rust archive interoperability requires VIENTO_TEST_ARCHIVE_BINARY; native archive code unchanged",
+  "files": {
+    "scripts/tests/editor-runtime.test.mjs": "58349be903cfbe25a7085cb790083643b47614f77a2d6ab4ac0c440159dc2d17",
+    "web/modules/app-runtime.js": "1121a6d2f8aa49cfebcdef135000c15c78b9c662c7431e6de508ad7a26afa89b"
+  },
+  "controllerTestEnvironment": "Production editor and index-loading controllers in DOM fixtures with controlled source responses and conflict prompts; save assertions verify submitted path, revision and BOM/CRLF. Existing temporary HTTP document and request-lifecycle tests also passed.",
+  "nativeTestsRerun": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "functionNetwork": {
+    "revision": 29,
+    "sourceFingerprints": 146,
+    "nodeSources": 159,
+    "localImportStatements": 375,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

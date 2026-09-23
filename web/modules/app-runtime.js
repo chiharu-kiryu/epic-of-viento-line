@@ -1634,6 +1634,10 @@ async function handleSaveConflict(doc, conflictPayload) {
   const normalizedAction = action || 'cancel';
   if (normalizedAction === '1') {
     const reloaded = await syncDocEditorSource(doc);
+    if (!reloaded) {
+      setEditorStatus(APP_ERROR_MESSAGES.conflictKeepDraftMessage);
+      return 'keep';
+    }
     if (reloaded?.error) {
       setEditorStatus(`${APP_ERROR_MESSAGES.readLatestSourceFailure}：${reloaded.error}`);
       return 'reload-error';
@@ -3515,7 +3519,8 @@ async function fetchEditableSource(pathValue) {
       version: normalizeEditSessionVersion(payload?.version),
     };
   } catch (error) {
-    return { error: logRuntimeErrorOrMessage(APP_REQUEST_LABELS.readSource, error) };
+    // The caller checks that this request is still current before reporting it.
+    return { error };
   }
 }
 
@@ -3556,8 +3561,8 @@ async function enterEditMode() {
   const sourceInfo = await syncDocEditorSource(doc);
   if (requestToken !== editorLoadToken || state.activePath !== doc.path || !isEditModeActive() || state.isCreating) return;
   state.isLoadingSource = false;
-  if (sourceInfo?.error) {
-    setEditorStatus(sourceInfo.error);
+  if (!sourceInfo || sourceInfo.error) {
+    if (sourceInfo?.error) setEditorStatus(sourceInfo.error);
     refreshEditButtons();
     return;
   }
@@ -3959,13 +3964,18 @@ function updateEmptyProject() {
 }
 
 async function syncDocEditorSource(doc) {
+  const requestToken = editorLoadToken;
   const sourcePath = getSourcePath(doc);
   if (!sourcePath) {
     return null;
   }
   const sourceInfo = await fetchEditableSource(sourcePath);
+  // Check the catalog object as well as its path: an index reload can replace
+  // the entry while the old source is still being read.
+  if (requestToken !== editorLoadToken || !isEditModeActive() || state.activePath !== doc.path
+    || getDocByPath(doc.path) !== doc || getSourcePath(doc) !== sourcePath) return null;
   if (sourceInfo?.error) {
-    return { error: sourceInfo.error };
+    return { error: logRuntimeErrorOrMessage(APP_REQUEST_LABELS.readSource, sourceInfo.error) };
   }
   doc._editorSource = sourcePath;
   doc._sourceCachedText = sourceInfo.content;
@@ -4695,7 +4705,7 @@ function selectDoc(pathValue, options = {}) {
       setEditorStatus(APP_ERROR_MESSAGES.loadingSource);
       syncDocEditorSource(doc)
         .then((result) => {
-          if (state.activePath !== doc.path || isInEditSession()) {
+          if (!result || !isEditModeActive() || state.activePath !== doc.path || getDocByPath(doc.path) !== doc || isInEditSession()) {
             return;
           }
           if (result?.error) {
@@ -4706,7 +4716,7 @@ function selectDoc(pathValue, options = {}) {
           setEditorStatus('');
         })
         .catch((error) => {
-          if (state.activePath === doc.path) {
+          if (isEditModeActive() && state.activePath === doc.path && getDocByPath(doc.path) === doc && !isInEditSession()) {
             const message = logRuntimeErrorOrMessage(APP_REQUEST_LABELS.readSource, error) || getFriendlyRequestError(error);
             setEditorStatus(t`${APP_REQUEST_LABELS.readSource}失败：${message}`);
           }
@@ -4881,6 +4891,23 @@ async function loadData(preferredPath = '', options = {}) {
     const incomingDocs = payload.docs ?? payload.state?.docs;
     if (!Array.isArray(incomingDocs)) throw new Error(APP_RUNTIME_TEXTS.runtimeContext.indexFormatInvalid);
     const nextDocs = incomingDocs.map((doc) => normalizeDocFromIndex(doc)).filter(Boolean);
+    const editingSource = state.isEditing && !state.isCreating
+      ? canonicalizeSourcePath(state.activeEditSource || getSourcePath(getActiveDoc()))
+      : '';
+    const editingDoc = editingSource ? nextDocs.find((doc) => getSourcePathKey(doc) === editingSource) : null;
+    // A reused catalog ID must never redirect a live draft to another file.
+    // Reject incomplete indexes before replacing either documents or settings.
+    if (editingSource && !editingDoc) {
+      throw new Error(t('新目录中找不到正在编辑的文件，已保留当前内容。请结束编辑后重新加载。'));
+    }
+    if (editingDoc) {
+      // The edit baseline has the exact last-read/saved bytes and revision,
+      // including when another index response replaced the object during a save.
+      // Never cache the unsaved draft or use the lossy display index as source.
+      editingDoc._sourceCachedText = editSessionBaselineContent;
+      editingDoc._sourceVersion = editSessionVersion;
+      editingDoc._renderSignature = makeDocRenderSignature(editingDoc);
+    }
     state.workspace = payload.workspace || null;
     for (const type of state.workspace?.documentTypes || []) {
       Object.defineProperty(CATEGORY_LABELS, type.id, { value: type.label, configurable: true, enumerable: true, writable: true });
@@ -4909,14 +4936,11 @@ async function loadData(preferredPath = '', options = {}) {
     for (const doc of state.docs) doc._searchText = ownedSearchText(doc);
     // A newly created file receives its catalog ID on the first rebuild.
     // Match the source path so that this refresh keeps the same edit session.
-    if (state.isEditing && !state.isCreating && state.activePath === state.activeEditPath) {
-      const editingDoc = getDocBySourcePath(state.activeEditSource);
-      if (editingDoc) {
-        if (blockDraftSourcePath === state.activeEditPath) blockDraftSourcePath = editingDoc.path;
-        state.activePath = editingDoc.path;
-        state.activeEditPath = editingDoc.path;
-        state.activeEditSource = getSourcePath(editingDoc);
-      }
+    if (editingDoc && state.activePath === state.activeEditPath) {
+      if (blockDraftSourcePath === state.activeEditPath) blockDraftSourcePath = editingDoc.path;
+      state.activePath = editingDoc.path;
+      state.activeEditPath = editingDoc.path;
+      state.activeEditSource = getSourcePath(editingDoc);
     }
     getSearchIndex(state.docs, true);
 

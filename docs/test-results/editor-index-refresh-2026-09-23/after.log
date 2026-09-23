@@ -1,0 +1,380 @@
+TAP version 13
+# Subtest: reopening an aborted export ignores its late failure and allows a fresh export
+ok 1 - reopening an aborted export ignores its late failure and allows a fresh export
+  ---
+  duration_ms: 29.077389
+  ...
+# Subtest: an aborted export arriving after reopen is released without blocking the new dialog
+ok 2 - an aborted export arriving after reopen is released without blocking the new dialog
+  ---
+  duration_ms: 16.311589
+  ...
+# Subtest: opening export during a save cannot leave a permanently busy snapshot
+ok 3 - opening export during a save cannot leave a permanently busy snapshot
+  ---
+  duration_ms: 9.569481
+  ...
+# Subtest: an expired native export can be regenerated in the same dialog after cancelling its save picker
+ok 4 - an expired native export can be regenerated in the same dialog after cancelling its save picker
+  ---
+  duration_ms: 19.84639
+  ...
+# Subtest: native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+ok 5 - native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+  ---
+  duration_ms: 12.784651
+  ...
+# Subtest: cancelling media import during structured insertion keeps the draft and uploaded assets
+ok 6 - cancelling media import during structured insertion keeps the draft and uploaded assets
+  ---
+  duration_ms: 10.962969
+  ...
+# Subtest: late media preparation cannot overwrite a draft whose content changed
+ok 7 - late media preparation cannot overwrite a draft whose content changed
+  ---
+  duration_ms: 9.851108
+  ...
+# Subtest: existing media still inserts into an unchanged structured draft and releases the editor
+ok 8 - existing media still inserts into an unchanged structured draft and releases the editor
+  ---
+  duration_ms: 15.061364
+  ...
+# Subtest: media preview loads immediately after reading a document without requiring another input event
+ok 9 - media preview loads immediately after reading a document without requiring another input event
+  ---
+  duration_ms: 39.628663
+  ...
+# Subtest: media preview stops when switching to browse: existing document
+ok 10 - media preview stops when switching to browse: existing document
+  ---
+  duration_ms: 26.981209
+  ...
+# Subtest: media preview stops when switching to browse: first unsaved document
+ok 11 - media preview stops when switching to browse: first unsaved document
+  ---
+  duration_ms: 27.231242
+  ...
+# Subtest: media preview clears the previous template immediately while a different type is loading
+ok 12 - media preview clears the previous template immediately while a different type is loading
+  ---
+  duration_ms: 24.914642
+  ...
+# Subtest: media preview clears when types share a source path and ignores the old pending response
+ok 13 - media preview clears when types share a source path and ignores the old pending response
+  ---
+  duration_ms: 24.546639
+  ...
+# Subtest: media preview and a first dirty draft survive a cancelled mode switch, then close together after confirmation
+ok 14 - media preview and a first dirty draft survive a cancelled mode switch, then close together after confirmation
+  ---
+  duration_ms: 27.480163
+  ...
+# Subtest: media preview keeps unchanged playback through source/block switches and saving without altering source bytes
+ok 15 - media preview keeps unchanged playback through source/block switches and saving without altering source bytes
+  ---
+  duration_ms: 36.270758
+  ...
+# Subtest: media preview discards a late result after removing media or leaving and reopening the editor
+ok 16 - media preview discards a late result after removing media or leaving and reopening the editor
+  ---
+  duration_ms: 30.967474
+  ...
+# Subtest: template loading: changing a new draft extension refreshes media parsing and ignores the previous path response
+ok 17 - template loading: changing a new draft extension refreshes media parsing and ignores the previous path response
+  ---
+  duration_ms: 29.426576
+  ...
+# Subtest: type settings distinguish creation from editing and retain a rejected new draft for retry or cancel
+ok 18 - type settings distinguish creation from editing and retain a rejected new draft for retry or cancel
+  ---
+  duration_ms: 40.091634
+  ...
+# Subtest: template preview and save retain original BOM and line endings when only its label changes
+ok 19 - template preview and save retain original BOM and line endings when only its label changes
+  ---
+  duration_ms: 25.822989
+  ...
+# Subtest: returning from saved project settings keeps editing locked until the new index applies
+ok 20 - returning from saved project settings keeps editing locked until the new index applies
+  ---
+  duration_ms: 19.090445
+  ...
+# Subtest: discarding edits after a template save cannot leave a closed dialog marked dirty
+ok 21 - discarding edits after a template save cannot leave a closed dialog marked dirty
+  ---
+  duration_ms: 22.612225
+  ...
+# Subtest: a failed project index application keeps the settings available for retry without another save
+ok 22 - a failed project index application keeps the settings available for retry without another save
+  ---
+  duration_ms: 20.138208
+  ...
+# Subtest: index refresh: reusing a catalog ID for another source cannot redirect a dirty draft or its save
+ok 23 - index refresh: reusing a catalog ID for another source cannot redirect a dirty draft or its save
+  ---
+  duration_ms: 38.382993
+  ...
+# Subtest: index refresh: a empty rebuild result retains the successfully saved document and allows retry
+ok 24 - index refresh: a empty rebuild result retains the successfully saved document and allows retry
+  ---
+  duration_ms: 14.00124
+  ...
+# Subtest: index refresh: a unrelated rebuild result retains the successfully saved document and allows retry
+ok 25 - index refresh: a unrelated rebuild result retains the successfully saved document and allows retry
+  ---
+  duration_ms: 16.57802
+  ...
+# Subtest: index refresh: saved source bytes survive reindexing and editor exit (overlapping refresh: false)
+ok 26 - index refresh: saved source bytes survive reindexing and editor exit (overlapping refresh: false)
+  ---
+  duration_ms: 14.857238
+  ...
+# Subtest: index refresh: saved source bytes survive reindexing and editor exit (overlapping refresh: true)
+ok 27 - index refresh: saved source bytes survive reindexing and editor exit (overlapping refresh: true)
+  ---
+  duration_ms: 12.964416
+  ...
+# Subtest: index refresh: a new file keeps its saved source and version when assigned its first catalog ID
+ok 28 - index refresh: a new file keeps its saved source and version when assigned its first catalog ID
+  ---
+  duration_ms: 18.337597
+  ...
+# Subtest: index refresh: remapping a source draft preserves its dirty state and restores only the read baseline on discard
+ok 29 - index refresh: remapping a source draft preserves its dirty state and restores only the read baseline on discard
+  ---
+  duration_ms: 11.751974
+  ...
+# Subtest: index refresh: remapping a blocks draft preserves its dirty state and restores only the read baseline on discard
+ok 30 - index refresh: remapping a blocks draft preserves its dirty state and restores only the read baseline on discard
+  ---
+  duration_ms: 11.778249
+  ...
+# Subtest: new document validation refuses paths that cannot be indexed or migrated before submitting
+ok 31 - new document validation refuses paths that cannot be indexed or migrated before submitting
+  ---
+  duration_ms: 38.805919
+  ...
+# Subtest: save recovery: an auto-completed filename remains the draft and preview path after a rejected creation
+ok 32 - save recovery: an auto-completed filename remains the draft and preview path after a rejected creation
+  ---
+  duration_ms: 14.345954
+  ...
+# Subtest: save recovery: HTTP 401 retains the source draft and reports a rejected rebuild without losing a successful save
+ok 33 - save recovery: HTTP 401 retains the source draft and reports a rejected rebuild without losing a successful save
+  ---
+  duration_ms: 11.392265
+  ...
+# Subtest: save recovery: HTTP 403 retains the blocks draft and reports a rejected rebuild without losing a successful save
+ok 34 - save recovery: HTTP 403 retains the blocks draft and reports a rejected rebuild without losing a successful save
+  ---
+  duration_ms: 11.429168
+  ...
+# Subtest: save recovery: adding the default extension cannot submit an overlong filename and shortening it permits retry
+ok 35 - save recovery: adding the default extension cannot submit an overlong filename and shortening it permits retry
+  ---
+  duration_ms: 11.165662
+  ...
+# Subtest: suggested filenames sanitize arbitrary type labels and fit filesystem filename limits
+ok 36 - suggested filenames sanitize arbitrary type labels and fit filesystem filename limits
+  ---
+  duration_ms: 8.372436
+  ...
+# Subtest: the initial creation hint cannot hide a failed template load
+ok 37 - the initial creation hint cannot hide a failed template load
+  ---
+  duration_ms: 10.551904
+  ...
+# Subtest: a failed index reload after saving is reported as a rebuild failure while the saved editor survives
+ok 38 - a failed index reload after saving is reported as a rebuild failure while the saved editor survives
+  ---
+  duration_ms: 10.268344
+  ...
+# Subtest: an invalid replacement index preserves the current document list and project types
+ok 39 - an invalid replacement index preserves the current document list and project types
+  ---
+  duration_ms: 7.501812
+  ...
+# Subtest: source/block switches retain new edits and do not duplicate display-only headings
+ok 40 - source/block switches retain new edits and do not duplicate display-only headings
+  ---
+  duration_ms: 8.032551
+  ...
+# Subtest: an unchanged source stays clean across modes and index refresh preserves a dirty editor
+ok 41 - an unchanged source stays clean across modes and index refresh preserves a dirty editor
+  ---
+  duration_ms: 7.593689
+  ...
+# Subtest: late source responses cannot reopen a cancelled session; empty sources stay empty
+ok 42 - late source responses cannot reopen a cancelled session; empty sources stay empty
+  ---
+  duration_ms: 8.413565
+  ...
+# Subtest: source loading: a cancelled read cannot replace the cache or revision of a reopened and saved document
+ok 43 - source loading: a cancelled read cannot replace the cache or revision of a reopened and saved document
+  ---
+  duration_ms: 11.030105
+  ...
+# Subtest: source loading: returning to browse discards an unfinished selection read instead of refilling the cleared editor
+ok 44 - source loading: returning to browse discards an unfinished selection read instead of refilling the cleared editor
+  ---
+  duration_ms: 8.08987
+  ...
+# Subtest: source loading: a failed abandoned read cannot add diagnostics after selecting another document
+ok 45 - source loading: a failed abandoned read cannot add diagnostics after selecting another document
+  ---
+  duration_ms: 8.26778
+  ...
+# Subtest: source loading: an index refresh cannot attach an old source response to a replacement catalog entry
+ok 46 - source loading: an index refresh cannot attach an old source response to a replacement catalog entry
+  ---
+  duration_ms: 11.050911
+  ...
+# Subtest: source loading: a superseded conflict reload keeps the dirty draft until reloading the current entry succeeds
+ok 47 - source loading: a superseded conflict reload keeps the dirty draft until reloading the current entry succeeds
+  ---
+  duration_ms: 11.998314
+  ...
+# Subtest: source loading: unauthorized responses preserve the last source and permit an empty-source retry
+ok 48 - source loading: unauthorized responses preserve the last source and permit an empty-source retry
+  ---
+  duration_ms: 8.86393
+  ...
+# Subtest: source loading: missing responses preserve the last source and permit an empty-source retry
+ok 49 - source loading: missing responses preserve the last source and permit an empty-source retry
+  ---
+  duration_ms: 8.494505
+  ...
+# Subtest: source loading: malformed responses preserve the last source and permit an empty-source retry
+ok 50 - source loading: malformed responses preserve the last source and permit an empty-source retry
+  ---
+  duration_ms: 8.007471
+  ...
+# Subtest: saving serializes shortcut requests and locks editing until rebuilding finishes
+ok 51 - saving serializes shortcut requests and locks editing until rebuilding finishes
+  ---
+  duration_ms: 8.323615
+  ...
+# Subtest: a changed creation path is an unsaved draft and cancel restores the current document path
+ok 52 - a changed creation path is an unsaved draft and cancel restores the current document path
+  ---
+  duration_ms: 8.654785
+  ...
+# Subtest: suggested creation paths reuse same-type directories and never treat a filename as a folder
+ok 53 - suggested creation paths reuse same-type directories and never treat a filename as a folder
+  ---
+  duration_ms: 5.847095
+  ...
+# Subtest: an older template response cannot replace a newer type or reopen a cancelled creation
+ok 54 - an older template response cannot replace a newer type or reopen a cancelled creation
+  ---
+  duration_ms: 9.082891
+  ...
+# Subtest: template loading: a cancelled response cannot replace the fresh cache used by the next creation and save
+ok 55 - template loading: a cancelled response cannot replace the fresh cache used by the next creation and save
+  ---
+  duration_ms: 11.944493
+  ...
+# Subtest: template loading: cancelling a first draft does not cache its late response before reopening
+ok 56 - template loading: cancelling a first draft does not cache its late response before reopening
+  ---
+  duration_ms: 9.707728
+  ...
+# Subtest: template loading: an old failure cannot poison a valid empty template or report an error in the new session
+ok 57 - template loading: an old failure cannot poison a valid empty template or report an error in the new session
+  ---
+  duration_ms: 10.99756
+  ...
+# Subtest: template loading: a cancelled creation cannot move the caret or scroll of a newer draft of the same type
+ok 58 - template loading: a cancelled creation cannot move the caret or scroll of a newer draft of the same type
+  ---
+  duration_ms: 10.127618
+  ...
+# Subtest: conflict reload uses the newly read version, even if the server changed again after the conflict
+ok 59 - conflict reload uses the newly read version, even if the server changed again after the conflict
+  ---
+  duration_ms: 11.588581
+  ...
+# Subtest: failed forced saves keep the original baseline so a normal retry asks about the conflict again
+ok 60 - failed forced saves keep the original baseline so a normal retry asks about the conflict again
+  ---
+  duration_ms: 11.630422
+  ...
+# Subtest: a failed conflict reload retains the block draft and its error until a successful retry
+ok 61 - a failed conflict reload retains the block draft and its error until a successful retry
+  ---
+  duration_ms: 10.348963
+  ...
+# Subtest: save conflict: keep draft only changes the baseline after an approved successful write
+ok 62 - save conflict: keep draft only changes the baseline after an approved successful write
+  ---
+  duration_ms: 7.407265
+  ...
+# Subtest: save conflict: cancel conflict only changes the baseline after an approved successful write
+ok 63 - save conflict: cancel conflict only changes the baseline after an approved successful write
+  ---
+  duration_ms: 6.988957
+  ...
+# Subtest: save conflict: cancel force confirmation only changes the baseline after an approved successful write
+ok 64 - save conflict: cancel force confirmation only changes the baseline after an approved successful write
+  ---
+  duration_ms: 9.316045
+  ...
+# Subtest: save conflict: confirm force save only changes the baseline after an approved successful write
+ok 65 - save conflict: confirm force save only changes the baseline after an approved successful write
+  ---
+  duration_ms: 12.391299
+  ...
+# Subtest: content revision tokens survive reading, conflict reload and subsequent ordinary saving
+ok 66 - content revision tokens survive reading, conflict reload and subsequent ordinary saving
+  ---
+  duration_ms: 11.278385
+  ...
+# Subtest: switching from the editor to browse makes the document content visible again
+ok 67 - switching from the editor to browse makes the document content visible again
+  ---
+  duration_ms: 8.661938
+  ...
+# Subtest: a successful creation stays editable as an existing file if rebuilding fails
+ok 68 - a successful creation stays editable as an existing file if rebuilding fails
+  ---
+  duration_ms: 11.66467
+  ...
+# Subtest: browser textarea normalization preserves source line endings through switches, edits and saves
+ok 69 - browser textarea normalization preserves source line endings through switches, edits and saves
+  ---
+  duration_ms: 10.735376
+  ...
+# Subtest: first index refresh maps a created source to its catalog ID without closing its editor
+ok 70 - first index refresh maps a created source to its catalog ID without closing its editor
+  ---
+  duration_ms: 11.503497
+  ...
+# Subtest: discard cancellation protects dirty drafts on document, mode and editor exit
+ok 71 - discard cancellation protects dirty drafts on document, mode and editor exit
+  ---
+  duration_ms: 8.572247
+  ...
+# Subtest: language changes update retained UI references while preserving authored labels and interpolation values
+ok 72 - language changes update retained UI references while preserving authored labels and interpolation values
+  ---
+  duration_ms: 4.017648
+  ...
+# Subtest: English catalogue preserves all message parameters
+ok 73 - English catalogue preserves all message parameters
+  ---
+  duration_ms: 3.607213
+  ...
+# Subtest: desktop language preferences require the local session and stay outside the project
+ok 74 - desktop language preferences require the local session and stay outside the project
+  ---
+  duration_ms: 373.987778
+  ...
+1..74
+# tests 74
+# suites 0
+# pass 74
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 652.347485

@@ -1,0 +1,317 @@
+TAP version 13
+# Subtest: new document validation refuses paths that cannot be indexed or migrated before submitting
+ok 1 - new document validation refuses paths that cannot be indexed or migrated before submitting # SKIP test name does not match pattern
+  ---
+  duration_ms: 1.541603
+  ...
+# Subtest: save recovery: an auto-completed filename remains the draft and preview path after a rejected creation
+ok 2 - save recovery: an auto-completed filename remains the draft and preview path after a rejected creation # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.069175
+  ...
+# Subtest: save recovery: HTTP 401 retains the source draft and reports a rejected rebuild without losing a successful save
+ok 3 - save recovery: HTTP 401 retains the source draft and reports a rejected rebuild without losing a successful save # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.06474
+  ...
+# Subtest: save recovery: HTTP 403 retains the blocks draft and reports a rejected rebuild without losing a successful save
+ok 4 - save recovery: HTTP 403 retains the blocks draft and reports a rejected rebuild without losing a successful save # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.146575
+  ...
+# Subtest: save recovery: adding the default extension cannot submit an overlong filename and shortening it permits retry
+ok 5 - save recovery: adding the default extension cannot submit an overlong filename and shortening it permits retry # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.07743
+  ...
+# Subtest: suggested filenames sanitize arbitrary type labels and fit filesystem filename limits
+ok 6 - suggested filenames sanitize arbitrary type labels and fit filesystem filename limits # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.058912
+  ...
+# Subtest: the initial creation hint cannot hide a failed template load
+ok 7 - the initial creation hint cannot hide a failed template load # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.060688
+  ...
+# Subtest: a failed index reload after saving is reported as a rebuild failure while the saved editor survives
+ok 8 - a failed index reload after saving is reported as a rebuild failure while the saved editor survives # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.088956
+  ...
+# Subtest: an invalid replacement index preserves the current document list and project types
+ok 9 - an invalid replacement index preserves the current document list and project types # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.081493
+  ...
+# Subtest: source/block switches retain new edits and do not duplicate display-only headings
+ok 10 - source/block switches retain new edits and do not duplicate display-only headings # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.08394
+  ...
+# Subtest: an unchanged source stays clean across modes and index refresh preserves a dirty editor
+ok 11 - an unchanged source stays clean across modes and index refresh preserves a dirty editor # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.065393
+  ...
+# Subtest: late source responses cannot reopen a cancelled session; empty sources stay empty
+ok 12 - late source responses cannot reopen a cancelled session; empty sources stay empty # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.056004
+  ...
+# Subtest: source loading: a cancelled read cannot replace the cache or revision of a reopened and saved document
+not ok 13 - source loading: a cancelled read cannot replace the cache or revision of a reopened and saved document
+  ---
+  duration_ms: 34.330083
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:287:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '迟到的旧正文'
+    - '﻿# 修改后保存\r\n'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    ﻿# 修改后保存
+    
+  actual: '迟到的旧正文'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:298:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: source loading: returning to browse discards an unfinished selection read instead of refilling the cleared editor
+not ok 14 - source loading: returning to browse discards an unfinished selection read instead of refilling the cleared editor
+  ---
+  duration_ms: 12.141761
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:308:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '浏览模式中不应写回的旧原文'
+    - ''
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: ''
+  actual: '浏览模式中不应写回的旧原文'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:317:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: source loading: a failed abandoned read cannot add diagnostics after selecting another document
+not ok 15 - source loading: a failed abandoned read cannot add diagnostics after selecting another document
+  ---
+  duration_ms: 9.658637
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:324:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + [
+    +   Error: 旧请求被拒绝
+    +       at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:332:38)
+    +       at async Test.run (node:internal/test_runner/test:632:9)
+    +       at async Test.processPendingSubtests (node:internal/test_runner/test:374:7) {
+    +     payload: {
+    +       errorCode: 'forbidden'
+    +     },
+    +     status: 403
+    +   }
+    + ]
+    - []
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0:
+    error: '旧请求被拒绝'
+    stack: |-
+      TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:332:38)
+      async Test.run (node:internal/test_runner/test:632:9)
+      async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:334:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: source loading: an index refresh cannot attach an old source response to a replacement catalog entry
+not ok 16 - source loading: an index refresh cannot attach an old source response to a replacement catalog entry
+  ---
+  duration_ms: 11.20996
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:341:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:349:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: source loading: a superseded conflict reload keeps the dirty draft until reloading the current entry succeeds
+not ok 17 - source loading: a superseded conflict reload keeps the dirty draft until reloading the current entry succeeds
+  ---
+  duration_ms: 11.873088
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:365:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'reload'
+    - 'keep'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'keep'
+  actual: 'reload'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:374:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: source loading: unauthorized responses preserve the last source and permit an empty-source retry
+ok 18 - source loading: unauthorized responses preserve the last source and permit an empty-source retry
+  ---
+  duration_ms: 7.818328
+  ...
+# Subtest: source loading: missing responses preserve the last source and permit an empty-source retry
+ok 19 - source loading: missing responses preserve the last source and permit an empty-source retry
+  ---
+  duration_ms: 7.221085
+  ...
+# Subtest: source loading: malformed responses preserve the last source and permit an empty-source retry
+ok 20 - source loading: malformed responses preserve the last source and permit an empty-source retry
+  ---
+  duration_ms: 6.74906
+  ...
+# Subtest: saving serializes shortcut requests and locks editing until rebuilding finishes
+ok 21 - saving serializes shortcut requests and locks editing until rebuilding finishes # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.110955
+  ...
+# Subtest: a changed creation path is an unsaved draft and cancel restores the current document path
+ok 22 - a changed creation path is an unsaved draft and cancel restores the current document path # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.043836
+  ...
+# Subtest: suggested creation paths reuse same-type directories and never treat a filename as a folder
+ok 23 - suggested creation paths reuse same-type directories and never treat a filename as a folder # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.124205
+  ...
+# Subtest: an older template response cannot replace a newer type or reopen a cancelled creation
+ok 24 - an older template response cannot replace a newer type or reopen a cancelled creation # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.046835
+  ...
+# Subtest: template loading: a cancelled response cannot replace the fresh cache used by the next creation and save
+ok 25 - template loading: a cancelled response cannot replace the fresh cache used by the next creation and save # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.037065
+  ...
+# Subtest: template loading: cancelling a first draft does not cache its late response before reopening
+ok 26 - template loading: cancelling a first draft does not cache its late response before reopening # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.034236
+  ...
+# Subtest: template loading: an old failure cannot poison a valid empty template or report an error in the new session
+ok 27 - template loading: an old failure cannot poison a valid empty template or report an error in the new session # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.04204
+  ...
+# Subtest: template loading: a cancelled creation cannot move the caret or scroll of a newer draft of the same type
+ok 28 - template loading: a cancelled creation cannot move the caret or scroll of a newer draft of the same type # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.035781
+  ...
+# Subtest: conflict reload uses the newly read version, even if the server changed again after the conflict
+ok 29 - conflict reload uses the newly read version, even if the server changed again after the conflict # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.034919
+  ...
+# Subtest: failed forced saves keep the original baseline so a normal retry asks about the conflict again
+ok 30 - failed forced saves keep the original baseline so a normal retry asks about the conflict again # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.032842
+  ...
+# Subtest: a failed conflict reload retains the block draft and its error until a successful retry
+ok 31 - a failed conflict reload retains the block draft and its error until a successful retry # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.032059
+  ...
+# Subtest: save conflict: keep draft only changes the baseline after an approved successful write
+ok 32 - save conflict: keep draft only changes the baseline after an approved successful write # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.033384
+  ...
+# Subtest: save conflict: cancel conflict only changes the baseline after an approved successful write
+ok 33 - save conflict: cancel conflict only changes the baseline after an approved successful write # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.071391
+  ...
+# Subtest: save conflict: cancel force confirmation only changes the baseline after an approved successful write
+ok 34 - save conflict: cancel force confirmation only changes the baseline after an approved successful write # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.041649
+  ...
+# Subtest: save conflict: confirm force save only changes the baseline after an approved successful write
+ok 35 - save conflict: confirm force save only changes the baseline after an approved successful write # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.038239
+  ...
+# Subtest: content revision tokens survive reading, conflict reload and subsequent ordinary saving
+ok 36 - content revision tokens survive reading, conflict reload and subsequent ordinary saving # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.044147
+  ...
+# Subtest: switching from the editor to browse makes the document content visible again
+ok 37 - switching from the editor to browse makes the document content visible again # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.069747
+  ...
+# Subtest: a successful creation stays editable as an existing file if rebuilding fails
+ok 38 - a successful creation stays editable as an existing file if rebuilding fails # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.092256
+  ...
+# Subtest: browser textarea normalization preserves source line endings through switches, edits and saves
+ok 39 - browser textarea normalization preserves source line endings through switches, edits and saves # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.03234
+  ...
+# Subtest: first index refresh maps a created source to its catalog ID without closing its editor
+ok 40 - first index refresh maps a created source to its catalog ID without closing its editor # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.030795
+  ...
+# Subtest: discard cancellation protects dirty drafts on document, mode and editor exit
+ok 41 - discard cancellation protects dirty drafts on document, mode and editor exit # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.030555
+  ...
+1..41
+# tests 41
+# suites 0
+# pass 3
+# fail 5
+# cancelled 0
+# skipped 33
+# todo 0
+# duration_ms 237.258788

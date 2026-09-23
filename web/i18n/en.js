@@ -220,6 +220,7 @@ export default {
   '分组': 'Group',
   '未成功获取文档索引': 'Could not load document index',
   '文档索引格式异常': 'Invalid document index format',
+  '新目录中找不到正在编辑的文件，已保留当前内容。请结束编辑后重新加载。': 'The refreshed list does not contain the file being edited. Your content has been kept. Finish editing, then reload the list.',
   '分类数据异常': 'Invalid category data',
   '分组数据异常': 'Invalid group data',
   '前端全局错误': 'Application error',

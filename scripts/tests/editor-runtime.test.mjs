@@ -260,6 +260,157 @@ test('late source responses cannot reopen a cancelled session; empty sources sta
   assert.equal(state.editHasUnsavedChanges, false);
 });
 
+async function sourceLoadingHarness() {
+  const requests = [], writes = [], errors = [];
+  const h = await editorHarness({
+    readDocSource: ({ pathValue }) => {
+      const pending = deferred(); requests.push({ ...pending, path: pathValue }); return pending.promise;
+    },
+    writeDoc: async (payload) => { writes.push(payload); return { version: '3' }; },
+  });
+  for (const name of ['renderHeroBanner', 'renderSectionCards', 'renderGallery', 'markActiveItem']) h.runtime[name] = () => {};
+  h.runtime.getHeroImagesForDisplay = () => [];
+  h.runtime.rebuildIndexForDoc = async () => {};
+  h.runtime.logRuntimeErrorOrMessage = (_label, error) => { errors.push(error); return h.runtime.getFriendlyRequestError(error); };
+  h.runtime.updateEditorForDoc(h.doc);
+  return { ...h, requests, writes, errors };
+}
+
+async function replaceSourceIndex(h, replacement) {
+  h.runtime.loadDocIndexPayload = async () => ({ payload: { docs: [replacement] } });
+  for (const name of ['setLoadingState', 'setListSkeletonState', 'hideLoadRetry', 'renderTabsNow', 'getSearchIndex']) h.runtime[name] = () => {};
+  h.runtime.getTabCounts = () => ({}); h.runtime.formatTime = () => '';
+  h.runtime.renderFilteredDocs = () => h.runtime.selectDoc(replacement.path);
+  await h.runtime.loadData();
+}
+
+test('source loading: a cancelled read cannot replace the cache or revision of a reopened and saved document', async () => {
+  const h = await sourceLoadingHarness();
+  const abandoned = h.runtime.enterEditMode();
+  h.runtime.setMode('browse'); h.runtime.setMode('edit');
+  const current = h.runtime.enterEditMode();
+  h.requests[1].resolve({ content: '\uFEFF# 最新原文\r\n', version: '2' }); await current;
+  h.source.value = '\uFEFF# 修改后保存\n';
+  await h.runtime.saveCurrentDoc();
+  const saved = h.writes[0].content;
+  assert.equal(saved, '\uFEFF# 修改后保存\r\n');
+  h.requests[0].resolve({ content: '迟到的旧正文', version: '1' }); await abandoned;
+  assert.equal(h.doc._sourceCachedText, saved);
+  assert.equal(h.doc._sourceVersion, '3');
+  assert.equal(h.state.activeEditSourceVersion, '3');
+  assert.equal(h.state.editHasUnsavedChanges, false);
+  assert.equal(h.runtime.getCurrentEditContent(), saved);
+  h.runtime.exitEditMode();
+  assert.equal(h.source.value, saved.replaceAll('\r\n', '\n'));
+  assert.deepEqual(h.errors, []);
+});
+
+test('source loading: returning to browse discards an unfinished selection read instead of refilling the cleared editor', async () => {
+  const h = await sourceLoadingHarness();
+  h.doc._sourceCachedText = undefined;
+  h.runtime.selectDoc(h.doc.path);
+  assert.equal(h.requests.length, 1);
+  h.runtime.setMode('browse');
+  assert.equal(h.source.value, '');
+  h.requests[0].resolve({ content: '浏览模式中不应写回的旧原文', version: '2' });
+  await new Promise(setImmediate);
+  assert.equal(h.source.value, '');
+  assert.equal(h.doc._sourceCachedText, undefined);
+  assert.equal(h.state.isEditing, false);
+  assert.equal(h.state.isLoadingSource, false);
+  assert.deepEqual(h.errors, []);
+});
+
+test('source loading: a failed abandoned read cannot add diagnostics after selecting another document', async () => {
+  const h = await sourceLoadingHarness();
+  h.doc._sourceCachedText = undefined;
+  const other = { ...h.doc, path: 'rule/另一篇', sourcePath: 'design-data/design-rules/另一篇.md', _sourceCachedText: '另一篇正文' };
+  h.state.docs.push(other); h.runtime.rebuildDocPathCaches(h.state.docs);
+  h.runtime.selectDoc(h.doc.path);
+  h.runtime.selectDoc(other.path);
+  h.runtime.setEditorStatus('当前文档已就绪');
+  h.requests[0].reject(Object.assign(new Error('旧请求被拒绝'), { status: 403, payload: { errorCode: 'forbidden' } }));
+  await new Promise(setImmediate);
+  assert.deepEqual(h.errors, []);
+  assert.equal(h.state.activePath, other.path);
+  assert.equal(h.source.value, '另一篇正文');
+  assert.equal(h.element('docEditStatus').textContent, '当前文档已就绪');
+  assert.equal(h.doc._sourceCachedText, undefined);
+});
+
+test('source loading: an index refresh cannot attach an old source response to a replacement catalog entry', async () => {
+  const h = await sourceLoadingHarness();
+  const entering = h.runtime.enterEditMode();
+  const replacement = { ...h.doc, sourcePath: 'design-data/design-rules/迁移后的原文.md', _sourceCachedText: undefined, _sourceVersion: undefined };
+  await replaceSourceIndex(h, replacement);
+  assert.equal(h.requests[1].path, replacement.sourcePath);
+  h.requests[1].resolve({ content: '新路径正文', version: '20' }); await new Promise(setImmediate);
+  h.requests[0].resolve({ content: '旧路径正文', version: '10' }); await entering;
+  assert.equal(h.state.isEditing, false);
+  assert.equal(h.state.isLoadingSource, false);
+  assert.equal(h.source.value, '新路径正文');
+  assert.equal(h.element('docEditBtn').disabled, false);
+  const retry = h.runtime.enterEditMode();
+  assert.equal(h.requests[2].path, replacement.sourcePath);
+  h.requests[2].resolve({ content: '新路径正文', version: '20' }); await retry;
+  assert.equal(h.state.activeEditSource, replacement.sourcePath);
+  h.source.value = '新路径修改后的正文'; await h.runtime.saveCurrentDoc();
+  assert.equal(h.writes[0].pathValue, replacement.sourcePath);
+  assert.equal(h.writes[0].expectedVersion, '20');
+  assert.equal(h.writes[0].content, '新路径修改后的正文');
+  assert.equal(h.state.editHasUnsavedChanges, false);
+  assert.equal(h.doc._sourceCachedText, '原文\n');
+});
+
+test('source loading: a superseded conflict reload keeps the dirty draft until reloading the current entry succeeds', async () => {
+  const h = await sourceLoadingHarness();
+  h.begin('原文\n', '1'); h.source.value = '未保存的合并草稿'; h.runtime.refreshEditSessionDirtyState();
+  h.runtime.openSaveConflictDialog = async () => '1';
+  const oldReload = h.runtime.handleSaveConflict(h.doc, { currentVersion: '2' });
+  await new Promise(setImmediate);
+  const replacement = { ...h.doc };
+  await replaceSourceIndex(h, replacement);
+  h.requests[0].resolve({ content: '旧读取的正文', version: '2' });
+  assert.equal(await oldReload, 'keep');
+  assert.equal(h.source.value, '未保存的合并草稿');
+  assert.equal(h.state.editHasUnsavedChanges, true);
+  assert.equal(h.state.activeEditSourceVersion, '1');
+  const retry = h.runtime.handleSaveConflict(replacement, { currentVersion: '2' });
+  await new Promise(setImmediate);
+  h.requests[1].resolve({ content: '重新读取的正文', version: '2' });
+  assert.equal(await retry, 'reload');
+  assert.equal(h.source.value, '重新读取的正文');
+  assert.equal(h.state.editHasUnsavedChanges, false);
+  assert.equal(h.state.activeEditSourceVersion, '2');
+});
+
+for (const scenario of ['unauthorized', 'missing', 'malformed']) {
+  test(`source loading: ${scenario} responses preserve the last source and permit an empty-source retry`, async () => {
+    const h = await sourceLoadingHarness();
+    const entering = h.runtime.enterEditMode();
+    if (scenario === 'malformed') h.requests[0].resolve({ version: '2' });
+    else h.requests[0].reject(Object.assign(new Error(scenario), {
+      status: scenario === 'unauthorized' ? 401 : 404,
+      payload: { errorCode: scenario === 'unauthorized' ? 'auth_required' : 'document not found' },
+    }));
+    await entering;
+    assert.equal(h.state.isEditing, false);
+    assert.equal(h.state.isLoadingSource, false);
+    assert.equal(h.doc._sourceCachedText, '原文\n');
+    assert.equal(h.doc._sourceVersion, '1');
+    assert.equal(h.source.value, '原文\n');
+    assert.ok(h.element('docEditStatus').textContent);
+    assert.equal(h.element('docEditBtn').disabled, false);
+    const retry = h.runtime.enterEditMode();
+    h.requests[1].resolve({ content: '', version: '2' }); await retry;
+    assert.equal(h.source.value, '');
+    assert.equal(h.state.isEditing, true);
+    assert.equal(h.state.editHasUnsavedChanges, false);
+    assert.equal(h.state.activeEditSourceVersion, '2');
+    assert.equal(h.element('docEditStatus').textContent, '');
+  });
+}
+
 test('saving serializes shortcut requests and locks editing until rebuilding finishes', async () => {
   const write = deferred();
   const rebuild = deferred();

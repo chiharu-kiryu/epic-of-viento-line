@@ -1,0 +1,64 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.4",
+  "gitBase": "7a1b5820f5f05fd6bac6fb9a8193272569db3801",
+  "scope": "Source identity, incomplete index rejection, saved source cache and revision preservation across index replacement",
+  "workflows": [
+    "F11",
+    "F18",
+    "F19",
+    "F21",
+    "F22"
+  ],
+  "bugs": [
+    "N79",
+    "N80"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 8,
+    "passed": 0,
+    "failed": 8,
+    "skipped": 0,
+    "log": "before.log"
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 74,
+    "passed": 74,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after.log",
+    "newCases": 8
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 284,
+    "passed": 283,
+    "failed": 0,
+    "skipped": 1,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 121,
+    "apiContractPassed": true
+  },
+  "skipReason": "Node/Rust archive interoperability requires VIENTO_TEST_ARCHIVE_BINARY; native archive code unchanged",
+  "files": {
+    "scripts/tests/editor-index-refresh.test.mjs": "7c2d6ad8c854def427c114530c3a88b70d56240058e8be38b211fd2c3fd99608",
+    "web/i18n/en.js": "baec8bfc40321d6ec9d2c0a45e0bb313a4b809fed1bc0e368decafec9a6b69a9",
+    "web/modules/app-runtime.js": "381ac75f4669ab50a4021690057e7244db171b13f361ab1531282bfae4cf1e21"
+  },
+  "controllerTestEnvironment": "Production index-loading, document-selection and editor/save controllers in DOM fixtures with in-memory files and controlled responses. Save assertions verify target path, revision, original BOM/CRLF/trailing spaces and unrelated file preservation; full application checks also run existing temporary HTTP interface tests.",
+  "nativeTestsRerun": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "functionNetwork": {
+    "revision": 30,
+    "sourceFingerprints": 147,
+    "nodeSources": 160,
+    "localImportStatements": 376,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

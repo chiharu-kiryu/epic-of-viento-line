@@ -1,0 +1,326 @@
+TAP version 13
+# Subtest: index refresh: reusing a catalog ID for another source cannot redirect a dirty draft or its save
+not ok 1 - index refresh: reusing a catalog ID for another source cannot redirect a dirty draft or its save
+  ---
+  duration_ms: 32.515809
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-index-refresh.test.mjs:47:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'docs-standard/design-data/design-rules/另一份.md'
+    - 'design-data/design-rules/编辑检查.md'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'design-data/design-rules/编辑检查.md'
+  actual: 'docs-standard/design-data/design-rules/另一份.md'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-index-refresh.test.mjs:59:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async startSubtest (node:internal/test_runner/harness:214:3)
+  ...
+# Subtest: index refresh: a empty rebuild result retains the successfully saved document and allows retry
+not ok 2 - index refresh: a empty rebuild result retains the successfully saved document and allows retry
+  ---
+  duration_ms: 12.841463
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-index-refresh.test.mjs:78:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected "actual" to be reference-equal to "expected":
+    + actual - expected
+    
+    + []
+    - [
+    -   {
+    -     _editorSource: 'design-data/design-rules/编辑检查.md',
+    -     _renderSignature: 'rule编辑检查||||designdatadesignrules编辑检查md||rule||||||1||||||||keytexttitle旧索引的错误标题typeheadingvalue||||||||',
+    -     _sourceCachedText: '﻿# 原文\r\n\r\n保存后的正文。  \r\n',
+    -     _sourceLastModified: '',
+    -     _sourceRenderedText: '﻿# 原文\r\n\r\n保存后的正文。  \r\n',
+    -     _sourceVersion: '2',
+    -     blocks: [
+    -       {
+    -         title: '旧索引的错误标题',
+    -         type: 'heading'
+    -       }
+    -     ],
+    -     category: 'rule',
+    -     meta: {},
+    -     path: 'rule/编辑检查',
+    -     sourcePath: 'design-data/design-rules/编辑检查.md'
+    -   }
+    - ]
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0:
+      path: 'rule/编辑检查'
+      sourcePath: 'design-data/design-rules/编辑检查.md'
+      category: 'rule'
+      meta:
+      blocks:
+        0:
+          type: 'heading'
+          title: '旧索引的错误标题'
+      _sourceCachedText: |-
+        ﻿# 原文
+        
+        保存后的正文。  
+        
+      _sourceVersion: '2'
+      _editorSource: 'design-data/design-rules/编辑检查.md'
+      _sourceLastModified: ''
+      _renderSignature: 'rule编辑检查||||designdatadesignrules编辑检查md||rule||||||1||||||||keytexttitle旧索引的错误标题typeheadingvalue||||||||'
+      _sourceRenderedText: |-
+        ﻿# 原文
+        
+        保存后的正文。  
+        
+  actual:
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-index-refresh.test.mjs:85:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: index refresh: a unrelated rebuild result retains the successfully saved document and allows retry
+not ok 3 - index refresh: a unrelated rebuild result retains the successfully saved document and allows retry
+  ---
+  duration_ms: 11.727997
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-index-refresh.test.mjs:78:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected "actual" to be reference-equal to "expected":
+    + actual - expected
+    
+      [
+        {
+    +     _heroImagesOrdered: undefined,
+    +     _renderSignature: 'rule重建后的条目||||docsstandarddesigndatadesignrules另一份md||rule||||||20260923t040000z||仅供展示的索引摘要||||||||||||||',
+    +     _searchText: ' undefined rule/重建后的条目 undefined rule     ',
+    +     _sourceCachedText: undefined,
+    +     _sourceLastModified: '2026-09-23T04:00:00Z',
+    +     _sourceRenderedText: undefined,
+    +     _sourceVersion: '',
+    +     blocks: [],
+    +     category: 'rule',
+    +     content: '仅供展示的索引摘要',
+    +     fields: {},
+    +     heroSkills: [],
+    +     lastModified: '2026-09-23T04:00:00Z',
+    -     _editorSource: 'design-data/design-rules/编辑检查.md',
+    -     _renderSignature: 'rule编辑检查||||designdatadesignrules编辑检查md||rule||||||1||||||||keytexttitle旧索引的错误标题typeheadingvalue||||||||',
+    -     _sourceCachedText: '﻿# 原文\r\n\r\n保存后的正文。  \r\n',
+    -     _sourceLastModified: '',
+    -     _sourceRenderedText: '﻿# 原文\r\n\r\n保存后的正文。  \r\n',
+    -     _sourceVersion: '2',
+    -     blocks: [
+    -       {
+    -         title: '旧索引的错误标题',
+    -         type: 'heading'
+    -       }
+    -     ],
+    -     category: 'rule',
+          meta: {},
+    +     outline: [],
+    +     parser: {},
+    +     path: 'rule/重建后的条目',
+    +     sections: [],
+    +     source: {
+    +       path: 'docs-standard/design-data/design-rules/另一份.md'
+    +     },
+    +     sourcePath: 'docs-standard/design-data/design-rules/另一份.md'
+    -     path: 'rule/编辑检查',
+    -     sourcePath: 'design-data/design-rules/编辑检查.md'
+        }
+      ]
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0:
+      path: 'rule/编辑检查'
+      sourcePath: 'design-data/design-rules/编辑检查.md'
+      category: 'rule'
+      meta:
+      blocks:
+        0:
+          type: 'heading'
+          title: '旧索引的错误标题'
+      _sourceCachedText: |-
+        ﻿# 原文
+        
+        保存后的正文。  
+        
+      _sourceVersion: '2'
+      _editorSource: 'design-data/design-rules/编辑检查.md'
+      _sourceLastModified: ''
+      _renderSignature: 'rule编辑检查||||designdatadesignrules编辑检查md||rule||||||1||||||||keytexttitle旧索引的错误标题typeheadingvalue||||||||'
+      _sourceRenderedText: |-
+        ﻿# 原文
+        
+        保存后的正文。  
+        
+  actual:
+    0:
+      path: 'rule/重建后的条目'
+      source:
+        path: 'docs-standard/design-data/design-rules/另一份.md'
+      category: 'rule'
+      content: '仅供展示的索引摘要'
+      lastModified: '2026-09-23T04:00:00Z'
+      _searchText: ' undefined rule/重建后的条目 undefined rule     '
+      meta:
+      sourcePath: 'docs-standard/design-data/design-rules/另一份.md'
+      fields:
+      sections:
+      outline:
+      blocks:
+      parser:
+      heroSkills:
+      _sourceVersion: ''
+      _sourceLastModified: '2026-09-23T04:00:00Z'
+      _renderSignature: 'rule重建后的条目||||docsstandarddesigndatadesignrules另一份md||rule||||||20260923t040000z||仅供展示的索引摘要||||||||||||||'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-index-refresh.test.mjs:85:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: index refresh: saved source bytes survive reindexing and editor exit (overlapping refresh: false)
+not ok 4 - index refresh: saved source bytes survive reindexing and editor exit (overlapping refresh: false)
+  ---
+  duration_ms: 12.584743
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-index-refresh.test.mjs:104:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + undefined
+    - '﻿# 原文\r\n\r\n保存后的正文。  \r\n'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    ﻿# 原文
+    
+    保存后的正文。  
+    
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-index-refresh.test.mjs:120:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: index refresh: saved source bytes survive reindexing and editor exit (overlapping refresh: true)
+not ok 5 - index refresh: saved source bytes survive reindexing and editor exit (overlapping refresh: true)
+  ---
+  duration_ms: 11.573007
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-index-refresh.test.mjs:104:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + undefined
+    - '﻿# 原文\r\n\r\n保存后的正文。  \r\n'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    ﻿# 原文
+    
+    保存后的正文。  
+    
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-index-refresh.test.mjs:120:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: index refresh: a new file keeps its saved source and version when assigned its first catalog ID
+not ok 6 - index refresh: a new file keeps its saved source and version when assigned its first catalog ID
+  ---
+  duration_ms: 16.219184
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-index-refresh.test.mjs:130:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + undefined
+    - '﻿# 原文\r\n\r\n保存后的正文。  \r\n'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    ﻿# 原文
+    
+    保存后的正文。  
+    
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-index-refresh.test.mjs:142:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: index refresh: remapping a source draft preserves its dirty state and restores only the read baseline on discard
+not ok 7 - index refresh: remapping a source draft preserves its dirty state and restores only the read baseline on discard
+  ---
+  duration_ms: 11.635692
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-index-refresh.test.mjs:149:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '仅供展示的索引摘要'
+    - '﻿# 原文\n\n保留格式。  \n'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    ﻿# 原文
+    
+    保留格式。  
+    
+  actual: '仅供展示的索引摘要'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-index-refresh.test.mjs:166:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: index refresh: remapping a blocks draft preserves its dirty state and restores only the read baseline on discard
+not ok 8 - index refresh: remapping a blocks draft preserves its dirty state and restores only the read baseline on discard
+  ---
+  duration_ms: 11.373012
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-index-refresh.test.mjs:149:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '仅供展示的索引摘要'
+    - '﻿# 原文\n\n保留格式。  \n'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    ﻿# 原文
+    
+    保留格式。  
+    
+  actual: '仅供展示的索引摘要'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-index-refresh.test.mjs:166:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 0
+# fail 8
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 241.051376
