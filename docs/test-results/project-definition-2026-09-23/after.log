@@ -1,0 +1,415 @@
+TAP version 13
+# Subtest: document migration: v2 can apply explicit owners after an earlier migration and rebuild shared navigation
+ok 1 - document migration: v2 can apply explicit owners after an earlier migration and rebuild shared navigation
+  ---
+  duration_ms: 1359.561544
+  ...
+# Subtest: document migration: v3 can apply explicit owners after an earlier migration and rebuild shared navigation
+ok 2 - document migration: v3 can apply explicit owners after an earlier migration and rebuild shared navigation
+  ---
+  duration_ms: 1234.881024
+  ...
+# Subtest: document migration: explicit corrections preserve other relations and retained owner annotations; ordinary reruns do not infer over them
+ok 3 - document migration: explicit corrections preserve other relations and retained owner annotations; ordinary reruns do not infer over them
+  ---
+  duration_ms: 821.590706
+  ...
+# Subtest: document migration: invalid or cyclic explicit corrections fail before changing initialized metadata
+ok 4 - document migration: invalid or cyclic explicit corrections fail before changing initialized metadata
+  ---
+  duration_ms: 813.049525
+  ...
+# Subtest: document migration: a linked private-directory is rejected before writing a journal or metadata
+ok 5 - document migration: a linked private-directory is rejected before writing a journal or metadata
+  ---
+  duration_ms: 231.191948
+  ...
+# Subtest: document migration: a linked migration-directory is rejected before writing a journal or metadata
+ok 6 - document migration: a linked migration-directory is rejected before writing a journal or metadata
+  ---
+  duration_ms: 251.696475
+  ...
+# Subtest: document migration: a linked lock-file is rejected before writing a journal or metadata
+ok 7 - document migration: a linked lock-file is rejected before writing a journal or metadata
+  ---
+  duration_ms: 307.418017
+  ...
+# Subtest: document migration: repeated operations in the same millisecond retain separate recovery journals
+ok 8 - document migration: repeated operations in the same millisecond retain separate recovery journals
+  ---
+  duration_ms: 190.512496
+  ...
+# Subtest: document migration: a write failure rolls descriptors back, releases the lock and permits a safe retry
+ok 9 - document migration: a write failure rolls descriptors back, releases the lock and permits a safe retry
+  ---
+  duration_ms: 189.16414
+  ...
+# Subtest: document exports include owned stories, exact sources and referenced external media in both formats
+ok 10 - document exports include owned stories, exact sources and referenced external media in both formats
+  ---
+  duration_ms: 198.176584
+  ...
+# Subtest: JSON and YAML typed fields export using the generic layout and media bindings
+ok 11 - JSON and YAML typed fields export using the generic layout and media bindings
+  ---
+  duration_ms: 100.88168
+  ...
+# Subtest: explicit audio bindings export a player even when the source does not embed the audio
+ok 12 - explicit audio bindings export a player even when the source does not embed the audio
+  ---
+  duration_ms: 83.078444
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the md reference index
+ok 13 - sharing carries declared asset IDs recognized by the md reference index
+  ---
+  duration_ms: 538.468198
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the txt reference index
+ok 14 - sharing carries declared asset IDs recognized by the txt reference index
+  ---
+  duration_ms: 595.011367
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the json reference index
+ok 15 - sharing carries declared asset IDs recognized by the json reference index
+  ---
+  duration_ms: 482.2352
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the yaml reference index
+ok 16 - sharing carries declared asset IDs recognized by the yaml reference index
+  ---
+  duration_ms: 461.112582
+  ...
+# Subtest: multiple attachment roles share one player per document while keeping each owned story complete
+ok 17 - multiple attachment roles share one player per document while keeping each owned story complete
+  ---
+  duration_ms: 73.888446
+  ...
+# Subtest: declared missing assets reject sharing, then retry succeeds after the reference is repaired
+ok 18 - declared missing assets reject sharing, then retry succeeds after the reference is repaired
+  ---
+  duration_ms: 74.479036
+  ...
+# Subtest: sharing retains indexed legacy image paths, relative links and unregistered local images
+ok 19 - sharing retains indexed legacy image paths, relative links and unregistered local images
+  ---
+  duration_ms: 464.556703
+  ...
+# Subtest: v2 relative image references resolve against the original document directory
+ok 20 - v2 relative image references resolve against the original document directory
+  ---
+  duration_ms: 411.301406
+  ...
+# Subtest: v3 relative image references resolve against the original document directory
+ok 21 - v3 relative image references resolve against the original document directory
+  ---
+  duration_ms: 448.142819
+  ...
+# Subtest: sharing preserves distinct percent and space filenames, registered identities and renamed aliases
+ok 22 - sharing preserves distinct percent and space filenames, registered identities and renamed aliases
+  ---
+  duration_ms: 112.4989
+  ...
+# Subtest: owned stories retain nested heading levels in HTML and Markdown shares
+ok 23 - owned stories retain nested heading levels in HTML and Markdown shares
+  ---
+  duration_ms: 76.582609
+  ...
+# Subtest: v2 complete project packages preserve migration contract, metadata and all external media
+ok 24 - v2 complete project packages preserve migration contract, metadata and all external media
+  ---
+  duration_ms: 101.901029
+  ...
+# Subtest: v3 complete project packages preserve migration contract, metadata and all external media
+ok 25 - v3 complete project packages preserve migration contract, metadata and all external media
+  ---
+  duration_ms: 85.410313
+  ...
+# Subtest: missing assets, traversal, symlinks and changed source snapshots cannot produce a successful export
+ok 26 - missing assets, traversal, symlinks and changed source snapshots cannot produce a successful export
+  ---
+  duration_ms: 108.726904
+  ...
+# Subtest: complete exports reject directory aliases and file-directory conflicts without changing project bytes
+ok 27 - complete exports reject directory aliases and file-directory conflicts without changing project bytes
+  ---
+  duration_ms: 180.88435
+  ...
+# Subtest: editor and native v2/v3 archives round-trip with exact sources, metadata and external media
+ok 28 - editor and native v2/v3 archives round-trip with exact sources, metadata and external media # SKIP
+  ---
+  duration_ms: 0.164702
+  ...
+# Subtest: HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup
+ok 29 - HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup
+  ---
+  duration_ms: 877.322937
+  ...
+# Subtest: consecutive browser exports recycle completed downloads instead of exhausting the three-job limit
+ok 30 - consecutive browser exports recycle completed downloads instead of exhausting the three-job limit
+  ---
+  duration_ms: 375.895657
+  ...
+# Subtest: releasing or expiring an export cannot remove a file being downloaded
+ok 31 - releasing or expiring an export cannot remove a file being downloaded
+  ---
+  duration_ms: 222.833943
+  ...
+# Subtest: export range requests keep their real status in diagnostics and remain retryable
+ok 32 - export range requests keep their real status in diagnostics and remain retryable
+  ---
+  duration_ms: 359.690909
+  ...
+# Subtest: pending and interrupted exports remain protected from automatic quota eviction
+ok 33 - pending and interrupted exports remain protected from automatic quota eviction
+  ---
+  duration_ms: 152.396097
+  ...
+# Subtest: export entry blocks unsaved and new drafts without changing editor state
+ok 34 - export entry blocks unsaved and new drafts without changing editor state
+  ---
+  duration_ms: 1.834333
+  ...
+# Subtest: expired and interrupted jobs release temporary disk space while retaining source files
+ok 35 - expired and interrupted jobs release temporary disk space while retaining source files
+  ---
+  duration_ms: 213.315312
+  ...
+# Subtest: definition adoption: generated templates reject an unusable hidden directory in preview and apply
+ok 36 - definition adoption: generated templates reject an unusable hidden directory in preview and apply
+  ---
+  duration_ms: 531.84366
+  ...
+# Subtest: definition adoption: generated templates reject an unusable nested hidden directory in preview and apply
+ok 37 - definition adoption: generated templates reject an unusable nested hidden directory in preview and apply
+  ---
+  duration_ms: 479.870703
+  ...
+# Subtest: definition adoption: generated templates reject an unusable reserved directory in preview and apply
+ok 38 - definition adoption: generated templates reject an unusable reserved directory in preview and apply
+  ---
+  duration_ms: 519.14599
+  ...
+# Subtest: definition adoption: generated templates reject an unusable nested reserved directory in preview and apply
+ok 39 - definition adoption: generated templates reject an unusable nested reserved directory in preview and apply
+  ---
+  duration_ms: 429.475313
+  ...
+# Subtest: definition adoption: generated templates reject an unusable overlong UTF-8 directory in preview and apply
+ok 40 - definition adoption: generated templates reject an unusable overlong UTF-8 directory in preview and apply
+  ---
+  duration_ms: 423.225902
+  ...
+# Subtest: definition adoption: v2 generated templates support preview, repair, creation, rebuilding and export without rewriting old data
+ok 41 - definition adoption: v2 generated templates support preview, repair, creation, rebuilding and export without rewriting old data
+  ---
+  duration_ms: 1491.910022
+  ...
+# Subtest: definition adoption: v3 generated templates support preview, repair, creation, rebuilding and export without rewriting old data
+ok 42 - definition adoption: v3 generated templates support preview, repair, creation, rebuilding and export without rewriting old data
+  ---
+  duration_ms: 1431.399003
+  ...
+# Subtest: definition adoption: missing, malformed and oversized template files fail before changing the manifest or originals
+ok 43 - definition adoption: missing, malformed and oversized template files fail before changing the manifest or originals
+  ---
+  duration_ms: 556.076187
+  ...
+# Subtest: definition adoption: changes in the same millisecond retain independent recovery journals
+ok 44 - definition adoption: changes in the same millisecond retain independent recovery journals
+  ---
+  duration_ms: 310.942309
+  ...
+# Subtest: definition adoption: manifest write failure preserves the previous project, releases the lock and permits an immediate retry
+ok 45 - definition adoption: manifest write failure preserves the previous project, releases the lock and permits an immediate retry
+  ---
+  duration_ms: 288.214865
+  ...
+# Subtest: type/template API applies live to creation, indexing and exports at an arbitrary document location
+ok 46 - type/template API applies live to creation, indexing and exports at an arbitrary document location
+  ---
+  duration_ms: 1309.131616
+  ...
+# Subtest: template edits preserve source and descriptors, reject stale saves, and prune only their own previous revision
+ok 47 - template edits preserve source and descriptors, reject stale saves, and prune only their own previous revision
+  ---
+  duration_ms: 183.668031
+  ...
+# Subtest: adding an existing type ID cannot overwrite its rules or template; editing it still works
+ok 48 - adding an existing type ID cannot overwrite its rules or template; editing it still works
+  ---
+  duration_ms: 676.855249
+  ...
+# Subtest: type preview and save reject an unusable default location: hidden folder
+ok 49 - type preview and save reject an unusable default location: hidden folder
+  ---
+  duration_ms: 296.053645
+  ...
+# Subtest: type preview and save reject an unusable default location: nested hidden folder
+ok 50 - type preview and save reject an unusable default location: nested hidden folder
+  ---
+  duration_ms: 306.911677
+  ...
+# Subtest: type preview and save reject an unusable default location: reserved folder
+ok 51 - type preview and save reject an unusable default location: reserved folder
+  ---
+  duration_ms: 291.34509
+  ...
+# Subtest: type preview and save reject an unusable default location: nested reserved folder
+ok 52 - type preview and save reject an unusable default location: nested reserved folder
+  ---
+  duration_ms: 286.612249
+  ...
+# Subtest: type preview and save reject an unusable default location: overlong UTF-8 folder
+ok 53 - type preview and save reject an unusable default location: overlong UTF-8 folder
+  ---
+  duration_ms: 283.126209
+  ...
+# Subtest: old type locations remain readable and can be repaired before creating documents at the new default
+ok 54 - old type locations remain readable and can be repaired before creating documents at the new default
+  ---
+  duration_ms: 683.881246
+  ...
+# Subtest: malformed templates and escaping configuration cannot publish changes
+ok 55 - malformed templates and escaping configuration cannot publish changes
+  ---
+  duration_ms: 94.414144
+  ...
+# Subtest: project rules replace historical notation and path guesses in the same parser
+ok 56 - project rules replace historical notation and path guesses in the same parser
+  ---
+  duration_ms: 0.981597
+  ...
+# Subtest: official example is an independent definition; adoption preserves IDs, sources, ownership and original templates
+ok 57 - official example is an independent definition; adoption preserves IDs, sources, ownership and original templates
+  ---
+  duration_ms: 438.206222
+  ...
+# Subtest: project snapshot: generated template revision belongs to the displayed manifest
+ok 58 - project snapshot: generated template revision belongs to the displayed manifest
+  ---
+  duration_ms: 301.402155
+  ...
+# Subtest: project snapshot: stale generated form cannot undo a concurrent rule change
+ok 59 - project snapshot: stale generated form cannot undo a concurrent rule change
+  ---
+  duration_ms: 315.960766
+  ...
+# Subtest: project snapshot: file-backed template revision belongs to the displayed manifest
+ok 60 - project snapshot: file-backed template revision belongs to the displayed manifest
+  ---
+  duration_ms: 266.788933
+  ...
+# Subtest: project snapshot: stale file-backed form cannot undo a concurrent rule change
+ok 61 - project snapshot: stale file-backed form cannot undo a concurrent rule change
+  ---
+  duration_ms: 331.001377
+  ...
+# Subtest: project snapshot: reopening and editing only a label keeps template bytes and explicit parser rules
+ok 62 - project snapshot: reopening and editing only a label keeps template bytes and explicit parser rules
+  ---
+  duration_ms: 173.606928
+  ...
+# Subtest: template HTTP: v2 fragment filename loads the configured file before creating and reopening
+ok 63 - template HTTP: v2 fragment filename loads the configured file before creating and reopening
+  ---
+  duration_ms: 893.093962
+  ...
+# Subtest: template HTTP: v2 fragment directory loads the configured file before creating and reopening
+ok 64 - template HTTP: v2 fragment directory loads the configured file before creating and reopening
+  ---
+  duration_ms: 822.698126
+  ...
+# Subtest: template HTTP: v2 literal percent loads the configured file before creating and reopening
+ok 65 - template HTTP: v2 literal percent loads the configured file before creating and reopening
+  ---
+  duration_ms: 664.672303
+  ...
+# Subtest: template HTTP: v2 percent escape loads the configured file before creating and reopening
+ok 66 - template HTTP: v2 percent escape loads the configured file before creating and reopening
+  ---
+  duration_ms: 697.939443
+  ...
+# Subtest: template HTTP: v2 encoded separator text loads the configured file before creating and reopening
+ok 67 - template HTTP: v2 encoded separator text loads the configured file before creating and reopening
+  ---
+  duration_ms: 681.334367
+  ...
+# Subtest: template HTTP: v2 ordinary Unicode and spaces loads the configured file before creating and reopening
+ok 68 - template HTTP: v2 ordinary Unicode and spaces loads the configured file before creating and reopening
+  ---
+  duration_ms: 707.576749
+  ...
+# Subtest: template HTTP: v3 fragment filename loads the configured file before creating and reopening
+ok 69 - template HTTP: v3 fragment filename loads the configured file before creating and reopening
+  ---
+  duration_ms: 665.456818
+  ...
+# Subtest: template HTTP: v3 fragment directory loads the configured file before creating and reopening
+ok 70 - template HTTP: v3 fragment directory loads the configured file before creating and reopening
+  ---
+  duration_ms: 623.493696
+  ...
+# Subtest: template HTTP: v3 literal percent loads the configured file before creating and reopening
+ok 71 - template HTTP: v3 literal percent loads the configured file before creating and reopening
+  ---
+  duration_ms: 638.194754
+  ...
+# Subtest: template HTTP: v3 percent escape loads the configured file before creating and reopening
+ok 72 - template HTTP: v3 percent escape loads the configured file before creating and reopening
+  ---
+  duration_ms: 621.205012
+  ...
+# Subtest: template HTTP: v3 encoded separator text loads the configured file before creating and reopening
+ok 73 - template HTTP: v3 encoded separator text loads the configured file before creating and reopening
+  ---
+  duration_ms: 581.144411
+  ...
+# Subtest: template HTTP: v3 ordinary Unicode and spaces loads the configured file before creating and reopening
+ok 74 - template HTTP: v3 ordinary Unicode and spaces loads the configured file before creating and reopening
+  ---
+  duration_ms: 579.450812
+  ...
+# Subtest: template HTTP: md keeps BOM and CRLF through the reader, creation, indexing and reopening
+ok 75 - template HTTP: md keeps BOM and CRLF through the reader, creation, indexing and reopening
+  ---
+  duration_ms: 561.694021
+  ...
+# Subtest: template HTTP: txt keeps BOM and CRLF through the reader, creation, indexing and reopening
+ok 76 - template HTTP: txt keeps BOM and CRLF through the reader, creation, indexing and reopening
+  ---
+  duration_ms: 556.420587
+  ...
+# Subtest: template HTTP: json keeps BOM and CRLF through the reader, creation, indexing and reopening
+ok 77 - template HTTP: json keeps BOM and CRLF through the reader, creation, indexing and reopening
+  ---
+  duration_ms: 572.752638
+  ...
+# Subtest: template HTTP: yaml keeps BOM and CRLF through the reader, creation, indexing and reopening
+ok 78 - template HTTP: yaml keeps BOM and CRLF through the reader, creation, indexing and reopening
+  ---
+  duration_ms: 590.873198
+  ...
+# Subtest: template HTTP: yml keeps BOM and CRLF through the reader, creation, indexing and reopening
+ok 79 - template HTTP: yml keeps BOM and CRLF through the reader, creation, indexing and reopening
+  ---
+  duration_ms: 589.851877
+  ...
+# Subtest: template HTTP: a missing file remains retryable and a valid empty template can be saved
+ok 80 - template HTTP: a missing file remains retryable and a valid empty template can be saved
+  ---
+  duration_ms: 560.12932
+  ...
+# Subtest: template HTTP: an HTML fallback remains an error instead of becoming document source
+ok 81 - template HTTP: an HTML fallback remains an error instead of becoming document source
+  ---
+  duration_ms: 237.504418
+  ...
+1..81
+# tests 81
+# suites 0
+# pass 80
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 12017.587825

@@ -1,6 +1,6 @@
 # Viento Studio 功能链路网络
 
-此页枚举 **2026-09-23、b.3.7 发布快照**的实际功能入口、业务步骤、接口和数据落点，包含音频支持、类型取消/返回及[按图排查的二十八轮修复](NETWORK_BUGFIX_b.2.8.1.md)。此为修订 39，将[项目设置读取修复](PROJECT_SNAPSHOT_BUGFIX_b.3.6.md)、[模板网络读取修复](TEMPLATE_HTTP_BUGFIX_b.3.6.md)及[图片显示修复](IMAGE_DISPLAY_BUGFIX_b.3.6.md)纳入 [b.3.7 发布](RELEASE_b.3.7.md)。JSON 保留此前源码、发布清单和验证证据；上一发布基线为 `8315e0b`，本次包含 N88–N93 共 6 处修复。最初基线为 `51d522cb919c20b15815b129bd62e859af9a97a0`。
+此页枚举 **2026-09-23、b.3.8 发布快照**的实际功能入口、业务步骤、接口和数据落点，包含音频支持、类型取消/返回及[按图排查的三十一轮修复](NETWORK_BUGFIX_b.2.8.1.md)。此为修订 43，将[归属迁移修复](DOCUMENT_MIGRATION_BUGFIX_b.3.7.md)、[项目定义修复](PROJECT_DEFINITION_BUGFIX_b.3.7.md)及[原生归档修复](ARCHIVE_REGISTRY_BUGFIX_b.3.7.md)纳入 [b.3.8 发布](RELEASE_b.3.8.md)。JSON 保留此前源码、发布清单和验证证据；上一发布基线为 `ed86c84`，本次包含 N94–N100 共 7 处修复。最初基线为 `51d522cb919c20b15815b129bd62e859af9a97a0`。
 
 - [离线交互浏览器](function-network.html)：筛选业务链路，点击节点查看上下游，查询真实模块导入及接口。下载后双击即可使用，不访问外网。
 - [机器可读快照](function-network.json)：完整节点、边、源码引用、模块导入、事件绑定、路由、命令和扫描文件指纹。
@@ -13,9 +13,9 @@
 | 已枚举业务链路 | 50 |
 | 功能及数据节点 | 66 |
 | 业务步骤连接（去重） | 173 |
-| 扫描代码文件（JS / MJS / Rust / Python / Shell） | 153 |
-| 其中 JavaScript 模块 | 133 |
-| 本地模块导入语句 | 400 |
+| 扫描代码文件（JS / MJS / Rust / Python / Shell） | 156 |
+| 其中 JavaScript 模块 | 136 |
+| 本地模块导入语句 | 413 |
 | 字面量事件名的显式事件绑定 | 96 |
 | 业务 HTTP 路径 / 方法组合 | 11 / 16 |
 | 桌面桥路径 / 方法组合 | 5 / 6 |
@@ -24,7 +24,7 @@
 
 业务图的箭头表示请求、数据传递或处理步骤；同一节点可以再次出现，且分支可能在文字中展开。**它不是逐函数调用图**。JSON 的 `moduleImports` 才是代码中实际声明的本地导入；它也不能表示调用次数或性能。桌面归档示例 CLI 另有 4 个操作，不计入 7 个作品维护命令。
 
-网络从代码静态梳理，不是运行时追踪。b.3.7 发布 app-only 检查共 356 项，355 项通过、1 项原生归档互通跳过。此前的 [编辑器](NATIVE_WORKFLOW_TEST_b.2.8.1.md)、[作品库](NATIVE_LIBRARY_TEST_b.2.8.1.md) 与 [导出](NATIVE_EXPORT_TEST_b.2.8.1.md) 原生实测记录继续保留，本轮没有重跑。每条链路附的“已有验证入口”不代表该链路所有运行状态均已覆盖。测试使用临时作品，没有修改日常作品。业务枚举按职责归并，并不声称覆盖所有运行时状态组合。
+网络从代码静态梳理，不是运行时追踪。b.3.8 发布 app-only 检查共 424 项，424 项全部通过、零跳过，包含实际 Node/Rust 归档互通。此前的 [编辑器](NATIVE_WORKFLOW_TEST_b.2.8.1.md)、[作品库](NATIVE_LIBRARY_TEST_b.2.8.1.md) 与 [导出](NATIVE_EXPORT_TEST_b.2.8.1.md) 原生实测记录继续保留，本轮没有重跑。每条链路附的“已有验证入口”不代表该链路所有运行状态均已覆盖。测试使用临时作品，没有修改日常作品。业务枚举按职责归并，并不声称覆盖所有运行时状态组合。
 
 ## 2. 总体网络
 
@@ -313,9 +313,9 @@ sequenceDiagram
 
 [作品库首页](#node-library) → [Tauri 桌面宿主](#node-host) → [原生作品与归档](#node-native_workspace) → [完整项目迁移包](#node-archive) → [项目清单](#node-manifest) → [原始正文](#node-documents) → [项目模板](#node-templates) → [文档元数据](#node-document_meta) → [素材元数据](#node-asset_meta) → [素材原文件](#node-assets) → [本机配置与最近作品](#node-local_config)
 
-先检查每层路径及 ZIP 清单，逐文件校验实际内容后核对登记的正文、素材指纹和绑定，再保留新恢复目录。 已有编辑窗口时，首页禁用入口，宿主在原生选择器、写文件及登记前拒绝切换。只接受迁移格式；拒绝链接、大小写/Unicode 及文件目录冲突、未声明条目或不一致登记；失败清理本次恢复目录。
+先检查每层路径及 ZIP 清单，逐文件校验实际内容后核对登记的正文、素材指纹和绑定，再保留新恢复目录。 已有编辑窗口时，首页禁用入口，宿主在原生选择器、写文件及登记前拒绝切换。只接受迁移格式；拒绝链接、大小写/Unicode 及文件目录冲突、未声明条目或不一致登记；失败清理本次恢复目录。 在保留恢复目录之前按编辑器约定检查文档类型、解析方式、关系目标/重复/循环及素材字段和旧路径别名；校验和正确的损坏登记也拒绝，原目录及已有作品保持不变。
 
-已有验证入口：[src-tauri/src/workspace.rs](../src-tauri/src/workspace.rs)、[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py)、[scripts/tests/export.test.mjs](../scripts/tests/export.test.mjs)、[desktop/tests/native-library.py](../desktop/tests/native-library.py)、[scripts/tests/desktop-library.test.mjs](../scripts/tests/desktop-library.test.mjs)。
+已有验证入口：[src-tauri/src/workspace.rs](../src-tauri/src/workspace.rs)、[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py)、[scripts/tests/export.test.mjs](../scripts/tests/export.test.mjs)、[desktop/tests/native-library.py](../desktop/tests/native-library.py)、[scripts/tests/desktop-library.test.mjs](../scripts/tests/desktop-library.test.mjs)、[scripts/tests/archive-registry.test.mjs](../scripts/tests/archive-registry.test.mjs)。
 
 <a id="f09"></a>
 
@@ -325,9 +325,9 @@ sequenceDiagram
 
 [作品库首页](#node-library) → [Tauri 桌面宿主](#node-host) → [原生作品与归档](#node-native_workspace) → [原始正文](#node-documents) → [项目模板](#node-templates) → [文档元数据](#node-document_meta) → [素材元数据](#node-asset_meta) → [素材原文件](#node-assets) → [完整项目迁移包](#node-archive)
 
-Rust 写入前固定文件快照与素材根，流式打包并核对正文/素材登记、内容指纹，复查文件与配置后原子发布。 活动编辑窗口不妨碍备份已保存内容；取消或失败后可重试，其他项目入口仍保持禁用。与 Node 整库导出独立实现；不包含未保存草稿、缓存或本机绑定。拒绝跨系统路径冲突和缺失内容，失败保留旧备份。
+Rust 写入前固定文件快照与素材根，流式打包并核对正文/素材登记、内容指纹，复查文件与配置后原子发布。 活动编辑窗口不妨碍备份已保存内容；取消或失败后可重试，其他项目入口仍保持禁用。与 Node 整库导出独立实现；不包含未保存草稿、缓存或本机绑定。拒绝跨系统路径冲突和缺失内容，失败保留旧备份。 原生备份同样拒绝编辑器不可读的登记，失败保留原备份，修正后可重新生成。共享归属、一般引用、旧可选字段、未知素材指纹和同一素材重复别名继续兼容。
 
-已有验证入口：[src-tauri/src/workspace.rs](../src-tauri/src/workspace.rs)、[scripts/tests/export.test.mjs](../scripts/tests/export.test.mjs)、[desktop/tests/native-library.py](../desktop/tests/native-library.py)、[scripts/tests/desktop-library.test.mjs](../scripts/tests/desktop-library.test.mjs)。
+已有验证入口：[src-tauri/src/workspace.rs](../src-tauri/src/workspace.rs)、[scripts/tests/export.test.mjs](../scripts/tests/export.test.mjs)、[desktop/tests/native-library.py](../desktop/tests/native-library.py)、[scripts/tests/desktop-library.test.mjs](../scripts/tests/desktop-library.test.mjs)、[scripts/tests/archive-registry.test.mjs](../scripts/tests/archive-registry.test.mjs)。
 
 ### 浏览与导航
 
@@ -387,9 +387,9 @@ Rust 写入前固定文件快照与素材根，流式打包并核对正文/素�
 
 [文档元数据](#node-document_meta) → [文档归属关系](#node-hierarchy) → [文档/素材/引用索引](#node-index) → [编辑器状态与导航](#node-editor) → [原始正文](#node-documents)
 
-part-of 元数据生成 owners/ownedDocuments，导航到实际子文档编辑。 支持多层及共享归属；环路/无效关系被校验；归属修改尚无专门图形编辑器。
+part-of 元数据生成 owners/ownedDocuments，导航到实际子文档编辑。 支持多层及共享归属；环路/无效关系被校验；归属修改尚无专门图形编辑器。 通过明确映射补充共享归属后重建，多个父档案仍指向同一份背景源文。
 
-已有验证入口：[scripts/tests/document-model.test.mjs](../scripts/tests/document-model.test.mjs)、[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py)、[scripts/tests/export.test.mjs](../scripts/tests/export.test.mjs)。
+已有验证入口：[scripts/tests/document-model.test.mjs](../scripts/tests/document-model.test.mjs)、[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py)、[scripts/tests/export.test.mjs](../scripts/tests/export.test.mjs)、[scripts/tests/document-migration.test.mjs](../scripts/tests/document-migration.test.mjs)。
 
 ### 正文编辑
 
@@ -449,9 +449,9 @@ part-of 元数据生成 owners/ownedDocuments，导航到实际子文档编辑�
 
 [编辑器状态与导航](#node-editor) → [浏览器请求层](#node-request) → [业务接口分发](#node-router) → [文档服务](#node-doc_service) → [新文档身份登记](#node-create_doc) → [文档元数据](#node-document_meta) → [文档文件事务](#node-file_store) → [原始正文](#node-documents) → [标准化与索引重建编排](#node-rebuild) → [编辑器状态与导航](#node-editor)
 
-在登记锁内重新读取类型、检查可迁移位置冲突，再建立 UUID 并独占创建源文件。 保护大小写/Unicode 等价名称、父目录和缺失源文件的登记身份；失败回滚本次登记，保存成功后即作为已有文档继续编辑。 成功创建返回内容版本，后续保存沿用同一校验。 合法 255 字节文件名可以新建、再次保存和刷新预览，身份与权限保持完整。 取消重试与手动更换扩展名后的保存使用当前路径、类型和源字节，模板缓存保留最新接受的内容。 自动补后缀后同步最终草稿路径和预览上下文，并再次检查文件名长度；重名失败可换名重试，保留原正文、登记及所选类型。 首次获得目录标识时承接已保存的完整正文与版本，退出后不回退为展示摘要。 来自真实 HTTP 模板的 BOM 与换行在五种格式的新建、索引和原文重开中保持一致，清单规则与所选类型继续生效。
+在登记锁内重新读取类型、检查可迁移位置冲突，再建立 UUID 并独占创建源文件。 保护大小写/Unicode 等价名称、父目录和缺失源文件的登记身份；失败回滚本次登记，保存成功后即作为已有文档继续编辑。 成功创建返回内容版本，后续保存沿用同一校验。 合法 255 字节文件名可以新建、再次保存和刷新预览，身份与权限保持完整。 取消重试与手动更换扩展名后的保存使用当前路径、类型和源字节，模板缓存保留最新接受的内容。 自动补后缀后同步最终草稿路径和预览上下文，并再次检查文件名长度；重名失败可换名重试，保留原正文、登记及所选类型。 首次获得目录标识时承接已保存的完整正文与版本，退出后不回退为展示摘要。 来自真实 HTTP 模板的 BOM 与换行在五种格式的新建、索引和原文重开中保持一致，清单规则与所选类型继续生效。 采用共享定义后，v2/v3 的自动生成 Markdown 模板可通过真实接口新建、重开和重建；清单中的标题与字段分组也用于 HTML 导出。
 
-已有验证入口：[scripts/tests/generic-project.test.mjs](../scripts/tests/generic-project.test.mjs)、[scripts/tests/editor-runtime.test.mjs](../scripts/tests/editor-runtime.test.mjs)、[scripts/tests/creation-workflow.test.mjs](../scripts/tests/creation-workflow.test.mjs)、[scripts/tests/editor-dialogs.test.mjs](../scripts/tests/editor-dialogs.test.mjs)、[scripts/tests/editor-index-refresh.test.mjs](../scripts/tests/editor-index-refresh.test.mjs)、[scripts/tests/template-http.test.mjs](../scripts/tests/template-http.test.mjs)。
+已有验证入口：[scripts/tests/generic-project.test.mjs](../scripts/tests/generic-project.test.mjs)、[scripts/tests/editor-runtime.test.mjs](../scripts/tests/editor-runtime.test.mjs)、[scripts/tests/creation-workflow.test.mjs](../scripts/tests/creation-workflow.test.mjs)、[scripts/tests/editor-dialogs.test.mjs](../scripts/tests/editor-dialogs.test.mjs)、[scripts/tests/editor-index-refresh.test.mjs](../scripts/tests/editor-index-refresh.test.mjs)、[scripts/tests/template-http.test.mjs](../scripts/tests/template-http.test.mjs)、[scripts/tests/project-definition.test.mjs](../scripts/tests/project-definition.test.mjs)。
 
 <a id="f20"></a>
 
@@ -623,9 +623,9 @@ revision、默认目录及新增标识校验 → 保留模板源格式 → 写�
 
 [编辑器导出窗口](#node-export_ui) → [浏览器请求层](#node-request) → [业务接口分发](#node-router) → [导出任务生命周期](#node-export_jobs) → [Node 导出规划与 ZIP](#node-export_pack) → [项目清单](#node-manifest) → [原始正文](#node-documents) → [项目模板](#node-templates) → [文档元数据](#node-document_meta) → [素材元数据](#node-asset_meta) → [素材原文件](#node-assets) → [导出暂存包](#node-export_cache) → [完整项目迁移包](#node-archive)
 
-Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与外置素材；两端 v2/v3 往返逐文件核验。 独立于作品库 Rust 导出；本机配置/缓存排除，导出前后验证源快照。 保存或重建忙碌时暂缓打开导出。 每层目录及文件位置检查跨系统冲突。互通回归需显式配置原生归档测试二进制。 完整包同样在登记前核对取消，连续取消不会积累未领取的 ZIP 或占用导出名额。
+Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与外置素材；两端 v2/v3 往返逐文件核验。 独立于作品库 Rust 导出；本机配置/缓存排除，导出前后验证源快照。 保存或重建忙碌时暂缓打开导出。 每层目录及文件位置检查跨系统冲突。互通回归需显式配置原生归档测试二进制。 完整包同样在登记前核对取消，连续取消不会积累未领取的 ZIP 或占用导出名额。 本轮启用实际原生归档程序重跑 v2/v3 Node/Rust 往返，并核对两端登记契约、导入失败清理及合法共享背景的恢复和重建。
 
-已有验证入口：[scripts/tests/export.test.mjs](../scripts/tests/export.test.mjs)、[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py)、[scripts/tests/editor-dialogs.test.mjs](../scripts/tests/editor-dialogs.test.mjs)、[desktop/tests/native_export_workflow.py](../desktop/tests/native_export_workflow.py)、[scripts/tests/export-cancellation.test.mjs](../scripts/tests/export-cancellation.test.mjs)。
+已有验证入口：[scripts/tests/export.test.mjs](../scripts/tests/export.test.mjs)、[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py)、[scripts/tests/editor-dialogs.test.mjs](../scripts/tests/editor-dialogs.test.mjs)、[desktop/tests/native_export_workflow.py](../desktop/tests/native_export_workflow.py)、[scripts/tests/export-cancellation.test.mjs](../scripts/tests/export-cancellation.test.mjs)、[scripts/tests/archive-registry.test.mjs](../scripts/tests/archive-registry.test.mjs)。
 
 <a id="f34"></a>
 
@@ -735,9 +735,9 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 
 [登记与迁移维护入口](#node-workspace_cli) → [文档归属关系](#node-hierarchy) → [文档与素材登记](#node-registry) → [文档元数据](#node-document_meta) → [文档/素材/引用索引](#node-index)
 
-分析旧背景与角色关系，可按共享归属映射生成 part-of；写入留迁移记录。 默认只预览；需要 --write 才提交；旧故事独立文件不被吞进角色正文。
+分析旧背景与角色关系，可按共享归属映射生成 part-of；写入留迁移记录。 默认只预览；需要 --write 才提交；旧故事独立文件不被吞进角色正文。 明确映射可修正已有或空的 part-of，保留其他关系及仍保留的归属备注；普通重跑不重排完整描述。使用共享登记锁和受保护日志路径，拒绝内部链接；每次日志使用独立 UUID 并禁止覆盖，写入失败回滚已替换描述。
 
-已有验证入口：[scripts/tests/document-model.test.mjs](../scripts/tests/document-model.test.mjs)。
+已有验证入口：[scripts/tests/document-model.test.mjs](../scripts/tests/document-model.test.mjs)、[scripts/tests/document-migration.test.mjs](../scripts/tests/document-migration.test.mjs)。
 
 <a id="f43"></a>
 
@@ -747,9 +747,9 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 
 [登记与迁移维护入口](#node-workspace_cli) → [官方示范定义与采用](#node-definition_tool) → [文档与素材登记](#node-registry) → [项目清单](#node-manifest) → [项目类型解析契约](#node-types) → [项目模板](#node-templates)
 
-把轻量类型/字段规则定义应用到外部作品；官方示范有独立标记。 默认只检查；不把示范正文/素材打入程序；缺少既有类型/模板时拒绝。
+把轻量类型/字段规则定义应用到外部作品；官方示范有独立标记。 默认只检查；不把示范正文/素材打入程序；缺少既有类型/模板时拒绝。 无独立模板文件的类型也校验生成正文、默认目录与解析规则；旧配置仍可读取并修正。预览不发布配置，实际变更写独立 UUID 日志且禁止覆盖；清单写入失败保留原配置、释放锁并允许立即重试，重复应用不新增日志。
 
-已有验证入口：[scripts/tests/project-engine.test.mjs](../scripts/tests/project-engine.test.mjs)。
+已有验证入口：[scripts/tests/project-engine.test.mjs](../scripts/tests/project-engine.test.mjs)、[scripts/tests/project-definition.test.mjs](../scripts/tests/project-definition.test.mjs)。
 
 <a id="f50"></a>
 
@@ -868,7 +868,7 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 | 节点 | 职责 | 代码依据 |
 | --- | --- | --- |
 | <a id="node-host"></a>Tauri 桌面宿主 `host` | 11 个首页命令；在文件选择和写入前检查活动编辑窗口，按请求 ID 管理关闭确认、操作互斥和引擎退出。 | [run](../src-tauri/src/lib.rs#L874)<br>[start_editor](../src-tauri/src/lib.rs#L670)<br>[request_close](../src-tauri/src/lib.rs#L605)<br>[CloseState](../src-tauri/src/close_state.rs#L4)<br>[stop_engine](../src-tauri/src/lib.rs#L460)<br>[require_closed_editor](../src-tauri/src/lib.rs#L74)<br>[VariantStrIter::impl_get](../src-tauri/vendor/glib/src/variant_iter.rs#L118) |
-| <a id="node-native_workspace"></a>原生作品与归档 `native_workspace` | 创建兼容作品；Rust 流式备份与恢复，校验文件树、正文/素材登记及指纹，核对快照后发布。 | [create_workspace](../src-tauri/src/workspace.rs#L659)<br>[export_workspace](../src-tauri/src/workspace.rs#L786)<br>[import_workspace](../src-tauri/src/workspace.rs#L906)<br>[validate_archive_registry](../src-tauri/src/workspace.rs#L412)<br>[validate_file_tree](../src-tauri/src/workspace.rs#L168) |
+| <a id="node-native_workspace"></a>原生作品与归档 `native_workspace` | 创建兼容作品；Rust 流式备份与恢复，校验文件树、正文/素材登记及指纹，核对快照后发布。 备份/恢复发布前按编辑器契约校验文档关系与循环归属、素材字段及旧路径别名。 | [create_workspace](../src-tauri/src/workspace.rs#L772)<br>[export_workspace](../src-tauri/src/workspace.rs#L899)<br>[import_workspace](../src-tauri/src/workspace.rs#L1019)<br>[validate_archive_registry](../src-tauri/src/workspace.rs#L490)<br>[validate_file_tree](../src-tauri/src/workspace.rs#L168)<br>[validate_document_models](../src-tauri/src/workspace.rs#L419) |
 | <a id="node-native_export"></a>原生保存导出结果 `native_export` | 按任务 ID 在选择保存位置前持有实际归档文件，缓存过期不影响当前保存；复核后原子发布，取消或失败保留旧目标。 | [save_editor_export](../src-tauri/src/lib.rs#L395)<br>[save_prepared_export](../src-tauri/src/export.rs#L55)<br>[prepare_export](../src-tauri/src/export.rs#L18) |
 | <a id="node-native_language"></a>原生语言偏好 `native_language` | 读写本机语言配置，并同步作品库与编辑窗口。 | [src-tauri/src/preferences.rs](../src-tauri/src/preferences.rs#L1)<br>[update_language](../src-tauri/src/lib.rs#L120) |
 
@@ -901,12 +901,12 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 | <a id="node-export_render"></a>离线阅读格式 `export_render` | 共享布局生成 HTML 或 Markdown，保留故事层级和包内素材路径；每篇文档的关联素材按身份去重，原文与附件角色保持完整。 | [renderExport](../scripts/lib/export-render.mjs#L9) |
 | <a id="node-paths"></a>程序、作品与缓存路径 `paths` | 程序资源与作品分离，解析配置选择、v2/v3 目录与外置素材。 | [scripts/lib/paths.mjs](../scripts/lib/paths.mjs#L1)<br>[resolveWorkspaceRoot](../scripts/lib/app-storage.mjs#L49) |
 | <a id="node-types"></a>项目类型解析契约 `types` | 稳定 documentType 对应项目模板、解析规则和字段分组；已有登记优先于目录猜测。 | [resolveDocumentDefinition](../scripts/lib/project-layout.mjs#L72)<br>[validateProjectTypes](../scripts/lib/project-layout.mjs#L37) |
-| <a id="node-registry"></a>文档与素材登记 `registry` | 读取身份登记，增量添加新对象，维护内容指纹、唯一性、共享登记锁和素材索引；核验登记文件及路径。 | [registerWorkspace](../scripts/lib/workspace.mjs#L268)<br>[readRegistry](../scripts/lib/workspace.mjs#L162)<br>[resolveAssetRequest](../scripts/lib/workspace.mjs#L66)<br>[assertPortableFileTree](../scripts/lib/workspace.mjs#L119)<br>[withRegistryLock](../scripts/lib/workspace.mjs#L237)<br>[verifyWorkspace](../scripts/lib/workspace.mjs#L344) |
-| <a id="node-hierarchy"></a>文档归属关系 `hierarchy` | 验证 part-of 关系并构建 owners/ownedDocuments；独立故事仍是独立文档。 | [validateDocumentModels](../scripts/lib/document-model.mjs#L23)<br>[attachDocumentHierarchy](../scripts/lib/document-model.mjs#L88) |
+| <a id="node-registry"></a>文档与素材登记 `registry` | 读取身份登记，增量添加新对象，维护内容指纹、唯一性、共享登记锁和素材索引；核验登记文件及路径。 归属迁移复用登记锁和路径检查，写入独立恢复日志。 | [registerWorkspace](../scripts/lib/workspace.mjs#L268)<br>[readRegistry](../scripts/lib/workspace.mjs#L162)<br>[resolveAssetRequest](../scripts/lib/workspace.mjs#L66)<br>[assertPortableFileTree](../scripts/lib/workspace.mjs#L119)<br>[withRegistryLock](../scripts/lib/workspace.mjs#L237)<br>[verifyWorkspace](../scripts/lib/workspace.mjs#L344)<br>[updateDocumentModels](../scripts/lib/workspace.mjs#L376) |
+| <a id="node-hierarchy"></a>文档归属关系 `hierarchy` | 验证 part-of 关系并构建 owners/ownedDocuments；独立故事仍是独立文档。 明确映射只更新指定文档的归属，保留其他关系与仍有效的备注。 | [validateDocumentModels](../scripts/lib/document-model.mjs#L23)<br>[attachDocumentHierarchy](../scripts/lib/document-model.mjs#L99)<br>[planLegacyDocumentModels](../scripts/lib/document-model.mjs#L55) |
 | <a id="node-standardize"></a>原文标准化 `standardize` | 正文根内扫描 → 项目定义 → 通用解析 → 标准对象；以相对源路径哈希定位缓存，按源范围更新、迁移和清理。 | [scripts/standardize-docs.mjs](../scripts/standardize-docs.mjs#L1)<br>[buildStandardCatalog](../scripts/standardize-docs/catalog.mjs#L18)<br>[scripts/standardize-docs/sources.mjs](../scripts/standardize-docs/sources.mjs#L1)<br>[buildStandardOutputPath](../scripts/lib/standard-cache.mjs#L9) |
 | <a id="node-parser"></a>共享文档解析器 `parser` | 按扩展名解析文本/Markdown、JSON、YAML，保留字段类型、正文、代码、表格及错误原文。 | [parseSourceContent](../scripts/standardize-docs/doc-factory.mjs#L10)<br>[scripts/standardize-docs/parser.mjs](../scripts/standardize-docs/parser.mjs#L1) |
 | <a id="node-layout"></a>共享布局生成器 `layout` | 由标题、分区、字段和块生成 viento-layout-v1；按项目 fieldGroups 调整展示分组。 | [buildDocumentLayout](../scripts/standardize-docs/layout.mjs#L7)<br>[scripts/lib/document-values.mjs](../scripts/lib/document-values.mjs#L1) |
-| <a id="node-index"></a>文档/素材/引用索引 `index` | 兼容镜像目录与新 .entries 缓存，生成文档、素材和引用索引，附加归属导航及未解析引用，共用 generation。 | [scripts/build-static-doc-site.mjs](../scripts/build-static-doc-site.mjs#L1)<br>[buildStandardIndex](../scripts/lib/static-index.mjs#L526)<br>[buildRegistryIndexes](../scripts/lib/workspace.mjs#L429)<br>[collectStandardPaths](../scripts/lib/standard-cache.mjs#L16) |
+| <a id="node-index"></a>文档/素材/引用索引 `index` | 兼容镜像目录与新 .entries 缓存，生成文档、素材和引用索引，附加归属导航及未解析引用，共用 generation。 | [scripts/build-static-doc-site.mjs](../scripts/build-static-doc-site.mjs#L1)<br>[buildStandardIndex](../scripts/lib/static-index.mjs#L526)<br>[buildRegistryIndexes](../scripts/lib/workspace.mjs#L428)<br>[collectStandardPaths](../scripts/lib/standard-cache.mjs#L16) |
 | <a id="node-media_format"></a>共享媒体引用格式 `media_format` | image/video/audio、扩展名和稳定 URL 语法由前后端共用；从解析后的文档值提取引用，跳过代码块。 | [scripts/lib/media-format.mjs](../scripts/lib/media-format.mjs#L1)<br>[collectDocumentMedia](../scripts/lib/media-format.mjs#L51) |
 
 ### 工具
@@ -915,7 +915,7 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 | --- | --- | --- |
 | <a id="node-cli"></a>浏览/编辑命令入口 `cli` | 解析 npm/脚本参数，预检契约，可选重建，然后选择浏览或编辑服务。 | [scripts/ops/site.mjs](../scripts/ops/site.mjs#L1)<br>[launchDocSite](../scripts/lib/site-launcher.mjs#L42)<br>[scripts/lib/site-options.mjs](../scripts/lib/site-options.mjs#L1) |
 | <a id="node-workspace_cli"></a>登记与迁移维护入口 `workspace_cli` | paths、register、verify、migrate-documents、check-project、apply-definition、bind-assets。 | [scripts/workspace.mjs](../scripts/workspace.mjs#L1) |
-| <a id="node-definition_tool"></a>官方示范定义与采用 `definition_tool` | 把轻量类型/规则示范应用到独立旧作品，保留 UUID、正文、附件与归属。 | [applyProjectDefinition](../scripts/lib/project-definition.mjs#L10)<br>[docs/examples/epic-of-viento-line.project.json](../docs/examples/epic-of-viento-line.project.json#L1) |
+| <a id="node-definition_tool"></a>官方示范定义与采用 `definition_tool` | 把轻量类型/规则示范应用到独立旧作品，保留 UUID、正文、附件与归属。 生成模板与文件模板使用同一预览校验，实际变更保留独立恢复日志。 | [applyProjectDefinition](../scripts/lib/project-definition.mjs#L11)<br>[docs/examples/epic-of-viento-line.project.json](../docs/examples/epic-of-viento-line.project.json#L1) |
 | <a id="node-checks"></a>校验与回归入口 `checks` | 版本、语法、接口契约、数据格式/模板对齐、Node/Rust/桌面原生工作流。 | [scripts/check-project.mjs](../scripts/check-project.mjs#L1)<br>[scripts/validate-standard-docs.mjs](../scripts/validate-standard-docs.mjs#L1)<br>[scripts/validate-data-template-alignment.mjs](../scripts/validate-data-template-alignment.mjs#L1)<br>[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py#L1)<br>[src-tauri/tests/glib_variant_iter.rs](../src-tauri/tests/glib_variant_iter.rs#L1) |
 | <a id="node-packaging"></a>桌面与源码打包 `packaging` | 统一版本，准备 Node/资源/语言字典，构建平台包与独立源码归档；CI 手动触发。 通过本地覆盖统一 GTK/WebKit 的 glib 修复副本，源码包携带完整依赖补丁。 | [desktop/version.mjs](../desktop/version.mjs#L1)<br>[desktop/prepare.mjs](../desktop/prepare.mjs#L1)<br>[desktop/build.mjs](../desktop/build.mjs#L1)<br>[desktop/package-source.py](../desktop/package-source.py#L1)<br>[.github/workflows/desktop.yml](../.github/workflows/desktop.yml#L1)<br>[[patch.crates-io]](../src-tauri/Cargo.toml#L36) |
 | <a id="node-cleanup"></a>构建目录清理 `cleanup` | 只清理已知构建目录，先检查与作品/素材位置是否重叠。 | [cleanBuilds](../desktop/clean.mjs#L12) |
@@ -936,7 +936,7 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 | <a id="node-asset_binding"></a>本机外置素材绑定 `asset_binding` | 持登记锁更新当前机器的 main 素材根，保留其他本机字段并拒绝配置路径链接；包内恢复为相对 assets/。 | [resolveAssetRoot](../scripts/lib/workspace.mjs#L60)<br>[bindWorkspaceAssets](../scripts/lib/workspace.mjs#L255) |
 | <a id="node-memory"></a>当前窗口草稿与状态 `memory` | 源码/区块/新建路径/项目类型表单及异步请求状态；未实现磁盘草稿恢复。 | [web/modules/app-state.js](../web/modules/app-state.js#L1) |
 | <a id="node-share"></a>文档分享包 `share` | HTML 或 Markdown、原始 sources、选中文档及附属文档、使用到的素材和元数据。 | [scripts/lib/export-package.mjs](../scripts/lib/export-package.mjs#L1) |
-| <a id="node-archive"></a>完整项目迁移包 `archive` | 公共清单、正文、模板、全部素材、登记及兼容标记；含逐文件大小/SHA-256。 | [export_workspace](../src-tauri/src/workspace.rs#L786) |
+| <a id="node-archive"></a>完整项目迁移包 `archive` | 公共清单、正文、模板、全部素材、登记及兼容标记；含逐文件大小/SHA-256。 | [export_workspace](../src-tauri/src/workspace.rs#L899) |
 | <a id="node-app_bundle"></a>应用安装包 `app_bundle` | 运行程序、Node、web/scripts/schemas、依赖；具体作品不打入包。 | [desktop/prepare.mjs](../desktop/prepare.mjs#L1) |
 | <a id="node-source_archive"></a>应用源码归档 `source_archive` | 包含当前未提交的程序源码/测试/说明，不包含作品和构建缓存。 | [desktop/package-source.py](../desktop/package-source.py#L1) |
 
@@ -1081,9 +1081,9 @@ JSON 保留逐条本地 ESM 导入语句、命名导入和行号；同一对文�
 | 模块 | 直接导入方数量 |
 | --- | ---: |
 | [scripts/lib/paths.mjs](../scripts/lib/paths.mjs) | 33 |
-| [scripts/lib/workspace.mjs](../scripts/lib/workspace.mjs) | 26 |
-| [scripts/lib/project-layout.mjs](../scripts/lib/project-layout.mjs) | 21 |
-| [scripts/tests/helpers.mjs](../scripts/tests/helpers.mjs) | 19 |
+| [scripts/lib/workspace.mjs](../scripts/lib/workspace.mjs) | 29 |
+| [scripts/lib/project-layout.mjs](../scripts/lib/project-layout.mjs) | 24 |
+| [scripts/tests/helpers.mjs](../scripts/tests/helpers.mjs) | 22 |
 | [scripts/lib/doc-api-contract.mjs](../scripts/lib/doc-api-contract.mjs) | 18 |
 | [web/i18n/index.js](../web/i18n/index.js) | 18 |
 | [scripts/tests/editor-harness.mjs](../scripts/tests/editor-harness.mjs) | 15 |
@@ -1104,7 +1104,7 @@ JSON 保留逐条本地 ESM 导入语句、命名导入和行号；同一对文�
 - 本次未找到面向用户的正文重命名/删除工作流、持久化自动草稿恢复或导入后未引用素材自动清理入口。
 - 音视频在正文中通过嵌入引用播放；仅增加元数据绑定不保证当前编辑器自动出现播放器。
 
-上述职责区别和兼容边界继续保留；已修复的具体缺陷按 N01–N93 记在[连续修复记录](NETWORK_BUGFIX_b.2.8.1.md)。
+上述职责区别和兼容边界继续保留；已修复的具体缺陷按 N01–N100 记在[连续修复记录](NETWORK_BUGFIX_b.2.8.1.md)。
 
 ## 10. 快照结构与后续更新
 
@@ -1112,6 +1112,6 @@ JSON 保留逐条本地 ESM 导入语句、命名导入和行号；同一对文�
 
 本次使用本机 Acorn 解析 ESM 声明、字面量动态导入、显式事件绑定及路由对象，再人工核对关键业务调用与文件读写。模块统计不包含 HTML/CSS 的资源链接、Rust 的 crate 内部依赖、计算出的动态导入或内联属性事件；Python、Rust 和 shell 记录源码指纹及人工确认的入口。已有测试声明可能来自参数化模板，不能用声明数量推断实际测试用例数。
 
-修订 39 记录 153 份源码指纹、173 处节点源码引用及 400 条本地导入，将 N88–N93 修复纳入 b.3.7，并核对 10 份版本与界面清单指纹；二十八轮复现与验证证据保留，交互页内嵌数据与 JSON 一致。发布完整应用检查 355 项通过、1 项原生归档互通跳过。新增场景检查项目设置冲突、模板的特殊名称与原始字节，以及图片各入口的文件名处理和缺图回退。Rust、原生窗口、视觉排版及媒体解码本轮没有重跑，详见 [b.3.7 发布记录](RELEASE_b.3.7.md)。功能图仍是静态梳理；图页面的浏览器交互实测仍未完成。
+修订 43 记录 156 份源码指纹、176 处节点源码引用及 413 条本地导入，将 N94–N100 修复纳入 b.3.8，并核对 10 份版本与界面清单指纹；三十一轮复现与验证证据保留，交互页内嵌数据与 JSON 一致。发布完整应用检查 424 项全部通过、零跳过，包含实际 Node/Rust 互通；Rust 归档模块 13 通过、1 项真实大体积作品测试忽略。新增场景检查归属迁移、模板默认目录、独立恢复日志、失败重试、原生备份/恢复登记契约及兼容性。完整 Tauri 库、原生窗口和媒体解码本轮未重跑，详见 [b.3.8 发布记录](RELEASE_b.3.8.md)。功能图仍是静态梳理；图页面的浏览器交互实测仍未完成。
 
 此文件组是版本快照，不会随应用自动更新。下次更新时：先按 `sourceInventory.sha256` 确认变更范围；重新检查路由表、原生命令注册及本地导入；沿受影响的业务链核对读写和失败分支；保留稳定节点 ID / F 编号，再同步 JSON、本文、HTML 和总图。增加日期或版本，并明确实际运行了哪些验证。交互页内嵌快照供离线打开，无需启动作品服务。

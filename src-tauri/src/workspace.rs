@@ -407,6 +407,84 @@ fn data_file(root: &Path, relative: &str) -> Result<PathBuf> {
     }
 }
 
+// Match String.trim() in the editor's document-model validator, including BOM.
+fn has_model_text(value: &str) -> bool {
+    value.chars().any(|c| {
+        !matches!(c, '\u{9}'..='\u{d}' | ' ' | '\u{a0}' | '\u{1680}'
+            | '\u{2000}'..='\u{200a}' | '\u{2028}' | '\u{2029}' | '\u{202f}'
+            | '\u{205f}' | '\u{3000}' | '\u{feff}')
+    })
+}
+
+fn validate_document_models(records: &[serde_json::Value]) -> Result<()> {
+    let by_id: BTreeMap<_, _> = records
+        .iter()
+        .enumerate()
+        .map(|(index, record)| (record["id"].as_str().unwrap(), index))
+        .collect();
+    let mut owners = vec![Vec::new(); records.len()];
+    let mut incoming = vec![0usize; records.len()];
+    for (index, record) in records.iter().enumerate() {
+        if record.get("documentType").is_some_and(|value| {
+            !value
+                .as_str()
+                .is_some_and(|text| has_model_text(text) && text.encode_utf16().count() <= 120)
+        }) {
+            return Err("无效的文档类型登记".into());
+        }
+        if record.get("parserProfile").is_some_and(|value| {
+            ![Some("structured"), Some("prose"), Some("legacy-hero")].contains(&value.as_str())
+        }) {
+            return Err("不支持的文档解析配置".into());
+        }
+        let Some(relations) = record.get("relations") else {
+            continue;
+        };
+        let relations = relations.as_array().ok_or("文档关系必须为数组")?;
+        let mut seen = HashSet::new();
+        for relation in relations {
+            let kind = relation["kind"]
+                .as_str()
+                .filter(|text| has_model_text(text))
+                .ok_or("无效的文档关系类别")?;
+            let target = relation["targetId"].as_str().ok_or("文档关系缺少目标")?;
+            let target_index = *by_id.get(target).ok_or("文档关系指向未登记的文档")?;
+            if relation.get("slot").is_some_and(|slot| !slot.is_string()) {
+                return Err("文档关系名称必须为文本".into());
+            }
+            if !seen.insert((kind, target)) {
+                return Err("重复的文档关系".into());
+            }
+            if kind == "part-of" {
+                owners[index].push(target_index);
+                incoming[target_index] += 1;
+            }
+        }
+    }
+    // Only ownership must be acyclic. References may form cycles, and several
+    // documents may share a parent or belong to multiple parents. Avoid a
+    // recursive traversal of potentially deep imported graphs.
+    let mut ready: Vec<_> = incoming
+        .iter()
+        .enumerate()
+        .filter_map(|(index, count)| (*count == 0).then_some(index))
+        .collect();
+    let mut visited = 0;
+    while let Some(index) = ready.pop() {
+        visited += 1;
+        for &owner in &owners[index] {
+            incoming[owner] -= 1;
+            if incoming[owner] == 0 {
+                ready.push(owner);
+            }
+        }
+    }
+    if visited != records.len() {
+        return Err("文档归属存在循环".into());
+    }
+    Ok(())
+}
+
 // Validate the bytes actually archived/extracted, not just the existence of a
 // live asset path. ZIP checksums alone cannot establish registry consistency.
 fn validate_archive_registry(root: &Path, version: u32, files: &[Entry]) -> Result<()> {
@@ -416,6 +494,8 @@ fn validate_archive_registry(root: &Path, version: u32, files: &[Entry]) -> Resu
         .collect();
     let mut ids = HashSet::new();
     let mut asset_ids = HashSet::new();
+    let mut asset_aliases = HashSet::new();
+    let mut documents = Vec::new();
     for (kind, format) in [("assets", "viento-asset"), ("documents", "viento-document")] {
         let prefix = format!("metadata/{kind}/");
         let mut locations = HashSet::new();
@@ -440,6 +520,22 @@ fn validate_archive_registry(root: &Path, version: u32, files: &[Entry]) -> Resu
                 return Err(format!("登记身份或格式无效：{}", entry.path));
             }
             if kind == "assets" {
+                if !record["name"].is_string()
+                    || ![
+                        Some("image"),
+                        Some("video"),
+                        Some("audio"),
+                        Some("font"),
+                        Some("text"),
+                        Some("other"),
+                    ]
+                    .contains(&record["kind"].as_str())
+                    || !record["tags"]
+                        .as_array()
+                        .is_some_and(|tags| tags.iter().all(|tag| tag.is_string()))
+                {
+                    return Err(format!("无效的素材登记：{}", entry.path));
+                }
                 asset_ids.insert(id.to_string());
                 let relative = record["location"]["path"]
                     .as_str()
@@ -450,6 +546,22 @@ fn validate_archive_registry(root: &Path, version: u32, files: &[Entry]) -> Resu
                     || !locations.insert(portable_key(relative))
                 {
                     return Err(format!("素材登记位置无效或重复：{relative}"));
+                }
+                let aliases = record["legacyPaths"]
+                    .as_array()
+                    .ok_or("素材旧路径必须为数组")?;
+                let mut own_aliases = HashSet::from([portable_key(&source)]);
+                for alias in aliases {
+                    let alias = alias
+                        .as_str()
+                        .filter(|value| value.starts_with("assets/") && portable_path(value))
+                        .ok_or("无效的素材旧路径")?;
+                    own_aliases.insert(portable_key(alias));
+                }
+                for alias in own_aliases {
+                    if !asset_aliases.insert(alias) {
+                        return Err("素材旧路径登记冲突".into());
+                    }
                 }
                 let actual = contents
                     .get(source.as_str())
@@ -484,10 +596,11 @@ fn validate_archive_registry(root: &Path, version: u32, files: &[Entry]) -> Resu
                         return Err(format!("文档引用的素材未登记或绑定无效：{source}"));
                     }
                 }
+                documents.push(record);
             }
         }
     }
-    Ok(())
+    validate_document_models(&documents)
 }
 
 fn require_real_dir(path: &Path) -> Result<()> {

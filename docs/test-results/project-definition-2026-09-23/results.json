@@ -1,0 +1,71 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.7",
+  "gitBase": "ed86c8491552e4b54592dcc2e2eb462a5e62be84",
+  "scope": "Project definition adoption, generated-template validation, creation/indexing/export compatibility, independent recovery journals and immediate retry after failed manifest writes",
+  "workflows": [
+    "F19",
+    "F43"
+  ],
+  "bugs": [
+    "N97",
+    "N98"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 10,
+    "passed": 3,
+    "failed": 7,
+    "skipped": 0,
+    "log": "before.log",
+    "sourceState": "b.3.7 plus unchanged round-29 document migration fixes; project definition module still at the released version",
+    "files": {
+      "scripts/lib/project-definition.mjs": "43ef86565a0f995cc106f5b80ac74230eb84d5152c02009e378450b8c2bc3ac5"
+    },
+    "testFileSha256": "aaf69def86bd2156918ea39992da8de03837a14b519337b4e0ba8accf0aab6f1",
+    "reproduction": "Ran all 10 new cases before the production changes. Five generated-template invalid directory cases accepted both preview and apply. Fixed-clock second application and retry after controlled manifest failure both failed with EEXIST. v2/v3 generated-template creation/export and bad file-template rejection already passed."
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 81,
+    "passed": 80,
+    "failed": 0,
+    "skipped": 1,
+    "log": "after.log",
+    "newCases": 10
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 375,
+    "passed": 374,
+    "failed": 0,
+    "skipped": 1,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 129,
+    "apiContractPassed": true
+  },
+  "commands": {
+    "before": "node --test scripts/tests/project-definition.test.mjs",
+    "after": "node --test scripts/tests/project-definition.test.mjs scripts/tests/project-engine.test.mjs scripts/tests/project-snapshot.test.mjs scripts/tests/template-http.test.mjs scripts/tests/document-migration.test.mjs scripts/tests/export.test.mjs",
+    "application": "node scripts/check-project.mjs --app-only"
+  },
+  "skipReason": "Node/Rust archive interoperability requires VIENTO_TEST_ARCHIVE_BINARY; native archive code unchanged",
+  "files": {
+    "scripts/lib/project-definition.mjs": "984c6deaf35f6d376f631d6e9de19a2c49f9a6f9f33a865d72f13beda6c5c88f",
+    "scripts/tests/project-definition.test.mjs": "46ff91af400a9b78c20ec7d4fed122faa7037bd292850abeb3b29dcd12376f0f"
+  },
+  "testEnvironment": "Actual adoption CLI and HTTP configuration, document creation, read and rebuild routes run in temporary v2/v3 workspaces, with generated Markdown content and HTML export checked. Original sources (including BOM/CRLF), template bytes, assets and metadata files, including UUIDs, ownership notes and bindings, are compared byte-for-byte. Default directories are exercised in preview and write mode. Fixed clock and atomic manifest rename failure hooks run only in isolated child processes; original manifest, lock release, distinct logs and safe immediate retry are checked.",
+  "nativeTestsRerun": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "functionNetwork": {
+    "revision": 41,
+    "sourceFingerprints": 155,
+    "nodeSources": 175,
+    "localImportStatements": 409,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

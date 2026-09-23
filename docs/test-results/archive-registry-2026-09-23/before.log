@@ -1,0 +1,1800 @@
+TAP version 13
+# Subtest: native archive metadata stays compatible with the editor reader before backup and restore commit
+    # Subtest: v2: reject empty document type and preserve prior backup and restore directory
+    not ok 1 - v2: reject empty document type and preserve prior backup and restore directory
+      ---
+      duration_ms: 48.319085
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject BOM-only document type and preserve prior backup and restore directory
+    not ok 2 - v2: reject BOM-only document type and preserve prior backup and restore directory
+      ---
+      duration_ms: 42.336659
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject overlong UTF-16 document type and preserve prior backup and restore directory
+    not ok 3 - v2: reject overlong UTF-16 document type and preserve prior backup and restore directory
+      ---
+      duration_ms: 41.208958
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject unknown parser profile and preserve prior backup and restore directory
+    not ok 4 - v2: reject unknown parser profile and preserve prior backup and restore directory
+      ---
+      duration_ms: 40.773124
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject non-array relations and preserve prior backup and restore directory
+    not ok 5 - v2: reject non-array relations and preserve prior backup and restore directory
+      ---
+      duration_ms: 38.523351
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject null relationship and preserve prior backup and restore directory
+    not ok 6 - v2: reject null relationship and preserve prior backup and restore directory
+      ---
+      duration_ms: 37.928901
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject blank relationship kind and preserve prior backup and restore directory
+    not ok 7 - v2: reject blank relationship kind and preserve prior backup and restore directory
+      ---
+      duration_ms: 39.08108
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject BOM-only relationship kind and preserve prior backup and restore directory
+    not ok 8 - v2: reject BOM-only relationship kind and preserve prior backup and restore directory
+      ---
+      duration_ms: 41.493448
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject missing relationship target and preserve prior backup and restore directory
+    not ok 9 - v2: reject missing relationship target and preserve prior backup and restore directory
+      ---
+      duration_ms: 38.542398
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject non-string relationship slot and preserve prior backup and restore directory
+    not ok 10 - v2: reject non-string relationship slot and preserve prior backup and restore directory
+      ---
+      duration_ms: 39.292851
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject duplicate relationship and preserve prior backup and restore directory
+    not ok 11 - v2: reject duplicate relationship and preserve prior backup and restore directory
+      ---
+      duration_ms: 38.706706
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject self ownership and preserve prior backup and restore directory
+    not ok 12 - v2: reject self ownership and preserve prior backup and restore directory
+      ---
+      duration_ms: 40.065916
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject mutual ownership and preserve prior backup and restore directory
+    not ok 13 - v2: reject mutual ownership and preserve prior backup and restore directory
+      ---
+      duration_ms: 39.844598
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject non-string asset name and preserve prior backup and restore directory
+    not ok 14 - v2: reject non-string asset name and preserve prior backup and restore directory
+      ---
+      duration_ms: 36.432536
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject unknown asset kind and preserve prior backup and restore directory
+    not ok 15 - v2: reject unknown asset kind and preserve prior backup and restore directory
+      ---
+      duration_ms: 37.490633
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject non-array asset tags and preserve prior backup and restore directory
+    not ok 16 - v2: reject non-array asset tags and preserve prior backup and restore directory
+      ---
+      duration_ms: 36.554492
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject non-string asset tag and preserve prior backup and restore directory
+    not ok 17 - v2: reject non-string asset tag and preserve prior backup and restore directory
+      ---
+      duration_ms: 38.197812
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject missing legacy paths and preserve prior backup and restore directory
+    not ok 18 - v2: reject missing legacy paths and preserve prior backup and restore directory
+      ---
+      duration_ms: 37.752149
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject escaping legacy path and preserve prior backup and restore directory
+    not ok 19 - v2: reject escaping legacy path and preserve prior backup and restore directory
+      ---
+      duration_ms: 36.537539
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject legacy path outside assets and preserve prior backup and restore directory
+    not ok 20 - v2: reject legacy path outside assets and preserve prior backup and restore directory
+      ---
+      duration_ms: 35.644059
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject legacy path collides with another asset and preserve prior backup and restore directory
+    not ok 21 - v2: reject legacy path collides with another asset and preserve prior backup and restore directory
+      ---
+      duration_ms: 40.872006
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: reject Unicode-equivalent legacy path collision and preserve prior backup and restore directory
+    not ok 22 - v2: reject Unicode-equivalent legacy path collision and preserve prior backup and restore directory
+      ---
+      duration_ms: 39.196494
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v2: retry with valid shared ownership restores exact sources, rules, metadata and attachment references
+    ok 23 - v2: retry with valid shared ownership restores exact sources, rules, metadata and attachment references
+      ---
+      duration_ms: 345.258352
+      ...
+    # Subtest: v2: optional legacy fields, empty roles, repeated own aliases and unknown fingerprints remain portable
+    ok 24 - v2: optional legacy fields, empty roles, repeated own aliases and unknown fingerprints remain portable
+      ---
+      duration_ms: 37.935092
+      ...
+    # Subtest: v3: reject empty document type and preserve prior backup and restore directory
+    not ok 25 - v3: reject empty document type and preserve prior backup and restore directory
+      ---
+      duration_ms: 31.715307
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject BOM-only document type and preserve prior backup and restore directory
+    not ok 26 - v3: reject BOM-only document type and preserve prior backup and restore directory
+      ---
+      duration_ms: 33.017787
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject overlong UTF-16 document type and preserve prior backup and restore directory
+    not ok 27 - v3: reject overlong UTF-16 document type and preserve prior backup and restore directory
+      ---
+      duration_ms: 31.282239
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject unknown parser profile and preserve prior backup and restore directory
+    not ok 28 - v3: reject unknown parser profile and preserve prior backup and restore directory
+      ---
+      duration_ms: 33.408513
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject non-array relations and preserve prior backup and restore directory
+    not ok 29 - v3: reject non-array relations and preserve prior backup and restore directory
+      ---
+      duration_ms: 31.04488
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject null relationship and preserve prior backup and restore directory
+    not ok 30 - v3: reject null relationship and preserve prior backup and restore directory
+      ---
+      duration_ms: 31.320653
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject blank relationship kind and preserve prior backup and restore directory
+    not ok 31 - v3: reject blank relationship kind and preserve prior backup and restore directory
+      ---
+      duration_ms: 35.126217
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject BOM-only relationship kind and preserve prior backup and restore directory
+    not ok 32 - v3: reject BOM-only relationship kind and preserve prior backup and restore directory
+      ---
+      duration_ms: 31.670731
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject missing relationship target and preserve prior backup and restore directory
+    not ok 33 - v3: reject missing relationship target and preserve prior backup and restore directory
+      ---
+      duration_ms: 31.186273
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject non-string relationship slot and preserve prior backup and restore directory
+    not ok 34 - v3: reject non-string relationship slot and preserve prior backup and restore directory
+      ---
+      duration_ms: 32.757293
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject duplicate relationship and preserve prior backup and restore directory
+    not ok 35 - v3: reject duplicate relationship and preserve prior backup and restore directory
+      ---
+      duration_ms: 31.379116
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject self ownership and preserve prior backup and restore directory
+    not ok 36 - v3: reject self ownership and preserve prior backup and restore directory
+      ---
+      duration_ms: 33.433061
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject mutual ownership and preserve prior backup and restore directory
+    not ok 37 - v3: reject mutual ownership and preserve prior backup and restore directory
+      ---
+      duration_ms: 32.221907
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject non-string asset name and preserve prior backup and restore directory
+    not ok 38 - v3: reject non-string asset name and preserve prior backup and restore directory
+      ---
+      duration_ms: 29.28261
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject unknown asset kind and preserve prior backup and restore directory
+    not ok 39 - v3: reject unknown asset kind and preserve prior backup and restore directory
+      ---
+      duration_ms: 28.392588
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject non-array asset tags and preserve prior backup and restore directory
+    not ok 40 - v3: reject non-array asset tags and preserve prior backup and restore directory
+      ---
+      duration_ms: 28.620068
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject non-string asset tag and preserve prior backup and restore directory
+    not ok 41 - v3: reject non-string asset tag and preserve prior backup and restore directory
+      ---
+      duration_ms: 33.122369
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject missing legacy paths and preserve prior backup and restore directory
+    not ok 42 - v3: reject missing legacy paths and preserve prior backup and restore directory
+      ---
+      duration_ms: 28.711584
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject escaping legacy path and preserve prior backup and restore directory
+    not ok 43 - v3: reject escaping legacy path and preserve prior backup and restore directory
+      ---
+      duration_ms: 29.926365
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject legacy path outside assets and preserve prior backup and restore directory
+    not ok 44 - v3: reject legacy path outside assets and preserve prior backup and restore directory
+      ---
+      duration_ms: 29.697933
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject legacy path collides with another asset and preserve prior backup and restore directory
+    not ok 45 - v3: reject legacy path collides with another asset and preserve prior backup and restore directory
+      ---
+      duration_ms: 28.342491
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: reject Unicode-equivalent legacy path collision and preserve prior backup and restore directory
+    not ok 46 - v3: reject Unicode-equivalent legacy path collision and preserve prior backup and restore directory
+      ---
+      duration_ms: 29.664629
+      location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:65'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+          {
+        +   backupPreserved: false,
+        +   backupRejected: false,
+        +   directoryPreserved: false,
+        +   restoreRejected: false
+        -   backupPreserved: true,
+        -   backupRejected: true,
+        -   directoryPreserved: true,
+        -   restoreRejected: true
+          }
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+        backupRejected: true
+        restoreRejected: true
+        backupPreserved: true
+        directoryPreserved: true
+      actual:
+        backupRejected: false
+        restoreRejected: false
+        backupPreserved: false
+        directoryPreserved: false
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:115:16)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:93:57)
+        async Test.run (node:internal/test_runner/test:632:9)
+        async startSubtest (node:internal/test_runner/harness:214:3)
+      ...
+    # Subtest: v3: retry with valid shared ownership restores exact sources, rules, metadata and attachment references
+    ok 47 - v3: retry with valid shared ownership restores exact sources, rules, metadata and attachment references
+      ---
+      duration_ms: 325.842426
+      ...
+    # Subtest: v3: optional legacy fields, empty roles, repeated own aliases and unknown fingerprints remain portable
+    ok 48 - v3: optional legacy fields, empty roles, repeated own aliases and unknown fingerprints remain portable
+      ---
+      duration_ms: 31.979437
+      ...
+    1..48
+not ok 1 - native archive metadata stays compatible with the editor reader before backup and restore commit
+  ---
+  duration_ms: 2514.696845
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/archive-registry.test.mjs:90:1'
+  failureType: 'subtestsFailed'
+  error: '44 subtests failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+1..1
+# tests 49
+# suites 0
+# pass 4
+# fail 45
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2689.243027

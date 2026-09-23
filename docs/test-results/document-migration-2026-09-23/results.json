@@ -1,0 +1,73 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.7",
+  "gitBase": "ed86c8491552e4b54592dcc2e2eb462a5e62be84",
+  "scope": "Explicit document ownership migration, protected paths, independent recovery journals, rollback/retry and shared hierarchy indexing",
+  "workflows": [
+    "F14",
+    "F42"
+  ],
+  "bugs": [
+    "N94",
+    "N95",
+    "N96"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 9,
+    "passed": 1,
+    "failed": 8,
+    "skipped": 0,
+    "log": "before.log",
+    "sourceState": "b.3.7 release before document migration fixes",
+    "files": {
+      "scripts/lib/document-model.mjs": "424beea925ce674ebb0ec4f1671ab0a52673a61980f603a89dda8352cec43423",
+      "scripts/lib/workspace.mjs": "f3dbbd3428bda6fd2f0ce1ed976d5872cff770d395d5fef258b45c53a239253d"
+    },
+    "reproduction": "Ran all 9 new cases against b.3.7. Two v2/v3 mapping cases, one initialized descriptor preservation case, cyclic correction rejection, three linked path cases and fixed-clock journal preservation failed. Existing failed-write rollback and retry passed."
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 88,
+    "passed": 87,
+    "failed": 0,
+    "skipped": 1,
+    "log": "after.log",
+    "newCases": 9
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 365,
+    "passed": 364,
+    "failed": 0,
+    "skipped": 1,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 128,
+    "apiContractPassed": true
+  },
+  "commands": {
+    "before": "node --test scripts/tests/document-migration.test.mjs",
+    "after": "node --test scripts/tests/document-migration.test.mjs scripts/tests/document-model.test.mjs scripts/tests/asset-binding.test.mjs scripts/tests/workspace-layout.test.mjs scripts/tests/metadata-conversion.test.mjs scripts/tests/project-engine.test.mjs scripts/tests/export.test.mjs",
+    "application": "node scripts/check-project.mjs --app-only"
+  },
+  "skipReason": "Node/Rust archive interoperability requires VIENTO_TEST_ARCHIVE_BINARY; native archive code unchanged",
+  "files": {
+    "scripts/lib/document-model.mjs": "ccdd05ff614086ad038dae4dccfca438eee99aefca69ce85a05c9f1b5c93b0ef",
+    "scripts/lib/workspace.mjs": "dd65d70c66969311a92351d9bada09bca89f8712f78a643aa1d72c8935a2e783",
+    "scripts/tests/document-migration.test.mjs": "74d01c6103bb9a35fe6bce490df6cbf5850a70158e244007d2392735c1d672e1"
+  },
+  "testEnvironment": "Actual migration CLI, registry operations and index builders run in temporary v2/v3 workspaces. Explicit maps are previewed and then applied to initialized records, with shared navigation rebuilt. Preserved sources, manifest, asset bytes, identities, bindings, unrelated relationships and retained owner annotations are checked. Link targets are separate temporary directories outside the test workspace. Fixed clock and atomic rename failure hooks run only in isolated child processes; rollback compares original descriptor bytes and retry verifies lock release.",
+  "nativeTestsRerun": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "functionNetwork": {
+    "revision": 40,
+    "sourceFingerprints": 154,
+    "nodeSources": 175,
+    "localImportStatements": 403,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

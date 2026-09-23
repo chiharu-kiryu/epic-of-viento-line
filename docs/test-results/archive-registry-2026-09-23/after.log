@@ -1,0 +1,511 @@
+TAP version 13
+# Subtest: native archive metadata stays compatible with the editor reader before backup and restore commit
+    # Subtest: v2: reject empty document type and preserve prior backup and restore directory
+    ok 1 - v2: reject empty document type and preserve prior backup and restore directory
+      ---
+      duration_ms: 59.369794
+      ...
+    # Subtest: v2: reject BOM-only document type and preserve prior backup and restore directory
+    ok 2 - v2: reject BOM-only document type and preserve prior backup and restore directory
+      ---
+      duration_ms: 55.597186
+      ...
+    # Subtest: v2: reject overlong UTF-16 document type and preserve prior backup and restore directory
+    ok 3 - v2: reject overlong UTF-16 document type and preserve prior backup and restore directory
+      ---
+      duration_ms: 52.229611
+      ...
+    # Subtest: v2: reject unknown parser profile and preserve prior backup and restore directory
+    ok 4 - v2: reject unknown parser profile and preserve prior backup and restore directory
+      ---
+      duration_ms: 46.687389
+      ...
+    # Subtest: v2: reject non-array relations and preserve prior backup and restore directory
+    ok 5 - v2: reject non-array relations and preserve prior backup and restore directory
+      ---
+      duration_ms: 54.085762
+      ...
+    # Subtest: v2: reject null relationship and preserve prior backup and restore directory
+    ok 6 - v2: reject null relationship and preserve prior backup and restore directory
+      ---
+      duration_ms: 54.180936
+      ...
+    # Subtest: v2: reject blank relationship kind and preserve prior backup and restore directory
+    ok 7 - v2: reject blank relationship kind and preserve prior backup and restore directory
+      ---
+      duration_ms: 53.435514
+      ...
+    # Subtest: v2: reject BOM-only relationship kind and preserve prior backup and restore directory
+    ok 8 - v2: reject BOM-only relationship kind and preserve prior backup and restore directory
+      ---
+      duration_ms: 50.91105
+      ...
+    # Subtest: v2: reject missing relationship target and preserve prior backup and restore directory
+    ok 9 - v2: reject missing relationship target and preserve prior backup and restore directory
+      ---
+      duration_ms: 53.909801
+      ...
+    # Subtest: v2: reject non-string relationship slot and preserve prior backup and restore directory
+    ok 10 - v2: reject non-string relationship slot and preserve prior backup and restore directory
+      ---
+      duration_ms: 49.547613
+      ...
+    # Subtest: v2: reject duplicate relationship and preserve prior backup and restore directory
+    ok 11 - v2: reject duplicate relationship and preserve prior backup and restore directory
+      ---
+      duration_ms: 47.433803
+      ...
+    # Subtest: v2: reject self ownership and preserve prior backup and restore directory
+    ok 12 - v2: reject self ownership and preserve prior backup and restore directory
+      ---
+      duration_ms: 49.691811
+      ...
+    # Subtest: v2: reject mutual ownership and preserve prior backup and restore directory
+    ok 13 - v2: reject mutual ownership and preserve prior backup and restore directory
+      ---
+      duration_ms: 63.623303
+      ...
+    # Subtest: v2: reject non-string asset name and preserve prior backup and restore directory
+    ok 14 - v2: reject non-string asset name and preserve prior backup and restore directory
+      ---
+      duration_ms: 46.175749
+      ...
+    # Subtest: v2: reject unknown asset kind and preserve prior backup and restore directory
+    ok 15 - v2: reject unknown asset kind and preserve prior backup and restore directory
+      ---
+      duration_ms: 51.701308
+      ...
+    # Subtest: v2: reject non-array asset tags and preserve prior backup and restore directory
+    ok 16 - v2: reject non-array asset tags and preserve prior backup and restore directory
+      ---
+      duration_ms: 66.878118
+      ...
+    # Subtest: v2: reject non-string asset tag and preserve prior backup and restore directory
+    ok 17 - v2: reject non-string asset tag and preserve prior backup and restore directory
+      ---
+      duration_ms: 51.070327
+      ...
+    # Subtest: v2: reject missing legacy paths and preserve prior backup and restore directory
+    ok 18 - v2: reject missing legacy paths and preserve prior backup and restore directory
+      ---
+      duration_ms: 43.733103
+      ...
+    # Subtest: v2: reject escaping legacy path and preserve prior backup and restore directory
+    ok 19 - v2: reject escaping legacy path and preserve prior backup and restore directory
+      ---
+      duration_ms: 42.228622
+      ...
+    # Subtest: v2: reject legacy path outside assets and preserve prior backup and restore directory
+    ok 20 - v2: reject legacy path outside assets and preserve prior backup and restore directory
+      ---
+      duration_ms: 44.047351
+      ...
+    # Subtest: v2: reject legacy path collides with another asset and preserve prior backup and restore directory
+    ok 21 - v2: reject legacy path collides with another asset and preserve prior backup and restore directory
+      ---
+      duration_ms: 48.617753
+      ...
+    # Subtest: v2: reject Unicode-equivalent legacy path collision and preserve prior backup and restore directory
+    ok 22 - v2: reject Unicode-equivalent legacy path collision and preserve prior backup and restore directory
+      ---
+      duration_ms: 50.660474
+      ...
+    # Subtest: v2: retry with valid shared ownership restores exact sources, rules, metadata and attachment references
+    ok 23 - v2: retry with valid shared ownership restores exact sources, rules, metadata and attachment references
+      ---
+      duration_ms: 415.736536
+      ...
+    # Subtest: v2: optional legacy fields, empty roles, repeated own aliases and unknown fingerprints remain portable
+    ok 24 - v2: optional legacy fields, empty roles, repeated own aliases and unknown fingerprints remain portable
+      ---
+      duration_ms: 43.409577
+      ...
+    # Subtest: v3: reject empty document type and preserve prior backup and restore directory
+    ok 25 - v3: reject empty document type and preserve prior backup and restore directory
+      ---
+      duration_ms: 38.209908
+      ...
+    # Subtest: v3: reject BOM-only document type and preserve prior backup and restore directory
+    ok 26 - v3: reject BOM-only document type and preserve prior backup and restore directory
+      ---
+      duration_ms: 35.654975
+      ...
+    # Subtest: v3: reject overlong UTF-16 document type and preserve prior backup and restore directory
+    ok 27 - v3: reject overlong UTF-16 document type and preserve prior backup and restore directory
+      ---
+      duration_ms: 36.863432
+      ...
+    # Subtest: v3: reject unknown parser profile and preserve prior backup and restore directory
+    ok 28 - v3: reject unknown parser profile and preserve prior backup and restore directory
+      ---
+      duration_ms: 32.7369
+      ...
+    # Subtest: v3: reject non-array relations and preserve prior backup and restore directory
+    ok 29 - v3: reject non-array relations and preserve prior backup and restore directory
+      ---
+      duration_ms: 31.611653
+      ...
+    # Subtest: v3: reject null relationship and preserve prior backup and restore directory
+    ok 30 - v3: reject null relationship and preserve prior backup and restore directory
+      ---
+      duration_ms: 33.314286
+      ...
+    # Subtest: v3: reject blank relationship kind and preserve prior backup and restore directory
+    ok 31 - v3: reject blank relationship kind and preserve prior backup and restore directory
+      ---
+      duration_ms: 33.874521
+      ...
+    # Subtest: v3: reject BOM-only relationship kind and preserve prior backup and restore directory
+    ok 32 - v3: reject BOM-only relationship kind and preserve prior backup and restore directory
+      ---
+      duration_ms: 31.910511
+      ...
+    # Subtest: v3: reject missing relationship target and preserve prior backup and restore directory
+    ok 33 - v3: reject missing relationship target and preserve prior backup and restore directory
+      ---
+      duration_ms: 30.729627
+      ...
+    # Subtest: v3: reject non-string relationship slot and preserve prior backup and restore directory
+    ok 34 - v3: reject non-string relationship slot and preserve prior backup and restore directory
+      ---
+      duration_ms: 31.756975
+      ...
+    # Subtest: v3: reject duplicate relationship and preserve prior backup and restore directory
+    ok 35 - v3: reject duplicate relationship and preserve prior backup and restore directory
+      ---
+      duration_ms: 34.58764
+      ...
+    # Subtest: v3: reject self ownership and preserve prior backup and restore directory
+    ok 36 - v3: reject self ownership and preserve prior backup and restore directory
+      ---
+      duration_ms: 35.724109
+      ...
+    # Subtest: v3: reject mutual ownership and preserve prior backup and restore directory
+    ok 37 - v3: reject mutual ownership and preserve prior backup and restore directory
+      ---
+      duration_ms: 37.471429
+      ...
+    # Subtest: v3: reject non-string asset name and preserve prior backup and restore directory
+    ok 38 - v3: reject non-string asset name and preserve prior backup and restore directory
+      ---
+      duration_ms: 33.560113
+      ...
+    # Subtest: v3: reject unknown asset kind and preserve prior backup and restore directory
+    ok 39 - v3: reject unknown asset kind and preserve prior backup and restore directory
+      ---
+      duration_ms: 35.050135
+      ...
+    # Subtest: v3: reject non-array asset tags and preserve prior backup and restore directory
+    ok 40 - v3: reject non-array asset tags and preserve prior backup and restore directory
+      ---
+      duration_ms: 32.834588
+      ...
+    # Subtest: v3: reject non-string asset tag and preserve prior backup and restore directory
+    ok 41 - v3: reject non-string asset tag and preserve prior backup and restore directory
+      ---
+      duration_ms: 33.715674
+      ...
+    # Subtest: v3: reject missing legacy paths and preserve prior backup and restore directory
+    ok 42 - v3: reject missing legacy paths and preserve prior backup and restore directory
+      ---
+      duration_ms: 32.598863
+      ...
+    # Subtest: v3: reject escaping legacy path and preserve prior backup and restore directory
+    ok 43 - v3: reject escaping legacy path and preserve prior backup and restore directory
+      ---
+      duration_ms: 30.654562
+      ...
+    # Subtest: v3: reject legacy path outside assets and preserve prior backup and restore directory
+    ok 44 - v3: reject legacy path outside assets and preserve prior backup and restore directory
+      ---
+      duration_ms: 31.043594
+      ...
+    # Subtest: v3: reject legacy path collides with another asset and preserve prior backup and restore directory
+    ok 45 - v3: reject legacy path collides with another asset and preserve prior backup and restore directory
+      ---
+      duration_ms: 30.299284
+      ...
+    # Subtest: v3: reject Unicode-equivalent legacy path collision and preserve prior backup and restore directory
+    ok 46 - v3: reject Unicode-equivalent legacy path collision and preserve prior backup and restore directory
+      ---
+      duration_ms: 31.219955
+      ...
+    # Subtest: v3: retry with valid shared ownership restores exact sources, rules, metadata and attachment references
+    ok 47 - v3: retry with valid shared ownership restores exact sources, rules, metadata and attachment references
+      ---
+      duration_ms: 376.183228
+      ...
+    # Subtest: v3: optional legacy fields, empty roles, repeated own aliases and unknown fingerprints remain portable
+    ok 48 - v3: optional legacy fields, empty roles, repeated own aliases and unknown fingerprints remain portable
+      ---
+      duration_ms: 37.311809
+      ...
+    1..48
+ok 1 - native archive metadata stays compatible with the editor reader before backup and restore commit
+  ---
+  duration_ms: 3101.874799
+  ...
+# Subtest: document migration: v2 can apply explicit owners after an earlier migration and rebuild shared navigation
+ok 2 - document migration: v2 can apply explicit owners after an earlier migration and rebuild shared navigation
+  ---
+  duration_ms: 1377.695531
+  ...
+# Subtest: document migration: v3 can apply explicit owners after an earlier migration and rebuild shared navigation
+ok 3 - document migration: v3 can apply explicit owners after an earlier migration and rebuild shared navigation
+  ---
+  duration_ms: 1099.484708
+  ...
+# Subtest: document migration: explicit corrections preserve other relations and retained owner annotations; ordinary reruns do not infer over them
+ok 4 - document migration: explicit corrections preserve other relations and retained owner annotations; ordinary reruns do not infer over them
+  ---
+  duration_ms: 734.952136
+  ...
+# Subtest: document migration: invalid or cyclic explicit corrections fail before changing initialized metadata
+ok 5 - document migration: invalid or cyclic explicit corrections fail before changing initialized metadata
+  ---
+  duration_ms: 695.717957
+  ...
+# Subtest: document migration: a linked private-directory is rejected before writing a journal or metadata
+ok 6 - document migration: a linked private-directory is rejected before writing a journal or metadata
+  ---
+  duration_ms: 222.928549
+  ...
+# Subtest: document migration: a linked migration-directory is rejected before writing a journal or metadata
+ok 7 - document migration: a linked migration-directory is rejected before writing a journal or metadata
+  ---
+  duration_ms: 216.016766
+  ...
+# Subtest: document migration: a linked lock-file is rejected before writing a journal or metadata
+ok 8 - document migration: a linked lock-file is rejected before writing a journal or metadata
+  ---
+  duration_ms: 293.711214
+  ...
+# Subtest: document migration: repeated operations in the same millisecond retain separate recovery journals
+ok 9 - document migration: repeated operations in the same millisecond retain separate recovery journals
+  ---
+  duration_ms: 171.67027
+  ...
+# Subtest: document migration: a write failure rolls descriptors back, releases the lock and permits a safe retry
+ok 10 - document migration: a write failure rolls descriptors back, releases the lock and permits a safe retry
+  ---
+  duration_ms: 182.898911
+  ...
+# Subtest: the core parser is independent of paths and game vocabulary; compatibility is explicit
+ok 11 - the core parser is independent of paths and game vocabulary; compatibility is explicit
+  ---
+  duration_ms: 10.899025
+  ...
+# Subtest: arbitrary OC fields and typed nested values render from one layout without category templates
+ok 12 - arbitrary OC fields and typed nested values render from one layout without category templates
+  ---
+  duration_ms: 3.271949
+  ...
+# Subtest: heading order, repeated prose, tables and multiline bonuses survive the universal layout
+ok 13 - heading order, repeated prose, tables and multiline bonuses survive the universal layout
+  ---
+  duration_ms: 2.407908
+  ...
+# Subtest: ownership supports several parents and custom types; missing owners keep the source visible
+ok 14 - ownership supports several parents and custom types; missing owners keep the source visible
+  ---
+  duration_ms: 1.567092
+  ...
+# Subtest: ambiguous legacy names remain visible and invalid or cyclic ownership is rejected
+ok 15 - ambiguous legacy names remain visible and invalid or cyclic ownership is rejected
+  ---
+  duration_ms: 2.215827
+  ...
+# Subtest: descriptor migration, shared-story editing, partial rebuild and relocation preserve identity and ownership
+ok 16 - descriptor migration, shared-story editing, partial rebuild and relocation preserve identity and ownership
+  ---
+  duration_ms: 1684.308761
+  ...
+# Subtest: document exports include owned stories, exact sources and referenced external media in both formats
+ok 17 - document exports include owned stories, exact sources and referenced external media in both formats
+  ---
+  duration_ms: 187.779059
+  ...
+# Subtest: JSON and YAML typed fields export using the generic layout and media bindings
+ok 18 - JSON and YAML typed fields export using the generic layout and media bindings
+  ---
+  duration_ms: 90.472705
+  ...
+# Subtest: explicit audio bindings export a player even when the source does not embed the audio
+ok 19 - explicit audio bindings export a player even when the source does not embed the audio
+  ---
+  duration_ms: 69.563074
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the md reference index
+ok 20 - sharing carries declared asset IDs recognized by the md reference index
+  ---
+  duration_ms: 554.063175
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the txt reference index
+ok 21 - sharing carries declared asset IDs recognized by the txt reference index
+  ---
+  duration_ms: 502.497557
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the json reference index
+ok 22 - sharing carries declared asset IDs recognized by the json reference index
+  ---
+  duration_ms: 465.433577
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the yaml reference index
+ok 23 - sharing carries declared asset IDs recognized by the yaml reference index
+  ---
+  duration_ms: 424.955179
+  ...
+# Subtest: multiple attachment roles share one player per document while keeping each owned story complete
+ok 24 - multiple attachment roles share one player per document while keeping each owned story complete
+  ---
+  duration_ms: 66.847698
+  ...
+# Subtest: declared missing assets reject sharing, then retry succeeds after the reference is repaired
+ok 25 - declared missing assets reject sharing, then retry succeeds after the reference is repaired
+  ---
+  duration_ms: 73.836818
+  ...
+# Subtest: sharing retains indexed legacy image paths, relative links and unregistered local images
+ok 26 - sharing retains indexed legacy image paths, relative links and unregistered local images
+  ---
+  duration_ms: 429.988206
+  ...
+# Subtest: v2 relative image references resolve against the original document directory
+ok 27 - v2 relative image references resolve against the original document directory
+  ---
+  duration_ms: 392.646188
+  ...
+# Subtest: v3 relative image references resolve against the original document directory
+ok 28 - v3 relative image references resolve against the original document directory
+  ---
+  duration_ms: 393.174591
+  ...
+# Subtest: sharing preserves distinct percent and space filenames, registered identities and renamed aliases
+ok 29 - sharing preserves distinct percent and space filenames, registered identities and renamed aliases
+  ---
+  duration_ms: 92.411058
+  ...
+# Subtest: owned stories retain nested heading levels in HTML and Markdown shares
+ok 30 - owned stories retain nested heading levels in HTML and Markdown shares
+  ---
+  duration_ms: 49.477584
+  ...
+# Subtest: v2 complete project packages preserve migration contract, metadata and all external media
+ok 31 - v2 complete project packages preserve migration contract, metadata and all external media
+  ---
+  duration_ms: 91.43522
+  ...
+# Subtest: v3 complete project packages preserve migration contract, metadata and all external media
+ok 32 - v3 complete project packages preserve migration contract, metadata and all external media
+  ---
+  duration_ms: 82.270379
+  ...
+# Subtest: missing assets, traversal, symlinks and changed source snapshots cannot produce a successful export
+ok 33 - missing assets, traversal, symlinks and changed source snapshots cannot produce a successful export
+  ---
+  duration_ms: 83.972301
+  ...
+# Subtest: complete exports reject directory aliases and file-directory conflicts without changing project bytes
+ok 34 - complete exports reject directory aliases and file-directory conflicts without changing project bytes
+  ---
+  duration_ms: 151.649129
+  ...
+# Subtest: editor and native v2/v3 archives round-trip with exact sources, metadata and external media
+ok 35 - editor and native v2/v3 archives round-trip with exact sources, metadata and external media
+  ---
+  duration_ms: 337.86643
+  ...
+# Subtest: HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup
+ok 36 - HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup
+  ---
+  duration_ms: 804.429328
+  ...
+# Subtest: consecutive browser exports recycle completed downloads instead of exhausting the three-job limit
+ok 37 - consecutive browser exports recycle completed downloads instead of exhausting the three-job limit
+  ---
+  duration_ms: 385.607074
+  ...
+# Subtest: releasing or expiring an export cannot remove a file being downloaded
+ok 38 - releasing or expiring an export cannot remove a file being downloaded
+  ---
+  duration_ms: 150.469814
+  ...
+# Subtest: export range requests keep their real status in diagnostics and remain retryable
+ok 39 - export range requests keep their real status in diagnostics and remain retryable
+  ---
+  duration_ms: 280.283816
+  ...
+# Subtest: pending and interrupted exports remain protected from automatic quota eviction
+ok 40 - pending and interrupted exports remain protected from automatic quota eviction
+  ---
+  duration_ms: 102.991969
+  ...
+# Subtest: export entry blocks unsaved and new drafts without changing editor state
+ok 41 - export entry blocks unsaved and new drafts without changing editor state
+  ---
+  duration_ms: 1.975752
+  ...
+# Subtest: expired and interrupted jobs release temporary disk space while retaining source files
+ok 42 - expired and interrupted jobs release temporary disk space while retaining source files
+  ---
+  duration_ms: 177.193476
+  ...
+# Subtest: definition adoption: generated templates reject an unusable hidden directory in preview and apply
+ok 43 - definition adoption: generated templates reject an unusable hidden directory in preview and apply
+  ---
+  duration_ms: 514.775481
+  ...
+# Subtest: definition adoption: generated templates reject an unusable nested hidden directory in preview and apply
+ok 44 - definition adoption: generated templates reject an unusable nested hidden directory in preview and apply
+  ---
+  duration_ms: 518.490856
+  ...
+# Subtest: definition adoption: generated templates reject an unusable reserved directory in preview and apply
+ok 45 - definition adoption: generated templates reject an unusable reserved directory in preview and apply
+  ---
+  duration_ms: 418.305435
+  ...
+# Subtest: definition adoption: generated templates reject an unusable nested reserved directory in preview and apply
+ok 46 - definition adoption: generated templates reject an unusable nested reserved directory in preview and apply
+  ---
+  duration_ms: 403.960505
+  ...
+# Subtest: definition adoption: generated templates reject an unusable overlong UTF-8 directory in preview and apply
+ok 47 - definition adoption: generated templates reject an unusable overlong UTF-8 directory in preview and apply
+  ---
+  duration_ms: 397.558922
+  ...
+# Subtest: definition adoption: v2 generated templates support preview, repair, creation, rebuilding and export without rewriting old data
+ok 48 - definition adoption: v2 generated templates support preview, repair, creation, rebuilding and export without rewriting old data
+  ---
+  duration_ms: 1385.057999
+  ...
+# Subtest: definition adoption: v3 generated templates support preview, repair, creation, rebuilding and export without rewriting old data
+ok 49 - definition adoption: v3 generated templates support preview, repair, creation, rebuilding and export without rewriting old data
+  ---
+  duration_ms: 1292.453187
+  ...
+# Subtest: definition adoption: missing, malformed and oversized template files fail before changing the manifest or originals
+ok 50 - definition adoption: missing, malformed and oversized template files fail before changing the manifest or originals
+  ---
+  duration_ms: 541.837932
+  ...
+# Subtest: definition adoption: changes in the same millisecond retain independent recovery journals
+ok 51 - definition adoption: changes in the same millisecond retain independent recovery journals
+  ---
+  duration_ms: 232.463867
+  ...
+# Subtest: definition adoption: manifest write failure preserves the previous project, releases the lock and permits an immediate retry
+ok 52 - definition adoption: manifest write failure preserves the previous project, releases the lock and permits an immediate retry
+  ---
+  duration_ms: 266.486941
+  ...
+1..52
+# tests 100
+# suites 0
+# pass 100
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6747.07687

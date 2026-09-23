@@ -1,0 +1,243 @@
+TAP version 13
+# Subtest: document migration: v2 can apply explicit owners after an earlier migration and rebuild shared navigation
+not ok 1 - document migration: v2 can apply explicit owners after an earlier migration and rebuild shared navigation
+  ---
+  duration_ms: 367.109674
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/document-migration.test.mjs:56:31'
+  failureType: 'testCodeFailure'
+  error: 'an explicit mapping must not be silently ignored after relations were initialized'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/document-migration.test.mjs:62:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async startSubtest (node:internal/test_runner/harness:214:3)
+  ...
+# Subtest: document migration: v3 can apply explicit owners after an earlier migration and rebuild shared navigation
+not ok 2 - document migration: v3 can apply explicit owners after an earlier migration and rebuild shared navigation
+  ---
+  duration_ms: 366.248596
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/document-migration.test.mjs:56:31'
+  failureType: 'testCodeFailure'
+  error: 'an explicit mapping must not be silently ignored after relations were initialized'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/document-migration.test.mjs:62:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: document migration: explicit corrections preserve other relations and retained owner annotations; ordinary reruns do not infer over them
+not ok 3 - document migration: explicit corrections preserve other relations and retained owner annotations; ordinary reruns do not infer over them
+  ---
+  duration_ms: 200.354415
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/document-migration.test.mjs:82:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected ... Lines skipped
+    
+      '{\n' +
+    +   '  "documentType": "story",\n' +
+    +   '  "parserProfile": "prose",\n' +
+    +   '  "format": "viento-document",\n' +
+    +   '  "version": 1,\n' +
+    +   '  "id": "d0a6c737-e3a3-4bf3-9cab-37510ee40c70",\n' +
+    +   '  "sourcePath": "design-data/backstory/力量/同行.md",\n' +
+    -   '  "format": "viento-document",\n' +
+    -   '  "version": 1,\n' +
+    -   '  "id": "d0a6c737-e3a3-4bf3-9cab-37510ee40c70",\n' +
+    -   '  "sourcePath": "design-data/backstory/力量/同行.md",\n' +
+    -   '  "documentType": "story",\n' +
+    -   '  "parserProfile": "prose",\n' +
+        '  "assetBindings": [\n' +
+    ...
+        '    }\n' +
+        '  ]\n' +
+        '}\n'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    {
+      "format": "viento-document",
+      "version": 1,
+      "id": "d0a6c737-e3a3-4bf3-9cab-37510ee40c70",
+      "sourcePath": "design-data/backstory/力量/同行.md",
+      "documentType": "story",
+      "parserProfile": "prose",
+      "assetBindings": [
+        {
+          "assetId": "c0fe8737-3aca-4007-be72-05a24eab95cd",
+          "role": "attachment"
+        }
+      ],
+      "relations": [
+        {
+          "kind": "inspired-by",
+          "targetId": "60227bdf-fd51-4344-93f5-f85388e2c20c",
+          "slot": "参考资料",
+          "note": "保留扩展字段"
+        },
+        {
+          "kind": "part-of",
+          "targetId": "60227bdf-fd51-4344-93f5-f85388e2c20c",
+          "slot": "起源",
+          "note": "保留归属备注"
+        }
+      ]
+    }
+    
+  actual: |-
+    {
+      "documentType": "story",
+      "parserProfile": "prose",
+      "format": "viento-document",
+      "version": 1,
+      "id": "d0a6c737-e3a3-4bf3-9cab-37510ee40c70",
+      "sourcePath": "design-data/backstory/力量/同行.md",
+      "assetBindings": [
+        {
+          "assetId": "c0fe8737-3aca-4007-be72-05a24eab95cd",
+          "role": "attachment"
+        }
+      ],
+      "relations": [
+        {
+          "kind": "inspired-by",
+          "targetId": "60227bdf-fd51-4344-93f5-f85388e2c20c",
+          "slot": "参考资料",
+          "note": "保留扩展字段"
+        },
+        {
+          "kind": "part-of",
+          "targetId": "60227bdf-fd51-4344-93f5-f85388e2c20c",
+          "slot": "起源",
+          "note": "保留归属备注"
+        }
+      ]
+    }
+    
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/document-migration.test.mjs:91:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: document migration: invalid or cyclic explicit corrections fail before changing initialized metadata
+not ok 4 - document migration: invalid or cyclic explicit corrections fail before changing initialized metadata
+  ---
+  duration_ms: 356.661643
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/document-migration.test.mjs:103:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/document-migration.test.mjs:108:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: document migration: a linked private-directory is rejected before writing a journal or metadata
+not ok 5 - document migration: a linked private-directory is rejected before writing a journal or metadata
+  ---
+  duration_ms: 193.50286
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/document-migration.test.mjs:114:79'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/document-migration.test.mjs:138:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: document migration: a linked migration-directory is rejected before writing a journal or metadata
+not ok 6 - document migration: a linked migration-directory is rejected before writing a journal or metadata
+  ---
+  duration_ms: 188.714147
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/document-migration.test.mjs:114:79'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/document-migration.test.mjs:138:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: document migration: a linked lock-file is rejected before writing a journal or metadata
+not ok 7 - document migration: a linked lock-file is rejected before writing a journal or metadata
+  ---
+  duration_ms: 277.43262
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/document-migration.test.mjs:114:79'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/document-migration.test.mjs:138:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: document migration: repeated operations in the same millisecond retain separate recovery journals
+not ok 8 - document migration: repeated operations in the same millisecond retain separate recovery journals
+  ---
+  duration_ms: 168.780078
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/document-migration.test.mjs:146:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: a later migration must never overwrite the recovery history
+        at file:///tmp/viento-test-UXqjsa/[eval1]:11:12 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: '.viento/migrations/document-model-123456789.json',
+      expected: '.viento/migrations/document-model-123456789.json',
+      operator: 'notStrictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-UXqjsa/[eval1]:11:12 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: document migration: a write failure rolls descriptors back, releases the lock and permits a safe retry
+ok 9 - document migration: a write failure rolls descriptors back, releases the lock and permits a safe retry
+  ---
+  duration_ms: 164.659117
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 1
+# fail 8
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2416.79936

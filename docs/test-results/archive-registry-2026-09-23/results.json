@@ -1,0 +1,90 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.7",
+  "gitBase": "ed86c8491552e4b54592dcc2e2eb462a5e62be84",
+  "scope": "Native backup/restore validates the same document models, asset fields and legacy aliases as the editor; damaged registry rejection, original backup preservation, restore cleanup, compatible migration and retry",
+  "workflows": [
+    "F08",
+    "F09",
+    "F33"
+  ],
+  "bugs": [
+    "N99",
+    "N100"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1 with separately compiled release Rust archive module",
+    "tests": 49,
+    "passed": 4,
+    "failed": 45,
+    "skipped": 0,
+    "log": "before.log",
+    "sourceState": "Unchanged release workspace.rs from ed86c84 replayed in an isolated native build; other worktree changes preserved",
+    "files": {
+      "src-tauri/src/workspace.rs": "3e18656e36b99ab630bc888f8b3a0e49438b7dfe9377fe79835434e5e97a8c7e"
+    },
+    "testFileSha256": "9bc1bc9644ae86939df75d0badec660e4af71f56e858cb9d13e206b74fdeef9c",
+    "reproduction": "48 subtests plus 1 parent aggregate. All 44 damaged-record cases (22 across each of v2/v3) are rejected by the editor reader, but native backup/export and import accepted them, replacing the prior backup and retaining an unreadable restored project. Four compatible migration cases passed. The final test file ran unchanged against the release module."
+  },
+  "after": {
+    "runtime": "Node v18.19.1 with actual fixed Rust archive module",
+    "tests": 100,
+    "passed": 100,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after.log",
+    "newCases": 48,
+    "parentAggregate": 1
+  },
+  "application": {
+    "runtime": "Node v24.19.0 with VIENTO_TEST_ARCHIVE_BINARY configured",
+    "tests": 424,
+    "passed": 424,
+    "failed": 0,
+    "skipped": 0,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 130,
+    "apiContractPassed": true
+  },
+  "native": {
+    "tests": 14,
+    "passed": 13,
+    "failed": 0,
+    "ignored": 1,
+    "log": "native.log",
+    "build": "native-build.json",
+    "ignoredReason": "Existing full-size migration test requires VIENTO_TEST_SOURCE_ROOT pointing at real source data; daily workspace was not used",
+    "scope": "Production workspace.rs module tests compiled in a standalone harness with the unchanged official CLI entry; full Tauri library tests not rerun"
+  },
+  "commands": {
+    "before": "VIENTO_TEST_ARCHIVE_BINARY=<release-module binary> node --test scripts/tests/archive-registry.test.mjs",
+    "after": "VIENTO_TEST_ARCHIVE_BINARY=<current-module binary> node --test scripts/tests/archive-registry.test.mjs scripts/tests/export.test.mjs scripts/tests/document-model.test.mjs scripts/tests/document-migration.test.mjs scripts/tests/project-definition.test.mjs",
+    "application": "VIENTO_TEST_ARCHIVE_BINARY=<current-module binary> node scripts/check-project.mjs --app-only",
+    "native": "cargo test --manifest-path <temporary harness>/Cargo.toml --offline --locked --jobs 2"
+  },
+  "files": {
+    "scripts/tests/archive-registry.test.mjs": "9bc1bc9644ae86939df75d0badec660e4af71f56e858cb9d13e206b74fdeef9c",
+    "src-tauri/src/workspace.rs": "31517d2900ca84286dc86f549f89895581f3be45d0f05d9a27b8272b7b6fbf8c"
+  },
+  "testEnvironment": "Actual native archive CLI, Node registry reader/exporter and standardization/index builders operate on temporary v2/v3 projects. Valid-digest malformed ZIPs are built independently using yazl. Each damaged record is rejected by the Node reader before the native checks; backup bytes, original files and restored parent contents are compared. Compatible shared ownership, legacy optional fields, UTF-16 text limits, ECMAScript whitespace semantics, repeated own aliases and null fingerprints remain portable. Existing cross-runtime test checks external image/video/audio bytes and UUIDs. All 61 resolved harness dependency versions and checksums match the project Cargo.lock.",
+  "nativeArchiveTestsRerun": true,
+  "fullTauriLibraryTestsRerun": false,
+  "nativeWindowTested": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "cleanup": {
+    "temporaryBuild": "/tmp/viento-archive-registry-g7ujovld",
+    "removed": true,
+    "removedFileBytes": 131075835
+  },
+  "functionNetwork": {
+    "revision": 42,
+    "sourceFingerprints": 156,
+    "nodeSources": 176,
+    "localImportStatements": 413,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

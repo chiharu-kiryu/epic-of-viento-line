@@ -1,0 +1,450 @@
+TAP version 13
+# Subtest: asset rebinding retains other local settings, raw data and registered identities
+ok 1 - asset rebinding retains other local settings, raw data and registered identities
+  ---
+  duration_ms: 481.112295
+  ...
+# Subtest: asset rebinding respects a live registry lock without replacing the original binding
+ok 2 - asset rebinding respects a live registry lock without replacing the original binding
+  ---
+  duration_ms: 212.065659
+  ...
+# Subtest: asset rebinding rejects a linked private-directory without changing its target
+ok 3 - asset rebinding rejects a linked private-directory without changing its target
+  ---
+  duration_ms: 199.5611
+  ...
+# Subtest: asset rebinding rejects a linked local-file without changing its target
+ok 4 - asset rebinding rejects a linked local-file without changing its target
+  ---
+  duration_ms: 257.775
+  ...
+# Subtest: asset rebinding rejects invalid destinations without changing the original configuration
+ok 5 - asset rebinding rejects invalid destinations without changing the original configuration
+  ---
+  duration_ms: 441.504724
+  ...
+# Subtest: workspace verification rejects a replaced asset-file and leaves data untouched
+ok 6 - workspace verification rejects a replaced asset-file and leaves data untouched
+  ---
+  duration_ms: 26.665084
+  ...
+# Subtest: workspace verification rejects a replaced asset-directory and leaves data untouched
+ok 7 - workspace verification rejects a replaced asset-directory and leaves data untouched
+  ---
+  duration_ms: 18.103488
+  ...
+# Subtest: workspace verification rejects a replaced default-asset-root and leaves data untouched
+ok 8 - workspace verification rejects a replaced default-asset-root and leaves data untouched
+  ---
+  duration_ms: 19.404204
+  ...
+# Subtest: workspace verification rejects a replaced document-file and leaves data untouched
+ok 9 - workspace verification rejects a replaced document-file and leaves data untouched
+  ---
+  duration_ms: 19.616395
+  ...
+# Subtest: workspace verification rejects a replaced document-directory and leaves data untouched
+ok 10 - workspace verification rejects a replaced document-directory and leaves data untouched
+  ---
+  duration_ms: 17.437387
+  ...
+# Subtest: workspace verification rejects a replaced document-as-directory and leaves data untouched
+ok 11 - workspace verification rejects a replaced document-as-directory and leaves data untouched
+  ---
+  duration_ms: 27.170532
+  ...
+# Subtest: workspace verification accepts legal asset names starting with two dots
+ok 12 - workspace verification accepts legal asset names starting with two dots
+  ---
+  duration_ms: 228.742798
+  ...
+# Subtest: media upload refuses a store changed during streaming and can retry into the new store
+ok 13 - media upload refuses a store changed during streaming and can retry into the new store
+  ---
+  duration_ms: 249.367471
+  ...
+# Subtest: document migration: v2 can apply explicit owners after an earlier migration and rebuild shared navigation
+ok 14 - document migration: v2 can apply explicit owners after an earlier migration and rebuild shared navigation
+  ---
+  duration_ms: 1449.569476
+  ...
+# Subtest: document migration: v3 can apply explicit owners after an earlier migration and rebuild shared navigation
+ok 15 - document migration: v3 can apply explicit owners after an earlier migration and rebuild shared navigation
+  ---
+  duration_ms: 1253.169114
+  ...
+# Subtest: document migration: explicit corrections preserve other relations and retained owner annotations; ordinary reruns do not infer over them
+ok 16 - document migration: explicit corrections preserve other relations and retained owner annotations; ordinary reruns do not infer over them
+  ---
+  duration_ms: 788.835154
+  ...
+# Subtest: document migration: invalid or cyclic explicit corrections fail before changing initialized metadata
+ok 17 - document migration: invalid or cyclic explicit corrections fail before changing initialized metadata
+  ---
+  duration_ms: 800.220619
+  ...
+# Subtest: document migration: a linked private-directory is rejected before writing a journal or metadata
+ok 18 - document migration: a linked private-directory is rejected before writing a journal or metadata
+  ---
+  duration_ms: 224.999642
+  ...
+# Subtest: document migration: a linked migration-directory is rejected before writing a journal or metadata
+ok 19 - document migration: a linked migration-directory is rejected before writing a journal or metadata
+  ---
+  duration_ms: 236.363717
+  ...
+# Subtest: document migration: a linked lock-file is rejected before writing a journal or metadata
+ok 20 - document migration: a linked lock-file is rejected before writing a journal or metadata
+  ---
+  duration_ms: 318.283538
+  ...
+# Subtest: document migration: repeated operations in the same millisecond retain separate recovery journals
+ok 21 - document migration: repeated operations in the same millisecond retain separate recovery journals
+  ---
+  duration_ms: 217.927725
+  ...
+# Subtest: document migration: a write failure rolls descriptors back, releases the lock and permits a safe retry
+ok 22 - document migration: a write failure rolls descriptors back, releases the lock and permits a safe retry
+  ---
+  duration_ms: 193.875665
+  ...
+# Subtest: the core parser is independent of paths and game vocabulary; compatibility is explicit
+ok 23 - the core parser is independent of paths and game vocabulary; compatibility is explicit
+  ---
+  duration_ms: 6.226209
+  ...
+# Subtest: arbitrary OC fields and typed nested values render from one layout without category templates
+ok 24 - arbitrary OC fields and typed nested values render from one layout without category templates
+  ---
+  duration_ms: 3.378843
+  ...
+# Subtest: heading order, repeated prose, tables and multiline bonuses survive the universal layout
+ok 25 - heading order, repeated prose, tables and multiline bonuses survive the universal layout
+  ---
+  duration_ms: 1.952109
+  ...
+# Subtest: ownership supports several parents and custom types; missing owners keep the source visible
+ok 26 - ownership supports several parents and custom types; missing owners keep the source visible
+  ---
+  duration_ms: 1.256021
+  ...
+# Subtest: ambiguous legacy names remain visible and invalid or cyclic ownership is rejected
+ok 27 - ambiguous legacy names remain visible and invalid or cyclic ownership is rejected
+  ---
+  duration_ms: 1.500173
+  ...
+# Subtest: descriptor migration, shared-story editing, partial rebuild and relocation preserve identity and ownership
+ok 28 - descriptor migration, shared-story editing, partial rebuild and relocation preserve identity and ownership
+  ---
+  duration_ms: 1890.738621
+  ...
+# Subtest: document exports include owned stories, exact sources and referenced external media in both formats
+ok 29 - document exports include owned stories, exact sources and referenced external media in both formats
+  ---
+  duration_ms: 236.220195
+  ...
+# Subtest: JSON and YAML typed fields export using the generic layout and media bindings
+ok 30 - JSON and YAML typed fields export using the generic layout and media bindings
+  ---
+  duration_ms: 113.02441
+  ...
+# Subtest: explicit audio bindings export a player even when the source does not embed the audio
+ok 31 - explicit audio bindings export a player even when the source does not embed the audio
+  ---
+  duration_ms: 85.679817
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the md reference index
+ok 32 - sharing carries declared asset IDs recognized by the md reference index
+  ---
+  duration_ms: 629.832049
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the txt reference index
+ok 33 - sharing carries declared asset IDs recognized by the txt reference index
+  ---
+  duration_ms: 566.192054
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the json reference index
+ok 34 - sharing carries declared asset IDs recognized by the json reference index
+  ---
+  duration_ms: 526.400866
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the yaml reference index
+ok 35 - sharing carries declared asset IDs recognized by the yaml reference index
+  ---
+  duration_ms: 474.153878
+  ...
+# Subtest: multiple attachment roles share one player per document while keeping each owned story complete
+ok 36 - multiple attachment roles share one player per document while keeping each owned story complete
+  ---
+  duration_ms: 79.980072
+  ...
+# Subtest: declared missing assets reject sharing, then retry succeeds after the reference is repaired
+ok 37 - declared missing assets reject sharing, then retry succeeds after the reference is repaired
+  ---
+  duration_ms: 72.132369
+  ...
+# Subtest: sharing retains indexed legacy image paths, relative links and unregistered local images
+ok 38 - sharing retains indexed legacy image paths, relative links and unregistered local images
+  ---
+  duration_ms: 465.913913
+  ...
+# Subtest: v2 relative image references resolve against the original document directory
+ok 39 - v2 relative image references resolve against the original document directory
+  ---
+  duration_ms: 451.455222
+  ...
+# Subtest: v3 relative image references resolve against the original document directory
+ok 40 - v3 relative image references resolve against the original document directory
+  ---
+  duration_ms: 522.175326
+  ...
+# Subtest: sharing preserves distinct percent and space filenames, registered identities and renamed aliases
+ok 41 - sharing preserves distinct percent and space filenames, registered identities and renamed aliases
+  ---
+  duration_ms: 121.042004
+  ...
+# Subtest: owned stories retain nested heading levels in HTML and Markdown shares
+ok 42 - owned stories retain nested heading levels in HTML and Markdown shares
+  ---
+  duration_ms: 60.016997
+  ...
+# Subtest: v2 complete project packages preserve migration contract, metadata and all external media
+ok 43 - v2 complete project packages preserve migration contract, metadata and all external media
+  ---
+  duration_ms: 106.601819
+  ...
+# Subtest: v3 complete project packages preserve migration contract, metadata and all external media
+ok 44 - v3 complete project packages preserve migration contract, metadata and all external media
+  ---
+  duration_ms: 75.265745
+  ...
+# Subtest: missing assets, traversal, symlinks and changed source snapshots cannot produce a successful export
+ok 45 - missing assets, traversal, symlinks and changed source snapshots cannot produce a successful export
+  ---
+  duration_ms: 87.615819
+  ...
+# Subtest: complete exports reject directory aliases and file-directory conflicts without changing project bytes
+ok 46 - complete exports reject directory aliases and file-directory conflicts without changing project bytes
+  ---
+  duration_ms: 176.232313
+  ...
+# Subtest: editor and native v2/v3 archives round-trip with exact sources, metadata and external media
+ok 47 - editor and native v2/v3 archives round-trip with exact sources, metadata and external media # SKIP
+  ---
+  duration_ms: 0.129736
+  ...
+# Subtest: HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup
+ok 48 - HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup
+  ---
+  duration_ms: 801.367097
+  ...
+# Subtest: consecutive browser exports recycle completed downloads instead of exhausting the three-job limit
+ok 49 - consecutive browser exports recycle completed downloads instead of exhausting the three-job limit
+  ---
+  duration_ms: 337.671042
+  ...
+# Subtest: releasing or expiring an export cannot remove a file being downloaded
+ok 50 - releasing or expiring an export cannot remove a file being downloaded
+  ---
+  duration_ms: 146.257063
+  ...
+# Subtest: export range requests keep their real status in diagnostics and remain retryable
+ok 51 - export range requests keep their real status in diagnostics and remain retryable
+  ---
+  duration_ms: 264.39034
+  ...
+# Subtest: pending and interrupted exports remain protected from automatic quota eviction
+ok 52 - pending and interrupted exports remain protected from automatic quota eviction
+  ---
+  duration_ms: 90.422564
+  ...
+# Subtest: export entry blocks unsaved and new drafts without changing editor state
+ok 53 - export entry blocks unsaved and new drafts without changing editor state
+  ---
+  duration_ms: 1.959533
+  ...
+# Subtest: expired and interrupted jobs release temporary disk space while retaining source files
+ok 54 - expired and interrupted jobs release temporary disk space while retaining source files
+  ---
+  duration_ms: 162.749857
+  ...
+# Subtest: JSON and empty source documents survive standardization, indexing and editor API reads
+ok 55 - JSON and empty source documents survive standardization, indexing and editor API reads
+  ---
+  duration_ms: 1436.028694
+  ...
+# Subtest: merged backstory source strings normalize to path objects without character-index properties
+ok 56 - merged backstory source strings normalize to path objects without character-index properties
+  ---
+  duration_ms: 1.815942
+  ...
+# Subtest: same-stem sources keep separate caches and identities (legacy)
+ok 57 - same-stem sources keep separate caches and identities (legacy)
+  ---
+  duration_ms: 1006.896698
+  ...
+# Subtest: same-stem sources keep separate caches and identities (generic v3)
+ok 58 - same-stem sources keep separate caches and identities (generic v3)
+  ---
+  duration_ms: 962.838071
+  ...
+# Subtest: partial rebuild respects dotted folders and migrates only matching legacy cache entries
+ok 59 - partial rebuild respects dotted folders and migrates only matching legacy cache entries
+  ---
+  duration_ms: 227.485998
+  ...
+# Subtest: legacy display-path disambiguation preserves document IDs and part-of navigation
+ok 60 - legacy display-path disambiguation preserves document IDs and part-of navigation
+  ---
+  duration_ms: 451.696895
+  ...
+# Subtest: metadata sorting supports buildings, first-line fields, BOM and original line endings, and is idempotent
+ok 61 - metadata sorting supports buildings, first-line fields, BOM and original line endings, and is idempotent
+  ---
+  duration_ms: 538.035029
+  ...
+# Subtest: metadata sorting leaves JSON/YAML, fenced examples and separate heading sections intact
+ok 62 - metadata sorting leaves JSON/YAML, fenced examples and separate heading sections intact
+  ---
+  duration_ms: 168.7948
+  ...
+# Subtest: invalid metadata sort options fail without expanding the write scope
+ok 63 - invalid metadata sort options fail without expanding the write scope
+  ---
+  duration_ms: 487.186868
+  ...
+# Subtest: type/template API applies live to creation, indexing and exports at an arbitrary document location
+ok 64 - type/template API applies live to creation, indexing and exports at an arbitrary document location
+  ---
+  duration_ms: 1365.565454
+  ...
+# Subtest: template edits preserve source and descriptors, reject stale saves, and prune only their own previous revision
+ok 65 - template edits preserve source and descriptors, reject stale saves, and prune only their own previous revision
+  ---
+  duration_ms: 152.476324
+  ...
+# Subtest: adding an existing type ID cannot overwrite its rules or template; editing it still works
+ok 66 - adding an existing type ID cannot overwrite its rules or template; editing it still works
+  ---
+  duration_ms: 735.135385
+  ...
+# Subtest: type preview and save reject an unusable default location: hidden folder
+ok 67 - type preview and save reject an unusable default location: hidden folder
+  ---
+  duration_ms: 297.069663
+  ...
+# Subtest: type preview and save reject an unusable default location: nested hidden folder
+ok 68 - type preview and save reject an unusable default location: nested hidden folder
+  ---
+  duration_ms: 295.765109
+  ...
+# Subtest: type preview and save reject an unusable default location: reserved folder
+ok 69 - type preview and save reject an unusable default location: reserved folder
+  ---
+  duration_ms: 286.087685
+  ...
+# Subtest: type preview and save reject an unusable default location: nested reserved folder
+ok 70 - type preview and save reject an unusable default location: nested reserved folder
+  ---
+  duration_ms: 295.73641
+  ...
+# Subtest: type preview and save reject an unusable default location: overlong UTF-8 folder
+ok 71 - type preview and save reject an unusable default location: overlong UTF-8 folder
+  ---
+  duration_ms: 294.228592
+  ...
+# Subtest: old type locations remain readable and can be repaired before creating documents at the new default
+ok 72 - old type locations remain readable and can be repaired before creating documents at the new default
+  ---
+  duration_ms: 675.087184
+  ...
+# Subtest: malformed templates and escaping configuration cannot publish changes
+ok 73 - malformed templates and escaping configuration cannot publish changes
+  ---
+  duration_ms: 80.43464
+  ...
+# Subtest: project rules replace historical notation and path guesses in the same parser
+ok 74 - project rules replace historical notation and path guesses in the same parser
+  ---
+  duration_ms: 1.095135
+  ...
+# Subtest: official example is an independent definition; adoption preserves IDs, sources, ownership and original templates
+ok 75 - official example is an independent definition; adoption preserves IDs, sources, ownership and original templates
+  ---
+  duration_ms: 413.185416
+  ...
+# Subtest: registration preserves raw bytes and stable IDs; indexing never accepts changed content as the original
+ok 76 - registration preserves raw bytes and stable IDs; indexing never accepts changed content as the original
+  ---
+  duration_ms: 98.329019
+  ...
+# Subtest: separate application/workspace roots support editing, external media, offline metadata and legacy/ID URLs
+ok 77 - separate application/workspace roots support editing, external media, offline metadata and legacy/ID URLs
+  ---
+  duration_ms: 1707.206553
+  ...
+# Subtest: reference indexes include image, video and audio paths in every source format, including renamed aliases
+ok 78 - reference indexes include image, video and audio paths in every source format, including renamed aliases
+  ---
+  duration_ms: 500.169993
+  ...
+# Subtest: reference indexes exclude fenced code examples while retaining bare IDs and explicit attachments
+ok 79 - reference indexes exclude fenced code examples while retaining bare IDs and explicit attachments
+  ---
+  duration_ms: 392.332247
+  ...
+# Subtest: v1 registration retains workspace identity and the old manifest; unsupported versions do not mutate sources
+ok 80 - v1 registration retains workspace identity and the old manifest; unsupported versions do not mutate sources
+  ---
+  duration_ms: 19.034743
+  ...
+# Subtest: ambiguous registry identities and unsafe paths fail before replacing existing metadata
+ok 81 - ambiguous registry identities and unsafe paths fail before replacing existing metadata
+  ---
+  duration_ms: 20.017345
+  ...
+# Subtest: registration refuses symlinked metadata directories without writing outside the workspace
+ok 82 - registration refuses symlinked metadata directories without writing outside the workspace
+  ---
+  duration_ms: 1.590214
+  ...
+# Subtest: read-only preview serves a separate workspace and refuses write requests
+ok 83 - read-only preview serves a separate workspace and refuses write requests
+  ---
+  duration_ms: 621.976811
+  ...
+# Subtest: registration keeps a live lock and recovers a lock whose owner no longer exists
+ok 84 - registration keeps a live lock and recovers a lock whose owner no longer exists
+  ---
+  duration_ms: 11.034721
+  ...
+# Subtest: reusing a renamed asset alias cannot write a conflicting registry
+ok 85 - reusing a renamed asset alias cannot write a conflicting registry
+  ---
+  duration_ms: 12.949481
+  ...
+# Subtest: automatic workspace names and manifests stay compatible with the native importer
+ok 86 - automatic workspace names and manifests stay compatible with the native importer
+  ---
+  duration_ms: 9.294293
+  ...
+# Subtest: image references support any asset folder and encoded filenames
+ok 87 - image references support any asset folder and encoded filenames
+  ---
+  duration_ms: 444.487158
+  ...
+# Subtest: custom standardization output cannot prune application files or an external asset store
+ok 88 - custom standardization output cannot prune application files or an external asset store
+  ---
+  duration_ms: 585.643211
+  ...
+1..88
+# tests 88
+# suites 0
+# pass 87
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 6878.347512

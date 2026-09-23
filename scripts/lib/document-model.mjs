@@ -68,8 +68,13 @@ export function planLegacyDocumentModels(records, sharedOwners = {}) {
   }
   const unresolved = [];
   const documents = records.map((record) => {
-    const next = { ...legacyDocumentDefaults(record.sourcePath), ...record };
-    if (record.relations !== undefined) return next;
+    const next = { ...record };
+    // Filling defaults must not reorder already-complete descriptors and turn
+    // an ordinary rerun into an unnecessary metadata rewrite.
+    for (const [key, value] of Object.entries(legacyDocumentDefaults(record.sourcePath))) {
+      if (next[key] === undefined) next[key] = value;
+    }
+    if (record.relations !== undefined && !Object.hasOwn(sharedOwners, record.sourcePath)) return next;
     let owners = (sharedOwners[record.sourcePath] || []).map((source) => bySource.get(source));
     const match = record.sourcePath.match(/^design-data\/backstory\/([^/]+)\/([^/]+)$/);
     if (!owners.length && match && match[1] !== '故事') {
@@ -77,8 +82,14 @@ export function planLegacyDocumentModels(records, sharedOwners = {}) {
       if (candidates.length === 1) owners = candidates;
       else unresolved.push({ sourcePath: record.sourcePath, reason: candidates.length ? 'ambiguous-owner' : 'missing-owner' });
     }
-    next.relations = [...new Map(owners.map((owner) => [owner.id, owner])).values()]
-      .map((owner) => ({ kind: 'part-of', targetId: owner.id, slot: '背景故事' }));
+    const ownerIds = new Set(owners.map((owner) => owner.id));
+    // An explicit correction replaces ownership only. Keep unrelated links and
+    // the authored slot/annotations of owners which remain in the mapping.
+    next.relations = (record.relations || []).filter((relation) => relation.kind !== 'part-of' || ownerIds.has(relation.targetId));
+    const retainedOwners = new Set(next.relations.filter((relation) => relation.kind === 'part-of').map((relation) => relation.targetId));
+    for (const targetId of ownerIds) {
+      if (!retainedOwners.has(targetId)) next.relations.push({ kind: 'part-of', targetId, slot: '背景故事' });
+    }
     return next;
   });
   validateDocumentModels(documents);

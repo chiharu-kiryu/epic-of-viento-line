@@ -374,10 +374,8 @@ export async function verifyWorkspace(root) {
 // An explicit, resumable descriptor migration shares the registration lock.
 // Only descriptors change; original source and asset files remain authoritative.
 export async function updateDocumentModels(root, transform, { write = false } = {}) {
-  if (![2, 3].includes(readWorkspace(root)?.version)) throw new Error('请先登记作品库');
-  const lockPath = path.join(root, '.viento/registry.lock');
-  const lock = await acquireRegistryLock(lockPath);
-  try {
+  return withRegistryLock(root, async () => {
+    if (![2, 3].includes(readWorkspace(root)?.version)) throw new Error('请先登记作品库');
     const registry = await readRegistry(root);
     const plan = transform(registry.documents);
     validateDocumentModels(plan.documents);
@@ -391,8 +389,9 @@ export async function updateDocumentModels(root, transform, { write = false } = 
     });
     let journal = null;
     if (write && changes.length) {
-      journal = `.viento/migrations/document-model-${Date.now()}.json`;
-      await writeJson(path.join(root, journal), { version: 1, changes });
+      journal = `.viento/migrations/document-model-${Date.now()}-${randomUUID()}.json`;
+      const file = await resolveContainedPath(root, path.join(root, journal), { allowMissing: true });
+      await writeJson(file, { version: 1, changes }, { exclusive: true });
       const applied = [];
       try {
         for (const change of changes) {
@@ -408,7 +407,7 @@ export async function updateDocumentModels(root, transform, { write = false } = 
       ownedDocuments: plan.documents.filter((record) => record.relations?.some((relation) => relation.kind === 'part-of')).length,
       ownershipLinks: plan.documents.reduce((n, record) => n + (record.relations || []).filter((relation) => relation.kind === 'part-of').length, 0),
       unresolved: plan.unresolved || [], journal };
-  } finally { await lock.close(); await fsp.rm(lockPath, { force: true }); }
+  });
 }
 
 export async function registeredAssetCatalog(root) {

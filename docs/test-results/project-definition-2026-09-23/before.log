@@ -1,0 +1,189 @@
+TAP version 13
+# Subtest: definition adoption: generated templates reject an unusable hidden directory in preview and apply
+not ok 1 - definition adoption: generated templates reject an unusable hidden directory in preview and apply
+  ---
+  duration_ms: 370.724276
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-definition.test.mjs:68:4'
+  failureType: 'testCodeFailure'
+  error: 'both entry points must validate the default location even without a template file'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: true
+    1: true
+  actual:
+    0: false
+    1: false
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-definition.test.mjs:75:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async startSubtest (node:internal/test_runner/harness:214:3)
+  ...
+# Subtest: definition adoption: generated templates reject an unusable nested hidden directory in preview and apply
+not ok 2 - definition adoption: generated templates reject an unusable nested hidden directory in preview and apply
+  ---
+  duration_ms: 356.842088
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-definition.test.mjs:68:4'
+  failureType: 'testCodeFailure'
+  error: 'both entry points must validate the default location even without a template file'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: true
+    1: true
+  actual:
+    0: false
+    1: false
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-definition.test.mjs:75:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: definition adoption: generated templates reject an unusable reserved directory in preview and apply
+not ok 3 - definition adoption: generated templates reject an unusable reserved directory in preview and apply
+  ---
+  duration_ms: 352.576138
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-definition.test.mjs:68:4'
+  failureType: 'testCodeFailure'
+  error: 'both entry points must validate the default location even without a template file'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: true
+    1: true
+  actual:
+    0: false
+    1: false
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-definition.test.mjs:75:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: definition adoption: generated templates reject an unusable nested reserved directory in preview and apply
+not ok 4 - definition adoption: generated templates reject an unusable nested reserved directory in preview and apply
+  ---
+  duration_ms: 347.287829
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-definition.test.mjs:68:4'
+  failureType: 'testCodeFailure'
+  error: 'both entry points must validate the default location even without a template file'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: true
+    1: true
+  actual:
+    0: false
+    1: false
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-definition.test.mjs:75:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: definition adoption: generated templates reject an unusable overlong UTF-8 directory in preview and apply
+not ok 5 - definition adoption: generated templates reject an unusable overlong UTF-8 directory in preview and apply
+  ---
+  duration_ms: 347.740679
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-definition.test.mjs:68:4'
+  failureType: 'testCodeFailure'
+  error: 'both entry points must validate the default location even without a template file'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: true
+    1: true
+  actual:
+    0: false
+    1: false
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-definition.test.mjs:75:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: definition adoption: v2 generated templates support preview, repair, creation, rebuilding and export without rewriting old data
+ok 6 - definition adoption: v2 generated templates support preview, repair, creation, rebuilding and export without rewriting old data
+  ---
+  duration_ms: 1223.324399
+  ...
+# Subtest: definition adoption: v3 generated templates support preview, repair, creation, rebuilding and export without rewriting old data
+ok 7 - definition adoption: v3 generated templates support preview, repair, creation, rebuilding and export without rewriting old data
+  ---
+  duration_ms: 1189.541231
+  ...
+# Subtest: definition adoption: missing, malformed and oversized template files fail before changing the manifest or originals
+ok 8 - definition adoption: missing, malformed and oversized template files fail before changing the manifest or originals
+  ---
+  duration_ms: 510.028726
+  ...
+# Subtest: definition adoption: changes in the same millisecond retain independent recovery journals
+not ok 9 - definition adoption: changes in the same millisecond retain independent recovery journals
+  ---
+  duration_ms: 199.220126
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-definition.test.mjs:143:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    [Error: EEXIST: file already exists, link '/tmp/viento-test-38SxK6/.viento/migrations/project-definition-123456789.json.ebda2b7e-7dcb-45fd-9505-ab037d8c0f9e.tmp' -> '/tmp/viento-test-38SxK6/.viento/migrations/project-definition-123456789.json'] {
+      errno: -17,
+      code: 'EEXIST',
+      syscall: 'link',
+      path: '/tmp/viento-test-38SxK6/.viento/migrations/project-definition-123456789.json.ebda2b7e-7dcb-45fd-9505-ab037d8c0f9e.tmp',
+      dest: '/tmp/viento-test-38SxK6/.viento/migrations/project-definition-123456789.json'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: definition adoption: manifest write failure preserves the previous project, releases the lock and permits an immediate retry
+not ok 10 - definition adoption: manifest write failure preserves the previous project, releases the lock and permits an immediate retry
+  ---
+  duration_ms: 204.580323
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-definition.test.mjs:167:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    [Error: EEXIST: file already exists, link '/tmp/viento-test-eoJJ0S/.viento/migrations/project-definition-123456789.json.3bdc3edb-6277-438e-93a4-7e38426da84c.tmp' -> '/tmp/viento-test-eoJJ0S/.viento/migrations/project-definition-123456789.json'] {
+      errno: -17,
+      code: 'EEXIST',
+      syscall: 'link',
+      path: '/tmp/viento-test-eoJJ0S/.viento/migrations/project-definition-123456789.json.3bdc3edb-6277-438e-93a4-7e38426da84c.tmp',
+      dest: '/tmp/viento-test-eoJJ0S/.viento/migrations/project-definition-123456789.json'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 3
+# fail 7
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5296.716769
