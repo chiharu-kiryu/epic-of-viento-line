@@ -1,0 +1,185 @@
+TAP version 13
+# Subtest: capability discovery includes the live project configuration and preview routes
+ok 1 - capability discovery includes the live project configuration and preview routes
+  ---
+  duration_ms: 373.674767
+  ...
+# Subtest: browser module graph is served as JavaScript; server-only modules stay private
+ok 2 - browser module graph is served as JavaScript; server-only modules stay private
+  ---
+  duration_ms: 592.591734
+  ...
+# Subtest: same-version concurrent edits accept one writer, including source-path aliases
+ok 3 - same-version concurrent edits accept one writer, including source-path aliases
+  ---
+  duration_ms: 991.509348
+  ...
+# Subtest: concurrent creation is exclusive and a rejected write does not block subsequent saves
+ok 4 - concurrent creation is exclusive and a rejected write does not block subsequent saves
+  ---
+  duration_ms: 512.088245
+  ...
+# Subtest: preserving the modification time cannot hide an external edit from the save conflict check
+ok 5 - preserving the modification time cannot hide an external edit from the save conflict check
+  ---
+  duration_ms: 434.596489
+  ...
+# Subtest: atomic saves preserve permissions and advance modification times on coarse clocks
+ok 6 - atomic saves preserve permissions and advance modification times on coarse clocks
+  ---
+  duration_ms: 62.874001
+  ...
+# Subtest: static resources do not consume the API rate limit or leak active request counts
+ok 7 - static resources do not consume the API rate limit or leak active request counts
+  ---
+  duration_ms: 333.283952
+  ...
+# Subtest: mutable workspace files revalidate and If-None-Match takes precedence over dates
+ok 8 - mutable workspace files revalidate and If-None-Match takes precedence over dates
+  ---
+  duration_ms: 324.522868
+  ...
+# Subtest: media responses identify their format and support bounded seeking without downloading the whole file
+ok 9 - media responses identify their format and support bounded seeking without downloading the whole file
+  ---
+  duration_ms: 314.287743
+  ...
+# Subtest: an unreadable asset cannot terminate the editing service
+ok 10 - an unreadable asset cannot terminate the editing service
+  ---
+  duration_ms: 259.633055
+  ...
+# Subtest: new document validation refuses paths that cannot be indexed or migrated before submitting
+ok 11 - new document validation refuses paths that cannot be indexed or migrated before submitting
+  ---
+  duration_ms: 46.954907
+  ...
+# Subtest: suggested filenames sanitize arbitrary type labels and fit filesystem filename limits
+ok 12 - suggested filenames sanitize arbitrary type labels and fit filesystem filename limits
+  ---
+  duration_ms: 8.102797
+  ...
+# Subtest: the initial creation hint cannot hide a failed template load
+ok 13 - the initial creation hint cannot hide a failed template load
+  ---
+  duration_ms: 11.06021
+  ...
+# Subtest: a failed index reload after saving is reported as a rebuild failure while the saved editor survives
+ok 14 - a failed index reload after saving is reported as a rebuild failure while the saved editor survives
+  ---
+  duration_ms: 12.8447
+  ...
+# Subtest: an invalid replacement index preserves the current document list and project types
+ok 15 - an invalid replacement index preserves the current document list and project types
+  ---
+  duration_ms: 8.3707
+  ...
+# Subtest: source/block switches retain new edits and do not duplicate display-only headings
+ok 16 - source/block switches retain new edits and do not duplicate display-only headings
+  ---
+  duration_ms: 10.639506
+  ...
+# Subtest: an unchanged source stays clean across modes and index refresh preserves a dirty editor
+ok 17 - an unchanged source stays clean across modes and index refresh preserves a dirty editor
+  ---
+  duration_ms: 10.864726
+  ...
+# Subtest: late source responses cannot reopen a cancelled session; empty sources stay empty
+ok 18 - late source responses cannot reopen a cancelled session; empty sources stay empty
+  ---
+  duration_ms: 11.355013
+  ...
+# Subtest: saving serializes shortcut requests and locks editing until rebuilding finishes
+ok 19 - saving serializes shortcut requests and locks editing until rebuilding finishes
+  ---
+  duration_ms: 10.15527
+  ...
+# Subtest: a changed creation path is an unsaved draft and cancel restores the current document path
+ok 20 - a changed creation path is an unsaved draft and cancel restores the current document path
+  ---
+  duration_ms: 10.753714
+  ...
+# Subtest: suggested creation paths reuse same-type directories and never treat a filename as a folder
+ok 21 - suggested creation paths reuse same-type directories and never treat a filename as a folder
+  ---
+  duration_ms: 6.522086
+  ...
+# Subtest: an older template response cannot replace a newer type or reopen a cancelled creation
+ok 22 - an older template response cannot replace a newer type or reopen a cancelled creation
+  ---
+  duration_ms: 11.007799
+  ...
+# Subtest: conflict reload uses the newly read version, even if the server changed again after the conflict
+ok 23 - conflict reload uses the newly read version, even if the server changed again after the conflict
+  ---
+  duration_ms: 9.53278
+  ...
+# Subtest: failed forced saves keep the original baseline so a normal retry asks about the conflict again
+ok 24 - failed forced saves keep the original baseline so a normal retry asks about the conflict again
+  ---
+  duration_ms: 9.91965
+  ...
+# Subtest: a failed conflict reload retains the block draft and its error until a successful retry
+ok 25 - a failed conflict reload retains the block draft and its error until a successful retry
+  ---
+  duration_ms: 10.611492
+  ...
+# Subtest: save conflict: keep draft only changes the baseline after an approved successful write
+ok 26 - save conflict: keep draft only changes the baseline after an approved successful write
+  ---
+  duration_ms: 9.071459
+  ...
+# Subtest: save conflict: cancel conflict only changes the baseline after an approved successful write
+ok 27 - save conflict: cancel conflict only changes the baseline after an approved successful write
+  ---
+  duration_ms: 9.07241
+  ...
+# Subtest: save conflict: cancel force confirmation only changes the baseline after an approved successful write
+ok 28 - save conflict: cancel force confirmation only changes the baseline after an approved successful write
+  ---
+  duration_ms: 8.850696
+  ...
+# Subtest: save conflict: confirm force save only changes the baseline after an approved successful write
+ok 29 - save conflict: confirm force save only changes the baseline after an approved successful write
+  ---
+  duration_ms: 11.211249
+  ...
+# Subtest: content revision tokens survive reading, conflict reload and subsequent ordinary saving
+ok 30 - content revision tokens survive reading, conflict reload and subsequent ordinary saving
+  ---
+  duration_ms: 9.976809
+  ...
+# Subtest: switching from the editor to browse makes the document content visible again
+ok 31 - switching from the editor to browse makes the document content visible again
+  ---
+  duration_ms: 8.814998
+  ...
+# Subtest: a successful creation stays editable as an existing file if rebuilding fails
+ok 32 - a successful creation stays editable as an existing file if rebuilding fails
+  ---
+  duration_ms: 11.883523
+  ...
+# Subtest: browser textarea normalization preserves source line endings through switches, edits and saves
+ok 33 - browser textarea normalization preserves source line endings through switches, edits and saves
+  ---
+  duration_ms: 11.063676
+  ...
+# Subtest: first index refresh maps a created source to its catalog ID without closing its editor
+ok 34 - first index refresh maps a created source to its catalog ID without closing its editor
+  ---
+  duration_ms: 13.473613
+  ...
+# Subtest: discard cancellation protects dirty drafts on document, mode and editor exit
+ok 35 - discard cancellation protects dirty drafts on document, mode and editor exit
+  ---
+  duration_ms: 8.59122
+  ...
+1..35
+# tests 35
+# suites 0
+# pass 35
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4348.554648

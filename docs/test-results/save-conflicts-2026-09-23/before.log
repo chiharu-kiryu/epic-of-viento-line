@@ -1,0 +1,223 @@
+TAP version 13
+# Subtest: capability discovery includes the live project configuration and preview routes
+ok 1 - capability discovery includes the live project configuration and preview routes # SKIP test name does not match pattern
+  ---
+  duration_ms: 1.187872
+  ...
+# Subtest: browser module graph is served as JavaScript; server-only modules stay private
+ok 2 - browser module graph is served as JavaScript; server-only modules stay private # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.075341
+  ...
+# Subtest: same-version concurrent edits accept one writer, including source-path aliases
+ok 3 - same-version concurrent edits accept one writer, including source-path aliases # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.069391
+  ...
+# Subtest: concurrent creation is exclusive and a rejected write does not block subsequent saves
+ok 4 - concurrent creation is exclusive and a rejected write does not block subsequent saves # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.064693
+  ...
+# Subtest: preserving the modification time cannot hide an external edit from the save conflict check
+not ok 5 - preserving the modification time cannot hide an external edit from the save conflict check
+  ---
+  duration_ms: 284.077687
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/doc-api.test.mjs:87:1'
+  failureType: 'testCodeFailure'
+  error: 'equal-size edits with preserved timestamps must still conflict'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 409
+  actual: 200
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/doc-api.test.mjs:98:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: atomic saves preserve permissions and advance numeric versions on coarse clocks
+ok 6 - atomic saves preserve permissions and advance numeric versions on coarse clocks # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.139553
+  ...
+# Subtest: static resources do not consume the API rate limit or leak active request counts
+ok 7 - static resources do not consume the API rate limit or leak active request counts # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.066566
+  ...
+# Subtest: mutable workspace files revalidate and If-None-Match takes precedence over dates
+ok 8 - mutable workspace files revalidate and If-None-Match takes precedence over dates # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.059865
+  ...
+# Subtest: media responses identify their format and support bounded seeking without downloading the whole file
+ok 9 - media responses identify their format and support bounded seeking without downloading the whole file # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.128023
+  ...
+# Subtest: an unreadable asset cannot terminate the editing service
+ok 10 - an unreadable asset cannot terminate the editing service # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.150483
+  ...
+# Subtest: new document validation refuses paths that cannot be indexed or migrated before submitting
+ok 11 - new document validation refuses paths that cannot be indexed or migrated before submitting # SKIP test name does not match pattern
+  ---
+  duration_ms: 1.245382
+  ...
+# Subtest: suggested filenames sanitize arbitrary type labels and fit filesystem filename limits
+ok 12 - suggested filenames sanitize arbitrary type labels and fit filesystem filename limits # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.08001
+  ...
+# Subtest: the initial creation hint cannot hide a failed template load
+ok 13 - the initial creation hint cannot hide a failed template load # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.07459
+  ...
+# Subtest: a failed index reload after saving is reported as a rebuild failure while the saved editor survives
+ok 14 - a failed index reload after saving is reported as a rebuild failure while the saved editor survives # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.1607
+  ...
+# Subtest: an invalid replacement index preserves the current document list and project types
+ok 15 - an invalid replacement index preserves the current document list and project types # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.064272
+  ...
+# Subtest: source/block switches retain new edits and do not duplicate display-only headings
+ok 16 - source/block switches retain new edits and do not duplicate display-only headings # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.05752
+  ...
+# Subtest: an unchanged source stays clean across modes and index refresh preserves a dirty editor
+ok 17 - an unchanged source stays clean across modes and index refresh preserves a dirty editor # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.058943
+  ...
+# Subtest: late source responses cannot reopen a cancelled session; empty sources stay empty
+ok 18 - late source responses cannot reopen a cancelled session; empty sources stay empty # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.064983
+  ...
+# Subtest: saving serializes shortcut requests and locks editing until rebuilding finishes
+ok 19 - saving serializes shortcut requests and locks editing until rebuilding finishes # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.094745
+  ...
+# Subtest: a changed creation path is an unsaved draft and cancel restores the current document path
+ok 20 - a changed creation path is an unsaved draft and cancel restores the current document path # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.096839
+  ...
+# Subtest: suggested creation paths reuse same-type directories and never treat a filename as a folder
+ok 21 - suggested creation paths reuse same-type directories and never treat a filename as a folder # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.070233
+  ...
+# Subtest: an older template response cannot replace a newer type or reopen a cancelled creation
+ok 22 - an older template response cannot replace a newer type or reopen a cancelled creation # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.061858
+  ...
+# Subtest: conflict reload uses the newly read version, even if the server changed again after the conflict
+ok 23 - conflict reload uses the newly read version, even if the server changed again after the conflict # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.056208
+  ...
+# Subtest: failed forced saves keep the original baseline so a normal retry asks about the conflict again
+not ok 24 - failed forced saves keep the original baseline so a normal retry asks about the conflict again
+  ---
+  duration_ms: 34.19116
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:230:1'
+  failureType: 'testCodeFailure'
+  error: 'ordinary retry must not silently overwrite the remote content'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '另一位作者的更新'
+  actual: '我的未保存草稿'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:252:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: a failed conflict reload retains the block draft and its error until a successful retry
+not ok 25 - a failed conflict reload retains the block draft and its error until a successful retry
+  ---
+  duration_ms: 10.848106
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:261:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /读取最新内容失败.*最新正文读取超时/. Input:
+
+    '已取消保存：版本冲突处理已中止。'
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: '已取消保存：版本冲突处理已中止。'
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:278:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: content revision tokens survive reading, conflict reload and subsequent ordinary saving
+not ok 26 - content revision tokens survive reading, conflict reload and subsequent ordinary saving
+  ---
+  duration_ms: 9.265146
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:291:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+
+    + ''
+    - 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+  actual: ''
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-runtime.test.mjs:308:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: switching from the editor to browse makes the document content visible again
+ok 27 - switching from the editor to browse makes the document content visible again # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.379802
+  ...
+# Subtest: a successful creation stays editable as an existing file if rebuilding fails
+ok 28 - a successful creation stays editable as an existing file if rebuilding fails # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.190422
+  ...
+# Subtest: browser textarea normalization preserves source line endings through switches, edits and saves
+ok 29 - browser textarea normalization preserves source line endings through switches, edits and saves # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.066617
+  ...
+# Subtest: first index refresh maps a created source to its catalog ID without closing its editor
+ok 30 - first index refresh maps a created source to its catalog ID without closing its editor # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.05174
+  ...
+# Subtest: discard cancellation protects dirty drafts on document, mode and editor exit
+ok 31 - discard cancellation protects dirty drafts on document, mode and editor exit # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.128003
+  ...
+1..31
+# tests 31
+# suites 0
+# pass 0
+# fail 4
+# cancelled 0
+# skipped 27
+# todo 0
+# duration_ms 446.132589

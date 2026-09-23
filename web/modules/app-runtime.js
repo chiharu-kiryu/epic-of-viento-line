@@ -47,7 +47,7 @@ import { createBlockDraft, serializeBlockDraft, serializeSourceDraft } from './a
 import { setupMediaEditor } from './app-media-editor.js';
 import { setupExport } from './app-export.js';
 import { setupProjectSettings } from './app-project-settings.js';
-import { API_ERRORS, API_RESPONSE, getCreatePathError } from '../../scripts/lib/doc-api-contract.mjs';
+import { API_ERRORS, API_RESPONSE, getCreatePathError, normalizeDocumentVersion } from '../../scripts/lib/doc-api-contract.mjs';
 import {
   detectEditBackendAvailability,
   loadDocIndexPayload,
@@ -1505,19 +1505,7 @@ function getCurrentEditDraftContent() {
 }
 
 function normalizeEditSessionVersion(rawVersion) {
-  if (typeof rawVersion === 'number' && Number.isFinite(rawVersion)) {
-    return String(rawVersion);
-  }
-  if (typeof rawVersion === 'string') {
-    const normalized = rawVersion.trim();
-    if (!normalized) {
-      return '';
-    }
-    if (/^\d+(?:\.\d+)?$/.test(normalized)) {
-      return normalized;
-    }
-  }
-  return '';
+  return normalizeDocumentVersion(rawVersion);
 }
 
 function formatVersionForConflict(versionValue) {
@@ -1525,7 +1513,7 @@ function formatVersionForConflict(versionValue) {
   if (!normalized) {
     return '—';
   }
-  return normalized.slice(0, 8);
+  return normalized.replace(/^sha256:/, '').slice(0, 8);
 }
 
 function renderConflictMessagePayload(conflictPayload) {
@@ -1648,7 +1636,7 @@ async function handleSaveConflict(doc, conflictPayload) {
     const reloaded = await syncDocEditorSource(doc);
     if (reloaded?.error) {
       setEditorStatus(`${APP_ERROR_MESSAGES.readLatestSourceFailure}：${reloaded.error}`);
-      return 'cancel';
+      return 'reload-error';
     }
     state.activeEditSourceVersion = doc._sourceVersion;
     fillSourcePreview(doc, sourcePath, { skipSync: true });
@@ -3785,7 +3773,7 @@ async function saveExistingDoc(options = {}) {
       && payload?.currentVersion
     ) {
       const conflictAction = await handleSaveConflict(doc, payload);
-      if (conflictAction === 'reload' || conflictAction === 'keep') {
+      if (conflictAction === 'reload' || conflictAction === 'reload-error' || conflictAction === 'keep') {
         if (editSaveBtnEl) {
           editSaveBtnEl.disabled = false;
         }
@@ -3795,9 +3783,6 @@ async function saveExistingDoc(options = {}) {
         return;
       }
       if (conflictAction === 'force') {
-        if (payload?.currentVersion) {
-          state.activeEditSourceVersion = normalizeEditSessionVersion(payload.currentVersion);
-        }
         if (editSaveBtnEl) {
           editSaveBtnEl.disabled = true;
         }

@@ -1,6 +1,6 @@
 # Viento Studio 功能链路网络
 
-此页枚举 **2026-09-13、b.2.9 发布源码**的实际功能入口、业务步骤、接口和数据落点，包含音频支持、类型取消/返回及[按图排查的十一轮修复](NETWORK_BUGFIX_b.2.8.1.md)。此为修订 14，补齐 [glib 安全修复](SECURITY_GLIB_b.2.9.md) 的依赖覆盖与优化回归；JSON 记录源码、构建清单和第三方原包指纹。基线提交为 `51d522cb919c20b15815b129bd62e859af9a97a0`；逐文件 SHA-256 保存在 JSON 快照中。
+此页枚举 **2026-09-23、b.3.0 发布源码**的实际功能入口、业务步骤、接口和数据落点，包含音频支持、类型取消/返回及[按图排查的十二轮修复](NETWORK_BUGFIX_b.2.8.1.md)。此为修订 16，同步发布版本并补齐 [保存冲突修复](SAVE_CONFLICT_BUGFIX_b.2.9.md) 的内容版本、失败重试和草稿保护；JSON 保留源码、构建清单和第三方原包指纹。基线提交为 `51d522cb919c20b15815b129bd62e859af9a97a0`；逐文件 SHA-256 保存在 JSON 快照中。
 
 - [离线交互浏览器](function-network.html)：筛选业务链路，点击节点查看上下游，查询真实模块导入及接口。下载后双击即可使用，不访问外网。
 - [机器可读快照](function-network.json)：完整节点、边、源码引用、模块导入、事件绑定、路由、命令和扫描文件指纹。
@@ -24,7 +24,7 @@
 
 业务图的箭头表示请求、数据传递或处理步骤；同一节点可以再次出现，且分支可能在文字中展开。**它不是逐函数调用图**。JSON 的 `moduleImports` 才是代码中实际声明的本地导入；它也不能表示调用次数或性能。桌面归档示例 CLI 另有 4 个操作，不计入 7 个作品维护命令。
 
-网络从代码静态梳理，不是运行时追踪。随后按图排查并修复问题，本轮启用原生归档互通的 app-only 检查通过 195 项测试，在此前 [编辑器](NATIVE_WORKFLOW_TEST_b.2.8.1.md) 与 [作品库](NATIVE_LIBRARY_TEST_b.2.8.1.md) 实测上补齐了 [编辑器导出、原生保存与过期重试](NATIVE_EXPORT_TEST_b.2.8.1.md)；每条链路附的“已有验证入口”仍不代表该链路所有运行状态均已覆盖。测试使用临时作品，没有修改日常作品。业务枚举按职责归并，并不声称覆盖所有运行时状态组合。
+网络从代码静态梳理，不是运行时追踪。本轮 app-only 检查共 203 项，202 项通过、1 项原生归档互通跳过。此前的 [编辑器](NATIVE_WORKFLOW_TEST_b.2.8.1.md)、[作品库](NATIVE_LIBRARY_TEST_b.2.8.1.md) 与 [导出](NATIVE_EXPORT_TEST_b.2.8.1.md) 原生实测记录继续保留，本轮没有重跑。每条链路附的“已有验证入口”不代表该链路所有运行状态均已覆盖。测试使用临时作品，没有修改日常作品。业务枚举按职责归并，并不声称覆盖所有运行时状态组合。
 
 ## 2. 总体网络
 
@@ -401,7 +401,7 @@ part-of 元数据生成 owners/ownedDocuments，导航到实际子文档编辑�
 
 [编辑器状态与导航](#node-editor) → [浏览器请求层](#node-request) → [业务接口分发](#node-router) → [文档服务](#node-doc_service) → [文档文件事务](#node-file_store) → [原始正文](#node-documents) → [源码与区块草稿](#node-draft) → [当前窗口草稿与状态](#node-memory)
 
-读取文件原文与版本，建立草稿基线。 使用源文件而非展示索引还原正文；源读取失败不会把展示内容当成权威稿。
+读取文件原文与内容指纹版本，建立草稿基线。 使用源文件而非展示索引还原正文；源读取失败不会把展示内容当成权威稿。客户端原样传回版本标记。
 
 已有验证入口：[scripts/tests/editor-runtime.test.mjs](../scripts/tests/editor-runtime.test.mjs)、[scripts/tests/metadata-conversion.test.mjs](../scripts/tests/metadata-conversion.test.mjs)。
 
@@ -437,7 +437,7 @@ part-of 元数据生成 owners/ownedDocuments，导航到实际子文档编辑�
 
 [编辑器状态与导航](#node-editor) → [源码与区块草稿](#node-draft) → [浏览器请求层](#node-request) → [业务接口分发](#node-router) → [文档服务](#node-doc_service) → [文档文件事务](#node-file_store) → [原始正文](#node-documents) → [标准化与索引重建编排](#node-rebuild) → [文档/素材/引用索引](#node-index) → [编辑器状态与导航](#node-editor)
 
-校验 expectedVersion，原子保存原文，失效服务缓存，再重建和重新载入。 源文件保存和重建是两个阶段；重建或索引读取失败时明确报错，已保存正文继续可编辑并允许重试。
+校验 expectedVersion 与当前正文内容指纹，原子保存原文，失效服务缓存，再重建和重新载入。 保留文件时间的外部修改也会触发冲突；旧时间戳普通请求需重新读取。源文件保存和重建是两个阶段；重建或索引读取失败时明确报错，已保存正文继续可编辑并允许重试。
 
 已有验证入口：[scripts/tests/doc-api.test.mjs](../scripts/tests/doc-api.test.mjs)、[scripts/tests/editor-runtime.test.mjs](../scripts/tests/editor-runtime.test.mjs)、[scripts/tests/call-paths.test.mjs](../scripts/tests/call-paths.test.mjs)。
 
@@ -449,7 +449,7 @@ part-of 元数据生成 owners/ownedDocuments，导航到实际子文档编辑�
 
 [编辑器状态与导航](#node-editor) → [浏览器请求层](#node-request) → [业务接口分发](#node-router) → [文档服务](#node-doc_service) → [新文档身份登记](#node-create_doc) → [文档元数据](#node-document_meta) → [文档文件事务](#node-file_store) → [原始正文](#node-documents) → [标准化与索引重建编排](#node-rebuild) → [编辑器状态与导航](#node-editor)
 
-在登记锁内重新读取类型、检查可迁移位置冲突，再建立 UUID 并独占创建源文件。 保护大小写/Unicode 等价名称、父目录和缺失源文件的登记身份；失败回滚本次登记，保存成功后即作为已有文档继续编辑。
+在登记锁内重新读取类型、检查可迁移位置冲突，再建立 UUID 并独占创建源文件。 保护大小写/Unicode 等价名称、父目录和缺失源文件的登记身份；失败回滚本次登记，保存成功后即作为已有文档继续编辑。 成功创建返回内容版本，后续保存沿用同一校验。
 
 已有验证入口：[scripts/tests/generic-project.test.mjs](../scripts/tests/generic-project.test.mjs)、[scripts/tests/editor-runtime.test.mjs](../scripts/tests/editor-runtime.test.mjs)。
 
@@ -461,7 +461,7 @@ part-of 元数据生成 owners/ownedDocuments，导航到实际子文档编辑�
 
 [文档服务](#node-doc_service) → [浏览器请求层](#node-request) → [编辑器状态与导航](#node-editor) → [当前窗口草稿与状态](#node-memory) → [文档文件事务](#node-file_store)
 
-选择读取最新、保留草稿、明确强制覆盖或取消。 强制覆盖必须由冲突 UI 明确选择；默认不会静默压过另一版本。
+选择读取最新、保留草稿、明确强制覆盖或取消。 强制覆盖需要二次确认；只有保存或读取最新正文成功后更新基线。强制写入失败仍保留原版本，普通重试重新检查冲突；读取失败保留错误、草稿和区块模式。
 
 已有验证入口：[scripts/tests/doc-api.test.mjs](../scripts/tests/doc-api.test.mjs)、[scripts/tests/editor-runtime.test.mjs](../scripts/tests/editor-runtime.test.mjs)。
 
@@ -844,8 +844,8 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 | 节点 | 职责 | 代码依据 |
 | --- | --- | --- |
 | <a id="node-library"></a>作品库首页 `library` | 列出最近作品，创建、打开、导入、备份及返回编辑窗口。 | [renderLibrary](../desktop/ui/app.js#L47) |
-| <a id="node-editor"></a>编辑器状态与导航 `editor` | 浏览、搜索、选择、读写、新建和未保存草稿的主协调器。 | [initApp](../web/modules/app-runtime.js#L4967)<br>[web/modules/app-state.js](../web/modules/app-state.js#L1) |
-| <a id="node-draft"></a>源码与区块草稿 `draft` | 从当前源码切分区块并按修改片段还原；保留 BOM、换行和未修改文本。 | [createBlockDraft](../web/modules/app-editor-draft.js#L29)<br>[serializeSourceDraft](../web/modules/app-editor-draft.js#L4)<br>[setEditInputMode](../web/modules/app-runtime.js#L2539) |
+| <a id="node-editor"></a>编辑器状态与导航 `editor` | 浏览、搜索、选择、读写、新建和未保存草稿的主协调器。 | [initApp](../web/modules/app-runtime.js#L4952)<br>[web/modules/app-state.js](../web/modules/app-state.js#L1)<br>[handleSaveConflict](../web/modules/app-runtime.js#L1630) |
+| <a id="node-draft"></a>源码与区块草稿 `draft` | 从当前源码切分区块并按修改片段还原；保留 BOM、换行和未修改文本。 | [createBlockDraft](../web/modules/app-editor-draft.js#L29)<br>[serializeSourceDraft](../web/modules/app-editor-draft.js#L4)<br>[setEditInputMode](../web/modules/app-runtime.js#L2527) |
 | <a id="node-project_ui"></a>项目类型与模板窗口 `project_ui` | 定义类型、规则、模板和字段分组，预览、保存、取消新增及返回编辑器。 | [setupProjectSettings](../web/modules/app-project-settings.js#L6)<br>[cancelChanges](../web/modules/app-project-settings.js#L119) |
 | <a id="node-media_ui"></a>素材选择与草稿预览 `media_ui` | 筛选、导入、复用、粘贴、拖入图片/视频/音频；维护异步草稿预览。 | [setupMediaEditor](../web/modules/app-media-editor.js#L6) |
 | <a id="node-export_ui"></a>编辑器导出窗口 `export_ui` | 选择文档分享或整库迁移，准备导出、保存、取消与释放临时包。 | [setupExport](../web/modules/app-export.js#L12)<br>[exportAvailability](../web/modules/app-export.js#L5) |
@@ -858,7 +858,7 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 
 | 节点 | 职责 | 代码依据 |
 | --- | --- | --- |
-| <a id="node-legacy_ui"></a>旧类别卡片与模板回退 `legacy_ui` | 旧作品未提供通用布局或项目模板时保留英雄等专用卡片/模板分支。 | [web/modules/app-type-templates.js](../web/modules/app-type-templates.js#L1)<br>[web/modules/app-render.js](../web/modules/app-render.js#L1)<br>[renderHeroSkillCards](../web/modules/app-runtime.js#L3130) |
+| <a id="node-legacy_ui"></a>旧类别卡片与模板回退 `legacy_ui` | 旧作品未提供通用布局或项目模板时保留英雄等专用卡片/模板分支。 | [web/modules/app-type-templates.js](../web/modules/app-type-templates.js#L1)<br>[web/modules/app-render.js](../web/modules/app-render.js#L1)<br>[renderHeroSkillCards](../web/modules/app-runtime.js#L3118) |
 | <a id="node-legacy_parser"></a>旧作品记法兼容 `legacy_parser` | 未显式声明通用项目规则时，旧路径和 legacy-hero 等 profile 仍提供默认规则。 | [scripts/standardize-docs/legacy-profile.mjs](../scripts/standardize-docs/legacy-profile.mjs#L1)<br>[scripts/lib/category.mjs](../scripts/lib/category.mjs#L1)<br>[legacyDocumentDefaults](../scripts/lib/document-model.mjs#L6) |
 | <a id="node-legacy_images"></a>旧图片与技能匹配 `legacy_images` | 无稳定登记等兼容分支保留按名字/旧目录归集图像及英雄技能信息。 | [buildAssetImageCatalog](../scripts/lib/image-index.mjs#L74)<br>[collectHeroSkillsFromSections](../scripts/build-static-hero-skills.mjs#L301) |
 | <a id="node-maintenance"></a>历史素材与文本工具 `maintenance` | 单独运行的格式整理、技能类型补全、占位资源生成和资源对照表工具；不属于日常编辑自动流程。 | [scripts/reorder-source-metadata-fields.mjs](../scripts/reorder-source-metadata-fields.mjs#L1)<br>[scripts/normalize_docs.mjs](../scripts/normalize_docs.mjs#L1)<br>[scripts/fill-hero-skill-types.mjs](../scripts/fill-hero-skill-types.mjs#L1)<br>[scripts/generate-data-placeholders.mjs](../scripts/generate-data-placeholders.mjs#L1)<br>[scripts/sync_hero_image_resources.mjs](../scripts/sync_hero_image_resources.mjs#L1) |
@@ -881,8 +881,8 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 | <a id="node-browse_server"></a>浏览 HTTP 服务 `browse_server` | 只读作品文件和静态索引；额外允许导出接口写临时导出缓存。 | [scripts/browse-server.mjs](../scripts/browse-server.mjs#L1) |
 | <a id="node-session"></a>桌面会话与事件桥 `session` | 验证 Host/Origin 和 Cookie；桥接首页、语言、导出，以及带请求 ID 的关闭状态报告。 | [createDesktopSession](../scripts/lib/desktop-session.mjs#L10)<br>[web/modules/desktop-bridge.js](../web/modules/desktop-bridge.js#L1) |
 | <a id="node-router"></a>业务接口分发 `router` | 16 种方法/路径组合；鉴权、限流、请求格式和响应信封。 | [handleApiRequest](../scripts/lib/doc-server-routes.mjs#L484)<br>[scripts/lib/doc-api-contract.mjs](../scripts/lib/doc-api-contract.mjs#L1) |
-| <a id="node-doc_service"></a>文档服务 `doc_service` | 读原文、版本校验、写入、文档索引缓存、重建互斥，以及其他业务服务的入口。 | [createDocumentService](../scripts/lib/doc-api-service.mjs#L54) |
-| <a id="node-file_store"></a>文档文件事务 `file_store` | 同文档串行读写，快照与原子替换，独占创建；不把展示数据反向写成正文。 | [withDocumentTransaction](../scripts/lib/doc-file-store.mjs#L8)<br>[writeDocumentAtomically](../scripts/lib/doc-file-store.mjs#L36) |
+| <a id="node-doc_service"></a>文档服务 `doc_service` | 读原文、内容版本校验、写入、文档索引缓存、重建互斥，以及其他业务服务的入口。 | [createDocumentService](../scripts/lib/doc-api-service.mjs#L53) |
+| <a id="node-file_store"></a>文档文件事务 `file_store` | 同文档串行读写，按实际字节生成内容版本，快照与原子替换、独占创建；不把展示数据反向写成正文。 | [withDocumentTransaction](../scripts/lib/doc-file-store.mjs#L8)<br>[writeDocumentAtomically](../scripts/lib/doc-file-store.mjs#L40)<br>[documentContentVersion](../scripts/lib/doc-file-store.mjs#L25)<br>[readDocumentSnapshot](../scripts/lib/doc-file-store.mjs#L29) |
 | <a id="node-create_doc"></a>新文档身份登记 `create_doc` | 新建时先登记所选类型与 UUID，再发布源文件；失败只回滚本次新登记。 | [createRegisteredDocument](../scripts/lib/project-documents.mjs#L41) |
 | <a id="node-project_service"></a>项目配置与模板服务 `project_service` | 以清单和模板内容生成 revision，先写模板再切换清单，防止过时覆盖。 | [readProjectConfiguration](../scripts/lib/project-service.mjs#L42)<br>[previewProjectTemplate](../scripts/lib/project-service.mjs#L34)<br>[saveProjectTemplate](../scripts/lib/project-service.mjs#L73) |
 | <a id="node-media_service"></a>素材导入与清单 `media_service` | 扩展名/内容特征与体积校验、流式上传、哈希去重、稳定 ID 登记。 | [importMediaAsset](../scripts/lib/media-assets.mjs#L53)<br>[listMediaAssets](../scripts/lib/media-assets.mjs#L38) |
@@ -890,8 +890,8 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 | <a id="node-export_jobs"></a>导出任务生命周期 `export_jobs` | 串行生成，最多 3 个任务；额度满时回收已完整下载且空闲的旧任务，下载期间暂停过期和文件清理。 | [createExportService](../scripts/lib/export-service.mjs#L8) |
 | <a id="node-export_pack"></a>Node 导出规划与 ZIP `export_pack` | 分享文档及引用素材，或整库原样打包；校验每层路径的跨系统冲突、登记指纹与源快照。 | [planExport](../scripts/lib/export-package.mjs#L33)<br>[writeExportZip](../scripts/lib/export-package.mjs#L175) |
 | <a id="node-rebuild"></a>标准化与索引重建编排 `rebuild` | 先运行标准化子脚本，再构建文档/素材/引用索引；支持指定源范围。 | [rebuildIndex](../scripts/lib/rebuild-workflow.mjs#L70) |
-| <a id="node-static"></a>受限文件与素材服务 `static` | 允许列表、路径映射和链接边界；支持 GET/HEAD 与范围响应。 | [handleStaticRequest](../scripts/lib/doc-server-static-routes.mjs#L174)<br>[sendFile](../scripts/lib/doc-server.mjs#L521)<br>[resolveProjectFilePath](../scripts/lib/doc-server.mjs#L634) |
-| <a id="node-editable_index"></a>轻量文件目录索引 `editable_index` | /api/index 独立扫描源文件与登记，仅含名称、类型、时间和素材关联；不生成 layout 或归属树。 | [buildEditableDocIndex](../scripts/lib/doc-server.mjs#L344)<br>[createDocumentService](../scripts/lib/doc-api-service.mjs#L54) |
+| <a id="node-static"></a>受限文件与素材服务 `static` | 允许列表、路径映射和链接边界；支持 GET/HEAD 与范围响应。 | [handleStaticRequest](../scripts/lib/doc-server-static-routes.mjs#L174)<br>[sendFile](../scripts/lib/doc-server.mjs#L510)<br>[resolveProjectFilePath](../scripts/lib/doc-server.mjs#L623) |
+| <a id="node-editable_index"></a>轻量文件目录索引 `editable_index` | /api/index 独立扫描源文件与登记，仅含名称、类型、时间和素材关联；不生成 layout 或归属树。 | [buildEditableDocIndex](../scripts/lib/doc-server.mjs#L333)<br>[createDocumentService](../scripts/lib/doc-api-service.mjs#L53) |
 | <a id="node-diagnostics"></a>请求诊断与恢复 `diagnostics` | 请求 ID、时长/状态码统计，以及前端重试、错误去重和诊断面板。 | [createApiMetrics](../scripts/lib/doc-api-metrics.mjs#L32)<br>[logRuntimeError](../web/modules/app-runtime.js#L1092)<br>[retryLoadData](../web/modules/app-runtime.js#L880) |
 
 ### 引擎
@@ -1104,7 +1104,7 @@ JSON 保留逐条本地 ESM 导入语句、命名导入和行号；同一对文�
 - 本次未找到面向用户的正文重命名/删除工作流、持久化自动草稿恢复或导入后未引用素材自动清理入口。
 - 音视频在正文中通过嵌入引用播放；仅增加元数据绑定不保证当前编辑器自动出现播放器。
 
-上述职责区别和兼容边界继续保留；已修复的具体缺陷按 N01–N46 记在[连续修复记录](NETWORK_BUGFIX_b.2.8.1.md)。
+上述职责区别和兼容边界继续保留；已修复的具体缺陷按 N01–N49 记在[连续修复记录](NETWORK_BUGFIX_b.2.8.1.md)。
 
 ## 10. 快照结构与后续更新
 
@@ -1112,6 +1112,6 @@ JSON 保留逐条本地 ESM 导入语句、命名导入和行号；同一对文�
 
 本次使用本机 Acorn 解析 ESM 声明、字面量动态导入、显式事件绑定及路由对象，再人工核对关键业务调用与文件读写。模块统计不包含 HTML/CSS 的资源链接、Rust 的 crate 内部依赖、计算出的动态导入或内联属性事件；Python、Rust 和 shell 记录源码指纹及人工确认的入口。已有测试声明可能来自参数化模板，不能用声明数量推断实际测试用例数。
 
-修订 14 记录 143 份源码指纹、137 处节点源码引用及导入记录，补齐 glib 修复文件和优化回归；第三方包的其余文件通过独立原包清单核验；交互页内嵌数据与 JSON 保持一致。本轮通过启用原生归档互通的 195 项应用回归和 28 项 Rust 测试，原有 1 项真实大体积作品测试忽略；版本规则与验证范围见 [发布记录](RELEASE_b.2.9.md)。升版前的 [编辑器导出实测](NATIVE_EXPORT_TEST_b.2.8.1.md) 补齐保存等待期间清理缓存、过期后生成、原生覆盖取消与替换，之前的编辑器和作品库记录继续保留，原生报告版本和指纹不改写。功能图仍是静态梳理；内置浏览器此前拒绝本地 HTML 导航，图页面的浏览器交互实测仍未完成。
+修订 16 记录 143 份源码指纹、140 处节点源码引用及导入记录，收录 8 份保存链路源码更新，同步发布清单和界面版本，保留此前 glib 补丁来源；交互页内嵌数据与 JSON 保持一致。本轮保存冲突专项 35 项通过，完整应用检查 202 项通过、1 项原生归档互通跳过。Rust、原生窗口与归档互通保留此前报告，本轮没有重跑，详见 [保存冲突修复记录](SAVE_CONFLICT_BUGFIX_b.2.9.md)。功能图仍是静态梳理；图页面的浏览器交互实测仍未完成。
 
 此文件组是版本快照，不会随应用自动更新。下次更新时：先按 `sourceInventory.sha256` 确认变更范围；重新检查路由表、原生命令注册及本地导入；沿受影响的业务链核对读写和失败分支；保留稳定节点 ID / F 编号，再同步 JSON、本文、HTML 和总图。增加日期或版本，并明确实际运行了哪些验证。交互页内嵌快照供离线打开，无需启动作品服务。

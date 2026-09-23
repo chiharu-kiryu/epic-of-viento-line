@@ -227,6 +227,135 @@ test('conflict reload uses the newly read version, even if the server changed ag
   assert.equal(state.editHasUnsavedChanges, false);
 });
 
+test('failed forced saves keep the original baseline so a normal retry asks about the conflict again', async () => {
+  const writes = [], actions = ['3', '3', '2'];
+  let stored = '另一位作者的更新';
+  const { runtime, state, source, begin } = await editorHarness({
+    writeDoc: async (payload) => {
+      writes.push(payload);
+      if (payload.force) throw Object.assign(new Error('保存连接中断'), { status: 503 });
+      if (payload.expectedVersion !== '2') throw Object.assign(new Error('document was modified by another client'), {
+        status: 409, payload: { error: 'document was modified by another client', currentVersion: '2' },
+      });
+      stored = payload.content;
+      return { version: '3' };
+    },
+  });
+  runtime.logRuntimeErrorOrMessage = (_label, error) => error.message;
+  runtime.rebuildIndexForDoc = async () => {};
+  runtime.openSaveConflictDialog = async () => actions.shift();
+  begin('最初读取的内容', '1');
+  source.value = '我的未保存草稿';
+  await runtime.saveCurrentDoc();
+  const versionAfterFailure = state.activeEditSourceVersion;
+  await runtime.saveCurrentDoc();
+  assert.equal(stored, '另一位作者的更新', 'ordinary retry must not silently overwrite the remote content');
+  assert.equal(versionAfterFailure, '1');
+  assert.deepEqual(writes.map(({ expectedVersion, force }) => [expectedVersion, force]), [['1', false], ['1', true], ['1', false]]);
+  assert.equal(actions.length, 0);
+  assert.equal(source.value, '我的未保存草稿');
+  assert.equal(state.editHasUnsavedChanges, true);
+  assert.equal(state.isSaving, false);
+});
+
+test('a failed conflict reload retains the block draft and its error until a successful retry', async () => {
+  let reads = 0;
+  const { runtime, state, source, element, begin } = await editorHarness({
+    readDocSource: async () => {
+      if (++reads === 1) throw new Error('最新正文读取超时');
+      return { content: '服务器的最新正文', version: '3' };
+    },
+    writeDoc: async () => { throw Object.assign(new Error('document was modified by another client'), {
+      status: 409, payload: { error: 'document was modified by another client', currentVersion: '2' },
+    }); },
+  });
+  runtime.logRuntimeErrorOrMessage = (_label, error) => error.message;
+  runtime.openSaveConflictDialog = async () => '1';
+  begin('原文', '1');
+  runtime.setEditInputMode('blocks');
+  element('docBlockEditor').querySelectorAll('textarea')[0].value = '未保存的区块草稿';
+  await runtime.saveCurrentDoc();
+  assert.match(element('docEditStatus').textContent, /读取最新内容失败.*最新正文读取超时/);
+  assert.equal(runtime.getCurrentEditContent(), '未保存的区块草稿');
+  assert.equal(state.editInputMode, 'blocks');
+  assert.equal(state.activeEditSourceVersion, '1');
+  assert.equal(state.editHasUnsavedChanges, true);
+  assert.equal(state.isSaving, false);
+  await runtime.saveCurrentDoc();
+  assert.equal(source.value, '服务器的最新正文');
+  assert.equal(state.activeEditSourceVersion, '3');
+  assert.equal(state.editHasUnsavedChanges, false);
+  assert.equal(state.isSaving, false);
+});
+
+for (const [label, choices, approved] of [
+  ['keep draft', ['2'], false],
+  ['cancel conflict', ['cancel'], false],
+  ['cancel force confirmation', ['3', 'cancel'], false],
+  ['confirm force save', ['3', '3'], true],
+]) {
+  test(`save conflict: ${label} only changes the baseline after an approved successful write`, async () => {
+    const actions = [...choices], modes = [], writes = [];
+    const original = '\uFEFF原文\r\n', draft = '\uFEFF未保存的修改\r\n';
+    const { runtime, state, source, begin, element } = await editorHarness({
+      writeDoc: async (payload) => {
+        writes.push(payload);
+        if (!payload.force) throw Object.assign(new Error('document was modified by another client'), {
+          status: 409, payload: { error: 'document was modified by another client', currentVersion: '2' },
+        });
+        return { version: '3' };
+      },
+    });
+    runtime.rebuildIndexForDoc = async () => {};
+    runtime.openSaveConflictDialog = async (_payload, options) => {
+      modes.push(options?.mode || 'default');
+      assert.equal(source.readOnly, true);
+      assert.equal(element('docSaveBtn').disabled, true);
+      return actions.shift();
+    };
+    begin(original, '1');
+    source.value = draft;
+    await runtime.saveCurrentDoc();
+    assert.deepEqual(modes, choices.length === 2 ? ['default', 'force'] : ['default']);
+    assert.equal(writes.length, approved ? 2 : 1);
+    assert.equal(writes.at(-1).force, approved);
+    assert.equal(runtime.getCurrentEditContent(), draft);
+    assert.equal(state.activeEditSourceVersion, approved ? '3' : '1');
+    assert.equal(state.editHasUnsavedChanges, !approved);
+    assert.equal(state.isSaving, false);
+    assert.equal(source.readOnly, false);
+  });
+}
+
+test('content revision tokens survive reading, conflict reload and subsequent ordinary saving', async () => {
+  const first = `sha256:${'a'.repeat(64)}`, latest = `sha256:${'b'.repeat(64)}`, saved = `sha256:${'c'.repeat(64)}`;
+  const writes = [];
+  let reads = 0;
+  const { runtime, state, source } = await editorHarness({
+    readDocSource: async () => ({ content: ++reads === 1 ? '原文' : '更新后的正文', version: reads === 1 ? first : latest }),
+    writeDoc: async (payload) => {
+      writes.push(payload);
+      if (writes.length === 1) throw Object.assign(new Error('document was modified by another client'), {
+        status: 409, payload: { error: 'document was modified by another client', currentVersion: latest },
+      });
+      return { version: saved };
+    },
+  });
+  runtime.rebuildIndexForDoc = async () => {};
+  runtime.openSaveConflictDialog = async () => '1';
+  await runtime.enterEditMode();
+  assert.equal(state.activeEditSourceVersion, first);
+  source.value = '第一份草稿';
+  await runtime.saveCurrentDoc();
+  assert.equal(source.value, '更新后的正文');
+  assert.equal(state.activeEditSourceVersion, latest);
+  source.value = '重新编辑后的内容';
+  await runtime.saveCurrentDoc();
+  assert.deepEqual(writes.map(({ expectedVersion }) => expectedVersion), [first, latest]);
+  assert.equal(state.activeEditSourceVersion, saved);
+  assert.equal(state.editHasUnsavedChanges, false);
+});
+
 test('switching from the editor to browse makes the document content visible again', async () => {
   const { runtime, state, element, begin } = await editorHarness();
   begin();

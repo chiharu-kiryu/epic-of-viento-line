@@ -84,7 +84,35 @@ test('concurrent creation is exclusive and a rejected write does not block subse
   assert.deepEqual(await fs.readdir(path.join(root, 'design-data/new')), ['doc.txt']);
 });
 
-test('atomic saves preserve permissions and advance numeric versions on coarse clocks', async (t) => {
+test('preserving the modification time cannot hide an external edit from the save conflict check', async (t) => {
+  const root = await fixture(t);
+  const file = 'design-data/preserved-time.md', absolute = path.join(root, file);
+  await write(root, file, '原始正文');
+  const timestamp = 1700000000;
+  await fs.utimes(absolute, timestamp, timestamp);
+  const base = await serve(t, root);
+  const original = (await request(base, `/api/doc?path=${file}`)).data;
+  await fs.writeFile(absolute, '外部修改');
+  await fs.utimes(absolute, timestamp, timestamp);
+  const response = await request(base, '/api/doc', { path: file, content: '旧草稿', expectedVersion: original.version });
+  assert.equal(response.status, 409, 'equal-size edits with preserved timestamps must still conflict');
+  assert.equal(await fs.readFile(absolute, 'utf8'), '外部修改');
+  const latest = (await request(base, `/api/doc?path=${file}`)).data;
+  assert.equal(latest.lastModified, original.lastModified);
+  assert.notEqual(latest.version, original.version);
+  assert.equal(response.data.currentVersion, latest.version);
+  const saved = await request(base, '/api/doc', { path: `docs-standard/${file}`, content: '合并后的正文', expectedLastModified: latest.version });
+  assert.equal(saved.status, 200);
+  const reread = (await request(base, `/api/doc?path=${file}`)).data;
+  assert.equal(reread.version, saved.data.version);
+  assert.equal(reread.content, '合并后的正文');
+  // An old client must reload; a timestamp alone can never authorize a silent overwrite.
+  const legacy = await request(base, '/api/doc', { path: file, content: '旧版请求', expectedLastModified: String((await fs.stat(absolute)).mtimeMs) });
+  assert.equal(legacy.status, 409);
+  assert.equal(await fs.readFile(absolute, 'utf8'), '合并后的正文');
+});
+
+test('atomic saves preserve permissions and advance modification times on coarse clocks', async (t) => {
   const root = await fixture(t);
   const file = path.join(root, 'design-data/version.txt');
   for (const mode of [0o640, 0o666]) {

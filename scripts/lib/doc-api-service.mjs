@@ -1,5 +1,4 @@
 import path from 'node:path';
-import fs from 'node:fs/promises';
 import {
   safePathFromQuery,
   normalizeLockVersion,
@@ -26,7 +25,7 @@ import {
   normalizeRequestId,
 } from './doc-api-contract.mjs';
 import { createApiMetrics } from './doc-api-metrics.mjs';
-import { withDocumentTransaction, readDocumentSnapshot, writeDocumentAtomically } from './doc-file-store.mjs';
+import { withDocumentTransaction, documentContentVersion, readDocumentSnapshot, writeDocumentAtomically } from './doc-file-store.mjs';
 
 const DEFAULT_INDEX_CACHE_TTL_MS = 5000;
 let requestSequence = 0;
@@ -191,7 +190,7 @@ function createDocumentService(options = {}) {
       if (!resolved) {
         throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
       }
-      const { content, stats } = await readDocumentSnapshot(resolved.absolutePath);
+      const { content, stats, version } = await readDocumentSnapshot(resolved.absolutePath);
       const extension = path.extname(resolved.relativePath).replace('.', '') || 'txt';
       return {
         path: resolved.relativePath,
@@ -199,7 +198,7 @@ function createDocumentService(options = {}) {
         title: trimName(path.basename(resolved.relativePath)),
         content,
         lastModified: stats.mtime.toISOString(),
-        version: String(stats.mtimeMs),
+        version,
       };
     });
   }
@@ -243,9 +242,8 @@ function createDocumentService(options = {}) {
       let previousStats = null;
       if (!createMode) {
         try {
-          const stats = await fs.stat(resolved.absolutePath);
+          const { stats, version: currentVersion } = await readDocumentSnapshot(resolved.absolutePath);
           previousStats = stats;
-          const currentVersion = String(stats.mtimeMs);
           if (!forceOverwrite && currentVersion !== expectedVersion) {
             throw createError(409, API_ERRORS.conflict, {
               currentVersion,
@@ -271,7 +269,7 @@ function createDocumentService(options = {}) {
           ok: true,
           path: resolved.relativePath,
           lastModified: stats.mtime.toISOString(),
-          version: String(stats.mtimeMs),
+          version: documentContentVersion(normalized.content),
         };
       } catch (error) {
         if (error.statusCode) throw error;

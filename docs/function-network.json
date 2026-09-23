@@ -2,23 +2,23 @@
   "metadata": {
     "schemaVersion": "viento-function-network-v1",
     "title": "Viento Studio 功能链路网络",
-    "version": "b.2.9",
-    "date": "2026-09-13",
+    "version": "b.3.0",
+    "date": "2026-09-23",
     "gitBase": "51d522cb919c20b15815b129bd62e859af9a97a0",
-    "sourceState": "b.2.9 工作树：在修订 13 基础上回移 glib RUSTSEC-2024-0429 上游修复，统一桌面依赖来源并加入优化回归",
+    "sourceState": "b.3.0 发布工作树：收录 N47–N49 保存冲突修复，按既定规则从 b.2.9 进位，内部版本 0.3.0；同步清单和界面版本",
     "method": "人工核对业务入口与关键调用；使用本机 Acorn 解析 ES 模块声明、静态字面量动态导入、显式事件绑定和路由表",
     "runtimeTrace": false,
     "verification": {
       "sourceFingerprints": "143 selected code files matched the worktree; remaining vendored glib files verified separately against the 121-file upstream manifest",
-      "references": "137 node source references, module imports and document links checked",
+      "references": "140 node source references, module imports and document links checked",
       "graphIntegrity": "workflow edges and module SCCs recomputed",
       "pageScript": "JavaScript syntax checked; embedded snapshot matches JSON",
       "browserPreview": "not executed: in-app browser URL policy rejected local HTML navigation",
-      "applicationRegression": "b.2.9, bundled Node v24.20.0 and compiled native archive CLI: app-only 195 passed, 0 failed, 0 skipped; version, 117 JavaScript syntax checks and API contract passed",
-      "nativeRegression": "b.2.9, cargo test --offline --locked: 22 core + 1 startup + 5 optimized glib regressions passed; 1 existing large-workspace test ignored",
-      "nativeWindowInteraction": "Pre-release b.2.8.1 evidence retained; native windows not rerun for the version bump. Passed: current rebuilt Linux library workflow and editor save extension; actual GTK save after cache cleanup, cancellation/expiry/regeneration, invalid destination, overwrite cancel/replace, exact share/full ZIPs and staging cleanup. Prior editor workflow evidence retained.",
-      "applicationTestsPassed": 195,
-      "archiveInterop": "v2/v3 Node export → Rust import/export → Node export passed; exact sources, metadata, stable IDs and external image/video/audio bytes compared",
+      "applicationRegression": "b.3.0, Node v24.19.0: app-only 203 tests, 202 passed, 0 failed, 1 native archive interoperability test skipped; version, 117 JavaScript syntax checks and API contract passed",
+      "nativeRegression": "Prior 2026-09-13 evidence: b.2.9, cargo test --offline --locked: 22 core + 1 startup + 5 optimized glib regressions passed; 1 existing large-workspace test ignored; not rerun for this JavaScript-only change",
+      "nativeWindowInteraction": "Not rerun on 2026-09-23. Pre-release b.2.8.1 evidence retained; native windows not rerun for the version bump. Passed: current rebuilt Linux library workflow and editor save extension; actual GTK save after cache cleanup, cancellation/expiry/regeneration, invalid destination, overwrite cancel/replace, exact share/full ZIPs and staging cleanup. Prior editor workflow evidence retained.",
+      "applicationTestsPassed": 202,
+      "archiveInterop": "Not rerun on 2026-09-23: VIENTO_TEST_ARCHIVE_BINARY was not configured. Previous 2026-09-13 v2/v3 Node/Rust archive tests passed; native archive code unchanged.",
       "nativeTestReport": "docs/NATIVE_WORKFLOW_TEST_b.2.8.1.md",
       "closeBridgeRegression": "3 passed after localized native close confirmation change",
       "nativeDriverStability": "Earlier runs saw connection resets; final persistent-connection runs passed. Separate 2,000-request probes did not reproduce the resets; underlying trigger remains unconfirmed.",
@@ -26,15 +26,21 @@
       "libraryControllerRegression": "3 new library controller tests and 9 settings tests passed",
       "nativeExportTestReport": "docs/NATIVE_EXPORT_TEST_b.2.8.1.md",
       "exportDialogRegression": "12 dialog tests and 3 language tests passed, including 2 new native-save scenarios",
-      "releaseNotes": "docs/RELEASE_b.2.9.md",
+      "releaseNotes": "docs/RELEASE_b.3.0.md",
       "systemNodeObservation": "Initial Node v18.19.1 full run: 193 assertions passed, request-lifecycle worker did not exit and was terminated. Isolated reruns on system and bundled runtimes both passed all 4 tests with normal exit; root cause unconfirmed.",
-      "releaseValidation": "docs/test-results/release-b.2.8.2/results.json",
-      "versionCorrection": "Corrected to b.2.9 / 0.2.9; beta digits are 0–9, b.9.9 advances to 1.0.0. Earlier regression logs retain their original versions.",
+      "releaseValidation": "docs/test-results/release-b.3.0/results.json",
+      "versionCorrection": "Historical b.2.9 correction: beta digits are 0–9, b.9.9 advances to 1.0.0. Earlier logs retain their original versions; the current patch release advances b.2.9 to b.3.0.",
       "versionRuleRegression": "b.2.9: 4 version tests passed (all 100 beta transitions, stable carry, invalid formats); JavaScript/Python agreed on 122 cases; next-version CLI, release manifest/lock/UI consistency and Cargo metadata passed. Source archive verified 253 files and was removed after validation. Full application/Rust regressions were not rerun for this version-rule change.",
       "securityRegression": "Unpatched glib 0.18.5 reproduced a null-pointer precondition violation (SIGABRT); exact two-line upstream backport passes all 5 iterator tests with glib opt-level=3. All other 120 of 121 upstream package files match.",
       "securityReport": "docs/SECURITY_GLIB_b.2.9.md",
       "securityValidation": "docs/test-results/glib-security-2026-09-13/results.json",
-      "securitySourceArchive": "383 archive files verified; all 121 glib source files, license and patch included; unpacked offline locked Cargo metadata resolves exactly one glib from the unpacked vendor directory. Temporary archive removed."
+      "securitySourceArchive": "383 archive files verified; all 121 glib source files, license and patch included; unpacked offline locked Cargo metadata resolves exactly one glib from the unpacked vendor directory. Temporary archive removed.",
+      "applicationTestsSkipped": 1,
+      "saveConflictRegression": "Node v18.19.1: 35 focused tests passed, including 8 new cases; reproduced failed-force retry overwrites, hidden reload failures and preserved-timestamp external edits before fixing them",
+      "saveConflictReport": "docs/SAVE_CONFLICT_BUGFIX_b.2.9.md",
+      "saveConflictValidation": "docs/test-results/save-conflicts-2026-09-23/results.json",
+      "releaseVersionValidation": "b.3.0 / 0.3.0 matched all manifests, locks and UI labels; next-version CLI returned b.3.1; offline locked Cargo metadata confirmed application 0.3.0 and the sole locally patched glib dependency",
+      "releaseSourceArchive": "b.3.0 source archive: all 391 files verified against the worktree; all 121 vendored glib files matched their provenance; unpacked offline locked Cargo metadata resolved application 0.3.0 and local patched glib; temporary files removed"
     },
     "scope": "功能级有向业务步骤 + 文件级静态相对导入；不穷举运行时动态路径、第三方库内部或每次函数调用",
     "projectDataRead": false,
@@ -57,43 +63,57 @@
     "limitations": [
       "workflow-step 是业务步骤顺序，不能当作直接函数调用边。",
       "文件导入关系不代表调用次数、调用顺序、用户使用频率或性能。",
-      "测试声明包含参数化模板，声明数不等于执行数；本轮完整 app-only 校验通过 195 项；另有 28 项 Rust 测试通过。",
+      "测试声明包含参数化模板，声明数不等于执行数；本轮完整 app-only 校验通过 202 项，1 项原生归档互通跳过；Rust 和原生窗口测试沿用此前记录。",
       "没有读取实际作品正文、素材内容、本机秘密或网络服务。",
-      "归档互通回归需设置 VIENTO_TEST_ARCHIVE_BINARY；本轮已启用，未设置时该项明确跳过。",
+      "归档互通回归需设置 VIENTO_TEST_ARCHIVE_BINARY；本轮未配置，明确跳过；原生归档代码未变。",
       "第三方 glib 仅将实际修复文件加入功能图源码清单；其余文件通过 vendor/glib-upstream.json 的原包指纹核验，不展开第三方模块调用图。"
     ],
-    "snapshotRevision": 14,
+    "snapshotRevision": 16,
     "repairLog": "docs/NETWORK_BUGFIX_b.2.8.1.md",
     "previousSnapshot": {
-      "revision": 13,
-      "commit": "c3524bec73590dcc959f64fe878aa7934c6e806a",
-      "changedSources": [
+      "revision": 15,
+      "commit": "b14c2ef855ab6f134c1d9cac24394c69d297aa79",
+      "changedSources": [],
+      "releaseFiles": [
         {
-          "file": "src-tauri/tests/glib_variant_iter.rs",
-          "before": null,
-          "after": "5ff1e921944fd3bf73354d483ef732f28da1f4f6f1bb1310c0a5d8e0204ba48f"
+          "file": "VERSION",
+          "before": "684ebca53692ec56454478a5762c9ac7f79386d773169dcb0774b5f5b8e7541f",
+          "after": "55b4baeabc72e37d3d72a2eaa6d2c53b90cb4ec1116cce259cdc6f971aeeb04c"
         },
         {
-          "file": "src-tauri/vendor/glib/src/variant_iter.rs",
-          "before": null,
-          "after": "a0f5ee8acb8faa089bcdfbc9a57372609fce7654026ccef7d9a224d05a654ccc"
-        }
-      ],
-      "buildFiles": [
+          "file": "package.json",
+          "before": "ffb22f214f29fab894b9d685b165daef31bcd411bfcb1a3532238a7d2788b4db",
+          "after": "8bddf5f08182349016d98fbc7e13ae74bb4ce80b4593d01cf2757baa6986a0f6"
+        },
+        {
+          "file": "package-lock.json",
+          "before": "8474547479702e90939271e5f92d8e6cd04837bde388b54535b5203d6c541bb6",
+          "after": "3dd98d9173029209f7769377ee0f3548e307d5a042c5666cccc1b4611e9ce156"
+        },
         {
           "file": "src-tauri/Cargo.toml",
-          "before": "7c81bf5f313309b8db43549fefd09813e592ebf23c6d3c8bb7d539d2ffd00c0c",
-          "after": "99e8c9f6068fa9c0f1de0c2906ae6261134d0b43a9cb502b570304cd06dbdfcd"
+          "before": "99e8c9f6068fa9c0f1de0c2906ae6261134d0b43a9cb502b570304cd06dbdfcd",
+          "after": "62722192a1e8dbe16f9bcdcf5c3c6c5ccb067017373f275a6ff577a75896b611"
         },
         {
           "file": "src-tauri/Cargo.lock",
-          "before": "42e01f9591cff82b82713b2bcd6ba75d7dc99fe65afbfc8ee96dac4cc3a4656f",
-          "after": "12e5eaff8ba585c1458e60510bdb5972fa4e47e5fccaa96c196645a31ec690e4"
+          "before": "12e5eaff8ba585c1458e60510bdb5972fa4e47e5fccaa96c196645a31ec690e4",
+          "after": "9d31506fb3d5557093891333e6daa9c4a8784061b304c6fc5100f2abde1cccac"
         },
         {
-          "file": ".gitattributes",
-          "before": "52ad86b74eb19799e83f80ed8c42feb6b97b46f33b75f5765eb1d6ea2b2c97d0",
-          "after": "7babc07ef117b705aa7aba04cd1dd01d51448c77d7ce3403db91f8f047894a8c"
+          "file": "src-tauri/tauri.conf.json",
+          "before": "d0a2fd22886fa95918adf60860e3f561d13d1950fe326eac58be21a74627f2a6",
+          "after": "8c70b1f8e34ff67ed9eab7696b8b49c31c6b229e6f0b9391b78eaac166c24f41"
+        },
+        {
+          "file": "web/index.html",
+          "before": "e6d6154feebc472b2e26e7f03855f8d306037aed111149e603b339c942d5c2fd",
+          "after": "4722e82544eae3f4204bce7dc4ddd3ddd7ddd893213a5366b2d7b44bab81db2c"
+        },
+        {
+          "file": "desktop/ui/index.html",
+          "before": "3381eca659a4a2365030c6f9e08896058c80d2bc9b62592cd2a8ac6051b423e9",
+          "after": "b0f3033bd8867bd15d8259c6db44184c155a8343f407e5d72d9b4c3953d60db6"
         }
       ]
     },
@@ -659,6 +679,87 @@
             "after": "3381eca659a4a2365030c6f9e08896058c80d2bc9b62592cd2a8ac6051b423e9"
           }
         ]
+      },
+      {
+        "fromRevision": 13,
+        "toRevision": 14,
+        "commit": "c3524bec73590dcc959f64fe878aa7934c6e806a",
+        "changedSources": [
+          {
+            "file": "src-tauri/tests/glib_variant_iter.rs",
+            "before": null,
+            "after": "5ff1e921944fd3bf73354d483ef732f28da1f4f6f1bb1310c0a5d8e0204ba48f"
+          },
+          {
+            "file": "src-tauri/vendor/glib/src/variant_iter.rs",
+            "before": null,
+            "after": "a0f5ee8acb8faa089bcdfbc9a57372609fce7654026ccef7d9a224d05a654ccc"
+          }
+        ],
+        "buildFiles": [
+          {
+            "file": "src-tauri/Cargo.toml",
+            "before": "7c81bf5f313309b8db43549fefd09813e592ebf23c6d3c8bb7d539d2ffd00c0c",
+            "after": "99e8c9f6068fa9c0f1de0c2906ae6261134d0b43a9cb502b570304cd06dbdfcd"
+          },
+          {
+            "file": "src-tauri/Cargo.lock",
+            "before": "42e01f9591cff82b82713b2bcd6ba75d7dc99fe65afbfc8ee96dac4cc3a4656f",
+            "after": "12e5eaff8ba585c1458e60510bdb5972fa4e47e5fccaa96c196645a31ec690e4"
+          },
+          {
+            "file": ".gitattributes",
+            "before": "52ad86b74eb19799e83f80ed8c42feb6b97b46f33b75f5765eb1d6ea2b2c97d0",
+            "after": "7babc07ef117b705aa7aba04cd1dd01d51448c77d7ce3403db91f8f047894a8c"
+          }
+        ]
+      },
+      {
+        "fromRevision": 14,
+        "toRevision": 15,
+        "commit": "b14c2ef855ab6f134c1d9cac24394c69d297aa79",
+        "changedSources": [
+          {
+            "file": "scripts/lib/doc-api-contract.mjs",
+            "before": "f244c6abafb354944070b97ba011cbd01c5cda6174a53bfc5c072aa64a8da68b",
+            "after": "85f1fa6c413311e129499f9c68758e9d3669284277b6063ddea214bfcf190861"
+          },
+          {
+            "file": "scripts/lib/doc-api-service.mjs",
+            "before": "3ba0475dde0b59f20e18a8f5ed106242cc1cc94c151debfcdf77d41e219d23cc",
+            "after": "4a8013c703fef2789306b525e8bc34c5e5bce5e61cc1ea2c0425b345a347fa4f"
+          },
+          {
+            "file": "scripts/lib/doc-file-store.mjs",
+            "before": "10f335f80d46a4a7fb7d7f8ed28667df9a098fb6fb80323ae7eb4c6b1cd06f80",
+            "after": "6504da5c3a9491822a4716c379563c828308a6e5b437671ec931079d05f52f38"
+          },
+          {
+            "file": "scripts/lib/doc-server.mjs",
+            "before": "519050af33fc77b2e36b99491e1d99ce7dc20e64013acd2649409b385498b21e",
+            "after": "64bf9fe44b8f57d9f6375f3dad2f8cec00e75561897811b4e49fdd5ca3e1f4e0"
+          },
+          {
+            "file": "scripts/tests/doc-api.test.mjs",
+            "before": "ee7b3f9eb23de1c2acdbcc368bc0a169b865fd87b459909842563f4ad63648de",
+            "after": "e0cb5b0d1938303cb592424dbc18bafe5775c1ec1c44e2406018766ff540b405"
+          },
+          {
+            "file": "scripts/tests/editor-harness.mjs",
+            "before": "54a55d75445eb703e468f9ac237fe0381354b154d326c2aeaabf4a370679ab33",
+            "after": "6653a0ec972c91874a2aaac4d8d905f2008f1cfb01afb52ae43b8ebde7591291"
+          },
+          {
+            "file": "scripts/tests/editor-runtime.test.mjs",
+            "before": "a116581085fc251356c08e320627be09eca25b83f7351691f993266f917919af",
+            "after": "4813afeb288d59c7a7cedf97ba768647bef70ebc770c5e18b9b742ed0fa08259"
+          },
+          {
+            "file": "web/modules/app-runtime.js",
+            "before": "d9588aa789262a1595a6145915098a670b88015bcbbf638426073f4525be3a4d",
+            "after": "62fb98115025b51e2228fb2808ab1354433b4307bc3cad60470ba4a5e973a92d"
+          }
+        ]
       }
     ],
     "vendoredDependencies": [
@@ -698,12 +799,17 @@
       "sources": [
         {
           "file": "web/modules/app-runtime.js",
-          "line": 4967,
+          "line": 4952,
           "symbol": "initApp"
         },
         {
           "file": "web/modules/app-state.js",
           "line": 1
+        },
+        {
+          "file": "web/modules/app-runtime.js",
+          "line": 1630,
+          "symbol": "handleSaveConflict"
         }
       ]
     },
@@ -725,7 +831,7 @@
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 2539,
+          "line": 2527,
           "symbol": "setEditInputMode"
         }
       ]
@@ -870,7 +976,7 @@
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 3130,
+          "line": 3118,
           "symbol": "renderHeroSkillCards"
         }
       ]
@@ -1070,11 +1176,11 @@
       "id": "doc_service",
       "label": "文档服务",
       "layer": "服务",
-      "description": "读原文、版本校验、写入、文档索引缓存、重建互斥，以及其他业务服务的入口。",
+      "description": "读原文、内容版本校验、写入、文档索引缓存、重建互斥，以及其他业务服务的入口。",
       "sources": [
         {
           "file": "scripts/lib/doc-api-service.mjs",
-          "line": 54,
+          "line": 53,
           "symbol": "createDocumentService"
         }
       ]
@@ -1083,7 +1189,7 @@
       "id": "file_store",
       "label": "文档文件事务",
       "layer": "服务",
-      "description": "同文档串行读写，快照与原子替换，独占创建；不把展示数据反向写成正文。",
+      "description": "同文档串行读写，按实际字节生成内容版本，快照与原子替换、独占创建；不把展示数据反向写成正文。",
       "sources": [
         {
           "file": "scripts/lib/doc-file-store.mjs",
@@ -1092,8 +1198,18 @@
         },
         {
           "file": "scripts/lib/doc-file-store.mjs",
-          "line": 36,
+          "line": 40,
           "symbol": "writeDocumentAtomically"
+        },
+        {
+          "file": "scripts/lib/doc-file-store.mjs",
+          "line": 25,
+          "symbol": "documentContentVersion"
+        },
+        {
+          "file": "scripts/lib/doc-file-store.mjs",
+          "line": 29,
+          "symbol": "readDocumentSnapshot"
         }
       ]
     },
@@ -1239,12 +1355,12 @@
         },
         {
           "file": "scripts/lib/doc-server.mjs",
-          "line": 521,
+          "line": 510,
           "symbol": "sendFile"
         },
         {
           "file": "scripts/lib/doc-server.mjs",
-          "line": 634,
+          "line": 623,
           "symbol": "resolveProjectFilePath"
         }
       ]
@@ -1415,12 +1531,12 @@
       "sources": [
         {
           "file": "scripts/lib/doc-server.mjs",
-          "line": 344,
+          "line": 333,
           "symbol": "buildEditableDocIndex"
         },
         {
           "file": "scripts/lib/doc-api-service.mjs",
-          "line": 54,
+          "line": 53,
           "symbol": "createDocumentService"
         }
       ]
@@ -3668,8 +3784,8 @@
         "draft",
         "memory"
       ],
-      "effect": "读取文件原文与版本，建立草稿基线。",
-      "boundary": "使用源文件而非展示索引还原正文；源读取失败不会把展示内容当成权威稿。",
+      "effect": "读取文件原文与内容指纹版本，建立草稿基线。",
+      "boundary": "使用源文件而非展示索引还原正文；源读取失败不会把展示内容当成权威稿。客户端原样传回版本标记。",
       "tests": [
         "scripts/tests/editor-runtime.test.mjs",
         "scripts/tests/metadata-conversion.test.mjs"
@@ -3733,8 +3849,8 @@
         "index",
         "editor"
       ],
-      "effect": "校验 expectedVersion，原子保存原文，失效服务缓存，再重建和重新载入。",
-      "boundary": "源文件保存和重建是两个阶段；重建或索引读取失败时明确报错，已保存正文继续可编辑并允许重试。",
+      "effect": "校验 expectedVersion 与当前正文内容指纹，原子保存原文，失效服务缓存，再重建和重新载入。",
+      "boundary": "保留文件时间的外部修改也会触发冲突；旧时间戳普通请求需重新读取。源文件保存和重建是两个阶段；重建或索引读取失败时明确报错，已保存正文继续可编辑并允许重试。",
       "tests": [
         "scripts/tests/doc-api.test.mjs",
         "scripts/tests/editor-runtime.test.mjs",
@@ -3759,7 +3875,7 @@
         "editor"
       ],
       "effect": "在登记锁内重新读取类型、检查可迁移位置冲突，再建立 UUID 并独占创建源文件。",
-      "boundary": "保护大小写/Unicode 等价名称、父目录和缺失源文件的登记身份；失败回滚本次登记，保存成功后即作为已有文档继续编辑。",
+      "boundary": "保护大小写/Unicode 等价名称、父目录和缺失源文件的登记身份；失败回滚本次登记，保存成功后即作为已有文档继续编辑。 成功创建返回内容版本，后续保存沿用同一校验。",
       "tests": [
         "scripts/tests/generic-project.test.mjs",
         "scripts/tests/editor-runtime.test.mjs"
@@ -3778,7 +3894,7 @@
         "file_store"
       ],
       "effect": "选择读取最新、保留草稿、明确强制覆盖或取消。",
-      "boundary": "强制覆盖必须由冲突 UI 明确选择；默认不会静默压过另一版本。",
+      "boundary": "强制覆盖需要二次确认；只有保存或读取最新正文成功后更新基线。强制写入失败仍保留原版本，普通重试重新检查冲突；读取失败保留错误、草稿和区块模式。",
       "tests": [
         "scripts/tests/doc-api.test.mjs",
         "scripts/tests/editor-runtime.test.mjs"
@@ -5202,7 +5318,7 @@
       "to": "scripts/lib/doc-server.mjs",
       "kind": "import",
       "local": true,
-      "line": 3,
+      "line": 2,
       "symbols": [
         "safePathFromQuery",
         "normalizeLockVersion",
@@ -5217,7 +5333,7 @@
       "to": "scripts/lib/paths.mjs",
       "kind": "import",
       "local": true,
-      "line": 11,
+      "line": 10,
       "symbols": [
         "trimName",
         "PROJECT_ROOT",
@@ -5230,7 +5346,7 @@
       "to": "scripts/lib/project-service.mjs",
       "kind": "import",
       "local": true,
-      "line": 12,
+      "line": 11,
       "symbols": [
         "readProjectConfiguration",
         "previewProjectTemplate",
@@ -5242,7 +5358,7 @@
       "to": "scripts/lib/rebuild-workflow.mjs",
       "kind": "import",
       "local": true,
-      "line": 13,
+      "line": 12,
       "symbols": [
         "rebuildIndex"
       ]
@@ -5252,7 +5368,7 @@
       "to": "scripts/lib/image-index.mjs",
       "kind": "import",
       "local": true,
-      "line": 14,
+      "line": 13,
       "symbols": [
         "clearHeroImageCache"
       ]
@@ -5262,7 +5378,7 @@
       "to": "scripts/lib/media-assets.mjs",
       "kind": "import",
       "local": true,
-      "line": 15,
+      "line": 14,
       "symbols": [
         "listMediaAssets",
         "importMediaAsset"
@@ -5273,7 +5389,7 @@
       "to": "scripts/lib/project-documents.mjs",
       "kind": "import",
       "local": true,
-      "line": 16,
+      "line": 15,
       "symbols": [
         "createRegisteredDocument"
       ]
@@ -5283,7 +5399,7 @@
       "to": "scripts/lib/media-insertion.mjs",
       "kind": "import",
       "local": true,
-      "line": 17,
+      "line": 16,
       "symbols": [
         "prepareMediaInsertion"
       ]
@@ -5293,7 +5409,7 @@
       "to": "scripts/lib/export-service.mjs",
       "kind": "import",
       "local": true,
-      "line": 18,
+      "line": 17,
       "symbols": [
         "createExportService"
       ]
@@ -5303,7 +5419,7 @@
       "to": "scripts/lib/doc-api-contract.mjs",
       "kind": "import",
       "local": true,
-      "line": 19,
+      "line": 18,
       "symbols": [
         "makeCapabilitiesPayload",
         "API_ERRORS",
@@ -5319,7 +5435,7 @@
       "to": "scripts/lib/doc-api-metrics.mjs",
       "kind": "import",
       "local": true,
-      "line": 28,
+      "line": 27,
       "symbols": [
         "createApiMetrics"
       ]
@@ -5329,9 +5445,10 @@
       "to": "scripts/lib/doc-file-store.mjs",
       "kind": "import",
       "local": true,
-      "line": 29,
+      "line": 28,
       "symbols": [
         "withDocumentTransaction",
+        "documentContentVersion",
         "readDocumentSnapshot",
         "writeDocumentAtomically"
       ]
@@ -5490,7 +5607,8 @@
       "line": 11,
       "symbols": [
         "API_RESPONSE",
-        "API_RESPONSE_DEFAULTS"
+        "API_RESPONSE_DEFAULTS",
+        "normalizeDocumentVersion"
       ]
     },
     {
@@ -6240,98 +6358,6 @@
       ]
     },
     {
-      "from": "scripts/normalize-building-data.mjs",
-      "to": "scripts/lib/paths.mjs",
-      "kind": "import",
-      "local": true,
-      "line": 3,
-      "symbols": [
-        "DOC_ROOT"
-      ]
-    },
-    {
-      "from": "scripts/normalize-building-data.mjs",
-      "to": "scripts/lib/normalize-runner.mjs",
-      "kind": "import",
-      "local": true,
-      "line": 4,
-      "symbols": [
-        "runTextNormalizationBatch"
-      ]
-    },
-    {
-      "from": "scripts/normalize-building-data.mjs",
-      "to": "scripts/lib/normalize-text-utils.mjs",
-      "kind": "import",
-      "local": true,
-      "line": 5,
-      "symbols": [
-        "normalizeForCompare",
-        "toUnixLineEndings"
-      ]
-    },
-    {
-      "from": "scripts/normalize-hero-data.mjs",
-      "to": "scripts/lib/paths.mjs",
-      "kind": "import",
-      "local": true,
-      "line": 3,
-      "symbols": [
-        "DOC_ROOT"
-      ]
-    },
-    {
-      "from": "scripts/normalize-hero-data.mjs",
-      "to": "scripts/lib/normalize-runner.mjs",
-      "kind": "import",
-      "local": true,
-      "line": 4,
-      "symbols": [
-        "runTextNormalizationBatch"
-      ]
-    },
-    {
-      "from": "scripts/normalize-unit-data.mjs",
-      "to": "scripts/lib/scan-files.mjs",
-      "kind": "import",
-      "local": true,
-      "line": 2,
-      "symbols": [
-        "collectFilesRecursive"
-      ]
-    },
-    {
-      "from": "scripts/normalize-unit-data.mjs",
-      "to": "scripts/lib/paths.mjs",
-      "kind": "import",
-      "local": true,
-      "line": 3,
-      "symbols": [
-        "DOC_ROOT"
-      ]
-    },
-    {
-      "from": "scripts/normalize-unit-data.mjs",
-      "to": "scripts/lib/normalize-runner.mjs",
-      "kind": "import",
-      "local": true,
-      "line": 4,
-      "symbols": [
-        "runTextNormalizationBatch"
-      ]
-    },
-    {
-      "from": "scripts/normalize-unit-data.mjs",
-      "to": "scripts/lib/normalize-text-utils.mjs",
-      "kind": "import",
-      "local": true,
-      "line": 5,
-      "symbols": [
-        "normalizeForCompare",
-        "toUnixLineEndings"
-      ]
-    },
-    {
       "from": "scripts/normalize_docs.mjs",
       "to": "scripts/lib/normalize-text-utils.mjs",
       "kind": "import",
@@ -6372,6 +6398,98 @@
         "PROJECT_ROOT",
         "DOC_ROOT",
         "toPosix"
+      ]
+    },
+    {
+      "from": "scripts/normalize-building-data.mjs",
+      "to": "scripts/lib/paths.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 3,
+      "symbols": [
+        "DOC_ROOT"
+      ]
+    },
+    {
+      "from": "scripts/normalize-building-data.mjs",
+      "to": "scripts/lib/normalize-runner.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 4,
+      "symbols": [
+        "runTextNormalizationBatch"
+      ]
+    },
+    {
+      "from": "scripts/normalize-building-data.mjs",
+      "to": "scripts/lib/normalize-text-utils.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 5,
+      "symbols": [
+        "normalizeForCompare",
+        "toUnixLineEndings"
+      ]
+    },
+    {
+      "from": "scripts/normalize-hero-data.mjs",
+      "to": "scripts/lib/paths.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 3,
+      "symbols": [
+        "DOC_ROOT"
+      ]
+    },
+    {
+      "from": "scripts/normalize-hero-data.mjs",
+      "to": "scripts/lib/normalize-runner.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 4,
+      "symbols": [
+        "runTextNormalizationBatch"
+      ]
+    },
+    {
+      "from": "scripts/normalize-unit-data.mjs",
+      "to": "scripts/lib/scan-files.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 2,
+      "symbols": [
+        "collectFilesRecursive"
+      ]
+    },
+    {
+      "from": "scripts/normalize-unit-data.mjs",
+      "to": "scripts/lib/paths.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 3,
+      "symbols": [
+        "DOC_ROOT"
+      ]
+    },
+    {
+      "from": "scripts/normalize-unit-data.mjs",
+      "to": "scripts/lib/normalize-runner.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 4,
+      "symbols": [
+        "runTextNormalizationBatch"
+      ]
+    },
+    {
+      "from": "scripts/normalize-unit-data.mjs",
+      "to": "scripts/lib/normalize-text-utils.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 5,
+      "symbols": [
+        "normalizeForCompare",
+        "toUnixLineEndings"
       ]
     },
     {
@@ -7146,7 +7264,8 @@
         "API_PATHS",
         "API_ERRORS",
         "API_RESPONSE",
-        "getCreatePathError"
+        "getCreatePathError",
+        "normalizeDocumentVersion"
       ]
     },
     {
@@ -8554,7 +8673,8 @@
       "symbols": [
         "API_ERRORS",
         "API_RESPONSE",
-        "getCreatePathError"
+        "getCreatePathError",
+        "normalizeDocumentVersion"
       ]
     },
     {
@@ -9102,16 +9222,6 @@
       ]
     },
     {
-      "from": "scripts/lib/doc-api-service.mjs",
-      "to": "node:fs/promises",
-      "kind": "import",
-      "local": false,
-      "line": 2,
-      "symbols": [
-        "default"
-      ]
-    },
-    {
       "from": "scripts/lib/doc-file-store.mjs",
       "to": "node:fs/promises",
       "kind": "import",
@@ -9138,6 +9248,7 @@
       "local": false,
       "line": 3,
       "symbols": [
+        "createHash",
         "randomUUID"
       ]
     },
@@ -9680,6 +9791,16 @@
       ]
     },
     {
+      "from": "scripts/normalize_docs.mjs",
+      "to": "node:path",
+      "kind": "import",
+      "local": false,
+      "line": 1,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
       "from": "scripts/normalize-building-data.mjs",
       "to": "node:fs/promises",
       "kind": "import",
@@ -9721,16 +9842,6 @@
     },
     {
       "from": "scripts/normalize-unit-data.mjs",
-      "to": "node:path",
-      "kind": "import",
-      "local": false,
-      "line": 1,
-      "symbols": [
-        "default"
-      ]
-    },
-    {
-      "from": "scripts/normalize_docs.mjs",
       "to": "node:path",
       "kind": "import",
       "local": false,
@@ -11405,8 +11516,8 @@
     {
       "path": "scripts/lib/doc-api-contract.mjs",
       "area": "engine",
-      "lines": 249,
-      "sha256": "f244c6abafb354944070b97ba011cbd01c5cda6174a53bfc5c072aa64a8da68b"
+      "lines": 260,
+      "sha256": "85f1fa6c413311e129499f9c68758e9d3669284277b6063ddea214bfcf190861"
     },
     {
       "path": "scripts/lib/doc-api-metrics.mjs",
@@ -11417,14 +11528,14 @@
     {
       "path": "scripts/lib/doc-api-service.mjs",
       "area": "engine",
-      "lines": 367,
-      "sha256": "3ba0475dde0b59f20e18a8f5ed106242cc1cc94c151debfcdf77d41e219d23cc"
+      "lines": 365,
+      "sha256": "4a8013c703fef2789306b525e8bc34c5e5bce5e61cc1ea2c0425b345a347fa4f"
     },
     {
       "path": "scripts/lib/doc-file-store.mjs",
       "area": "engine",
-      "lines": 69,
-      "sha256": "10f335f80d46a4a7fb7d7f8ed28667df9a098fb6fb80323ae7eb4c6b1cd06f80"
+      "lines": 73,
+      "sha256": "6504da5c3a9491822a4716c379563c828308a6e5b437671ec931079d05f52f38"
     },
     {
       "path": "scripts/lib/doc-server-routes.mjs",
@@ -11441,8 +11552,8 @@
     {
       "path": "scripts/lib/doc-server.mjs",
       "area": "engine",
-      "lines": 666,
-      "sha256": "519050af33fc77b2e36b99491e1d99ce7dc20e64013acd2649409b385498b21e"
+      "lines": 655,
+      "sha256": "64bf9fe44b8f57d9f6375f3dad2f8cec00e75561897811b4e49fdd5ca3e1f4e0"
     },
     {
       "path": "scripts/lib/document-model.mjs",
@@ -11789,8 +11900,8 @@
     {
       "path": "scripts/tests/doc-api.test.mjs",
       "area": "test",
-      "lines": 175,
-      "sha256": "ee7b3f9eb23de1c2acdbcc368bc0a169b865fd87b459909842563f4ad63648de"
+      "lines": 203,
+      "sha256": "e0cb5b0d1938303cb592424dbc18bafe5775c1ec1c44e2406018766ff540b405"
     },
     {
       "path": "scripts/tests/document-model.test.mjs",
@@ -11814,13 +11925,13 @@
       "path": "scripts/tests/editor-harness.mjs",
       "area": "test",
       "lines": 111,
-      "sha256": "54a55d75445eb703e468f9ac237fe0381354b154d326c2aeaabf4a370679ab33"
+      "sha256": "6653a0ec972c91874a2aaac4d8d905f2008f1cfb01afb52ae43b8ebde7591291"
     },
     {
       "path": "scripts/tests/editor-runtime.test.mjs",
       "area": "test",
-      "lines": 344,
-      "sha256": "a116581085fc251356c08e320627be09eca25b83f7351691f993266f917919af"
+      "lines": 473,
+      "sha256": "4813afeb288d59c7a7cedf97ba768647bef70ebc770c5e18b9b742ed0fa08259"
     },
     {
       "path": "scripts/tests/export.test.mjs",
@@ -12077,8 +12188,8 @@
     {
       "path": "web/modules/app-runtime.js",
       "area": "editor",
-      "lines": 5315,
-      "sha256": "d9588aa789262a1595a6145915098a670b88015bcbbf638426073f4525be3a4d"
+      "lines": 5300,
+      "sha256": "62fb98115025b51e2228fb2808ab1354433b4307bc3cad60470ba4a5e973a92d"
     },
     {
       "path": "web/modules/app-services.js",
@@ -12534,231 +12645,231 @@
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 3165,
+      "line": 3153,
       "event": "click",
       "target": "button",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 4328,
+      "line": 4313,
       "event": "click",
       "target": "button",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 4995,
+      "line": 4980,
       "event": "click",
       "target": "sidebarToggleBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 4996,
+      "line": 4981,
       "event": "click",
       "target": "sidebarBackdropEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5001,
+      "line": 4986,
       "event": "input",
       "target": "searchInput",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5019,
+      "line": 5004,
       "event": "click",
       "target": "searchClearEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5033,
+      "line": 5018,
       "event": "click",
       "target": "loadRetryBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5039,
+      "line": 5024,
       "event": "click",
       "target": "runtimeErrorClearBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5045,
+      "line": 5030,
       "event": "click",
       "target": "runtimeErrorListEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5051,
+      "line": 5036,
       "event": "click",
       "target": "editBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5071,
+      "line": 5056,
       "event": "click",
       "target": "editCreateBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5077,
+      "line": 5062,
       "event": "change",
       "target": "createTypeSelectEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5093,
+      "line": 5078,
       "event": "click",
       "target": "editSourceModeBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5106,
+      "line": 5091,
       "event": "click",
       "target": "editBlockModeBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5119,
+      "line": 5104,
       "event": "input",
       "target": "createPathInputEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5125,
+      "line": 5110,
       "event": "blur",
       "target": "createPathInputEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5131,
+      "line": 5116,
       "event": "keydown",
       "target": "createPathInputEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5146,
+      "line": 5131,
       "event": "click",
       "target": "editSaveBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5161,
+      "line": 5146,
       "event": "input",
       "target": "editEditorEl",
       "handler": "onSourceInput"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5165,
+      "line": 5150,
       "event": "input",
       "target": "editBlockEditorEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5173,
+      "line": 5158,
       "event": "keydown",
       "target": "editBlockEditorEl",
       "handler": "handleEditorSaveShortcut"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5177,
+      "line": 5162,
       "event": "click",
       "target": "editCancelBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5187,
+      "line": 5172,
       "event": "click",
       "target": "button",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5196,
+      "line": 5181,
       "event": "click",
       "target": "saveConflictDialogEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5204,
+      "line": 5189,
       "event": "click",
       "target": "editRebuildBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5217,
+      "line": 5202,
       "event": "click",
       "target": "modeBrowseBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5223,
+      "line": 5208,
       "event": "click",
       "target": "modeEditBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5248,
+      "line": 5233,
       "event": "keydown",
       "target": "editEditorEl",
       "handler": "handleEditorSaveShortcut"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5252,
+      "line": 5237,
       "event": "resize",
       "target": "window",
       "handler": "resizeBlockEditors"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5253,
+      "line": 5238,
       "event": "error",
       "target": "window",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5258,
+      "line": 5243,
       "event": "unhandledrejection",
       "target": "window",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5262,
+      "line": 5247,
       "event": "keydown",
       "target": "window",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5286,
+      "line": 5271,
       "event": "beforeunload",
       "target": "window",
       "handler": "(inline)"
@@ -12952,26 +13063,31 @@
     {
       "file": "scripts/tests/doc-api.test.mjs",
       "line": 87,
-      "name": "atomic saves preserve permissions and advance numeric versions on coarse clocks"
+      "name": "preserving the modification time cannot hide an external edit from the save conflict check"
     },
     {
       "file": "scripts/tests/doc-api.test.mjs",
-      "line": 104,
+      "line": 115,
+      "name": "atomic saves preserve permissions and advance modification times on coarse clocks"
+    },
+    {
+      "file": "scripts/tests/doc-api.test.mjs",
+      "line": 132,
       "name": "static resources do not consume the API rate limit or leak active request counts"
     },
     {
       "file": "scripts/tests/doc-api.test.mjs",
-      "line": 119,
+      "line": 147,
       "name": "mutable workspace files revalidate and If-None-Match takes precedence over dates"
     },
     {
       "file": "scripts/tests/doc-api.test.mjs",
-      "line": 135,
+      "line": 163,
       "name": "media responses identify their format and support bounded seeking without downloading the whole file"
     },
     {
       "file": "scripts/tests/doc-api.test.mjs",
-      "line": 165,
+      "line": 193,
       "name": "an unreadable asset cannot terminate the editing service"
     },
     {
@@ -13152,26 +13268,46 @@
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
       "line": 230,
+      "name": "failed forced saves keep the original baseline so a normal retry asks about the conflict again"
+    },
+    {
+      "file": "scripts/tests/editor-runtime.test.mjs",
+      "line": 261,
+      "name": "a failed conflict reload retains the block draft and its error until a successful retry"
+    },
+    {
+      "file": "scripts/tests/editor-runtime.test.mjs",
+      "line": 297,
+      "name": "save conflict: ${label} only changes the baseline after an approved successful write"
+    },
+    {
+      "file": "scripts/tests/editor-runtime.test.mjs",
+      "line": 330,
+      "name": "content revision tokens survive reading, conflict reload and subsequent ordinary saving"
+    },
+    {
+      "file": "scripts/tests/editor-runtime.test.mjs",
+      "line": 359,
       "name": "switching from the editor to browse makes the document content visible again"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 241,
+      "line": 370,
       "name": "a successful creation stays editable as an existing file if rebuilding fails"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 267,
+      "line": 396,
       "name": "browser textarea normalization preserves source line endings through switches, edits and saves"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 294,
+      "line": 423,
       "name": "first index refresh maps a created source to its catalog ID without closing its editor"
     },
     {
       "file": "scripts/tests/editor-runtime.test.mjs",
-      "line": 320,
+      "line": 449,
       "name": "discard cancellation protects dirty drafts on document, mode and editor exit"
     },
     {

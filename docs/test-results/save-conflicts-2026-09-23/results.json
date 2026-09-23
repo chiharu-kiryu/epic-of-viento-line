@@ -1,0 +1,59 @@
+{
+  "date": "2026-09-23",
+  "version": "b.2.9",
+  "gitBase": "b14c2ef855ab6f134c1d9cac24394c69d297aa79",
+  "workflows": [
+    "F15",
+    "F18",
+    "F19",
+    "F20"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "selectedFailed": 4,
+    "unselectedSkipped": 27,
+    "bugReproductions": 3,
+    "newRevisionContractFailures": 1,
+    "log": "before.log"
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "passed": 35,
+    "failed": 0,
+    "skipped": 0,
+    "newCases": 8,
+    "log": "after.log"
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 203,
+    "passed": 202,
+    "failed": 0,
+    "skipped": 1,
+    "skipReason": "Node/Rust archive interoperability requires VIENTO_TEST_ARCHIVE_BINARY; native archive code unchanged in this round",
+    "javascriptSyntaxFiles": 117,
+    "apiContractPassed": true,
+    "log": "application.log"
+  },
+  "files": {
+    "scripts/lib/doc-api-contract.mjs": "85f1fa6c413311e129499f9c68758e9d3669284277b6063ddea214bfcf190861",
+    "scripts/lib/doc-api-service.mjs": "4a8013c703fef2789306b525e8bc34c5e5bce5e61cc1ea2c0425b345a347fa4f",
+    "scripts/lib/doc-file-store.mjs": "6504da5c3a9491822a4716c379563c828308a6e5b437671ec931079d05f52f38",
+    "scripts/lib/doc-server.mjs": "64bf9fe44b8f57d9f6375f3dad2f8cec00e75561897811b4e49fdd5ca3e1f4e0",
+    "scripts/tests/doc-api.test.mjs": "e0cb5b0d1938303cb592424dbc18bafe5775c1ec1c44e2406018766ff540b405",
+    "scripts/tests/editor-harness.mjs": "6653a0ec972c91874a2aaac4d8d905f2008f1cfb01afb52ae43b8ebde7591291",
+    "scripts/tests/editor-runtime.test.mjs": "4813afeb288d59c7a7cedf97ba768647bef70ebc770c5e18b9b742ed0fa08259",
+    "web/modules/app-runtime.js": "62fb98115025b51e2228fb2808ab1354433b4307bc3cad60470ba4a5e973a92d"
+  },
+  "nativeTestsRerun": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "functionNetwork": {
+    "revision": 15,
+    "sourceFingerprints": 143,
+    "nodeSources": 140,
+    "localImportStatements": 355,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

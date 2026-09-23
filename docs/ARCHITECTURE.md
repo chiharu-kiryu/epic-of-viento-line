@@ -1,8 +1,8 @@
 # Viento Studio 架构说明
 
-> 更新时间：2026-09-12
+> 更新时间：2026-09-23
 
-功能入口、业务上下游、接口和数据落点的最新盘点见 [功能链路网络](FUNCTION_NETWORK.md)（2026-09-13 当前工作树），可用 [离线交互图](function-network.html) 筛选查看。
+功能入口、业务上下游、接口和数据落点的最新盘点见 [功能链路网络](FUNCTION_NETWORK.md)（2026-09-23 当前工作树），可用 [离线交互图](function-network.html) 筛选查看。
 
 作品与程序已分离，作品及备份位于系统应用数据目录，本机默认作品由应用配置目录的 `viento.config.json` 指定，见 [本机数据目录](LOCAL_DATA_STORAGE.md)。新项目的 `documents/`、`templates/`、`assets/` 和 `metadata/` 均相对于作品根目录（旧作品使用 `design-data/`、`data-template/`）；生成数据实际位于作品的 `.viento/cache/`。下文 `docs-standard/...` 和 `web/data/index.json` 仍作为兼容访问路径，由服务映射到缓存，不代表仓库根目录还有这些文件。
 
@@ -18,6 +18,8 @@ Viento Studio 是通用 OC 设计引擎。应用代码、项目定义、作品�
 - 展示与分享：统一 `viento-layout-v1` 布局供编辑器和导出消费。
 
 `project-layout.mjs` 统一解析文档类型，`project-service.mjs` 提供模板预览和原子配置保存。模板按内容指纹先落盘，再切换清单；过期修改通过配置版本阻止覆盖。原作品的具体规则在其项目清单中声明，轻量示范定义见 `docs/examples/`，不会装入桌面运行包。
+
+正文编辑使用读取时的内容指纹作为版本条件；保留文件时间的外部修改仍会触发冲突。失败的覆盖或读取不会更新草稿基线，详见 [保存冲突与接口兼容性](SAVE_CONFLICT_BUGFIX_b.2.9.md)。
 
 ---
 

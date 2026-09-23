@@ -1,0 +1,49 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.0",
+  "buildVersion": "0.3.0",
+  "gitBase": "b14c2ef855ab6f134c1d9cac24394c69d297aa79",
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 203,
+    "passed": 202,
+    "failed": 0,
+    "skipped": 1,
+    "skipReason": "Native archive interoperability tool not configured; archive implementation unchanged",
+    "javascriptSyntaxFiles": 117,
+    "apiContractPassed": true,
+    "log": "application.log"
+  },
+  "cargoMetadata": "offline locked; application 0.3.0 and a single glib 0.18.5 from src-tauri/vendor/glib",
+  "nextVersion": "b.3.1",
+  "functionNetworkRevision": 16,
+  "files": {
+    "VERSION": "55b4baeabc72e37d3d72a2eaa6d2c53b90cb4ec1116cce259cdc6f971aeeb04c",
+    "package.json": "8bddf5f08182349016d98fbc7e13ae74bb4ce80b4593d01cf2757baa6986a0f6",
+    "package-lock.json": "3dd98d9173029209f7769377ee0f3548e307d5a042c5666cccc1b4611e9ce156",
+    "src-tauri/Cargo.toml": "62722192a1e8dbe16f9bcdcf5c3c6c5ccb067017373f275a6ff577a75896b611",
+    "src-tauri/Cargo.lock": "9d31506fb3d5557093891333e6daa9c4a8784061b304c6fc5100f2abde1cccac",
+    "src-tauri/tauri.conf.json": "8c70b1f8e34ff67ed9eab7696b8b49c31c6b229e6f0b9391b78eaac166c24f41",
+    "web/index.html": "4722e82544eae3f4204bce7dc4ddd3ddd7ddd893213a5366b2d7b44bab81db2c",
+    "desktop/ui/index.html": "b0f3033bd8867bd15d8259c6db44184c155a8343f407e5d72d9b4c3953d60db6",
+    "scripts/lib/doc-api-contract.mjs": "85f1fa6c413311e129499f9c68758e9d3669284277b6063ddea214bfcf190861",
+    "scripts/lib/doc-api-service.mjs": "4a8013c703fef2789306b525e8bc34c5e5bce5e61cc1ea2c0425b345a347fa4f",
+    "scripts/lib/doc-file-store.mjs": "6504da5c3a9491822a4716c379563c828308a6e5b437671ec931079d05f52f38",
+    "scripts/lib/doc-server.mjs": "64bf9fe44b8f57d9f6375f3dad2f8cec00e75561897811b4e49fdd5ca3e1f4e0",
+    "scripts/tests/doc-api.test.mjs": "e0cb5b0d1938303cb592424dbc18bafe5775c1ec1c44e2406018766ff540b405",
+    "scripts/tests/editor-harness.mjs": "6653a0ec972c91874a2aaac4d8d905f2008f1cfb01afb52ae43b8ebde7591291",
+    "scripts/tests/editor-runtime.test.mjs": "4813afeb288d59c7a7cedf97ba768647bef70ebc770c5e18b9b742ed0fa08259",
+    "web/modules/app-runtime.js": "62fb98115025b51e2228fb2808ab1354433b4307bc3cad60470ba4a5e973a92d"
+  },
+  "nativeTestsRerun": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "sourceArchive": {
+    "filesVerified": 391,
+    "bytes": 5808796,
+    "allArchivedBytesMatchSource": true,
+    "vendoredGlibFilesVerified": 121,
+    "unpackedCargoMetadataVerified": true,
+    "temporaryFilesRemoved": true
+  }
+}

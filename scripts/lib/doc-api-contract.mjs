@@ -128,6 +128,17 @@ export function normalizeRebuildRequest(rawPayload = {}) {
   };
 }
 
+export function normalizeDocumentVersion(rawVersion) {
+  if (typeof rawVersion === 'number' && Number.isFinite(rawVersion) && rawVersion >= 0) {
+    return String(rawVersion);
+  }
+  if (typeof rawVersion !== 'string') return '';
+  const version = rawVersion.trim();
+  // Numeric versions remain readable for older services. New services compare
+  // content revisions, so a legacy timestamp alone cannot authorize a write.
+  return /^(?:sha256:[a-f0-9]{64}|\d+(?:\.\d+)?)$/.test(version) ? version : '';
+}
+
 export function normalizeDocWriteRequest(rawPayload = {}) {
   const payload = (rawPayload && typeof rawPayload === 'object') ? rawPayload : {};
   return {

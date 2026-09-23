@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 
 // All service instances in this server share one queue per document.
 const transactions = new Map();
@@ -22,12 +22,16 @@ async function withDocumentTransaction(filePath, operation) {
   }
 }
 
+function documentContentVersion(content) {
+  return `sha256:${createHash('sha256').update(content).digest('hex')}`;
+}
+
 async function readDocumentSnapshot(absolutePath) {
   const handle = await fs.open(absolutePath, 'r');
   try {
-    const content = await handle.readFile('utf8');
+    const bytes = await handle.readFile();
     const stats = await handle.stat();
-    return { content, stats };
+    return { content: bytes.toString('utf8'), stats, version: documentContentVersion(bytes) };
   } finally {
     await handle.close();
   }
@@ -45,7 +49,7 @@ async function writeDocumentAtomically(absolutePath, content, { create = false, 
       await handle.chmod(previousStats.mode & 0o777);
     }
     let stats = await handle.stat();
-    // Preserve numeric lock versions while ensuring a new version on coarse clocks.
+    // Keep modification times advancing even on coarse clocks.
     if (previousStats && stats.mtimeMs <= previousStats.mtimeMs) {
       await handle.utimes(stats.atime, (previousStats.mtimeMs + 1) / 1000);
       stats = await handle.stat();
@@ -65,4 +69,4 @@ async function writeDocumentAtomically(absolutePath, content, { create = false, 
   }
 }
 
-export { withDocumentTransaction, readDocumentSnapshot, writeDocumentAtomically };
+export { withDocumentTransaction, documentContentVersion, readDocumentSnapshot, writeDocumentAtomically };

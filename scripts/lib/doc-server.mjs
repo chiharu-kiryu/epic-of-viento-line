@@ -11,6 +11,7 @@ import { resolveAssetRoot, resolveAssetRequest, registeredAssetCatalog } from '.
 import {
   API_RESPONSE,
   API_RESPONSE_DEFAULTS,
+  normalizeDocumentVersion,
 } from './doc-api-contract.mjs';
 
 const EDIT_ROOT_PREFIXES = [`${DOCUMENTS_PATH}/`, `docs-standard/${DOCUMENTS_PATH}/`];
@@ -136,19 +137,7 @@ function safePathFromQuery(rawPath) {
 }
 
 function normalizeLockVersion(rawVersion) {
-  if (typeof rawVersion === 'number' && Number.isFinite(rawVersion)) {
-    return String(rawVersion);
-  }
-  if (typeof rawVersion === 'string') {
-    const normalized = rawVersion.trim();
-    if (!normalized) {
-      return '';
-    }
-    if (/^\d+(?:\.\d+)?$/.test(normalized)) {
-      return normalized;
-    }
-  }
-  return '';
+  return normalizeDocumentVersion(rawVersion);
 }
 
 function normalizeStandardizeSourceFilter(rawPath = '') {
