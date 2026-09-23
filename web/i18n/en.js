@@ -15,6 +15,7 @@ export default {
   "放弃修改": "Discard changes",
   "类型名称": "Type name",
   "类型标识": "Type ID",
+  '类型标识已存在，请使用其他标识。': 'This type ID already exists. Please choose another ID.',
   "默认子目录": "Default folder",
   "解析方式": "Parsing mode",
   "字段与段落": "Fields and paragraphs",

@@ -1,0 +1,294 @@
+TAP version 13
+# Subtest: reopening an aborted export ignores its late failure and allows a fresh export
+ok 1 - reopening an aborted export ignores its late failure and allows a fresh export # SKIP test name does not match pattern
+  ---
+  duration_ms: 1.210034
+  ...
+# Subtest: an aborted export arriving after reopen is released without blocking the new dialog
+ok 2 - an aborted export arriving after reopen is released without blocking the new dialog # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.071336
+  ...
+# Subtest: opening export during a save cannot leave a permanently busy snapshot
+ok 3 - opening export during a save cannot leave a permanently busy snapshot # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.065655
+  ...
+# Subtest: an expired native export can be regenerated in the same dialog after cancelling its save picker
+ok 4 - an expired native export can be regenerated in the same dialog after cancelling its save picker # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.082668
+  ...
+# Subtest: native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+ok 5 - native save failures retain a retryable package and keep close/options guarded only while the picker is pending # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.063762
+  ...
+# Subtest: cancelling media import during structured insertion keeps the draft and uploaded assets
+ok 6 - cancelling media import during structured insertion keeps the draft and uploaded assets # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.058481
+  ...
+# Subtest: late media preparation cannot overwrite a draft whose content changed
+ok 7 - late media preparation cannot overwrite a draft whose content changed # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.059343
+  ...
+# Subtest: existing media still inserts into an unchanged structured draft and releases the editor
+ok 8 - existing media still inserts into an unchanged structured draft and releases the editor # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.149314
+  ...
+# Subtest: type settings distinguish creation from editing and retain a rejected new draft for retry or cancel
+not ok 9 - type settings distinguish creation from editing and retain a rejected new draft for retry or cancel
+  ---
+  duration_ms: 38.79834
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-dialogs.test.mjs:209:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + undefined
+    - true
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-dialogs.test.mjs:221:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template preview and save retain original BOM and line endings when only its label changes
+ok 10 - template preview and save retain original BOM and line endings when only its label changes # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.1892
+  ...
+# Subtest: returning from saved project settings keeps editing locked until the new index applies
+ok 11 - returning from saved project settings keeps editing locked until the new index applies # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.071846
+  ...
+# Subtest: discarding edits after a template save cannot leave a closed dialog marked dirty
+ok 12 - discarding edits after a template save cannot leave a closed dialog marked dirty # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.058351
+  ...
+# Subtest: a failed project index application keeps the settings available for retry without another save
+ok 13 - a failed project index application keeps the settings available for retry without another save # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.053441
+  ...
+# Subtest: type/template API applies live to creation, indexing and exports at an arbitrary document location
+ok 14 - type/template API applies live to creation, indexing and exports at an arbitrary document location # SKIP test name does not match pattern
+  ---
+  duration_ms: 1.153196
+  ...
+# Subtest: template edits preserve source and descriptors, reject stale saves, and prune only their own previous revision
+ok 15 - template edits preserve source and descriptors, reject stale saves, and prune only their own previous revision # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.159924
+  ...
+# Subtest: adding an existing type ID cannot overwrite its rules or template; editing it still works
+not ok 16 - adding an existing type ID cannot overwrite its rules or template; editing it still works
+  ---
+  duration_ms: 592.278243
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-engine.test.mjs:75:1'
+  failureType: 'testCodeFailure'
+  error: '{"status":200,"payload":{"ok":true,"data":{"workspace":{"id":"d7fc187e-fc40-4be6-9860-20a0cd202f4e","name":"独立设定","version":3,"paths":{"documents":"documents","templates":"templates","metadata":"metadata"},"configurable":true,"projectTypes":true,"documentTypes":[{"id":"document","label":"档案","directory":"","parserProfile":"structured","template":"document.md","templateSource":"templates/document.md","content":"# 新建档案\\n\\n## 内容\\n\\n"},{"id":"character","label":"自定义种族","directory":"species","parserProfile":"structured","template":"types/character/5f9ef069497c513455c7c8a3a2824c303527c9573060e0623ac6898a6a85edba.md","parserOptions":{"titleField":"名称"},"fieldGroups":[{"title":"生命特征","fields":["灵魂","繁衍"]}],"templateSource":"templates/types/character/5f9ef069497c513455c7c8a3a2824c303527c9573060e0623ac6898a6a85edba.md","content":"# 新建自定义种族\\n\\n"},{"id":"story","label":"故事","directory":"stories","parserProfile":"prose","template":"story.md","templateSource":"templates/story.md","content":"# 新建故事\\n\\n"},{"id":"place","label":"地点","directory":"places","parserProfile":"structured","template":"place.md","templateSource":"templates/place.md","content":"# 新建地点\\n\\n## 概况\\n\\n## 环境\\n\\n## 历史与关联\\n\\n"},{"id":"organization","label":"组织","directory":"organizations","parserProfile":"structured","template":"organization.md","templateSource":"templates/organization.md","content":"# 新建组织\\n\\n## 宗旨\\n\\n## 成员与关系\\n\\n## 历史\\n\\n"},{"id":"concept","label":"设定","directory":"concepts","parserProfile":"structured","template":"concept.md","templateSource":"templates/concept.md","content":"# 新建设定\\n\\n## 定义\\n\\n## 规则与边界\\n\\n## 关联\\n\\n"}]},"revision":"db4ec321fba4f87002d4b6229f9f20222c0c7fd045abce17b5ec2d49343c52af","entries":[{"type":{"id":"document","label":"档案","directory":"","parserProfile":"structured","template":"document.md"},"content":"# 新建档案\\n\\n## 内容\\n\\n","format":"md","problem":""},{"type":{"id":"character","label":"自定义种族","directory":"species","parserProfile":"structured","template":"types/character/5f9ef069497c513455c7c8a3a2824c303527c9573060e0623ac6898a6a85edba.md","parserOptions":{"titleField":"名称"},"fieldGroups":[{"title":"生命特征","fields":["灵魂","繁衍"]}]},"content":"# 新类型\\n","format":"md","problem":""},{"type":{"id":"story","label":"故事","directory":"stories","parserProfile":"prose","template":"story.md"},"content":"# 新建故事\\n\\n","format":"md","problem":""},{"type":{"id":"place","label":"地点","directory":"places","parserProfile":"structured","template":"place.md"},"content":"# 新建地点\\n\\n## 概况\\n\\n## 环境\\n\\n## 历史与关联\\n\\n","format":"md","problem":""},{"type":{"id":"organization","label":"组织","directory":"organizations","parserProfile":"structured","template":"organization.md"},"content":"# 新建组织\\n\\n## 宗旨\\n\\n## 成员与关系\\n\\n## 历史\\n\\n","format":"md","problem":""},{"type":{"id":"concept","label":"设定","directory":"concepts","parserProfile":"structured","template":"concept.md"},"content":"# 新建设定\\n\\n## 定义\\n\\n## 规则与边界\\n\\n## 关联\\n\\n","format":"md","problem":""}],"warnings":[],"preview":{"title":"新类型","layout":{"schemaVersion":"viento-layout-v1","sections":[{"id":"section-1","title":"内容","level":1,"anchor":"","blocks":[]}]},"parser":"heading-text"}},"requestId":"1790131169516-2"},"data":{"workspace":{"id":"d7fc187e-fc40-4be6-9860-20a0cd202f4e","name":"独立设定","version":3,"paths":{"documents":"documents","templates":"templates","metadata":"metadata"},"configurable":true,"projectTypes":true,"documentTypes":[{"id":"document","label":"档案","directory":"","parserProfile":"structured","template":"document.md","templateSource":"templates/document.md","content":"# 新建档案\\n\\n## 内容\\n\\n"},{"id":"character","label":"自定义种族","directory":"species","parserProfile":"structured","template":"types/character/5f9ef069497c513455c7c8a3a2824c303527c9573060e0623ac6898a6a85edba.md","parserOptions":{"titleField":"名称"},"fieldGroups":[{"title":"生命特征","fields":["灵魂","繁衍"]}],"templateSource":"templates/types/character/5f9ef069497c513455c7c8a3a2824c303527c9573060e0623ac6898a6a85edba.md","content":"# 新建自定义种族\\n\\n"},{"id":"story","label":"故事","directory":"stories","parserProfile":"prose","template":"story.md","templateSource":"templates/story.md","content":"# 新建故事\\n\\n"},{"id":"place","label":"地点","directory":"places","parserProfile":"structured","template":"place.md","templateSource":"templates/place.md","content":"# 新建地点\\n\\n## 概况\\n\\n## 环境\\n\\n## 历史与关联\\n\\n"},{"id":"organization","label":"组织","directory":"organizations","parserProfile":"structured","template":"organization.md","templateSource":"templates/organization.md","content":"# 新建组织\\n\\n## 宗旨\\n\\n## 成员与关系\\n\\n## 历史\\n\\n"},{"id":"concept","label":"设定","directory":"concepts","parserProfile":"structured","template":"concept.md","templateSource":"templates/concept.md","content":"# 新建设定\\n\\n## 定义\\n\\n## 规则与边界\\n\\n## 关联\\n\\n"}]},"revision":"db4ec321fba4f87002d4b6229f9f20222c0c7fd045abce17b5ec2d49343c52af","entries":[{"type":{"id":"document","label":"档案","directory":"","parserProfile":"structured","template":"document.md"},"content":"# 新建档案\\n\\n## 内容\\n\\n","format":"md","problem":""},{"type":{"id":"character","label":"自定义种族","directory":"species","parserProfile":"structured","template":"types/character/5f9ef069497c513455c7c8a3a2824c303527c9573060e0623ac6898a6a85edba.md","parserOptions":{"titleField":"名称"},"fieldGroups":[{"title":"生命特征","fields":["灵魂","繁衍"]}]},"content":"# 新类型\\n","format":"md","problem":""},{"type":{"id":"story","label":"故事","directory":"stories","parserProfile":"prose","template":"story.md"},"content":"# 新建故事\\n\\n","format":"md","problem":""},{"type":{"id":"place","label":"地点","directory":"places","parserProfile":"structured","template":"place.md"},"content":"# 新建地点\\n\\n## 概况\\n\\n## 环境\\n\\n## 历史与关联\\n\\n","format":"md","problem":""},{"type":{"id":"organization","label":"组织","directory":"organizations","parserProfile":"structured","template":"organization.md"},"content":"# 新建组织\\n\\n## 宗旨\\n\\n## 成员与关系\\n\\n## 历史\\n\\n","format":"md","problem":""},{"type":{"id":"concept","label":"设定","directory":"concepts","parserProfile":"structured","template":"concept.md"},"content":"# 新建设定\\n\\n## 定义\\n\\n## 规则与边界\\n\\n## 关联\\n\\n","format":"md","problem":""}],"warnings":[],"preview":{"title":"新类型","layout":{"schemaVersion":"viento-layout-v1","sections":[{"id":"section-1","title":"内容","level":1,"anchor":"","blocks":[]}]},"parser":"heading-text"}}}'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 409
+  actual: 200
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-engine.test.mjs:89:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: type preview and save reject an unusable default location: hidden folder
+not ok 17 - type preview and save reject an unusable default location: hidden folder
+  ---
+  duration_ms: 512.777506
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-engine.test.mjs:108:4'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+    +   200,
+    +   200
+    -   400,
+    -   400
+      ]
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 400
+    1: 400
+  actual:
+    0: 200
+    1: 200
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-engine.test.mjs:118:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: type preview and save reject an unusable default location: nested hidden folder
+not ok 18 - type preview and save reject an unusable default location: nested hidden folder
+  ---
+  duration_ms: 513.034959
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-engine.test.mjs:108:4'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+    +   200,
+    +   200
+    -   400,
+    -   400
+      ]
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 400
+    1: 400
+  actual:
+    0: 200
+    1: 200
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-engine.test.mjs:118:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: type preview and save reject an unusable default location: reserved folder
+not ok 19 - type preview and save reject an unusable default location: reserved folder
+  ---
+  duration_ms: 501.915372
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-engine.test.mjs:108:4'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+    +   200,
+    +   200
+    -   400,
+    -   400
+      ]
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 400
+    1: 400
+  actual:
+    0: 200
+    1: 200
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-engine.test.mjs:118:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: type preview and save reject an unusable default location: nested reserved folder
+not ok 20 - type preview and save reject an unusable default location: nested reserved folder
+  ---
+  duration_ms: 503.838667
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-engine.test.mjs:108:4'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+    +   200,
+    +   200
+    -   400,
+    -   400
+      ]
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 400
+    1: 400
+  actual:
+    0: 200
+    1: 200
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-engine.test.mjs:118:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: type preview and save reject an unusable default location: overlong UTF-8 folder
+not ok 21 - type preview and save reject an unusable default location: overlong UTF-8 folder
+  ---
+  duration_ms: 504.522276
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-engine.test.mjs:108:4'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+    +   200,
+    +   200
+    -   400,
+    -   400
+      ]
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 400
+    1: 400
+  actual:
+    0: 200
+    1: 200
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-engine.test.mjs:118:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: old type locations remain readable and can be repaired before creating documents at the new default
+ok 22 - old type locations remain readable and can be repaired before creating documents at the new default
+  ---
+  duration_ms: 534.289058
+  ...
+# Subtest: malformed templates and escaping configuration cannot publish changes
+ok 23 - malformed templates and escaping configuration cannot publish changes # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.141109
+  ...
+# Subtest: project rules replace historical notation and path guesses in the same parser
+ok 24 - project rules replace historical notation and path guesses in the same parser # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.058642
+  ...
+# Subtest: official example is an independent definition; adoption preserves IDs, sources, ownership and original templates
+ok 25 - official example is an independent definition; adoption preserves IDs, sources, ownership and original templates # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.033333
+  ...
+1..25
+# tests 25
+# suites 0
+# pass 1
+# fail 7
+# cancelled 0
+# skipped 17
+# todo 0
+# duration_ms 3844.36123

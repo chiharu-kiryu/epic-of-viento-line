@@ -1,0 +1,135 @@
+TAP version 13
+# Subtest: reopening an aborted export ignores its late failure and allows a fresh export
+ok 1 - reopening an aborted export ignores its late failure and allows a fresh export
+  ---
+  duration_ms: 24.347596
+  ...
+# Subtest: an aborted export arriving after reopen is released without blocking the new dialog
+ok 2 - an aborted export arriving after reopen is released without blocking the new dialog
+  ---
+  duration_ms: 11.284589
+  ...
+# Subtest: opening export during a save cannot leave a permanently busy snapshot
+ok 3 - opening export during a save cannot leave a permanently busy snapshot
+  ---
+  duration_ms: 6.428603
+  ...
+# Subtest: an expired native export can be regenerated in the same dialog after cancelling its save picker
+ok 4 - an expired native export can be regenerated in the same dialog after cancelling its save picker
+  ---
+  duration_ms: 12.443581
+  ...
+# Subtest: native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+ok 5 - native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+  ---
+  duration_ms: 9.695901
+  ...
+# Subtest: cancelling media import during structured insertion keeps the draft and uploaded assets
+ok 6 - cancelling media import during structured insertion keeps the draft and uploaded assets
+  ---
+  duration_ms: 8.662327
+  ...
+# Subtest: late media preparation cannot overwrite a draft whose content changed
+ok 7 - late media preparation cannot overwrite a draft whose content changed
+  ---
+  duration_ms: 7.922141
+  ...
+# Subtest: existing media still inserts into an unchanged structured draft and releases the editor
+ok 8 - existing media still inserts into an unchanged structured draft and releases the editor
+  ---
+  duration_ms: 8.425657
+  ...
+# Subtest: type settings distinguish creation from editing and retain a rejected new draft for retry or cancel
+ok 9 - type settings distinguish creation from editing and retain a rejected new draft for retry or cancel
+  ---
+  duration_ms: 49.530479
+  ...
+# Subtest: template preview and save retain original BOM and line endings when only its label changes
+ok 10 - template preview and save retain original BOM and line endings when only its label changes
+  ---
+  duration_ms: 27.036144
+  ...
+# Subtest: returning from saved project settings keeps editing locked until the new index applies
+ok 11 - returning from saved project settings keeps editing locked until the new index applies
+  ---
+  duration_ms: 19.013182
+  ...
+# Subtest: discarding edits after a template save cannot leave a closed dialog marked dirty
+ok 12 - discarding edits after a template save cannot leave a closed dialog marked dirty
+  ---
+  duration_ms: 25.672774
+  ...
+# Subtest: a failed project index application keeps the settings available for retry without another save
+ok 13 - a failed project index application keeps the settings available for retry without another save
+  ---
+  duration_ms: 23.609043
+  ...
+# Subtest: type/template API applies live to creation, indexing and exports at an arbitrary document location
+ok 14 - type/template API applies live to creation, indexing and exports at an arbitrary document location
+  ---
+  duration_ms: 901.501802
+  ...
+# Subtest: template edits preserve source and descriptors, reject stale saves, and prune only their own previous revision
+ok 15 - template edits preserve source and descriptors, reject stale saves, and prune only their own previous revision
+  ---
+  duration_ms: 76.011636
+  ...
+# Subtest: adding an existing type ID cannot overwrite its rules or template; editing it still works
+ok 16 - adding an existing type ID cannot overwrite its rules or template; editing it still works
+  ---
+  duration_ms: 533.650444
+  ...
+# Subtest: type preview and save reject an unusable default location: hidden folder
+ok 17 - type preview and save reject an unusable default location: hidden folder
+  ---
+  duration_ms: 228.866615
+  ...
+# Subtest: type preview and save reject an unusable default location: nested hidden folder
+ok 18 - type preview and save reject an unusable default location: nested hidden folder
+  ---
+  duration_ms: 228.980027
+  ...
+# Subtest: type preview and save reject an unusable default location: reserved folder
+ok 19 - type preview and save reject an unusable default location: reserved folder
+  ---
+  duration_ms: 227.14952
+  ...
+# Subtest: type preview and save reject an unusable default location: nested reserved folder
+ok 20 - type preview and save reject an unusable default location: nested reserved folder
+  ---
+  duration_ms: 227.590437
+  ...
+# Subtest: type preview and save reject an unusable default location: overlong UTF-8 folder
+ok 21 - type preview and save reject an unusable default location: overlong UTF-8 folder
+  ---
+  duration_ms: 230.301977
+  ...
+# Subtest: old type locations remain readable and can be repaired before creating documents at the new default
+ok 22 - old type locations remain readable and can be repaired before creating documents at the new default
+  ---
+  duration_ms: 526.688064
+  ...
+# Subtest: malformed templates and escaping configuration cannot publish changes
+ok 23 - malformed templates and escaping configuration cannot publish changes
+  ---
+  duration_ms: 53.624852
+  ...
+# Subtest: project rules replace historical notation and path guesses in the same parser
+ok 24 - project rules replace historical notation and path guesses in the same parser
+  ---
+  duration_ms: 0.670244
+  ...
+# Subtest: official example is an independent definition; adoption preserves IDs, sources, ownership and original templates
+ok 25 - official example is an independent definition; adoption preserves IDs, sources, ownership and original templates
+  ---
+  duration_ms: 329.464453
+  ...
+1..25
+# tests 25
+# suites 0
+# pass 25
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3740.658958

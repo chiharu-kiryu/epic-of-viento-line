@@ -1,0 +1,57 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.2",
+  "buildVersion": "0.3.2",
+  "gitBase": "759fe3caf341f6b07c4e3b14349a0ec31ab04f37",
+  "bugs": [
+    "N59",
+    "N60",
+    "N61",
+    "N62",
+    "N63"
+  ],
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 243,
+    "passed": 242,
+    "failed": 0,
+    "skipped": 1,
+    "skipReason": "Native archive interoperability tool not configured; native archive implementation unchanged",
+    "javascriptSyntaxFiles": 120,
+    "apiContractPassed": true,
+    "log": "application.log"
+  },
+  "cargoMetadata": "offline locked; application 0.3.2 and a single glib 0.18.5 from src-tauri/vendor/glib",
+  "nextVersion": "b.3.3",
+  "functionNetworkRevision": 22,
+  "files": {
+    "VERSION": "b65eb60961429ea68f46605be7a84fdab5ad4c4836dfb7769524c16a9515dbc2",
+    "package.json": "dba805ef9ddc98d97c44be8cd56eea5183e110ba9c62aa3067a8b797eac0ad96",
+    "package-lock.json": "3249f7a2df8b801102c2d0df3e26e97894fedbe42b403e90c17a9fadc615cb54",
+    "src-tauri/Cargo.toml": "5b3f7e04312ef68e1ac31b10725495a8a14dc5b90110a09eaa691338a196c1ea",
+    "src-tauri/Cargo.lock": "0fde7c13e93dc8dbda05ad18b2bf8a18b1922e170e86a6593918c67818239b39",
+    "src-tauri/tauri.conf.json": "02cedbab232596e6c993639ceef984e3f7798bf2e5ece9d80903c27670c38dd1",
+    "web/index.html": "cdae10524d60556d45883b7dd4d84e0bc9fb8770b91afb737f6b918dfc0bddbf",
+    "desktop/ui/index.html": "8eeeb1cce0b874e897eb00d251e85b0ef48e498aa3b6bcb5180e31a6b4084ea6",
+    "scripts/lib/export-package.mjs": "f0cbb51eec619763d035800c328153dac03ca92f4fedfac9278e4afb8270280f",
+    "scripts/lib/export-render.mjs": "55cf439f71ad851653e497654aa33771185fb829c48945b93341083ed87c1475",
+    "scripts/lib/image-index.mjs": "ec7c45970a46659b6e42962a33782124dd3d4f6c7fccdf1ab4d34be54702f0f9",
+    "scripts/tests/export.test.mjs": "84bbf6cbab91b755c4421c5be2d86e708b775d9da75f54e063b04c0fcd05e8d1",
+    "scripts/lib/project-service.mjs": "e50cb1a7abdbff7027c561b3feaa531e2543163a538f20850df62e4f459878bd",
+    "scripts/tests/editor-dialogs.test.mjs": "da8001dc92a2658c853bcc6df4e065e38aae8e59d7e331135d4c519c0d75619c",
+    "scripts/tests/project-engine.test.mjs": "27062dab6b98dcfd8ba7c60efb591c0d9a414f8671f1872cf138cf4fe265f6e9",
+    "web/i18n/en.js": "04f5eb4b370a643710026b015a87ab1b7c76dd4219bcf4d83261949967d20123",
+    "web/modules/app-project-settings.js": "f506a65db4972924f6ff93070920f13c0d1cba4add19da7b0f2cd8467ca79d5f"
+  },
+  "nativeTestsRerun": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "functionNetworkValidation": "network.json",
+  "sourceArchive": {
+    "filesVerified": 431,
+    "allArchivedBytesMatchSource": true,
+    "vendoredGlibFilesVerified": 121,
+    "unpackedCargoMetadataVerified": true,
+    "temporaryFilesRemoved": true
+  }
+}

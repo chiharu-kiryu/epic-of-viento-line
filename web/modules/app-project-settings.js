@@ -38,7 +38,7 @@ export function setupProjectSettings({ getContext, applied, setBusy }) {
       allowedFieldKeys: lines('projectAllowedFields'), multilineFieldKeys: lines('projectMultilineFields'), boundaryFieldKeys: lines('projectBoundaryFields'),
     };
     if (el('projectTitleField').value.trim()) parserOptions.titleField = el('projectTitleField').value.trim();
-    return { revision: configuration?.revision, type: { ...previous,
+    return { revision: configuration?.revision, create: !selected, type: { ...previous,
       id: el('projectTypeId').value.trim(), label: el('projectTypeLabel').value.trim(), directory: el('projectTypeDirectory').value.trim(), parserProfile: el('projectTypeProfile').value,
       parserOptions, fieldGroups: [...el('projectFieldGroups').children].map((row) => ({ title: row.querySelector('input').value.trim(), fields: row.querySelector('textarea').value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean) })),
     }, format: el('projectTemplateFormat').value, content: serializeSourceDraft(entry?.content || '', el('projectTemplateContent').value) };

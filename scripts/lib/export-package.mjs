@@ -8,7 +8,8 @@ import yazl from 'yazl';
 import { portablePath, readWorkspace, readRegistry, resolveAssetRoot, walkFiles, assertPortableFileTree } from './workspace.mjs';
 import { workspacePaths, resolveDocumentDefinition } from './project-layout.mjs';
 import { resolveContainedPath } from './contained-path.mjs';
-import { mediaUrl } from './media-format.mjs';
+import { collectDocumentMedia, mediaKindForName, mediaUrl } from './media-format.mjs';
+import { collectAssetImageRefs } from './image-index.mjs';
 import { parseSourceContent } from '../standardize-docs/doc-factory.mjs';
 import { buildDocumentLayout } from '../standardize-docs/layout.mjs';
 import { renderExport } from './export-render.mjs';
@@ -133,7 +134,11 @@ export async function planExport(root, options = {}, signal) {
       if (!registered && url.startsWith('/asset-files/')) throw exportError(`素材引用未登记：${src}`);
       const relative = registered?.location.path || url.slice('/assets/'.length).split('/').map(decodeURIComponent).join('/');
       const id = registered?.id || digest(relative).slice(0, 32);
-      if (!usedAssets.has(id)) usedAssets.set(id, { ...registered, id, name: registered?.name || path.basename(relative), relative, path: `assets/${id}${path.extname(relative).toLowerCase()}`, expected: registered?.content });
+      if (!usedAssets.has(id)) usedAssets.set(id, {
+        ...registered, id, name: registered?.name || path.basename(relative),
+        kind: registered?.kind || mediaKindForName(relative) || 'other',
+        relative, path: `assets/${id}${path.extname(relative).toLowerCase()}`, expected: registered?.content,
+      });
       return usedAssets.get(id);
     }
     const documents = [];
@@ -147,7 +152,18 @@ export async function planExport(root, options = {}, signal) {
       entry.expected = { size: raw.length, sha256: digest(raw) };
       const parsed = parseSourceContent(raw.toString('utf8'), item.sourcePath, resolveDocumentDefinition(manifest, item.sourcePath, item.descriptor));
       if (parsed.parseError) throw exportError(`正文解析失败，请修正格式后导出：${item.sourcePath}`);
-      const linkedAssets = (item.descriptor.assetBindings || []).map((binding) => resolveMedia(`asset:${binding.assetId}`));
+      // Match the reference index: declarations and legacy image paths also
+      // carry assets, even when the layout has no inline player or image.
+      const media = collectDocumentMedia(parsed.blocks);
+      const references = [
+        ...(item.descriptor.assetBindings || []).map((binding) => `asset:${binding.assetId}`),
+        ...media.urls,
+        ...collectAssetImageRefs(media.text, item.sourcePath).map((file) => `/${file.split('/').map(encodeURIComponent).join('/')}`),
+      ];
+      const linkedAssets = [...new Map(references.map((src) => {
+        const asset = resolveMedia(src);
+        return [asset.id, asset];
+      })).values()];
       documents.push({ ...item, title: parsed.title, layout: buildDocumentLayout(parsed), linkedAssets });
       if (item.descriptor.id) await addFile(root, `metadata/documents/${item.descriptor.id}.json`);
     }

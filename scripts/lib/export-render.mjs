@@ -10,8 +10,7 @@ export function renderExport(documents, format, resolveMedia) {
   const html = format === 'html';
   const escape = html ? escapeHtml : escapeMarkdown;
   let embedded = new Set();
-  function media(value) {
-    const asset = resolveMedia(value.src);
+  function media(value, asset = resolveMedia(value.src)) {
     embedded.add(asset.path);
     const url = asset.path.split('/').map(encodeURIComponent).join('/');
     const caption = value.caption || value.alt || asset.name;
@@ -90,7 +89,7 @@ export function renderExport(documents, format, resolveMedia) {
       ...(section.blocks || []).map(block),
     ].join('\n\n')).join('\n\n');
     const linked = (doc.linkedAssets || []).filter((asset) => !embedded.has(asset.path)).map((asset) => MEDIA_KINDS.includes(asset.kind)
-      ? media({ type: asset.kind, src: `asset:${asset.id}`, caption: asset.name })
+      ? media({ type: asset.kind, caption: asset.name }, asset)
       : html ? `<p><a href="${escapeHtml(asset.path.split('/').map(encodeURIComponent).join('/'))}" download>${escape(asset.name)}</a></p>`
         : `[${escape(asset.name)}](<${asset.path.split('/').map(encodeURIComponent).join('/')}>)`).join('\n\n');
     const body = [title, sections, linked ? heading('关联素材', level + 1) : '', linked].filter(Boolean).join('\n\n');

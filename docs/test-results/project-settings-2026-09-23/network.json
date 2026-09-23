@@ -1,0 +1,16 @@
+{
+  "revision": 21,
+  "sourceFingerprints": 146,
+  "jsModules": 126,
+  "localImportStatements": 373,
+  "externalImports": 271,
+  "explicitEventBindings": 95,
+  "testDeclarations": 218,
+  "nodeSources": 146,
+  "functionalEdges": 173,
+  "cycles": 1,
+  "inlinePageScripts": 1,
+  "documentLinks": 350,
+  "embeddedDataMatches": true,
+  "allChecksPassed": true
+}

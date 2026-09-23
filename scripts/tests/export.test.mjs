@@ -6,7 +6,7 @@ import { randomUUID, createHash } from 'node:crypto';
 import { inflateRawSync } from 'node:zlib';
 import vm from 'node:vm';
 import { setTimeout as delay } from 'node:timers/promises';
-import { fixture, write, serve, request } from './helpers.mjs';
+import { fixture, write, node, serve, request } from './helpers.mjs';
 import { readRegistry, registerWorkspace, writeJson, assertPortableFileTree } from '../lib/workspace.mjs';
 import { PROJECT_DEFAULTS } from '../lib/project-layout.mjs';
 import { exportFileName, planExport, writeExportZip } from '../lib/export-package.mjs';
@@ -133,6 +133,142 @@ test('explicit audio bindings export a player even when the source does not embe
   assert.equal((html.match(/<audio controls/g) || []).length, 1);
   assert.match(html, /关联素材/);
   assert.match(html, new RegExp(`assets/${audio.id}.m4a`));
+});
+
+for (const extension of ['md', 'txt', 'json', 'yaml']) test(`sharing carries declared asset IDs recognized by the ${extension} reference index`, async (t) => {
+  const { root, documents, image, audio } = await project(t);
+  const missingExample = `asset:${randomUUID()}`;
+  const fields = { title: '声明引用', 引用: [`asset:${image.id}`, { 配音: `asset://${audio.id.toUpperCase()}` }] };
+  const content = extension === 'json' ? JSON.stringify(fields, null, 2)
+    : extension === 'yaml' ? `title: 声明引用\n引用:\n  - asset:${image.id}\n  - 配音: asset://${audio.id.toUpperCase()}\n# ${missingExample}\n`
+      : `${extension === 'md' ? '# ' : ''}声明引用\n\nasset:${image.id}\n\n配音：asset://${audio.id.toUpperCase()}\n\n\`\`\`text\n${missingExample}\n\`\`\`\n`;
+  const source = `${documents}/声明.${extension}`;
+  await write(root, source, content);
+  await registerWorkspace(root);
+  const registry = await readRegistry(root);
+  const registered = registry.documents.find((record) => record.sourcePath === source);
+  await node(root, ['scripts/standardize-docs.mjs']);
+  await node(root, ['scripts/build-static-doc-site.mjs']);
+  const index = JSON.parse(await fs.readFile(path.join(root, '.viento/cache/indexes/documents.json'), 'utf8'));
+  assert.deepEqual(index.docs.find((doc) => doc.id === registered.id).assetRefs.sort(), [image.id, audio.id].sort());
+  for (const format of ['html', 'markdown']) {
+    const plan = await planExport(root, { kind: 'document', format, path: source });
+    assert.equal(plan.assetCount, 2, 'Every indexed declaration must survive sharing');
+    const output = path.join(root, `declarations-${extension}-${format}.zip`);
+    await writeExportZip(plan, output);
+    const { files, manifest } = unzip(await fs.readFile(output));
+    assert.deepEqual(manifest.assets.map((asset) => asset.id).sort(), [image.id, audio.id].sort());
+    assert.equal(files.get(`sources/${source}`).toString(), content);
+    for (const asset of [image, audio]) {
+      assert.deepEqual(files.get(`assets/${asset.id}${path.extname(asset.location.path)}`), await fs.readFile(path.join(root, '外置素材', asset.location.path)));
+      assert.deepEqual(files.get(`metadata/assets/${asset.id}.json`), await fs.readFile(path.join(root, 'metadata/assets', `${asset.id}.json`)));
+    }
+    const body = files.get(format === 'html' ? 'index.html' : 'document.md').toString();
+    assert.match(body, new RegExp(`assets/${image.id}.png`));
+    assert.match(body, new RegExp(`assets/${audio.id}.m4a`));
+    if (format === 'html') {
+      assert.equal((body.match(/<img /g) || []).length, 1);
+      assert.equal((body.match(/<audio controls/g) || []).length, 1);
+    }
+    assert.ok(![...files.keys()].some((name) => name.includes('未引用')));
+  }
+  assert.deepEqual(await readRegistry(root), registry);
+});
+
+test('multiple attachment roles share one player per document while keeping each owned story complete', async (t) => {
+  const { root, documents, owner, image, audio } = await project(t);
+  owner.assetBindings = [
+    { assetId: image.id, role: 'portrait' }, { assetId: image.id, role: 'cover' },
+    { assetId: audio.id, role: 'theme' }, { assetId: audio.id, role: 'voice' },
+  ];
+  await writeJson(path.join(root, 'metadata/documents', `${owner.id}.json`), owner);
+  const registry = await readRegistry(root);
+  for (const format of ['html', 'markdown']) {
+    const plan = await planExport(root, { kind: 'document', format, path: `${documents}/角色.md` });
+    assert.equal(plan.documentCount, 2);
+    assert.equal(plan.assetCount, 3);
+    const body = plan.entries.find((entry) => entry.path === (format === 'html' ? 'index.html' : 'document.md')).buffer.toString();
+    if (format === 'html') {
+      assert.equal((body.match(/<img /g) || []).length, 1);
+      for (const article of body.matchAll(/<article\b[^>]*>([\s\S]*?)<\/article>/g)) assert.equal((article[1].match(/<audio controls/g) || []).length, 1);
+    } else assert.equal((body.match(/\[音频：/g) || []).length, 2);
+  }
+  assert.deepEqual(await readRegistry(root), registry, 'Roles and original attachments stay intact');
+});
+
+test('declared missing assets reject sharing, then retry succeeds after the reference is repaired', async (t) => {
+  const { root, documents, image } = await project(t);
+  const source = `${documents}/缺失引用.md`;
+  await write(root, source, `# 声明引用\n\nasset:${randomUUID()}\n`);
+  const service = createExportService(root);
+  const options = { kind: 'document', format: 'html', path: source };
+  await assert.rejects(service.create(options), /未登记/);
+  await write(root, source, `# 声明引用\n\nasset:${image.id}\n`);
+  await fs.rename(path.join(root, '外置素材', image.location.path), path.join(root, 'held-image.png'));
+  await assert.rejects(service.create(options), /缺失/);
+  await fs.rename(path.join(root, 'held-image.png'), path.join(root, '外置素材', image.location.path));
+  const job = await service.create(options);
+  assert.equal(job.assetCount, 1);
+  const { manifest } = unzip(await fs.readFile(service.get(job.id).file));
+  assert.deepEqual(manifest.assets.map((asset) => asset.id), [image.id]);
+  await service.release(job.id);
+  assert.deepEqual(await fs.readdir(path.join(root, '.viento/cache/exports')), []);
+});
+
+test('sharing retains indexed legacy image paths, relative links and unregistered local images', async (t) => {
+  const { root, documents, image } = await project(t);
+  const source = `${documents}/chapters/引用.md`;
+  const raw = '# 旧图片引用\n\n[封面](../../assets/立绘.png)\n\n封面：assets/立绘.png\n\n原图：assets/未登记%2520.png\n\n```text\nassets/示例缺失.png\n```\n';
+  await write(root, source, raw);
+  await registerWorkspace(root);
+  await fs.rename(path.join(root, '外置素材', image.location.path), path.join(root, '外置素材', `${image.id}.png`));
+  image.location.path = `${image.id}.png`;
+  await writeJson(path.join(root, 'metadata/assets', `${image.id}.json`), image);
+  await write(root, '外置素材/未登记%20.png', 'unregistered image bytes');
+  const registry = await readRegistry(root);
+  const doc = registry.documents.find((record) => record.sourcePath === source);
+  await node(root, ['scripts/standardize-docs.mjs']);
+  await node(root, ['scripts/build-static-doc-site.mjs']);
+  const index = JSON.parse(await fs.readFile(path.join(root, '.viento/cache/indexes/documents.json'), 'utf8'));
+  const indexed = index.docs.find((item) => item.id === doc.id);
+  assert.deepEqual(indexed.assetRefs, [image.id]);
+  assert.deepEqual(indexed.unresolvedAssetPaths, ['assets/未登记%20.png']);
+  for (const format of ['html', 'markdown']) {
+    const plan = await planExport(root, { kind: 'document', format, path: source });
+    assert.equal(plan.assetCount, 2);
+    const output = path.join(root, `legacy-images-${format}.zip`);
+    await writeExportZip(plan, output);
+    const { files, manifest } = unzip(await fs.readFile(output));
+    assert.equal(manifest.assets.length, 2);
+    assert.equal(files.get(`sources/${source}`).toString(), raw);
+    assert.equal(files.get(`assets/${image.id}.png`).toString(), 'binary image');
+    const unregistered = manifest.assets.find((asset) => asset.originalPath === 'assets/未登记%20.png');
+    assert.ok(unregistered);
+    assert.equal(files.get(unregistered.path).toString(), 'unregistered image bytes');
+    const body = files.get(format === 'html' ? 'index.html' : 'document.md').toString();
+    if (format === 'html') assert.equal((body.match(/<img /g) || []).length, 2);
+    else assert.equal((body.match(/!\[/g) || []).length, 2);
+  }
+  assert.deepEqual(await readRegistry(root), registry);
+});
+
+for (const version of [2, 3]) test(`v${version} relative image references resolve against the original document directory`, async (t) => {
+  const { root, documents, image } = await project(t, version);
+  const source = `${documents}/chapters/相对引用.md`;
+  await write(root, source, '# 相对引用\n\n[立绘](../../assets/立绘.png)\n\n[缺失](../../assets/缺失.png)\n');
+  await registerWorkspace(root);
+  const registered = (await readRegistry(root)).documents.find((doc) => doc.sourcePath === source);
+  await node(root, ['scripts/standardize-docs.mjs']);
+  await node(root, ['scripts/build-static-doc-site.mjs']);
+  const index = JSON.parse(await fs.readFile(path.join(root, '.viento/cache/indexes/documents.json'), 'utf8'));
+  const doc = index.docs.find((item) => item.id === registered.id);
+  assert.deepEqual(doc.assetRefs, [image.id]);
+  assert.deepEqual(doc.heroImages, [`assets/${image.location.path}`, 'assets/缺失.png']);
+  assert.deepEqual(doc.unresolvedAssetPaths, ['assets/缺失.png']);
+  const references = JSON.parse(await fs.readFile(path.join(root, '.viento/cache/indexes/references.json'), 'utf8')).references.filter((link) => link.documentId === registered.id);
+  assert.equal(references.length, 2);
+  assert.ok(references.some((link) => link.assetId === image.id && link.resolved));
+  assert.ok(references.some((link) => link.legacyPath === 'assets/缺失.png' && !link.resolved));
 });
 
 test('sharing preserves distinct percent and space filenames, registered identities and renamed aliases', async (t) => {

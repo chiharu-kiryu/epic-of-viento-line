@@ -1,0 +1,62 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.1",
+  "gitBase": "759fe3caf341f6b07c4e3b14349a0ec31ab04f37",
+  "workflows": [
+    "F31",
+    "F32",
+    "F38"
+  ],
+  "bugs": [
+    "N59",
+    "N60",
+    "N61"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 26,
+    "passed": 0,
+    "failed": 9,
+    "skipped": 17,
+    "skipReason": "Existing tests excluded by test-name-pattern",
+    "log": "before.log"
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 64,
+    "passed": 63,
+    "failed": 0,
+    "skipped": 1,
+    "newCases": 9,
+    "log": "after.log"
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 235,
+    "passed": 234,
+    "failed": 0,
+    "skipped": 1,
+    "javascriptSyntaxFiles": 120,
+    "apiContractPassed": true,
+    "log": "application.log"
+  },
+  "skipReason": "Node/Rust archive interoperability requires VIENTO_TEST_ARCHIVE_BINARY; native archive code unchanged in this round",
+  "files": {
+    "scripts/lib/export-package.mjs": "f0cbb51eec619763d035800c328153dac03ca92f4fedfac9278e4afb8270280f",
+    "scripts/lib/export-render.mjs": "55cf439f71ad851653e497654aa33771185fb829c48945b93341083ed87c1475",
+    "scripts/lib/image-index.mjs": "ec7c45970a46659b6e42962a33782124dd3d4f6c7fccdf1ab4d34be54702f0f9",
+    "scripts/tests/export.test.mjs": "84bbf6cbab91b755c4421c5be2d86e708b775d9da75f54e063b04c0fcd05e8d1"
+  },
+  "nativeTestsRerun": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "functionNetwork": {
+    "revision": 20,
+    "sourceFingerprints": 146,
+    "nodeSources": 146,
+    "localImportStatements": 372,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

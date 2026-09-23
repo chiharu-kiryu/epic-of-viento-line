@@ -31,7 +31,8 @@ const ASSET_REFERENCE_PATTERNS = [
 ];
 
 function toSourceDirPosix(relativePath) {
-  return toPosix(path.dirname(relativePath));
+  // A preview's virtual prefix is not part of the original document location.
+  return toPosix(path.dirname(relativePath.replace(/^docs-standard\//, '')));
 }
 
 function trimImageExt(fileName = '') {

@@ -1,0 +1,330 @@
+TAP version 13
+# Subtest: document exports include owned stories, exact sources and referenced external media in both formats
+ok 1 - document exports include owned stories, exact sources and referenced external media in both formats
+  ---
+  duration_ms: 173.34123
+  ...
+# Subtest: JSON and YAML typed fields export using the generic layout and media bindings
+ok 2 - JSON and YAML typed fields export using the generic layout and media bindings
+  ---
+  duration_ms: 76.262126
+  ...
+# Subtest: explicit audio bindings export a player even when the source does not embed the audio
+ok 3 - explicit audio bindings export a player even when the source does not embed the audio
+  ---
+  duration_ms: 52.577489
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the md reference index
+ok 4 - sharing carries declared asset IDs recognized by the md reference index
+  ---
+  duration_ms: 419.387272
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the txt reference index
+ok 5 - sharing carries declared asset IDs recognized by the txt reference index
+  ---
+  duration_ms: 405.615719
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the json reference index
+ok 6 - sharing carries declared asset IDs recognized by the json reference index
+  ---
+  duration_ms: 386.619942
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the yaml reference index
+ok 7 - sharing carries declared asset IDs recognized by the yaml reference index
+  ---
+  duration_ms: 413.640366
+  ...
+# Subtest: multiple attachment roles share one player per document while keeping each owned story complete
+ok 8 - multiple attachment roles share one player per document while keeping each owned story complete
+  ---
+  duration_ms: 60.431404
+  ...
+# Subtest: declared missing assets reject sharing, then retry succeeds after the reference is repaired
+ok 9 - declared missing assets reject sharing, then retry succeeds after the reference is repaired
+  ---
+  duration_ms: 66.255546
+  ...
+# Subtest: sharing retains indexed legacy image paths, relative links and unregistered local images
+ok 10 - sharing retains indexed legacy image paths, relative links and unregistered local images
+  ---
+  duration_ms: 394.888867
+  ...
+# Subtest: v2 relative image references resolve against the original document directory
+ok 11 - v2 relative image references resolve against the original document directory
+  ---
+  duration_ms: 358.691493
+  ...
+# Subtest: v3 relative image references resolve against the original document directory
+ok 12 - v3 relative image references resolve against the original document directory
+  ---
+  duration_ms: 375.129727
+  ...
+# Subtest: sharing preserves distinct percent and space filenames, registered identities and renamed aliases
+ok 13 - sharing preserves distinct percent and space filenames, registered identities and renamed aliases
+  ---
+  duration_ms: 84.109989
+  ...
+# Subtest: owned stories retain nested heading levels in HTML and Markdown shares
+ok 14 - owned stories retain nested heading levels in HTML and Markdown shares
+  ---
+  duration_ms: 51.425735
+  ...
+# Subtest: v2 complete project packages preserve migration contract, metadata and all external media
+ok 15 - v2 complete project packages preserve migration contract, metadata and all external media
+  ---
+  duration_ms: 76.790278
+  ...
+# Subtest: v3 complete project packages preserve migration contract, metadata and all external media
+ok 16 - v3 complete project packages preserve migration contract, metadata and all external media
+  ---
+  duration_ms: 62.443213
+  ...
+# Subtest: missing assets, traversal, symlinks and changed source snapshots cannot produce a successful export
+ok 17 - missing assets, traversal, symlinks and changed source snapshots cannot produce a successful export
+  ---
+  duration_ms: 74.606525
+  ...
+# Subtest: complete exports reject directory aliases and file-directory conflicts without changing project bytes
+ok 18 - complete exports reject directory aliases and file-directory conflicts without changing project bytes
+  ---
+  duration_ms: 129.627294
+  ...
+# Subtest: editor and native v2/v3 archives round-trip with exact sources, metadata and external media
+ok 19 - editor and native v2/v3 archives round-trip with exact sources, metadata and external media # SKIP
+  ---
+  duration_ms: 0.082435
+  ...
+# Subtest: HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup
+ok 20 - HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup
+  ---
+  duration_ms: 736.262037
+  ...
+# Subtest: consecutive browser exports recycle completed downloads instead of exhausting the three-job limit
+ok 21 - consecutive browser exports recycle completed downloads instead of exhausting the three-job limit
+  ---
+  duration_ms: 339.243296
+  ...
+# Subtest: releasing or expiring an export cannot remove a file being downloaded
+ok 22 - releasing or expiring an export cannot remove a file being downloaded
+  ---
+  duration_ms: 137.331338
+  ...
+# Subtest: export range requests keep their real status in diagnostics and remain retryable
+ok 23 - export range requests keep their real status in diagnostics and remain retryable
+  ---
+  duration_ms: 256.282987
+  ...
+# Subtest: pending and interrupted exports remain protected from automatic quota eviction
+ok 24 - pending and interrupted exports remain protected from automatic quota eviction
+  ---
+  duration_ms: 94.786919
+  ...
+# Subtest: export entry blocks unsaved and new drafts without changing editor state
+ok 25 - export entry blocks unsaved and new drafts without changing editor state
+  ---
+  duration_ms: 1.822874
+  ...
+# Subtest: expired and interrupted jobs release temporary disk space while retaining source files
+ok 26 - expired and interrupted jobs release temporary disk space while retaining source files
+  ---
+  duration_ms: 165.107072
+  ...
+# Subtest: inline images and videos parse at the start, in prose and fields, but never inside code
+ok 27 - inline images and videos parse at the start, in prose and fields, but never inside code
+  ---
+  duration_ms: 8.350288
+  ...
+# Subtest: media URLs reject executable, remote and escaping sources while preserving local encoded names
+ok 28 - media URLs reject executable, remote and escaping sources while preserving local encoded names
+  ---
+  duration_ms: 0.554482
+  ...
+# Subtest: stable media URL forms normalize UUID casing to the registered identity
+ok 29 - stable media URL forms normalize UUID casing to the registered identity
+  ---
+  duration_ms: 0.140073
+  ...
+# Subtest: audio references render in prose, custom fields and structured media without autoplay or source loss
+ok 30 - audio references render in prose, custom fields and structured media without autoplay or source loss
+  ---
+  duration_ms: 10.497592
+  ...
+# Subtest: JSON and YAML insertion preserves existing source bytes, comments and structured values
+ok 31 - JSON and YAML insertion preserves existing source bytes, comments and structured values
+  ---
+  duration_ms: 25.584856
+  ...
+# Subtest: media insertion keeps indented YAML maps valid, including BOM, comments and existing lists
+ok 32 - media insertion keeps indented YAML maps valid, including BOM, comments and existing lists
+  ---
+  duration_ms: 14.064153
+  ...
+# Subtest: preview tolerates cyclic YAML aliases and interrupted imports leave no partial files
+ok 33 - preview tolerates cyclic YAML aliases and interrupted imports leave no partial files
+  ---
+  duration_ms: 71.477115
+  ...
+# Subtest: concurrent imports reuse identical bytes, keep names independent of paths and clean rejected uploads
+ok 34 - concurrent imports reuse identical bytes, keep names independent of paths and clean rejected uploads
+  ---
+  duration_ms: 64.443472
+  ...
+# Subtest: audio imports share registry formats, reuse existing audio and reject mislabeled or oversized files
+ok 35 - audio imports share registry formats, reuse existing audio and reject mislabeled or oversized files
+  ---
+  duration_ms: 132.932803
+  ...
+# Subtest: imports respect an external asset store and reject linked destination directories
+ok 36 - imports respect an external asset store and reject linked destination directories
+  ---
+  duration_ms: 73.394698
+  ...
+# Subtest: image: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+ok 37 - image: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+  ---
+  duration_ms: 1191.542437
+  ...
+# Subtest: audio: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+ok 38 - audio: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+  ---
+  duration_ms: 1238.103295
+  ...
+# Subtest: media import locks editing navigation without discarding the source draft
+ok 39 - media import locks editing navigation without discarding the source draft
+  ---
+  duration_ms: 19.727663
+  ...
+# Subtest: draft preview requests cannot consume the allowance for document reads and writes
+ok 40 - draft preview requests cannot consume the allowance for document reads and writes
+  ---
+  duration_ms: 240.091336
+  ...
+# Subtest: item cards split source attribute lines into named values without changing the source fields
+ok 41 - item cards split source attribute lines into named values without changing the source fields
+  ---
+  duration_ms: 17.470532
+  ...
+# Subtest: item attribute aliases preserve reductions, formulas, qualifiers and unstructured notes
+ok 42 - item attribute aliases preserve reductions, formulas, qualifiers and unstructured notes
+  ---
+  duration_ms: 1.770246
+  ...
+# Subtest: item attributes support structured fields and complementary alias blocks without losing zero
+ok 43 - item attributes support structured fields and complementary alias blocks without losing zero
+  ---
+  duration_ms: 0.922833
+  ...
+# Subtest: table display keeps empty and placeholder cells in their original columns
+ok 44 - table display keeps empty and placeholder cells in their original columns
+  ---
+  duration_ms: 0.698412
+  ...
+# Subtest: document and image path conversion preserves full-width filename characters and local images resolve
+ok 45 - document and image path conversion preserves full-width filename characters and local images resolve
+  ---
+  duration_ms: 1.574287
+  ...
+# Subtest: image URLs treat registered filenames as literal paths, including hashes and percent signs
+ok 46 - image URLs treat registered filenames as literal paths, including hashes and percent signs
+  ---
+  duration_ms: 0.392347
+  ...
+# Subtest: metadata conversion preserves zero, false and nested object arrays and finds nonempty aliases
+ok 47 - metadata conversion preserves zero, false and nested object arrays and finds nonempty aliases
+  ---
+  duration_ms: 0.504107
+  ...
+# Subtest: prose punctuation, repeated paragraphs, list entries and headings survive rendering in order
+ok 48 - prose punctuation, repeated paragraphs, list entries and headings survive rendering in order
+  ---
+  duration_ms: 0.842543
+  ...
+# Subtest: story previews include dialogue and rules retain tables outside metadata cards
+ok 49 - story previews include dialogue and rules retain tables outside metadata cards
+  ---
+  duration_ms: 1.467397
+  ...
+# Subtest: the editor uses the complete JSON source path and preserves empty source and real fallback newlines
+ok 50 - the editor uses the complete JSON source path and preserves empty source and real fallback newlines
+  ---
+  duration_ms: 16.326183
+  ...
+# Subtest: runtime content rendering suppresses only fields that were actually displayed in cards
+ok 51 - runtime content rendering suppresses only fields that were actually displayed in cards
+  ---
+  duration_ms: 9.193732
+  ...
+# Subtest: registration preserves raw bytes and stable IDs; indexing never accepts changed content as the original
+ok 52 - registration preserves raw bytes and stable IDs; indexing never accepts changed content as the original
+  ---
+  duration_ms: 64.225682
+  ...
+# Subtest: separate application/workspace roots support editing, external media, offline metadata and legacy/ID URLs
+ok 53 - separate application/workspace roots support editing, external media, offline metadata and legacy/ID URLs
+  ---
+  duration_ms: 1292.018323
+  ...
+# Subtest: reference indexes include image, video and audio paths in every source format, including renamed aliases
+ok 54 - reference indexes include image, video and audio paths in every source format, including renamed aliases
+  ---
+  duration_ms: 387.012259
+  ...
+# Subtest: reference indexes exclude fenced code examples while retaining bare IDs and explicit attachments
+ok 55 - reference indexes exclude fenced code examples while retaining bare IDs and explicit attachments
+  ---
+  duration_ms: 357.921606
+  ...
+# Subtest: v1 registration retains workspace identity and the old manifest; unsupported versions do not mutate sources
+ok 56 - v1 registration retains workspace identity and the old manifest; unsupported versions do not mutate sources
+  ---
+  duration_ms: 18.117218
+  ...
+# Subtest: ambiguous registry identities and unsafe paths fail before replacing existing metadata
+ok 57 - ambiguous registry identities and unsafe paths fail before replacing existing metadata
+  ---
+  duration_ms: 14.96792
+  ...
+# Subtest: registration refuses symlinked metadata directories without writing outside the workspace
+ok 58 - registration refuses symlinked metadata directories without writing outside the workspace
+  ---
+  duration_ms: 1.523732
+  ...
+# Subtest: read-only preview serves a separate workspace and refuses write requests
+ok 59 - read-only preview serves a separate workspace and refuses write requests
+  ---
+  duration_ms: 520.598201
+  ...
+# Subtest: registration keeps a live lock and recovers a lock whose owner no longer exists
+ok 60 - registration keeps a live lock and recovers a lock whose owner no longer exists
+  ---
+  duration_ms: 12.606975
+  ...
+# Subtest: reusing a renamed asset alias cannot write a conflicting registry
+ok 61 - reusing a renamed asset alias cannot write a conflicting registry
+  ---
+  duration_ms: 11.421017
+  ...
+# Subtest: automatic workspace names and manifests stay compatible with the native importer
+ok 62 - automatic workspace names and manifests stay compatible with the native importer
+  ---
+  duration_ms: 11.880009
+  ...
+# Subtest: image references support any asset folder and encoded filenames
+ok 63 - image references support any asset folder and encoded filenames
+  ---
+  duration_ms: 342.474936
+  ...
+# Subtest: custom standardization output cannot prune application files or an external asset store
+ok 64 - custom standardization output cannot prune application files or an external asset store
+  ---
+  duration_ms: 515.437095
+  ...
+1..64
+# tests 64
+# suites 0
+# pass 63
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 5592.069093

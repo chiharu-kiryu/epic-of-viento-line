@@ -8,6 +8,7 @@ import { parseSourceContent } from '../standardize-docs/doc-factory.mjs';
 import { parserOptionsForSource } from '../standardize-docs/legacy-profile.mjs';
 import { buildDocumentLayout } from '../standardize-docs/layout.mjs';
 import { writeDocumentAtomically } from './doc-file-store.mjs';
+import { getCreatePathError } from './doc-api-contract.mjs';
 
 const hash = (content) => createHash('sha256').update(content).digest('hex');
 const fail = (message, statusCode = 400) => Object.assign(new Error(message), { statusCode, errorCode: 'project_configuration' });
@@ -34,6 +35,9 @@ async function definitions(root, manifest) {
 export function previewProjectTemplate(manifest, { type, content, format = 'md' } = {}) {
   if (!type || typeof content !== 'string' || Buffer.byteLength(content) > 1024 * 1024 || !formats.includes(format)) throw fail('模板内容或格式无效（最多 1 MB）');
   validateProjectTypes({ ...manifest, documentTypes: [type] });
+  const directory = type.directory ? `${type.directory}/` : '';
+  const pathError = getCreatePathError(`${workspacePaths(manifest).documents}/${directory}document.${format}`);
+  if (pathError) throw fail(pathError);
   const parsed = parseSourceContent(content, `template.${format}`, { ...type, parserOptions: type.parserOptions || {} });
   if (parsed.parseError) throw fail(`模板解析失败：${parsed.parseError}`);
   return { title: parsed.title, layout: buildDocumentLayout(parsed), parser: parsed.profile };
@@ -77,6 +81,7 @@ export async function saveProjectTemplate(root, payload = {}) {
     const manifest = readWorkspace(root);
     const preview = previewProjectTemplate(manifest, payload);
     const oldType = current.entries.find((entry) => entry.type.id === payload.type.id)?.type;
+    if (payload.create === true && oldType) throw fail('类型标识已存在，请使用其他标识。', 409);
     const type = { ...oldType, ...payload.type };
     // Publish the template first under an immutable content address, then
     // atomically switch one manifest. An interruption cannot leave it pointing

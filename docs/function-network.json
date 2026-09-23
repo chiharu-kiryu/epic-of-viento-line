@@ -2,22 +2,22 @@
   "metadata": {
     "schemaVersion": "viento-function-network-v1",
     "title": "Viento Studio 功能链路网络",
-    "version": "b.3.1",
+    "version": "b.3.2",
     "date": "2026-09-23",
     "gitBase": "51d522cb919c20b15815b129bd62e859af9a97a0",
-    "sourceState": "b.3.1 发布快照：整合 N50–N58 素材绑定、上传换目录、新建保存及预览缓存修复，版本与界面清单已同步；安装程序未更新",
+    "sourceState": "b.3.2 发布快照：整合 N59–N63 素材引用、分享导出及类型模板修复，版本与界面清单已同步；安装程序未更新",
     "method": "人工核对业务入口与关键调用；使用本机 Acorn 解析 ES 模块声明、静态字面量动态导入、显式事件绑定和路由表",
     "runtimeTrace": false,
     "verification": {
-      "sourceFingerprints": "146 selected code files matched the worktree; vendored glib unchanged, earlier upstream-manifest verification retained",
-      "references": "145 node source references, module imports and document links checked",
+      "sourceFingerprints": "146 selected code files matched the worktree; all 121 vendored glib files matched the recorded upstream/patched manifests during release validation",
+      "references": "146 node source references, module imports and document links checked",
       "graphIntegrity": "workflow edges and module SCCs recomputed",
       "pageScript": "JavaScript syntax checked; embedded snapshot matches JSON",
       "browserPreview": "not executed: in-app browser URL policy rejected local HTML navigation",
-      "applicationRegression": "b.3.1, Node v24.19.0: app-only 226 tests, 225 passed, 0 failed, 1 native archive interoperability test skipped; version, 120 JavaScript syntax checks and API contract passed",
+      "applicationRegression": "b.3.2, Node v24.19.0: app-only 243 tests, 242 passed, 0 failed, 1 native archive interoperability test skipped; version, 120 JavaScript syntax checks and API contract passed",
       "nativeRegression": "Prior 2026-09-13 evidence: b.2.9, cargo test --offline --locked: 22 core + 1 startup + 5 optimized glib regressions passed; 1 existing large-workspace test ignored; not rerun for this JavaScript-only change",
-      "nativeWindowInteraction": "Not rerun on 2026-09-23 for JavaScript-only binding, document storage and cache changes. Earlier b.2.8.1 editor, library and export GTK evidence retained in the linked native reports.",
-      "applicationTestsPassed": 225,
+      "nativeWindowInteraction": "Not rerun on 2026-09-23 for JavaScript-only project settings and reference changes. Earlier b.2.8.1 editor, library and export GTK evidence retained in the linked native reports.",
+      "applicationTestsPassed": 242,
       "archiveInterop": "Not rerun on 2026-09-23: VIENTO_TEST_ARCHIVE_BINARY was not configured. Previous 2026-09-13 v2/v3 Node/Rust archive tests passed; native archive code unchanged.",
       "nativeTestReport": "docs/NATIVE_WORKFLOW_TEST_b.2.8.1.md",
       "closeBridgeRegression": "3 passed after localized native close confirmation change",
@@ -26,10 +26,10 @@
       "libraryControllerRegression": "3 new library controller tests and 9 settings tests passed",
       "nativeExportTestReport": "docs/NATIVE_EXPORT_TEST_b.2.8.1.md",
       "exportDialogRegression": "12 dialog tests and 3 language tests passed, including 2 new native-save scenarios",
-      "releaseNotes": "docs/RELEASE_b.3.1.md",
+      "releaseNotes": "docs/RELEASE_b.3.2.md",
       "systemNodeObservation": "Initial Node v18.19.1 full run: 193 assertions passed, request-lifecycle worker did not exit and was terminated. Isolated reruns on system and bundled runtimes both passed all 4 tests with normal exit; root cause unconfirmed.",
-      "releaseValidation": "docs/test-results/release-b.3.1/results.json",
-      "versionCorrection": "Historical b.2.9 correction: beta digits are 0–9, b.9.9 advances to 1.0.0. Earlier logs retain their original versions; this release advances b.3.0 to b.3.1.",
+      "releaseValidation": "docs/test-results/release-b.3.2/results.json",
+      "versionCorrection": "Historical b.2.9 correction: beta digits are 0–9, b.9.9 advances to 1.0.0. Earlier logs retain their original versions; this release advances b.3.1 to b.3.2.",
       "versionRuleRegression": "b.2.9: 4 version tests passed (all 100 beta transitions, stable carry, invalid formats); JavaScript/Python agreed on 122 cases; next-version CLI, release manifest/lock/UI consistency and Cargo metadata passed. Source archive verified 253 files and was removed after validation. Full application/Rust regressions were not rerun for this version-rule change.",
       "securityRegression": "Unpatched glib 0.18.5 reproduced a null-pointer precondition violation (SIGABRT); exact two-line upstream backport passes all 5 iterator tests with glib opt-level=3. All other 120 of 121 upstream package files match.",
       "securityReport": "docs/SECURITY_GLIB_b.2.9.md",
@@ -39,14 +39,20 @@
       "saveConflictRegression": "Node v18.19.1: 35 focused tests passed, including 8 new cases; reproduced failed-force retry overwrites, hidden reload failures and preserved-timestamp external edits before fixing them",
       "saveConflictReport": "docs/SAVE_CONFLICT_BUGFIX_b.2.9.md",
       "saveConflictValidation": "docs/test-results/save-conflicts-2026-09-23/results.json",
-      "releaseVersionValidation": "b.3.1 / 0.3.1 matched all manifests, locks and UI labels; next-version CLI returned b.3.2; offline locked Cargo metadata confirmed application 0.3.1 and the sole locally patched glib dependency",
-      "releaseSourceArchive": "b.3.1 source archive: all 414 files verified against the worktree; all 121 vendored glib files matched their provenance; unpacked offline locked Cargo metadata resolved application 0.3.1 and local patched glib; temporary files removed",
+      "releaseVersionValidation": "b.3.2 / 0.3.2 matched all manifests, locks and UI labels; next-version CLI returned b.3.3; offline locked Cargo metadata confirmed application 0.3.2 and the sole locally patched glib dependency",
+      "releaseSourceArchive": "b.3.2 release validation: 431 source files and all 121 vendored glib files verified; unpacked offline locked Cargo metadata resolved application 0.3.2 and the local patched glib; temporary archive and extracted files removed.",
       "assetBindingRegression": "Node v18.19.1: 78 focused tests, 77 passed, 0 failed, 1 native archive interoperability skipped; 13 new cases reproduce binding lock/config loss, linked paths, invalid verification and rebinding during upload",
       "assetBindingReport": "docs/ASSET_BINDING_BUGFIX_b.3.0.md",
       "assetBindingValidation": "docs/test-results/asset-binding-2026-09-23/results.json",
       "creationWorkflowRegression": "Node v18.19.1: 74 focused tests passed; 10 new cases cover 255-byte names, original permissions/IDs, cache shape conflicts, legacy migration, scoped deletion and v2/v3 ordinary source folders",
       "creationWorkflowReport": "docs/CREATION_WORKFLOW_BUGFIX_b.3.0.md",
-      "creationWorkflowValidation": "docs/test-results/creation-workflow-2026-09-23/results.json"
+      "creationWorkflowValidation": "docs/test-results/creation-workflow-2026-09-23/results.json",
+      "exportReferenceRegression": "Node v18.19.1: 64 focused tests, 63 passed, 0 failed, 1 native archive interoperability skipped; 9 new cases cover declarations across four formats, legacy paths, exact ZIP contents, role deduplication, repaired-reference retries and v2/v3 relative references",
+      "exportReferenceReport": "docs/EXPORT_REFERENCES_BUGFIX_b.3.1.md",
+      "exportReferenceValidation": "docs/test-results/export-references-2026-09-23/results.json",
+      "projectSettingsRegression": "Node v18.19.1: all 25 focused tests passed; 8 new cases cover duplicate type creation, protected configuration/template/source bytes, failed draft retries, invalid default paths and repair of old configurations before creation in a legal 255-byte directory",
+      "projectSettingsReport": "docs/PROJECT_SETTINGS_BUGFIX_b.3.1.md",
+      "projectSettingsValidation": "docs/test-results/project-settings-2026-09-23/results.json"
     },
     "scope": "功能级有向业务步骤 + 文件级静态相对导入；不穷举运行时动态路径、第三方库内部或每次函数调用",
     "projectDataRead": false,
@@ -57,7 +63,7 @@
       "functionalEdges": 173,
       "sourceFiles": 146,
       "jsModules": 126,
-      "relativeImportStatements": 371,
+      "relativeImportStatements": 373,
       "explicitEventBindings": 95,
       "businessApiPaths": 11,
       "businessApiOperations": 16,
@@ -69,58 +75,58 @@
     "limitations": [
       "workflow-step 是业务步骤顺序，不能当作直接函数调用边。",
       "文件导入关系不代表调用次数、调用顺序、用户使用频率或性能。",
-      "测试声明包含参数化模板，声明数不等于执行数；本轮完整 app-only 校验通过 225 项，1 项原生归档互通跳过；Rust 和原生窗口测试沿用此前记录。",
+      "测试声明包含参数化模板，声明数不等于执行数；本轮完整 app-only 校验通过 242 项，1 项原生归档互通跳过；Rust 和原生窗口测试沿用此前记录。",
       "没有读取实际作品正文、素材内容、本机秘密或网络服务。",
       "归档互通回归需设置 VIENTO_TEST_ARCHIVE_BINARY；本轮未配置，明确跳过；原生归档代码未变。",
       "第三方 glib 仅将实际修复文件加入功能图源码清单；其余文件通过 vendor/glib-upstream.json 的原包指纹核验，不展开第三方模块调用图。"
     ],
-    "snapshotRevision": 19,
+    "snapshotRevision": 22,
     "repairLog": "docs/NETWORK_BUGFIX_b.2.8.1.md",
     "previousSnapshot": {
-      "revision": 18,
-      "commit": "cd14564abd6bae65b09a6d3b5623684cad46f412",
-      "sourceState": "b.3.0 工作树：保留 N50–N54 素材链路修复，新增 N55–N58 长文件名保存、缓存命名与正文扫描修复；尚未提交或安装",
+      "revision": 21,
+      "commit": "759fe3caf341f6b07c4e3b14349a0ec31ab04f37",
+      "sourceState": "b.3.1 工作树：在发布提交 759fe3c 上保留 N59–N61 素材引用修复，新增 N62–N63 类型新增覆盖保护与默认目录校验；尚未提交或安装",
       "changedSources": [],
       "releaseFiles": [
         {
           "file": "VERSION",
-          "before": "55b4baeabc72e37d3d72a2eaa6d2c53b90cb4ec1116cce259cdc6f971aeeb04c",
-          "after": "8b9dc344e7127a08aff26084d1b0f8b61a42df1cbf8dcf25edccc0b81b2d015d"
+          "before": "8b9dc344e7127a08aff26084d1b0f8b61a42df1cbf8dcf25edccc0b81b2d015d",
+          "after": "b65eb60961429ea68f46605be7a84fdab5ad4c4836dfb7769524c16a9515dbc2"
         },
         {
           "file": "package.json",
-          "before": "8bddf5f08182349016d98fbc7e13ae74bb4ce80b4593d01cf2757baa6986a0f6",
-          "after": "73d22a49dcc750b1613ddd593c86d0b9157b6c4b1b8504fee3d08a2897fa0f2b"
+          "before": "73d22a49dcc750b1613ddd593c86d0b9157b6c4b1b8504fee3d08a2897fa0f2b",
+          "after": "dba805ef9ddc98d97c44be8cd56eea5183e110ba9c62aa3067a8b797eac0ad96"
         },
         {
           "file": "package-lock.json",
-          "before": "3dd98d9173029209f7769377ee0f3548e307d5a042c5666cccc1b4611e9ce156",
-          "after": "d125f5770557e6297e298bc39de1ac21e81ead531c16edc9928db2f04fc3c83a"
+          "before": "d125f5770557e6297e298bc39de1ac21e81ead531c16edc9928db2f04fc3c83a",
+          "after": "3249f7a2df8b801102c2d0df3e26e97894fedbe42b403e90c17a9fadc615cb54"
         },
         {
           "file": "src-tauri/Cargo.toml",
-          "before": "62722192a1e8dbe16f9bcdcf5c3c6c5ccb067017373f275a6ff577a75896b611",
-          "after": "653654522b9dc62c0560e03ab9eb70068b2b2b9c4836cb5e923aa2ce5a3f4f05"
+          "before": "653654522b9dc62c0560e03ab9eb70068b2b2b9c4836cb5e923aa2ce5a3f4f05",
+          "after": "5b3f7e04312ef68e1ac31b10725495a8a14dc5b90110a09eaa691338a196c1ea"
         },
         {
           "file": "src-tauri/Cargo.lock",
-          "before": "9d31506fb3d5557093891333e6daa9c4a8784061b304c6fc5100f2abde1cccac",
-          "after": "e2276f2731053a09e963c54e38d50f4f2bdd2d855dde01bf4a959a7f0ff1e18f"
+          "before": "e2276f2731053a09e963c54e38d50f4f2bdd2d855dde01bf4a959a7f0ff1e18f",
+          "after": "0fde7c13e93dc8dbda05ad18b2bf8a18b1922e170e86a6593918c67818239b39"
         },
         {
           "file": "src-tauri/tauri.conf.json",
-          "before": "8c70b1f8e34ff67ed9eab7696b8b49c31c6b229e6f0b9391b78eaac166c24f41",
-          "after": "a2da4a30ea6a51c034941ecd73dc1f09f29dc4a3993d39b4442aebe90b7fdc92"
+          "before": "a2da4a30ea6a51c034941ecd73dc1f09f29dc4a3993d39b4442aebe90b7fdc92",
+          "after": "02cedbab232596e6c993639ceef984e3f7798bf2e5ece9d80903c27670c38dd1"
         },
         {
           "file": "web/index.html",
-          "before": "4722e82544eae3f4204bce7dc4ddd3ddd7ddd893213a5366b2d7b44bab81db2c",
-          "after": "75ddd9ea746ed29c9387e31635c540025dc8227fd2e3d6a1c9ed15f6ade11a44"
+          "before": "75ddd9ea746ed29c9387e31635c540025dc8227fd2e3d6a1c9ed15f6ade11a44",
+          "after": "cdae10524d60556d45883b7dd4d84e0bc9fb8770b91afb737f6b918dfc0bddbf"
         },
         {
           "file": "desktop/ui/index.html",
-          "before": "b0f3033bd8867bd15d8259c6db44184c155a8343f407e5d72d9b4c3953d60db6",
-          "after": "1d9b6019b5dc024684f19cfe9534692cabd00e47108cedb2af5812a55f691a33"
+          "before": "1d9b6019b5dc024684f19cfe9534692cabd00e47108cedb2af5812a55f691a33",
+          "after": "8eeeb1cce0b874e897eb00d251e85b0ef48e498aa3b6bcb5180e31a6b4084ea6"
         }
       ]
     },
@@ -904,6 +910,113 @@
             "after": "6a73c9fda6f5a4cd3bae8a45f20fda6b390171baf9edab1c77a58df3468c1583"
           }
         ]
+      },
+      {
+        "fromRevision": 18,
+        "toRevision": 19,
+        "commit": "cd14564abd6bae65b09a6d3b5623684cad46f412",
+        "changedSources": [],
+        "releaseFiles": [
+          {
+            "file": "VERSION",
+            "before": "55b4baeabc72e37d3d72a2eaa6d2c53b90cb4ec1116cce259cdc6f971aeeb04c",
+            "after": "8b9dc344e7127a08aff26084d1b0f8b61a42df1cbf8dcf25edccc0b81b2d015d"
+          },
+          {
+            "file": "package.json",
+            "before": "8bddf5f08182349016d98fbc7e13ae74bb4ce80b4593d01cf2757baa6986a0f6",
+            "after": "73d22a49dcc750b1613ddd593c86d0b9157b6c4b1b8504fee3d08a2897fa0f2b"
+          },
+          {
+            "file": "package-lock.json",
+            "before": "3dd98d9173029209f7769377ee0f3548e307d5a042c5666cccc1b4611e9ce156",
+            "after": "d125f5770557e6297e298bc39de1ac21e81ead531c16edc9928db2f04fc3c83a"
+          },
+          {
+            "file": "src-tauri/Cargo.toml",
+            "before": "62722192a1e8dbe16f9bcdcf5c3c6c5ccb067017373f275a6ff577a75896b611",
+            "after": "653654522b9dc62c0560e03ab9eb70068b2b2b9c4836cb5e923aa2ce5a3f4f05"
+          },
+          {
+            "file": "src-tauri/Cargo.lock",
+            "before": "9d31506fb3d5557093891333e6daa9c4a8784061b304c6fc5100f2abde1cccac",
+            "after": "e2276f2731053a09e963c54e38d50f4f2bdd2d855dde01bf4a959a7f0ff1e18f"
+          },
+          {
+            "file": "src-tauri/tauri.conf.json",
+            "before": "8c70b1f8e34ff67ed9eab7696b8b49c31c6b229e6f0b9391b78eaac166c24f41",
+            "after": "a2da4a30ea6a51c034941ecd73dc1f09f29dc4a3993d39b4442aebe90b7fdc92"
+          },
+          {
+            "file": "web/index.html",
+            "before": "4722e82544eae3f4204bce7dc4ddd3ddd7ddd893213a5366b2d7b44bab81db2c",
+            "after": "75ddd9ea746ed29c9387e31635c540025dc8227fd2e3d6a1c9ed15f6ade11a44"
+          },
+          {
+            "file": "desktop/ui/index.html",
+            "before": "b0f3033bd8867bd15d8259c6db44184c155a8343f407e5d72d9b4c3953d60db6",
+            "after": "1d9b6019b5dc024684f19cfe9534692cabd00e47108cedb2af5812a55f691a33"
+          }
+        ]
+      },
+      {
+        "fromRevision": 19,
+        "toRevision": 20,
+        "commit": "759fe3caf341f6b07c4e3b14349a0ec31ab04f37",
+        "changedSources": [
+          {
+            "file": "scripts/lib/export-package.mjs",
+            "before": "388976eedeccab43cc12ea59b2b179f73cdcfb4c2e9d4c1f87f42d82c61cee4d",
+            "after": "f0cbb51eec619763d035800c328153dac03ca92f4fedfac9278e4afb8270280f"
+          },
+          {
+            "file": "scripts/lib/export-render.mjs",
+            "before": "c250f220ea7e191ed0753e14109e0b1cd87f17cd6c0ae2f4e3e77f2fcf1ed394",
+            "after": "55cf439f71ad851653e497654aa33771185fb829c48945b93341083ed87c1475"
+          },
+          {
+            "file": "scripts/lib/image-index.mjs",
+            "before": "55743b057042aaa5c44c9c07a851f3f97f7c45b25c5c7d5f7870efaa6eda7067",
+            "after": "ec7c45970a46659b6e42962a33782124dd3d4f6c7fccdf1ab4d34be54702f0f9"
+          },
+          {
+            "file": "scripts/tests/export.test.mjs",
+            "before": "bc6df4b637e757e95a01086f31a12e53f29fea5a41c2b510dc366e712035ab57",
+            "after": "84bbf6cbab91b755c4421c5be2d86e708b775d9da75f54e063b04c0fcd05e8d1"
+          }
+        ]
+      },
+      {
+        "fromRevision": 20,
+        "toRevision": 21,
+        "commit": "759fe3caf341f6b07c4e3b14349a0ec31ab04f37",
+        "changedSources": [
+          {
+            "file": "scripts/lib/project-service.mjs",
+            "before": "c5a9ef07c32bfa42cccf71003967bb09e8e273a32e01239b86405c1fc3bb267f",
+            "after": "e50cb1a7abdbff7027c561b3feaa531e2543163a538f20850df62e4f459878bd"
+          },
+          {
+            "file": "scripts/tests/editor-dialogs.test.mjs",
+            "before": "fa983a5ef5be9f0f008abc5b224073d01cd05439005efb7e844012fc4bc64a0a",
+            "after": "da8001dc92a2658c853bcc6df4e065e38aae8e59d7e331135d4c519c0d75619c"
+          },
+          {
+            "file": "scripts/tests/project-engine.test.mjs",
+            "before": "824500c9384567e7502d0703212c37b93c562722c66a66b793a3d1a6ccf97d41",
+            "after": "27062dab6b98dcfd8ba7c60efb591c0d9a414f8671f1872cf138cf4fe265f6e9"
+          },
+          {
+            "file": "web/i18n/en.js",
+            "before": "6382a061d97dd3459a498df59589ca99ab725b95b2135e2195bf91c3677d9c6b",
+            "after": "04f5eb4b370a643710026b015a87ab1b7c76dd4219bcf4d83261949967d20123"
+          },
+          {
+            "file": "web/modules/app-project-settings.js",
+            "before": "9d91ca9c3ab54eae2b116cea8c0803c94ba8b61a6d9a98cdb3158f1dc80d5df2",
+            "after": "f506a65db4972924f6ff93070920f13c0d1cba4add19da7b0f2cd8467ca79d5f"
+          }
+        ]
       }
     ],
     "vendoredDependencies": [
@@ -1374,21 +1487,21 @@
       "id": "project_service",
       "label": "项目配置与模板服务",
       "layer": "服务",
-      "description": "以清单和模板内容生成 revision，先写模板再切换清单，防止过时覆盖。",
+      "description": "校验新增标识、默认目录和 revision，先写模板再切换清单，防止重复新增和过时覆盖。",
       "sources": [
         {
           "file": "scripts/lib/project-service.mjs",
-          "line": 42,
+          "line": 46,
           "symbol": "readProjectConfiguration"
         },
         {
           "file": "scripts/lib/project-service.mjs",
-          "line": 34,
+          "line": 35,
           "symbol": "previewProjectTemplate"
         },
         {
           "file": "scripts/lib/project-service.mjs",
-          "line": 73,
+          "line": 77,
           "symbol": "saveProjectTemplate"
         }
       ]
@@ -1446,16 +1559,16 @@
       "id": "export_pack",
       "label": "Node 导出规划与 ZIP",
       "layer": "服务",
-      "description": "分享文档及引用素材，或整库原样打包；校验每层路径的跨系统冲突、登记指纹与源快照。",
+      "description": "分享携带嵌入、裸 ID、旧图片路径和附件引用；与索引共用提取规则，校验路径、登记指纹及源快照，缺失内容拒绝成功。整库打包保持原格式。",
       "sources": [
         {
           "file": "scripts/lib/export-package.mjs",
-          "line": 33,
+          "line": 34,
           "symbol": "planExport"
         },
         {
           "file": "scripts/lib/export-package.mjs",
-          "line": 175,
+          "line": 191,
           "symbol": "writeExportZip"
         }
       ]
@@ -1464,7 +1577,7 @@
       "id": "export_render",
       "label": "离线阅读格式",
       "layer": "引擎",
-      "description": "共享解析布局生成 HTML 或 Markdown，保留附属故事章节层级；素材改为包内路径，保留原文副本。",
+      "description": "共享布局生成 HTML 或 Markdown，保留故事层级和包内素材路径；每篇文档的关联素材按身份去重，原文与附件角色保持完整。",
       "sources": [
         {
           "file": "scripts/lib/export-render.mjs",
@@ -1730,17 +1843,22 @@
       "id": "legacy_images",
       "label": "旧图片与技能匹配",
       "layer": "兼容",
-      "description": "无稳定登记等兼容分支保留按名字/旧目录归集图像及英雄技能信息。",
+      "description": "旧图片路径按原始正文目录解析，兼容预览前缀；无稳定登记等分支仍保留按名字/旧目录归集图像及英雄技能信息。",
       "sources": [
         {
           "file": "scripts/lib/image-index.mjs",
-          "line": 74,
+          "line": 75,
           "symbol": "buildAssetImageCatalog"
         },
         {
           "file": "scripts/build-static-hero-skills.mjs",
           "line": 301,
           "symbol": "collectHeroSkillsFromSections"
+        },
+        {
+          "file": "scripts/lib/image-index.mjs",
+          "line": 128,
+          "symbol": "collectAssetImageRefs"
         }
       ]
     },
@@ -3979,7 +4097,8 @@
       "tests": [
         "scripts/tests/templates.test.mjs",
         "scripts/tests/generic-project.test.mjs",
-        "scripts/tests/editor-runtime.test.mjs"
+        "scripts/tests/editor-runtime.test.mjs",
+        "scripts/tests/project-engine.test.mjs"
       ]
     },
     {
@@ -4127,7 +4246,7 @@
         "project_ui"
       ],
       "effect": "加载类型、模板原文、字段规则、warnings 和 revision。",
-      "boundary": "已有文档草稿或忙碌操作必须先结束；此读取不保存模板。",
+      "boundary": "已有文档草稿或忙碌操作必须先结束；读取不保存模板，旧的无效默认目录显示问题并允许修正。",
       "tests": [
         "scripts/tests/project-engine.test.mjs"
       ]
@@ -4146,8 +4265,8 @@
         "layout",
         "render"
       ],
-      "effect": "使用与文档相同的解析器和布局生成器展示当前表单内容。",
-      "boundary": "只读预览；使用原始模板的换行格式和 BOM，格式错误保留表单并显示错误。",
+      "effect": "使用与文档相同的解析器和布局生成器展示当前表单内容，同时按新建路径规则校验默认目录。",
+      "boundary": "只读预览；保留原始模板的换行格式和 BOM，格式或默认目录错误保留表单并显示错误。",
       "tests": [
         "scripts/tests/project-engine.test.mjs",
         "scripts/tests/editor-dialogs.test.mjs"
@@ -4170,8 +4289,8 @@
         "index",
         "editor"
       ],
-      "effect": "revision 校验 → 保留模板源格式 → 写指纹模板 → 原子更新清单 → 重建。",
-      "boundary": "旧正文/UUID/归属不重写；解析规则改变同类型展示，重建失败给 indexWarning。返回时的索引读取失败会保留窗口供重试。",
+      "effect": "revision、默认目录及新增标识校验 → 保留模板源格式 → 写指纹模板 → 原子更新清单 → 重建。",
+      "boundary": "新增不能覆盖已有类型，失败保留草稿；正常编辑兼容旧调用。旧正文/UUID/归属不重写；重建失败给 indexWarning，返回时索引读取失败保留窗口供重试。",
       "tests": [
         "scripts/tests/project-engine.test.mjs",
         "desktop/tests/native-smoke.py",
@@ -4191,7 +4310,7 @@
         "editor"
       ],
       "effect": "取消新增回到上一个类型；放弃修改恢复最后保存内容；返回关闭窗口。",
-      "boundary": "有未保存内容先确认，已保存配置保留；返回时等待新索引加载完成，期间保持编辑器忙碌。",
+      "boundary": "新增被拒后可改标识重试或取消；有未保存内容先确认，已保存配置保留。返回时等待新索引加载完成，期间保持编辑器忙碌。",
       "tests": [
         "desktop/tests/project_settings_navigation.py",
         "scripts/tests/editor-dialogs.test.mjs"
@@ -4301,11 +4420,12 @@
         "asset_meta",
         "assets"
       ],
-      "effect": "稳定引用写法统一为小写 UUID 的 /asset-files/<UUID>，兼容 assets/ 与 legacyPaths；assetBindings 另进入登记、索引和导出附件清单。",
+      "effect": "稳定引用写法统一为小写 UUID 的 /asset-files/<UUID>，兼容 assets/ 与 legacyPaths；assetBindings 另进入登记、索引和导出附件清单。 裸 ID 与旧图片声明同时进入分享包；相对图片路径以原始正文目录为基准。",
       "boundary": "外置素材根由本机绑定解析；当前索引的附件图像补全只取 image，不能把绑定音视频视为正文自动播放器。",
       "tests": [
         "scripts/tests/workspace-layout.test.mjs",
-        "scripts/tests/media.test.mjs"
+        "scripts/tests/media.test.mjs",
+        "scripts/tests/export.test.mjs"
       ]
     },
     {
@@ -4326,8 +4446,8 @@
         "export_cache",
         "share"
       ],
-      "effect": "从已保存原文重新解析，递归携带附属文档、引用素材、元数据和原始 sources；保留附属故事章节层级，按实际文件名区分百分号与空格并匹配旧别名。",
-      "boundary": "不是完整项目恢复包；不把无关素材全部带入；未保存/新建草稿不能导出。 保存或重建忙碌时暂缓打开导出。 包内源路径按每层目录检查大小写/Unicode 及文件目录冲突。",
+      "effect": "从已保存原文重新解析，递归携带附属文档、嵌入媒体、裸 ID、旧图片路径及附件素材；保留元数据、原始 sources 和故事章节层级，百分号名称与旧别名按索引规则解析。",
+      "boundary": "不是完整项目恢复包；不把无关素材全部带入；未保存/新建草稿不能导出。 保存或重建忙碌时暂缓打开导出。 包内源路径按每层目录检查大小写/Unicode 及文件目录冲突。 未嵌入的引用列为关联素材，每篇文档按素材身份去重；未知 ID 或缺失文件失败后可修复重试。代码围栏与 YAML 注释仍排除。",
       "tests": [
         "scripts/tests/export.test.mjs",
         "desktop/tests/native-smoke.py",
@@ -4470,13 +4590,14 @@
         "index",
         "cache"
       ],
-      "effect": "生成 documents/assets/references 三份索引，共用 generation；统一提取图片、视频和音频的嵌套值、旧路径与稳定引用，跳过代码示例，保留裸 ID 声明和明确附件。",
+      "effect": "生成 documents/assets/references 三份索引，共用 generation；统一提取图片、视频和音频的嵌套值、旧路径与稳定引用，跳过代码示例，保留裸 ID 声明和明确附件。 旧图片相对路径去掉虚拟预览前缀后按正文目录解析，缺失路径同样进入引用报告。",
       "boundary": "未知 ID 和路径保留为未解析引用；resolved 表示找到登记，在线状态见素材索引。原始正文和权威登记不是索引；/api/index 的轻量目录及其内存缓存是另一条链路。 统一读取器兼容新旧标准缓存；新缓存入口目录为链接时拒绝并保留已有索引。",
       "tests": [
         "scripts/tests/workspace-layout.test.mjs",
         "scripts/tests/call-paths.test.mjs",
         "scripts/tests/document-model.test.mjs",
-        "scripts/tests/creation-workflow.test.mjs"
+        "scripts/tests/creation-workflow.test.mjs",
+        "scripts/tests/export.test.mjs"
       ]
     },
     {
@@ -5842,7 +5963,19 @@
       "local": true,
       "line": 11,
       "symbols": [
+        "collectDocumentMedia",
+        "mediaKindForName",
         "mediaUrl"
+      ]
+    },
+    {
+      "from": "scripts/lib/export-package.mjs",
+      "to": "scripts/lib/image-index.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 12,
+      "symbols": [
+        "collectAssetImageRefs"
       ]
     },
     {
@@ -5850,7 +5983,7 @@
       "to": "scripts/standardize-docs/doc-factory.mjs",
       "kind": "import",
       "local": true,
-      "line": 12,
+      "line": 13,
       "symbols": [
         "parseSourceContent"
       ]
@@ -5860,7 +5993,7 @@
       "to": "scripts/standardize-docs/layout.mjs",
       "kind": "import",
       "local": true,
-      "line": 13,
+      "line": 14,
       "symbols": [
         "buildDocumentLayout"
       ]
@@ -5870,7 +6003,7 @@
       "to": "scripts/lib/export-render.mjs",
       "kind": "import",
       "local": true,
-      "line": 14,
+      "line": 15,
       "symbols": [
         "renderExport"
       ]
@@ -6244,6 +6377,16 @@
       "line": 10,
       "symbols": [
         "writeDocumentAtomically"
+      ]
+    },
+    {
+      "from": "scripts/lib/project-service.mjs",
+      "to": "scripts/lib/doc-api-contract.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 11,
+      "symbols": [
+        "getCreatePathError"
       ]
     },
     {
@@ -7663,6 +7806,7 @@
       "symbols": [
         "fixture",
         "write",
+        "node",
         "serve",
         "request"
       ]
@@ -10166,6 +10310,16 @@
       ]
     },
     {
+      "from": "scripts/normalize_docs.mjs",
+      "to": "node:path",
+      "kind": "import",
+      "local": false,
+      "line": 1,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
       "from": "scripts/normalize-building-data.mjs",
       "to": "node:fs/promises",
       "kind": "import",
@@ -10207,16 +10361,6 @@
     },
     {
       "from": "scripts/normalize-unit-data.mjs",
-      "to": "node:path",
-      "kind": "import",
-      "local": false,
-      "line": 1,
-      "symbols": [
-        "default"
-      ]
-    },
-    {
-      "from": "scripts/normalize_docs.mjs",
       "to": "node:path",
       "kind": "import",
       "local": false,
@@ -12055,14 +12199,14 @@
     {
       "path": "scripts/lib/export-package.mjs",
       "area": "engine",
-      "lines": 226,
-      "sha256": "388976eedeccab43cc12ea59b2b179f73cdcfb4c2e9d4c1f87f42d82c61cee4d"
+      "lines": 242,
+      "sha256": "f0cbb51eec619763d035800c328153dac03ca92f4fedfac9278e4afb8270280f"
     },
     {
       "path": "scripts/lib/export-render.mjs",
       "area": "engine",
-      "lines": 108,
-      "sha256": "c250f220ea7e191ed0753e14109e0b1cd87f17cd6c0ae2f4e3e77f2fcf1ed394"
+      "lines": 107,
+      "sha256": "55cf439f71ad851653e497654aa33771185fb829c48945b93341083ed87c1475"
     },
     {
       "path": "scripts/lib/export-service.mjs",
@@ -12073,8 +12217,8 @@
     {
       "path": "scripts/lib/image-index.mjs",
       "area": "engine",
-      "lines": 375,
-      "sha256": "55743b057042aaa5c44c9c07a851f3f97f7c45b25c5c7d5f7870efaa6eda7067"
+      "lines": 376,
+      "sha256": "ec7c45970a46659b6e42962a33782124dd3d4f6c7fccdf1ab4d34be54702f0f9"
     },
     {
       "path": "scripts/lib/media-assets.mjs",
@@ -12145,8 +12289,8 @@
     {
       "path": "scripts/lib/project-service.mjs",
       "area": "engine",
-      "lines": 113,
-      "sha256": "c5a9ef07c32bfa42cccf71003967bb09e8e273a32e01239b86405c1fc3bb267f"
+      "lines": 118,
+      "sha256": "e50cb1a7abdbff7027c561b3feaa531e2543163a538f20850df62e4f459878bd"
     },
     {
       "path": "scripts/lib/rebuild-config.mjs",
@@ -12415,8 +12559,8 @@
     {
       "path": "scripts/tests/editor-dialogs.test.mjs",
       "area": "test",
-      "lines": 263,
-      "sha256": "fa983a5ef5be9f0f008abc5b224073d01cd05439005efb7e844012fc4bc64a0a"
+      "lines": 298,
+      "sha256": "da8001dc92a2658c853bcc6df4e065e38aae8e59d7e331135d4c519c0d75619c"
     },
     {
       "path": "scripts/tests/editor-draft.test.mjs",
@@ -12439,8 +12583,8 @@
     {
       "path": "scripts/tests/export.test.mjs",
       "area": "test",
-      "lines": 389,
-      "sha256": "bc6df4b637e757e95a01086f31a12e53f29fea5a41c2b510dc366e712035ab57"
+      "lines": 525,
+      "sha256": "84bbf6cbab91b755c4421c5be2d86e708b775d9da75f54e063b04c0fcd05e8d1"
     },
     {
       "path": "scripts/tests/generic-project.test.mjs",
@@ -12481,8 +12625,8 @@
     {
       "path": "scripts/tests/project-engine.test.mjs",
       "area": "test",
-      "lines": 128,
-      "sha256": "824500c9384567e7502d0703212c37b93c562722c66a66b793a3d1a6ccf97d41"
+      "lines": 200,
+      "sha256": "27062dab6b98dcfd8ba7c60efb591c0d9a414f8671f1872cf138cf4fe265f6e9"
     },
     {
       "path": "scripts/tests/request-lifecycle.test.mjs",
@@ -12619,8 +12763,8 @@
     {
       "path": "web/i18n/en.js",
       "area": "editor",
-      "lines": 520,
-      "sha256": "6382a061d97dd3459a498df59589ca99ab725b95b2135e2195bf91c3677d9c6b"
+      "lines": 521,
+      "sha256": "04f5eb4b370a643710026b015a87ab1b7c76dd4219bcf4d83261949967d20123"
     },
     {
       "path": "web/i18n/index.js",
@@ -12680,7 +12824,7 @@
       "path": "web/modules/app-project-settings.js",
       "area": "editor",
       "lines": 161,
-      "sha256": "9d91ca9c3ab54eae2b116cea8c0803c94ba8b61a6d9a98cdb3158f1dc80d5df2"
+      "sha256": "f506a65db4972924f6ff93070920f13c0d1cba4add19da7b0f2cd8467ca79d5f"
     },
     {
       "path": "web/modules/app-render.js",
@@ -12791,7 +12935,7 @@
     },
     {
       "file": "scripts/lib/export-package.mjs",
-      "line": 183,
+      "line": 199,
       "event": "abort",
       "target": "signal",
       "handler": "aborted"
@@ -13740,22 +13884,27 @@
     },
     {
       "file": "scripts/tests/editor-dialogs.test.mjs",
-      "line": 208,
+      "line": 209,
+      "name": "type settings distinguish creation from editing and retain a rejected new draft for retry or cancel"
+    },
+    {
+      "file": "scripts/tests/editor-dialogs.test.mjs",
+      "line": 243,
       "name": "template preview and save retain original BOM and line endings when only its label changes"
     },
     {
       "file": "scripts/tests/editor-dialogs.test.mjs",
-      "line": 222,
+      "line": 257,
       "name": "returning from saved project settings keeps editing locked until the new index applies"
     },
     {
       "file": "scripts/tests/editor-dialogs.test.mjs",
-      "line": 234,
+      "line": 269,
       "name": "discarding edits after a template save cannot leave a closed dialog marked dirty"
     },
     {
       "file": "scripts/tests/editor-dialogs.test.mjs",
-      "line": 248,
+      "line": 283,
       "name": "a failed project index application keeps the settings available for retry without another save"
     },
     {
@@ -13906,66 +14055,91 @@
     {
       "file": "scripts/tests/export.test.mjs",
       "line": 138,
+      "name": "sharing carries declared asset IDs recognized by the ${extension} reference index"
+    },
+    {
+      "file": "scripts/tests/export.test.mjs",
+      "line": 178,
+      "name": "multiple attachment roles share one player per document while keeping each owned story complete"
+    },
+    {
+      "file": "scripts/tests/export.test.mjs",
+      "line": 199,
+      "name": "declared missing assets reject sharing, then retry succeeds after the reference is repaired"
+    },
+    {
+      "file": "scripts/tests/export.test.mjs",
+      "line": 218,
+      "name": "sharing retains indexed legacy image paths, relative links and unregistered local images"
+    },
+    {
+      "file": "scripts/tests/export.test.mjs",
+      "line": 255,
+      "name": "v${version} relative image references resolve against the original document directory"
+    },
+    {
+      "file": "scripts/tests/export.test.mjs",
+      "line": 274,
       "name": "sharing preserves distinct percent and space filenames, registered identities and renamed aliases"
     },
     {
       "file": "scripts/tests/export.test.mjs",
-      "line": 168,
+      "line": 304,
       "name": "owned stories retain nested heading levels in HTML and Markdown shares"
     },
     {
       "file": "scripts/tests/export.test.mjs",
-      "line": 188,
+      "line": 324,
       "name": "v${version} complete project packages preserve migration contract, metadata and all external media"
     },
     {
       "file": "scripts/tests/export.test.mjs",
-      "line": 207,
+      "line": 343,
       "name": "missing assets, traversal, symlinks and changed source snapshots cannot produce a successful export"
     },
     {
       "file": "scripts/tests/export.test.mjs",
-      "line": 225,
+      "line": 361,
       "name": "complete exports reject directory aliases and file-directory conflicts without changing project bytes"
     },
     {
       "file": "scripts/tests/export.test.mjs",
-      "line": 240,
+      "line": 376,
       "name": "editor and native v2/v3 archives round-trip with exact sources, metadata and external media"
     },
     {
       "file": "scripts/tests/export.test.mjs",
-      "line": 267,
+      "line": 403,
       "name": "HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup"
     },
     {
       "file": "scripts/tests/export.test.mjs",
-      "line": 288,
+      "line": 424,
       "name": "consecutive browser exports recycle completed downloads instead of exhausting the three-job limit"
     },
     {
       "file": "scripts/tests/export.test.mjs",
-      "line": 300,
+      "line": 436,
       "name": "releasing or expiring an export cannot remove a file being downloaded"
     },
     {
       "file": "scripts/tests/export.test.mjs",
-      "line": 318,
+      "line": 454,
       "name": "export range requests keep their real status in diagnostics and remain retryable"
     },
     {
       "file": "scripts/tests/export.test.mjs",
-      "line": 335,
+      "line": 471,
       "name": "pending and interrupted exports remain protected from automatic quota eviction"
     },
     {
       "file": "scripts/tests/export.test.mjs",
-      "line": 351,
+      "line": 487,
       "name": "export entry blocks unsaved and new drafts without changing editor state"
     },
     {
       "file": "scripts/tests/export.test.mjs",
-      "line": 367,
+      "line": 503,
       "name": "expired and interrupted jobs release temporary disk space while retaining source files"
     },
     {
@@ -14216,16 +14390,31 @@
     {
       "file": "scripts/tests/project-engine.test.mjs",
       "line": 75,
+      "name": "adding an existing type ID cannot overwrite its rules or template; editing it still works"
+    },
+    {
+      "file": "scripts/tests/project-engine.test.mjs",
+      "line": 108,
+      "name": "type preview and save reject an unusable default location: ${label}"
+    },
+    {
+      "file": "scripts/tests/project-engine.test.mjs",
+      "line": 124,
+      "name": "old type locations remain readable and can be repaired before creating documents at the new default"
+    },
+    {
+      "file": "scripts/tests/project-engine.test.mjs",
+      "line": 147,
       "name": "malformed templates and escaping configuration cannot publish changes"
     },
     {
       "file": "scripts/tests/project-engine.test.mjs",
-      "line": 90,
+      "line": 162,
       "name": "project rules replace historical notation and path guesses in the same parser"
     },
     {
       "file": "scripts/tests/project-engine.test.mjs",
-      "line": 103,
+      "line": 175,
       "name": "official example is an independent definition; adoption preserves IDs, sources, ownership and original templates"
     },
     {
@@ -14446,7 +14635,7 @@
     },
     {
       "file": "scripts/lib/doc-api-contract.mjs",
-      "consumers": 13
+      "consumers": 14
     },
     {
       "file": "scripts/lib/workspace.mjs",

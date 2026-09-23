@@ -28,7 +28,7 @@ test('type/template API applies live to creation, indexing and exports at an arb
   const base = await serve(t, root);
   const config = (await request(base, '/api/project')).data;
   const content = '名称: 星裔\n灵魂: 0\n繁衍: false\n补充: null\n关系:\n  - 朋友: 旅者\n';
-  const payload = { revision: config.revision, type, content, format: 'yaml' };
+  const payload = { revision: config.revision, create: true, type, content, format: 'yaml' };
   const preview = await request(base, '/api/project/preview', payload);
   assert.equal(preview.status, 200);
   assert.equal(preview.data.title, '星裔');
@@ -70,6 +70,78 @@ test('template edits preserve source and descriptors, reject stale saves, and pr
   await fs.appendFile(character, '\n外部编辑');
   await assert.rejects(saveProjectTemplate(root, { revision: second.revision, type, format: 'md', content: '不能覆盖' }), { statusCode: 409 });
   assert.match(await fs.readFile(character, 'utf8'), /外部编辑/);
+});
+
+test('adding an existing type ID cannot overwrite its rules or template; editing it still works', async (t) => {
+  const root = await project(t);
+  const source = 'documents/characters/旅者.md';
+  const content = '# 旅者\n\n背景：旧稿必须保留。\n';
+  await write(root, source, content);
+  await registerWorkspace(root);
+  const registry = await readRegistry(root);
+  const base = await serve(t, root);
+  const config = (await request(base, '/api/project')).data;
+  const character = config.entries.find((entry) => entry.type.id === 'character');
+  const manifest = await fs.readFile(path.join(root, 'workspace.json'));
+  const templates = await fs.readdir(path.join(root, 'templates'), { recursive: true });
+  const payload = { revision: config.revision, create: true, type: { ...type, id: 'character' }, format: 'md', content: '# 新类型\n' };
+  const duplicate = await request(base, '/api/project', payload);
+  assert.equal(duplicate.status, 409, JSON.stringify(duplicate));
+  assert.deepEqual(await fs.readFile(path.join(root, 'workspace.json')), manifest);
+  assert.deepEqual(await fs.readdir(path.join(root, 'templates'), { recursive: true }), templates);
+  assert.equal(await fs.readFile(path.join(root, 'templates', character.type.template), 'utf8'), character.content);
+  assert.deepEqual((await request(base, '/api/project')).data, config);
+  const saved = await request(base, '/api/project', { ...payload, create: false, type: { ...character.type, label: '人物' } });
+  assert.equal(saved.status, 200, JSON.stringify(saved));
+  const reopened = (await request(base, '/api/project')).data;
+  assert.equal(reopened.entries.length, config.entries.length);
+  assert.equal(reopened.entries.find((entry) => entry.type.id === 'character').content, payload.content);
+  assert.equal(reopened.entries.find((entry) => entry.type.id === 'character').type.label, '人物');
+  assert.deepEqual(await readRegistry(root), registry);
+  assert.equal(await fs.readFile(path.join(root, source), 'utf8'), content);
+});
+
+for (const [label, directory] of [
+  ['hidden folder', '.private'], ['nested hidden folder', 'species/.private'],
+  ['reserved folder', 'node_modules'], ['nested reserved folder', 'species/node_modules'],
+  ['overlong UTF-8 folder', '种'.repeat(86)],
+]) test(`type preview and save reject an unusable default location: ${label}`, async (t) => {
+  const root = await project(t);
+  const base = await serve(t, root);
+  const config = (await request(base, '/api/project')).data;
+  const manifest = await fs.readFile(path.join(root, 'workspace.json'));
+  const payload = { revision: config.revision, create: true, type: { ...type, directory }, format: 'md', content: '# 新种族\n' };
+  const creation = await request(base, '/api/doc', { path: `documents/${directory}/测试.md`, content: payload.content, create: true });
+  assert.equal(creation.status, 400);
+  const preview = await request(base, '/api/project/preview', payload);
+  const saved = await request(base, '/api/project', payload);
+  assert.deepEqual([preview.status, saved.status], [400, 400]);
+  assert.deepEqual(await fs.readFile(path.join(root, 'workspace.json')), manifest);
+  assert.deepEqual((await readRegistry(root)).documents, []);
+  await assert.rejects(fs.stat(path.join(root, 'templates/types')), { code: 'ENOENT' });
+});
+
+test('old type locations remain readable and can be repaired before creating documents at the new default', async (t) => {
+  const root = await project(t);
+  const legacy = { ...readWorkspace(root), documentTypes: [...PROJECT_DEFAULTS.documentTypes, { ...type, directory: '.old' }] };
+  await write(root, 'workspace.json', JSON.stringify(legacy));
+  const source = 'documents/existing.md';
+  await write(root, source, '# 保留的旧文档\n');
+  await registerWorkspace(root);
+  const registry = await readRegistry(root);
+  const config = await readProjectConfiguration(root);
+  assert.equal(config.entries.at(-1).type.directory, '.old');
+  const base = await serve(t, root);
+  const directory = `世界/种族/${'种'.repeat(85)}`;
+  const saved = await request(base, '/api/project', { revision: config.revision, create: false, type: { ...type, directory }, format: 'md', content: '# 星裔\n' });
+  assert.equal(saved.status, 200, JSON.stringify(saved));
+  const reopened = (await request(base, '/api/project')).data.entries.at(-1);
+  assert.equal(reopened.type.directory, directory);
+  const created = await request(base, '/api/doc', { path: `documents/${reopened.type.directory}/星裔.md`, content: reopened.content, create: true, documentType: type.id });
+  assert.equal(created.status, 200, JSON.stringify(created));
+  assert.equal((await readRegistry(root)).documents.find((record) => record.sourcePath === `documents/${directory}/星裔.md`).documentType, type.id);
+  assert.deepEqual((await readRegistry(root)).documents.find((record) => record.sourcePath === source), registry.documents[0]);
+  assert.equal(await fs.readFile(path.join(root, source), 'utf8'), '# 保留的旧文档\n');
 });
 
 test('malformed templates and escaping configuration cannot publish changes', async (t) => {

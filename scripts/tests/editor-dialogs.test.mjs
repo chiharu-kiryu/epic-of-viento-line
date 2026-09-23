@@ -182,7 +182,7 @@ test('existing media still inserts into an unchanged structured draft and releas
   assert.equal(element('docMediaDialog').open, false);
 });
 
-async function projectHarness(content, apply = async () => {}) {
+async function projectHarness(content, apply = async () => {}, save = async () => {}) {
   let configuration = { workspace: { name: '测试作品' }, revision: 'one', warnings: [], entries: [{
     type: { id: 'character', label: '角色', directory: 'characters', parserProfile: 'structured' }, format: 'md', content,
   }] };
@@ -194,6 +194,7 @@ async function projectHarness(content, apply = async () => {}) {
       if (action === 'read') return configuration;
       writes.push({ action, ...payload });
       if (action === 'preview') return {};
+      await save(payload);
       configuration = { ...configuration, revision: 'next', entries: [{ type: payload.type, format: payload.format, content: payload.content }], preview: {} };
       return configuration;
     },
@@ -204,6 +205,40 @@ async function projectHarness(content, apply = async () => {}) {
   harness.element('projectSettingsBtn').click(); await flushDialogs();
   return { ...harness, writes, isBusy: () => busy };
 }
+
+test('type settings distinguish creation from editing and retain a rejected new draft for retry or cancel', async () => {
+  let attempts = 0;
+  const { element, writes, isBusy } = await projectHarness('# 角色\n', async () => {}, async () => {
+    if (++attempts === 1) throw new Error('类型标识已存在，请使用其他标识。');
+  });
+  element('projectTypeAdd').click();
+  element('projectTypeId').value = 'character';
+  element('projectTypeLabel').value = '自定义角色';
+  element('projectTypeDirectory').value = 'custom';
+  element('projectTemplateContent').value = '# 我的模板\n';
+  element('projectTypeForm').dispatch('input');
+  element('projectTypeForm').requestSubmit(); await flushDialogs();
+  assert.equal(writes.at(-1).create, true);
+  assert.equal(isBusy(), false);
+  assert.equal(element('projectSettingsDialog').open, true);
+  assert.equal(element('projectSettingsDialog').dataset.dirty, 'true');
+  assert.equal(element('projectTypeId').readOnly, false);
+  assert.equal(element('projectTemplateContent').value, '# 我的模板\n');
+  assert.match(element('projectSettingsMessage').textContent, /类型标识已存在/);
+  assert.equal(element('projectTypeCancel').hidden, false);
+  element('projectTypeId').value = 'custom';
+  element('projectTypeForm').requestSubmit(); await flushDialogs();
+  assert.equal(writes.at(-1).create, true);
+  assert.equal(element('projectTypeId').readOnly, true);
+  assert.equal(element('projectSettingsDialog').dataset.dirty, 'false');
+  element('projectTypeLabel').value = '新名称';
+  element('projectTypeForm').requestSubmit(); await flushDialogs();
+  assert.equal(writes.at(-1).create, false);
+  element('projectTypeAdd').click();
+  element('projectTypeCancel').click();
+  assert.equal(element('projectTypeId').value, 'custom');
+  assert.equal(writes.length, 3);
+});
 
 test('template preview and save retain original BOM and line endings when only its label changes', async () => {
   const original = '\uFEFF# 角色\r\n\r\n姓名：\r\n背景：\r尾行\n';
