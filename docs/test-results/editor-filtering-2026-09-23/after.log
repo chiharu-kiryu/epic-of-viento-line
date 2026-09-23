@@ -1,0 +1,425 @@
+TAP version 13
+# Subtest: the core parser is independent of paths and game vocabulary; compatibility is explicit
+ok 1 - the core parser is independent of paths and game vocabulary; compatibility is explicit
+  ---
+  duration_ms: 5.608471
+  ...
+# Subtest: arbitrary OC fields and typed nested values render from one layout without category templates
+ok 2 - arbitrary OC fields and typed nested values render from one layout without category templates
+  ---
+  duration_ms: 2.420755
+  ...
+# Subtest: heading order, repeated prose, tables and multiline bonuses survive the universal layout
+ok 3 - heading order, repeated prose, tables and multiline bonuses survive the universal layout
+  ---
+  duration_ms: 2.110507
+  ...
+# Subtest: ownership supports several parents and custom types; missing owners keep the source visible
+ok 4 - ownership supports several parents and custom types; missing owners keep the source visible
+  ---
+  duration_ms: 1.087366
+  ...
+# Subtest: ambiguous legacy names remain visible and invalid or cyclic ownership is rejected
+ok 5 - ambiguous legacy names remain visible and invalid or cyclic ownership is rejected
+  ---
+  duration_ms: 1.357928
+  ...
+# Subtest: descriptor migration, shared-story editing, partial rebuild and relocation preserve identity and ownership
+ok 6 - descriptor migration, shared-story editing, partial rebuild and relocation preserve identity and ownership
+  ---
+  duration_ms: 1341.493727
+  ...
+# Subtest: filtering: searching while writing a source draft changes the list without requesting discard
+ok 7 - filtering: searching while writing a source draft changes the list without requesting discard
+  ---
+  duration_ms: 48.795516
+  ...
+# Subtest: filtering: searching while writing a blocks draft changes the list without requesting discard
+ok 8 - filtering: searching while writing a blocks draft changes the list without requesting discard
+  ---
+  duration_ms: 16.48697
+  ...
+# Subtest: filtering: a custom category tab keeps a clean edit session open until a document is explicitly selected
+ok 9 - filtering: a custom category tab keeps a clean edit session open until a document is explicitly selected
+  ---
+  duration_ms: 16.766438
+  ...
+# Subtest: filtering: changing the list cannot cancel an unfinished new template or the resulting draft
+ok 10 - filtering: changing the list cannot cancel an unfinished new template or the resulting draft
+  ---
+  duration_ms: 18.324884
+  ...
+# Subtest: filtering: changing the list while source loading does not cancel the requested editor
+ok 11 - filtering: changing the list while source loading does not cancel the requested editor
+  ---
+  duration_ms: 17.642278
+  ...
+# Subtest: filtering: saving a source draft that no longer matches search keeps the rebuilt editor and version
+ok 12 - filtering: saving a source draft that no longer matches search keeps the rebuilt editor and version
+  ---
+  duration_ms: 20.849597
+  ...
+# Subtest: filtering: saving a blocks draft that no longer matches search keeps the rebuilt editor and version
+ok 13 - filtering: saving a blocks draft that no longer matches search keeps the rebuilt editor and version
+  ---
+  duration_ms: 21.699225
+  ...
+# Subtest: filtering: an empty result list still refreshes the current editor from its new catalog entry
+ok 14 - filtering: an empty result list still refreshes the current editor from its new catalog entry
+  ---
+  duration_ms: 20.14105
+  ...
+# Subtest: filtering: browse still selects a matching result and explicit preserveSelection does not switch documents
+ok 15 - filtering: browse still selects a matching result and explicit preserveSelection does not switch documents
+  ---
+  duration_ms: 13.299184
+  ...
+# Subtest: filtering: a compact sidebar stays open during edit search and closes on an explicit selection
+ok 16 - filtering: a compact sidebar stays open during edit search and closes on an explicit selection
+  ---
+  duration_ms: 13.613187
+  ...
+# Subtest: filtering: a compact sidebar stays open during browse search and closes on an explicit selection
+ok 17 - filtering: a compact sidebar stays open during browse search and closes on an explicit selection
+  ---
+  duration_ms: 11.670584
+  ...
+# Subtest: index refresh: reusing a catalog ID for another source cannot redirect a dirty draft or its save
+ok 18 - index refresh: reusing a catalog ID for another source cannot redirect a dirty draft or its save
+  ---
+  duration_ms: 36.769361
+  ...
+# Subtest: index refresh: a empty rebuild result retains the successfully saved document and allows retry
+ok 19 - index refresh: a empty rebuild result retains the successfully saved document and allows retry
+  ---
+  duration_ms: 14.061008
+  ...
+# Subtest: index refresh: a unrelated rebuild result retains the successfully saved document and allows retry
+ok 20 - index refresh: a unrelated rebuild result retains the successfully saved document and allows retry
+  ---
+  duration_ms: 12.538642
+  ...
+# Subtest: index refresh: saved source bytes survive reindexing and editor exit (overlapping refresh: false)
+ok 21 - index refresh: saved source bytes survive reindexing and editor exit (overlapping refresh: false)
+  ---
+  duration_ms: 14.367479
+  ...
+# Subtest: index refresh: saved source bytes survive reindexing and editor exit (overlapping refresh: true)
+ok 22 - index refresh: saved source bytes survive reindexing and editor exit (overlapping refresh: true)
+  ---
+  duration_ms: 14.175435
+  ...
+# Subtest: index refresh: a new file keeps its saved source and version when assigned its first catalog ID
+ok 23 - index refresh: a new file keeps its saved source and version when assigned its first catalog ID
+  ---
+  duration_ms: 20.939214
+  ...
+# Subtest: index refresh: remapping a source draft preserves its dirty state and restores only the read baseline on discard
+ok 24 - index refresh: remapping a source draft preserves its dirty state and restores only the read baseline on discard
+  ---
+  duration_ms: 14.611728
+  ...
+# Subtest: index refresh: remapping a blocks draft preserves its dirty state and restores only the read baseline on discard
+ok 25 - index refresh: remapping a blocks draft preserves its dirty state and restores only the read baseline on discard
+  ---
+  duration_ms: 13.370029
+  ...
+# Subtest: new document validation refuses paths that cannot be indexed or migrated before submitting
+ok 26 - new document validation refuses paths that cannot be indexed or migrated before submitting
+  ---
+  duration_ms: 42.093548
+  ...
+# Subtest: save recovery: an auto-completed filename remains the draft and preview path after a rejected creation
+ok 27 - save recovery: an auto-completed filename remains the draft and preview path after a rejected creation
+  ---
+  duration_ms: 15.963906
+  ...
+# Subtest: save recovery: HTTP 401 retains the source draft and reports a rejected rebuild without losing a successful save
+ok 28 - save recovery: HTTP 401 retains the source draft and reports a rejected rebuild without losing a successful save
+  ---
+  duration_ms: 13.111728
+  ...
+# Subtest: save recovery: HTTP 403 retains the blocks draft and reports a rejected rebuild without losing a successful save
+ok 29 - save recovery: HTTP 403 retains the blocks draft and reports a rejected rebuild without losing a successful save
+  ---
+  duration_ms: 17.341827
+  ...
+# Subtest: save recovery: adding the default extension cannot submit an overlong filename and shortening it permits retry
+ok 30 - save recovery: adding the default extension cannot submit an overlong filename and shortening it permits retry
+  ---
+  duration_ms: 14.247052
+  ...
+# Subtest: suggested filenames sanitize arbitrary type labels and fit filesystem filename limits
+ok 31 - suggested filenames sanitize arbitrary type labels and fit filesystem filename limits
+  ---
+  duration_ms: 12.017521
+  ...
+# Subtest: the initial creation hint cannot hide a failed template load
+ok 32 - the initial creation hint cannot hide a failed template load
+  ---
+  duration_ms: 10.117747
+  ...
+# Subtest: a failed index reload after saving is reported as a rebuild failure while the saved editor survives
+ok 33 - a failed index reload after saving is reported as a rebuild failure while the saved editor survives
+  ---
+  duration_ms: 10.932738
+  ...
+# Subtest: an invalid replacement index preserves the current document list and project types
+ok 34 - an invalid replacement index preserves the current document list and project types
+  ---
+  duration_ms: 8.436531
+  ...
+# Subtest: source/block switches retain new edits and do not duplicate display-only headings
+ok 35 - source/block switches retain new edits and do not duplicate display-only headings
+  ---
+  duration_ms: 10.168209
+  ...
+# Subtest: an unchanged source stays clean across modes and index refresh preserves a dirty editor
+ok 36 - an unchanged source stays clean across modes and index refresh preserves a dirty editor
+  ---
+  duration_ms: 9.000843
+  ...
+# Subtest: late source responses cannot reopen a cancelled session; empty sources stay empty
+ok 37 - late source responses cannot reopen a cancelled session; empty sources stay empty
+  ---
+  duration_ms: 10.89664
+  ...
+# Subtest: source loading: a cancelled read cannot replace the cache or revision of a reopened and saved document
+ok 38 - source loading: a cancelled read cannot replace the cache or revision of a reopened and saved document
+  ---
+  duration_ms: 12.034278
+  ...
+# Subtest: source loading: returning to browse discards an unfinished selection read instead of refilling the cleared editor
+ok 39 - source loading: returning to browse discards an unfinished selection read instead of refilling the cleared editor
+  ---
+  duration_ms: 9.647639
+  ...
+# Subtest: source loading: a failed abandoned read cannot add diagnostics after selecting another document
+ok 40 - source loading: a failed abandoned read cannot add diagnostics after selecting another document
+  ---
+  duration_ms: 7.995681
+  ...
+# Subtest: source loading: an index refresh cannot attach an old source response to a replacement catalog entry
+ok 41 - source loading: an index refresh cannot attach an old source response to a replacement catalog entry
+  ---
+  duration_ms: 12.301214
+  ...
+# Subtest: source loading: a superseded conflict reload keeps the dirty draft until reloading the current entry succeeds
+ok 42 - source loading: a superseded conflict reload keeps the dirty draft until reloading the current entry succeeds
+  ---
+  duration_ms: 9.875291
+  ...
+# Subtest: source loading: unauthorized responses preserve the last source and permit an empty-source retry
+ok 43 - source loading: unauthorized responses preserve the last source and permit an empty-source retry
+  ---
+  duration_ms: 8.990105
+  ...
+# Subtest: source loading: missing responses preserve the last source and permit an empty-source retry
+ok 44 - source loading: missing responses preserve the last source and permit an empty-source retry
+  ---
+  duration_ms: 9.062654
+  ...
+# Subtest: source loading: malformed responses preserve the last source and permit an empty-source retry
+ok 45 - source loading: malformed responses preserve the last source and permit an empty-source retry
+  ---
+  duration_ms: 7.919246
+  ...
+# Subtest: saving serializes shortcut requests and locks editing until rebuilding finishes
+ok 46 - saving serializes shortcut requests and locks editing until rebuilding finishes
+  ---
+  duration_ms: 8.166139
+  ...
+# Subtest: a changed creation path is an unsaved draft and cancel restores the current document path
+ok 47 - a changed creation path is an unsaved draft and cancel restores the current document path
+  ---
+  duration_ms: 8.665915
+  ...
+# Subtest: suggested creation paths reuse same-type directories and never treat a filename as a folder
+ok 48 - suggested creation paths reuse same-type directories and never treat a filename as a folder
+  ---
+  duration_ms: 5.767761
+  ...
+# Subtest: an older template response cannot replace a newer type or reopen a cancelled creation
+ok 49 - an older template response cannot replace a newer type or reopen a cancelled creation
+  ---
+  duration_ms: 8.884412
+  ...
+# Subtest: template loading: a cancelled response cannot replace the fresh cache used by the next creation and save
+ok 50 - template loading: a cancelled response cannot replace the fresh cache used by the next creation and save
+  ---
+  duration_ms: 11.608031
+  ...
+# Subtest: template loading: cancelling a first draft does not cache its late response before reopening
+ok 51 - template loading: cancelling a first draft does not cache its late response before reopening
+  ---
+  duration_ms: 8.999039
+  ...
+# Subtest: template loading: an old failure cannot poison a valid empty template or report an error in the new session
+ok 52 - template loading: an old failure cannot poison a valid empty template or report an error in the new session
+  ---
+  duration_ms: 11.003715
+  ...
+# Subtest: template loading: a cancelled creation cannot move the caret or scroll of a newer draft of the same type
+ok 53 - template loading: a cancelled creation cannot move the caret or scroll of a newer draft of the same type
+  ---
+  duration_ms: 8.968019
+  ...
+# Subtest: conflict reload uses the newly read version, even if the server changed again after the conflict
+ok 54 - conflict reload uses the newly read version, even if the server changed again after the conflict
+  ---
+  duration_ms: 7.40134
+  ...
+# Subtest: failed forced saves keep the original baseline so a normal retry asks about the conflict again
+ok 55 - failed forced saves keep the original baseline so a normal retry asks about the conflict again
+  ---
+  duration_ms: 8.352153
+  ...
+# Subtest: a failed conflict reload retains the block draft and its error until a successful retry
+ok 56 - a failed conflict reload retains the block draft and its error until a successful retry
+  ---
+  duration_ms: 9.111383
+  ...
+# Subtest: save conflict: keep draft only changes the baseline after an approved successful write
+ok 57 - save conflict: keep draft only changes the baseline after an approved successful write
+  ---
+  duration_ms: 8.771519
+  ...
+# Subtest: save conflict: cancel conflict only changes the baseline after an approved successful write
+ok 58 - save conflict: cancel conflict only changes the baseline after an approved successful write
+  ---
+  duration_ms: 11.078186
+  ...
+# Subtest: save conflict: cancel force confirmation only changes the baseline after an approved successful write
+ok 59 - save conflict: cancel force confirmation only changes the baseline after an approved successful write
+  ---
+  duration_ms: 7.496906
+  ...
+# Subtest: save conflict: confirm force save only changes the baseline after an approved successful write
+ok 60 - save conflict: confirm force save only changes the baseline after an approved successful write
+  ---
+  duration_ms: 8.334874
+  ...
+# Subtest: content revision tokens survive reading, conflict reload and subsequent ordinary saving
+ok 61 - content revision tokens survive reading, conflict reload and subsequent ordinary saving
+  ---
+  duration_ms: 9.965739
+  ...
+# Subtest: switching from the editor to browse makes the document content visible again
+ok 62 - switching from the editor to browse makes the document content visible again
+  ---
+  duration_ms: 7.786158
+  ...
+# Subtest: a successful creation stays editable as an existing file if rebuilding fails
+ok 63 - a successful creation stays editable as an existing file if rebuilding fails
+  ---
+  duration_ms: 11.149563
+  ...
+# Subtest: browser textarea normalization preserves source line endings through switches, edits and saves
+ok 64 - browser textarea normalization preserves source line endings through switches, edits and saves
+  ---
+  duration_ms: 10.27257
+  ...
+# Subtest: first index refresh maps a created source to its catalog ID without closing its editor
+ok 65 - first index refresh maps a created source to its catalog ID without closing its editor
+  ---
+  duration_ms: 11.848574
+  ...
+# Subtest: discard cancellation protects dirty drafts on document, mode and editor exit
+ok 66 - discard cancellation protects dirty drafts on document, mode and editor exit
+  ---
+  duration_ms: 8.092129
+  ...
+# Subtest: save recovery: a duplicate creation preserves the draft and an HTTP retry registers only the new selected type
+ok 67 - save recovery: a duplicate creation preserves the draft and an HTTP retry registers only the new selected type
+  ---
+  duration_ms: 412.53941
+  ...
+# Subtest: creation rejects portable path collisions without poisoning the registry: documents/hero.md
+ok 68 - creation rejects portable path collisions without poisoning the registry: documents/hero.md
+  ---
+  duration_ms: 252.001638
+  ...
+# Subtest: creation rejects portable path collisions without poisoning the registry: documents/Café.md
+ok 69 - creation rejects portable path collisions without poisoning the registry: documents/Café.md
+  ---
+  duration_ms: 245.462493
+  ...
+# Subtest: creation rejects portable path collisions without poisoning the registry: documents/characters/two.md
+ok 70 - creation rejects portable path collisions without poisoning the registry: documents/characters/two.md
+  ---
+  duration_ms: 245.701614
+  ...
+# Subtest: unregistered files and concurrent creates also reserve their portable source locations
+ok 71 - unregistered files and concurrent creates also reserve their portable source locations
+  ---
+  duration_ms: 235.783563
+  ...
+# Subtest: a missing registered source cannot silently donate its identity and type to a new document
+ok 72 - a missing registered source cannot silently donate its identity and type to a new document
+  ---
+  duration_ms: 242.243041
+  ...
+# Subtest: creation rejects unindexable and nonportable paths before creating metadata or source files
+ok 73 - creation rejects unindexable and nonportable paths before creating metadata or source files
+  ---
+  duration_ms: 579.066121
+  ...
+# Subtest: queued creation validates the current project definition after an earlier configuration change
+ok 74 - queued creation validates the current project definition after an earlier configuration change
+  ---
+  duration_ms: 35.58568
+  ...
+# Subtest: a failed source publication removes only its new descriptor and permits a clean retry
+ok 75 - a failed source publication removes only its new descriptor and permits a clean retry
+  ---
+  duration_ms: 43.68154
+  ...
+# Subtest: generic registration preserves version, project-owned types and templates without legacy directories
+ok 76 - generic registration preserves version, project-owned types and templates without legacy directories
+  ---
+  duration_ms: 308.943557
+  ...
+# Subtest: custom type survives a user-selected file location, partial rebuild, save and reload
+ok 77 - custom type survives a user-selected file location, partial rebuild, save and reload
+  ---
+  duration_ms: 1067.705905
+  ...
+# Subtest: invalid types and simultaneous creates never leave orphaned metadata or overwrite a source
+ok 78 - invalid types and simultaneous creates never leave orphaned metadata or overwrite a source
+  ---
+  duration_ms: 225.874901
+  ...
+# Subtest: generic documents, project templates and media IDs survive a different workspace root
+ok 79 - generic documents, project templates and media IDs survive a different workspace root
+  ---
+  duration_ms: 999.942366
+  ...
+# Subtest: generic editor offers only project types, uses local templates and accepts the new document root
+ok 80 - generic editor offers only project types, uses local templates and accepts the new document root
+  ---
+  duration_ms: 7.809285
+  ...
+# Subtest: new manifest layout and template paths are validated while legacy projects keep their original layout
+ok 81 - new manifest layout and template paths are validated while legacy projects keep their original layout
+  ---
+  duration_ms: 68.009069
+  ...
+# Subtest: an empty project exposes creation in edit mode and recovers after cancelling its first draft
+ok 82 - an empty project exposes creation in edit mode and recovers after cancelling its first draft
+  ---
+  duration_ms: 8.71577
+  ...
+# Subtest: project category tabs, counts and searches follow custom types without old game categories
+ok 83 - project category tabs, counts and searches follow custom types without old game categories
+  ---
+  duration_ms: 5.02349
+  ...
+1..83
+# tests 83
+# suites 0
+# pass 83
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5146.580532

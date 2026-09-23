@@ -1,0 +1,99 @@
+TAP version 13
+# Subtest: late export cancellation removes the completed document ZIP and leaves all three job slots available
+not ok 1 - late export cancellation removes the completed document ZIP and leaves all three job slots available
+  ---
+  duration_ms: 243.073909
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-cancellation.test.mjs:64:47'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: a cancelled result must never be registered as a successful job
+        at file:///tmp/viento-test-VNOJDS/[eval1]:45:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: undefined,
+      expected: Error: cancel at publication
+          at file:///tmp/viento-test-VNOJDS/[eval1]:39:58,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-VNOJDS/[eval1]:45:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: late export cancellation removes the completed workspace ZIP and leaves all three job slots available
+not ok 2 - late export cancellation removes the completed workspace ZIP and leaves all three job slots available
+  ---
+  duration_ms: 224.331297
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-cancellation.test.mjs:64:47'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: a cancelled result must never be registered as a successful job
+        at file:///tmp/viento-test-HXu39o/[eval1]:45:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: undefined,
+      expected: Error: cancel at publication
+          at file:///tmp/viento-test-HXu39o/[eval1]:39:58,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-HXu39o/[eval1]:45:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: disconnecting HTTP after ZIP completion cancels publication and permits a fresh download and release
+not ok 3 - disconnecting HTTP after ZIP completion cancels publication and permits a fresh download and release
+  ---
+  duration_ms: 279.619589
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-cancellation.test.mjs:91:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: disconnect must not leave an unclaimed job or ZIP behind
+        at file:///tmp/viento-test-wGwZVW/[eval1]:58:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: [ '8709c428-09b9-4f88-b5f8-b7b72d524944' ],
+      expected: [],
+      operator: 'deepStrictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-wGwZVW/[eval1]:58:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+1..3
+# tests 3
+# suites 0
+# pass 0
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 872.809103

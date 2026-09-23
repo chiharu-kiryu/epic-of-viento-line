@@ -1,0 +1,58 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.6",
+  "buildVersion": "0.3.6",
+  "gitBase": "c05024d5ab52efa331d56314932c8b58059fe8f5",
+  "bugs": [
+    "N81",
+    "N82",
+    "N83",
+    "N84",
+    "N85",
+    "N86",
+    "N87"
+  ],
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 312,
+    "passed": 311,
+    "failed": 0,
+    "skipped": 1,
+    "skipReason": "Native archive interoperability tool not configured; native archive implementation unchanged",
+    "javascriptSyntaxFiles": 124,
+    "apiContractPassed": true,
+    "log": "application.log"
+  },
+  "cargoMetadata": "offline locked; application 0.3.6 and a single glib 0.18.5 from src-tauri/vendor/glib",
+  "cargoMetadataEvidence": "cargo.json",
+  "nextVersion": "b.3.7",
+  "functionNetworkRevision": 35,
+  "files": {
+    "VERSION": "a1b31f4d9321bfd3a9ff8066b0f4c25cd9579750b9f9eb96f25176c04e95ff8e",
+    "package.json": "5aaee8dc25286f102d21b5660a934aa8489ec0a6d3254b52902d1d34313a6d48",
+    "package-lock.json": "c6ecd1b0d801648a62a89911c8a104dffd5e232c8476956c647c34338547afdc",
+    "src-tauri/Cargo.toml": "b87a47d43f9e4d0f922a11f321f5e8a909c8c5afb53a8ecfdd890839a55de409",
+    "src-tauri/Cargo.lock": "b5fae9f26829607d1b9f4cc9f9c8148ca71b55f8d66fc7169b25d8fb431de3fc",
+    "src-tauri/tauri.conf.json": "2567e77b0a87313fbc78b9da7ec78ec3ebf0fdefc79e15d3171666c8695ae5ea",
+    "web/index.html": "954522a1201ca81d8b31fdb54f338b0f8b8762bbd5460116bf46cdaec8dd6f88",
+    "desktop/ui/index.html": "b6d5972a621dad4876c2f04b0718faa4fdf3573b84b0f7f1d225bfb560dfd534",
+    "README.md": "e9b4f7ab5c3059b6782a58adf608abd8b14edbdbbc21dfd4b88d2943b0bd4501",
+    "desktop/README.md": "0a55c65afcdbf900977116c841ee3086c7bdb52972e72ecc899a9a0440f0cd02",
+    "scripts/tests/editor-filtering.test.mjs": "dc1b256ba0d4b004a719241f8b5831cfe2d25dc457c9ba02299b23365029cf20",
+    "scripts/tests/editor-language.test.mjs": "c80c99dcdda6d7825848eb3f2e4c30c0ea85bc685a8419669851a91ba82005b0",
+    "scripts/tests/export-cancellation.test.mjs": "334ba54cabb4fb9d71d3a6529273d8c2256734b45440d7ff998a410f938794a4",
+    "web/modules/app-runtime.js": "1637381e3e6cf7a787d82bf123ca6885144412ea34a704e4151be23011d1399f",
+    "scripts/lib/export-service.mjs": "8405f80d91b51379bea145c5c55850fc45a7c8c8d463f904daff1a0a19ab5fc4"
+  },
+  "nativeTestsRerun": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "functionNetworkValidation": "network.json",
+  "sourceArchive": {
+    "filesVerified": 509,
+    "allArchivedBytesMatchSource": true,
+    "vendoredGlibFilesVerified": 121,
+    "unpackedCargoMetadataVerified": true,
+    "temporaryFilesRemoved": true
+  }
+}

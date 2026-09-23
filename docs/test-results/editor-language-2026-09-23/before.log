@@ -1,0 +1,195 @@
+TAP version 13
+# Subtest: language: source draft, cursor and original bytes survive settings changes and save
+ok 1 - language: source draft, cursor and original bytes survive settings changes and save
+  ---
+  duration_ms: 276.749616
+  ...
+# Subtest: language: blocks draft, cursor and original bytes survive settings changes and save
+ok 2 - language: blocks draft, cursor and original bytes survive settings changes and save
+  ---
+  duration_ms: 234.440465
+  ...
+# Subtest: language: switching during an original-source read preserves the pending request and opens its result
+ok 3 - language: switching during an original-source read preserves the pending request and opens its result
+  ---
+  duration_ms: 107.378227
+  ...
+# Subtest: language: choosing English in settings updates the editor without changing its draft or selection
+ok 4 - language: choosing English in settings updates the editor without changing its draft or selection
+  ---
+  duration_ms: 89.315349
+  ...
+# Subtest: language: built-in create options translate in place without restarting the pending template or changing its path
+not ok 5 - language: built-in create options translate in place without restarting the pending template or changing its path
+  ---
+  duration_ms: 121.890834
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-language.test.mjs:111:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    '物品' !== 'Items'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'Items'
+  actual: '物品'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-language.test.mjs:119:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: language: authored type labels and new draft paths are never translated
+ok 6 - language: authored type labels and new draft paths are never translated
+  ---
+  duration_ms: 107.486995
+  ...
+# Subtest: language: a pending save retains disabled mode controls and cannot be submitted twice
+not ok 7 - language: a pending save retains disabled mode controls and cannot be submitted twice
+  ---
+  duration_ms: 83.005217
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-language.test.mjs:146:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-language.test.mjs:153:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: language: a read-only backend keeps edit mode unavailable after refresh
+not ok 8 - language: a read-only backend keeps edit mode unavailable after refresh
+  ---
+  duration_ms: 87.693096
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-language.test.mjs:165:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-language.test.mjs:168:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: language: default conflict retains its draft, decision and overwrite warning
+ok 9 - language: default conflict retains its draft, decision and overwrite warning
+  ---
+  duration_ms: 90.312316
+  ...
+# Subtest: language: force conflict retains its draft, decision and overwrite warning
+ok 10 - language: force conflict retains its draft, decision and overwrite warning
+  ---
+  duration_ms: 78.28757
+  ...
+# Subtest: language: index loading remains visible with an empty catalog
+not ok 11 - language: index loading remains visible with an empty catalog
+  ---
+  duration_ms: 74.73108
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-language.test.mjs:192:40'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'No documents in this category'
+    - 'Loading document index…'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'Loading document index…'
+  actual: 'No documents in this category'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-language.test.mjs:200:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: language: index loading remains visible with an existing draft
+not ok 12 - language: index loading remains visible with an existing draft
+  ---
+  duration_ms: 71.085099
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-language.test.mjs:192:40'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'Showing 1 of 1 documents'
+    - 'Loading document index…'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'Loading document index…'
+  actual: 'Showing 1 of 1 documents'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-language.test.mjs:200:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: language: failed index retains the error and force-retry action, then recovers after a successful retry
+not ok 13 - language: failed index retains the error and force-retry action, then recovers after a successful retry
+  ---
+  duration_ms: 64.716664
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-language.test.mjs:210:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /Loading failed.*fixture-index-offline/. Input:
+    
+    'Showing 1 of 1 documents'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: 'Showing 1 of 1 documents'
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-language.test.mjs:216:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: language: late index failures cannot replace the current loading or successful view
+not ok 14 - language: late index failures cannot replace the current loading or successful view
+  ---
+  duration_ms: 70.472562
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-language.test.mjs:234:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'Showing 1 of 1 documents'
+    - 'Loading document index…'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'Loading document index…'
+  actual: 'Showing 1 of 1 documents'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-language.test.mjs:241:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 7
+# fail 7
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1925.901562

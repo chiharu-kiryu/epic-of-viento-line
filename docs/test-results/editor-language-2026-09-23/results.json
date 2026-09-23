@@ -1,0 +1,69 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.5",
+  "gitBase": "c05024d5ab52efa331d56314932c8b58059fe8f5",
+  "scope": "Language settings/notifications during editing, source/template loading, save/conflict decisions and index loading/retry",
+  "workflows": [
+    "F10",
+    "F11",
+    "F15",
+    "F16",
+    "F18",
+    "F20",
+    "F36"
+  ],
+  "bugs": [
+    "N84",
+    "N85",
+    "N86"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 14,
+    "passed": 7,
+    "failed": 7,
+    "skipped": 0,
+    "log": "before.log",
+    "runtimeSourceState": "b.3.5 worktree after N81–N83, before N84–N86",
+    "runtimeSourceSha256": "19d92bff4466136db4e43435f072f5a7fc89962b5130e22a03331f45e3ccf63b",
+    "replay": "A temporary Node preload supplied the exact pre-change worktree runtime snapshot, verified by SHA-256, without changing the worktree. Temporary snapshot/preload removed."
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 86,
+    "passed": 86,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after.log",
+    "newCases": 14
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 309,
+    "passed": 308,
+    "failed": 0,
+    "skipped": 1,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 123,
+    "apiContractPassed": true
+  },
+  "skipReason": "Node/Rust archive interoperability requires VIENTO_TEST_ARCHIVE_BINARY; native archive code unchanged",
+  "files": {
+    "scripts/tests/editor-language.test.mjs": "c80c99dcdda6d7825848eb3f2e4c30c0ea85bc685a8419669851a91ba82005b0",
+    "web/modules/app-runtime.js": "1637381e3e6cf7a787d82bf123ca6885144412ea34a704e4151be23011d1399f"
+  },
+  "controllerTestEnvironment": "Actual settings, isolated translations, filtering, index loading, editor and conflict controllers share a DOM fixture with simulated files, requests and catalog presentation. Tests use real settings control events and simulated desktop language notifications. Assertions cover source/block bytes, BOM/CRLF, draft state, selection, scroll, version, busy guards, conflict decisions and current index lifecycle. Existing temporary HTTP tests also run in the full check. Browser undo stacks and native pixels were not tested.",
+  "nativeTestsRerun": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "functionNetwork": {
+    "revision": 33,
+    "sourceFingerprints": 149,
+    "nodeSources": 164,
+    "localImportStatements": 380,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

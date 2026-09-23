@@ -1,0 +1,63 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.5",
+  "gitBase": "c05024d5ab52efa331d56314932c8b58059fe8f5",
+  "scope": "Cancellation after ZIP completion and before export job publication, temporary-file cleanup, quota recovery and HTTP disconnect/retry/download/release",
+  "workflows": [
+    "F32",
+    "F33",
+    "F35"
+  ],
+  "bugs": [
+    "N87"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 3,
+    "passed": 0,
+    "failed": 3,
+    "skipped": 0,
+    "log": "before.log",
+    "serviceSourceState": "Pre-fix b.3.5 worktree; N81–N86 retained",
+    "serviceSourceSha256": "c0ca3bea75633eec9ec1118c7cc6dce0f83c3ff02883c3cfd42ea644a63aa96d",
+    "reproduction": "Ran the new tests directly against the pre-fix service, without reverting prior changes. All 3 reproduced failures."
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 55,
+    "passed": 54,
+    "failed": 0,
+    "skipped": 1,
+    "log": "after.log",
+    "newCases": 3
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 312,
+    "passed": 311,
+    "failed": 0,
+    "skipped": 1,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 124,
+    "apiContractPassed": true
+  },
+  "skipReason": "Node/Rust archive interoperability requires VIENTO_TEST_ARCHIVE_BINARY; native archive code unchanged",
+  "files": {
+    "scripts/lib/export-service.mjs": "8405f80d91b51379bea145c5c55850fc45a7c8c8d463f904daff1a0a19ab5fc4",
+    "scripts/tests/export-cancellation.test.mjs": "334ba54cabb4fb9d71d3a6529273d8c2256734b45440d7ff998a410f938794a4"
+  },
+  "testEnvironment": "Temporary registered workspaces in isolated child processes run the actual export service, ZIP writer and HTTP router. A controlled fs.stat pause after completed ZIP output fixes the late-cancellation boundary without timing or large-file assumptions. Document and workspace exports each cancel 3 times, then fill all 3 slots; a fourth unclaimed job remains protected by quota. A real HTTP abort confirms immediate cleanup followed by regeneration, byte-exact download, release and 410. Authored source, templates, metadata, assets and manifest bytes stay identical. Existing export/dialog/request tests also ran.",
+  "nativeTestsRerun": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "functionNetwork": {
+    "revision": 34,
+    "sourceFingerprints": 150,
+    "nodeSources": 165,
+    "localImportStatements": 384,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

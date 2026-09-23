@@ -165,6 +165,7 @@ let editSessionBaselinePath = '';
 let editSessionVersion = '';
 let saveConflictResolver = null;
 let saveConflictView = null;
+let indexLoadView = null;
 let renderedDocRef = null;
 const createTemplateCache = new Map();
 const createTemplateLoadErrorCache = new Map();
@@ -754,11 +755,14 @@ function refreshLanguageUi() {
   const listScroll = listEl?.scrollTop || 0;
   cachedListRenderState = { filtered: null, activeTab: null, groups: null };
   if (state.generatedAt) state.generatedStatus = APP_ERROR_MESSAGES.generatedStatusTemplate(formatTime(state.generatedAt));
-  renderFilteredDocs(state.activePath, { preserveSelection: true });
+  if (!renderIndexLoadView()) renderFilteredDocs(state.activePath, { preserveSelection: true });
   Array.from(listEl?.querySelectorAll('details') || []).forEach((node, index) => {
     if (index < groupStates.length) node.open = groupStates[index];
   });
   if (listEl) listEl.scrollTop = listScroll;
+  for (const option of createTypeSelectEl?.querySelectorAll('option') || []) {
+    option.textContent = getCreateTypeLabel(option.value);
+  }
   const doc = getActiveDoc();
   if (doc) {
     const detailsOpen = metaEl?.querySelector('.document-file-details')?.open;
@@ -875,6 +879,23 @@ function setLoadingState(stateText, listText) {
   if (listText) {
     setListText(listText);
   }
+}
+
+function renderIndexLoadView() {
+  if (!indexLoadView) return false;
+  if (indexLoadView.loading) {
+    setLoadingState(LIST_UI_TEXT.status.loadingIndex, LIST_UI_TEXT.status.loadingList);
+    setListSkeletonState(LIST_UI_TEXT.status.loadingIndex);
+    hideLoadRetry();
+  } else {
+    const message = getFriendlyLoadErrorMessage(indexLoadView.error);
+    showLoadRetry(
+      `${LIST_UI_TEXT.errors.genericLoadFailureText}：${message}`,
+      `${LIST_UI_TEXT.errors.loadFailureText}：${message}${LIST_UI_TEXT.errors.loadFailureSuffix}`,
+      indexLoadView.retryMode,
+    );
+  }
+  return true;
 }
 
 async function retryLoadData({ forceCacheBust = false } = {}) {
@@ -1459,9 +1480,19 @@ function syncEditorBusyUi() {
     if (editCreateBtnEl) editCreateBtnEl.disabled = true;
     if (editRebuildBtnEl) editRebuildBtnEl.disabled = true;
   }
-  if (modeBrowseBtnEl) modeBrowseBtnEl.disabled = writeBusy;
-  if (modeEditBtnEl) modeEditBtnEl.disabled = writeBusy || !state.editBackendAvailable;
+  syncModeButtons(writeBusy);
   mediaEditorController?.refresh();
+}
+
+function syncModeButtons(writeBusy = isEditorWriteBusy()) {
+  if (modeBrowseBtnEl) {
+    modeBrowseBtnEl.disabled = writeBusy;
+    modeBrowseBtnEl.setAttribute('aria-disabled', String(writeBusy));
+  }
+  if (modeEditBtnEl) {
+    modeEditBtnEl.disabled = writeBusy || !state.editBackendAvailable;
+    modeEditBtnEl.setAttribute('aria-disabled', String(modeEditBtnEl.disabled));
+  }
 }
 
 function mediaDraftContext(preferredInput = null) {
@@ -1744,6 +1775,7 @@ function getActiveDoc() {
 
 function setModeUi() {
   syncEditorLayout();
+  syncModeButtons();
   const isEditMode = state.mode === 'edit';
   const activeDoc = getActiveDoc();
   const activeDocEditable = activeDoc ? canUserEditDoc(activeDoc) : false;
@@ -1754,8 +1786,6 @@ function setModeUi() {
   if (modeEditBtnEl) {
     modeEditBtnEl.classList.toggle('mode-btn-active', isEditMode);
     modeEditBtnEl.setAttribute('aria-pressed', isEditMode ? 'true' : 'false');
-    modeEditBtnEl.disabled = false;
-    modeEditBtnEl.setAttribute('aria-disabled', state.editBackendAvailable ? 'false' : 'true');
   }
   if (modeStateEl) {
     if (isEditMode) {
@@ -4615,6 +4645,13 @@ function renderFilteredDocs(preferredPath = '', options = {}) {
     groups,
   };
 
+  // Filtering changes the list, not the document being written or opened.
+  // Refresh that document after an index replacement even with no matches.
+  const keepEditorSelection = isInEditSession() || state.isLoadingSource;
+  if (keepEditorSelection && !options.preserveSelection) {
+    selectDoc(state.activePath, { allowDuringWrite: options.allowDuringWrite === true, preserveSidebar: true });
+  }
+
   if (!filtered.length) {
     const hasKeyword = Boolean(searchQuery);
     setStatusText(`${hasKeyword ? LIST_UI_TEXT.status.noDataByKeyword : LIST_UI_TEXT.status.noDataByTab} ${state.generatedStatus}`);
@@ -4664,7 +4701,9 @@ function renderFilteredDocs(preferredPath = '', options = {}) {
     targetPath = filtered[0].path;
   }
 
-  if (!options.preserveSelection) selectDoc(targetPath, { allowDuringWrite: options.allowDuringWrite === true });
+  if (!keepEditorSelection && !options.preserveSelection) {
+    selectDoc(targetPath, { allowDuringWrite: options.allowDuringWrite === true, preserveSidebar: true });
+  }
 
   if (!skipTabs) {
     renderTabsNow();
@@ -4687,7 +4726,7 @@ function selectDoc(pathValue, options = {}) {
     return;
   }
   state.activePath = doc.path;
-  if (window.matchMedia?.('(max-width: 760px)').matches) setEditorSidebarCollapsed(true);
+  if (!options.preserveSidebar && window.matchMedia?.('(max-width: 760px)').matches) setEditorSidebarCollapsed(true);
 
   if (isDifferentDoc) {
     applyEditMode(null, false);
@@ -4864,9 +4903,8 @@ async function loadData(preferredPath = '', options = {}) {
   const currentLoadToken = ++dataLoadToken;
 
   try {
-    setLoadingState(LIST_UI_TEXT.status.loadingIndex, LIST_UI_TEXT.status.loadingList);
-    setListSkeletonState(LIST_UI_TEXT.status.loadingIndex);
-    hideLoadRetry();
+    indexLoadView = { loading: true };
+    renderIndexLoadView();
     const indexUrls = getDataIndexUrlCandidates();
     const { payload, lastError, attempts } = await loadDocIndexPayload({
       indexUrlCandidates: indexUrls,
@@ -4961,6 +4999,7 @@ async function loadData(preferredPath = '', options = {}) {
     cachedGroupedDocs = new WeakMap();
     state.generatedAt = payload.generatedAt;
     state.generatedStatus = APP_ERROR_MESSAGES.generatedStatusTemplate(formatTime(payload.generatedAt));
+    indexLoadView = null;
     renderTabsNow();
     renderFilteredDocs(normalizedPreferredPath || state.activePath, {
       preferredSourcePath,
@@ -4975,11 +5014,8 @@ async function loadData(preferredPath = '', options = {}) {
       clearListSkeletonState();
       return;
     }
-    showLoadRetry(
-      `${LIST_UI_TEXT.errors.genericLoadFailureText}：${getFriendlyLoadErrorMessage(error)}`,
-      `${LIST_UI_TEXT.errors.loadFailureText}：${getFriendlyLoadErrorMessage(error)}${LIST_UI_TEXT.errors.loadFailureSuffix}`,
-      isRetryAttempt && forceCacheBust ? 'force' : (isRetryAttempt ? 'force' : 'normal'),
-    );
+    indexLoadView = { error, retryMode: isRetryAttempt ? 'force' : 'normal' };
+    renderIndexLoadView();
     logRuntimeErrorOrMessage(APP_REQUEST_LABELS.loadDocIndex, error);
     if (loadArgs.throwOnError) throw error;
   }

@@ -1,0 +1,336 @@
+TAP version 13
+# Subtest: filtering: searching while writing a source draft changes the list without requesting discard
+not ok 1 - filtering: searching while writing a source draft changes the list without requesting discard
+  ---
+  duration_ms: 34.191371
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:70:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + [
+    +   '当前有未保存内容，切换文档将丢失这些修改，是否继续？'
+    + ]
+    - []
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0: '当前有未保存内容，切换文档将丢失这些修改，是否继续？'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:79:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async startSubtest (node:internal/test_runner/harness:214:3)
+  ...
+# Subtest: filtering: searching while writing a blocks draft changes the list without requesting discard
+not ok 2 - filtering: searching while writing a blocks draft changes the list without requesting discard
+  ---
+  duration_ms: 14.952163
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:70:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + [
+    +   '当前有未保存内容，切换文档将丢失这些修改，是否继续？'
+    + ]
+    - []
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0: '当前有未保存内容，切换文档将丢失这些修改，是否继续？'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:79:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: filtering: a custom category tab keeps a clean edit session open until a document is explicitly selected
+not ok 3 - filtering: a custom category tab keeps a clean edit session open until a document is explicitly selected
+  ---
+  duration_ms: 12.788884
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:96:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'item/other'
+    - 'character/active'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'character/active'
+  actual: 'item/other'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:102:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: filtering: changing the list cannot cancel an unfinished new template or the resulting draft
+not ok 4 - filtering: changing the list cannot cancel an unfinished new template or the resulting draft
+  ---
+  duration_ms: 14.979518
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:112:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + [
+    +   '当前有未保存内容，切换文档将丢失这些修改，是否继续？',
+    +   '当前有未保存内容，切换文档将丢失这些修改，是否继续？'
+    + ]
+    - []
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0: '当前有未保存内容，切换文档将丢失这些修改，是否继续？'
+    1: '当前有未保存内容，切换文档将丢失这些修改，是否继续？'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:129:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: filtering: changing the list while source loading does not cancel the requested editor
+not ok 5 - filtering: changing the list while source loading does not cancel the requested editor
+  ---
+  duration_ms: 13.291095
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:134:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'item/other'
+    - 'character/active'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'character/active'
+  actual: 'item/other'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:140:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: filtering: saving a source draft that no longer matches search keeps the rebuilt editor and version
+not ok 6 - filtering: saving a source draft that no longer matches search keeps the rebuilt editor and version
+  ---
+  duration_ms: 16.299386
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:149:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'item/other'
+    - 'character/rebuilt'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'character/rebuilt'
+  actual: 'item/other'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:163:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: filtering: saving a blocks draft that no longer matches search keeps the rebuilt editor and version
+not ok 7 - filtering: saving a blocks draft that no longer matches search keeps the rebuilt editor and version
+  ---
+  duration_ms: 15.96738
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:149:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'item/other'
+    - 'character/rebuilt'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'character/rebuilt'
+  actual: 'item/other'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:163:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: filtering: an empty result list still refreshes the current editor from its new catalog entry
+not ok 8 - filtering: an empty result list still refreshes the current editor from its new catalog entry
+  ---
+  duration_ms: 16.858478
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:178:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected "actual" to be reference-equal to "expected":
+    + actual - expected
+    
+      {
+    +   _editorSource: 'documents/characters/active.md',
+    +   _heroImagesOrdered: undefined,
+    +   _renderSignature: 'characteractive||needlerole||documentscharactersactivemd||character||||||1||||||||||||||||',
+    +   _searchText: ' needle role character/active undefined character     ',
+    +   _sourceCachedText: '﻿# updated role\r\n\r\n保留格式。  \r\n',
+    +   _sourceLastModified: '',
+    +   _sourceRenderedText: '﻿# updated role\r\n\r\n保留格式。  \r\n',
+    +   _sourceVersion: '2',
+    +   blocks: [],
+    +   category: 'character',
+    +   fields: {},
+    +   heroSkills: [],
+    +   meta: {},
+    +   name: 'needle role',
+    +   outline: [],
+    +   owners: [],
+    +   parser: {},
+    +   path: 'character/active',
+    +   sections: [],
+    +   sourcePath: 'documents/characters/active.md'
+    -   _heroImagesOrdered: undefined,
+    -   _renderSignature: 'characterrebuilt||updatedrole||docsstandarddocumentscharactersactivemd||character||||||2||||||||||||||||',
+    -   _searchText: ' updated role character/rebuilt undefined character     ',
+    -   _sourceCachedText: '﻿# updated role\r\n\r\n保留格式。  \r\n',
+    -   _sourceLastModified: '',
+    -   _sourceRenderedText: undefined,
+    -   _sourceVersion: '2',
+    -   blocks: [],
+    -   category: 'character',
+    -   fields: {},
+    -   heroSkills: [],
+    -   meta: {},
+    -   name: 'updated role',
+    -   outline: [],
+    -   owners: [],
+    -   parser: {},
+    -   path: 'character/rebuilt',
+    -   sections: [],
+    -   source: {
+    -     path: 'docs-standard/documents/characters/active.md'
+    -   },
+    -   sourcePath: 'docs-standard/documents/characters/active.md'
+      }
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    path: 'character/rebuilt'
+    source:
+      path: 'docs-standard/documents/characters/active.md'
+    category: 'character'
+    name: 'updated role'
+    owners:
+    blocks:
+    _searchText: ' updated role character/rebuilt undefined character     '
+    meta:
+    sourcePath: 'docs-standard/documents/characters/active.md'
+    fields:
+    sections:
+    outline:
+    parser:
+    heroSkills:
+    _sourceCachedText: |-
+      ﻿# updated role
+      
+      保留格式。  
+      
+    _sourceVersion: '2'
+    _sourceLastModified: ''
+    _renderSignature: 'characterrebuilt||updatedrole||docsstandarddocumentscharactersactivemd||character||||||2||||||||||||||||'
+  actual:
+    path: 'character/active'
+    sourcePath: 'documents/characters/active.md'
+    category: 'character'
+    meta:
+    blocks:
+    _sourceCachedText: |-
+      ﻿# updated role
+      
+      保留格式。  
+      
+    _sourceVersion: '2'
+    name: 'needle role'
+    owners:
+    _searchText: ' needle role character/active undefined character     '
+    fields:
+    sections:
+    outline:
+    parser:
+    heroSkills:
+    _sourceRenderedText: |-
+      ﻿# updated role
+      
+      保留格式。  
+      
+    _sourceLastModified: ''
+    _renderSignature: 'characteractive||needlerole||documentscharactersactivemd||character||||||1||||||||||||||||'
+    _editorSource: 'documents/characters/active.md'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:189:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: filtering: browse still selects a matching result and explicit preserveSelection does not switch documents
+ok 9 - filtering: browse still selects a matching result and explicit preserveSelection does not switch documents
+  ---
+  duration_ms: 11.915276
+  ...
+# Subtest: filtering: a compact sidebar stays open during edit search and closes on an explicit selection
+not ok 10 - filtering: a compact sidebar stays open during edit search and closes on an explicit selection
+  ---
+  duration_ms: 12.452522
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:215:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:222:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: filtering: a compact sidebar stays open during browse search and closes on an explicit selection
+not ok 11 - filtering: a compact sidebar stays open during browse search and closes on an explicit selection
+  ---
+  duration_ms: 12.009017
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:215:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/editor-filtering.test.mjs:222:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+1..11
+# tests 11
+# suites 0
+# pass 1
+# fail 10
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 312.179843

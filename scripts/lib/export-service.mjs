@@ -72,6 +72,9 @@ export function createExportService(root, { ttlMs = 15 * 60 * 1000 } = {}) {
       const file = path.join(directory, 'payload.zip');
       await writeExportZip(plan, file, signal);
       const bytes = (await fs.stat(file)).size;
+      // Cancellation can arrive after the ZIP writer removed its listener,
+      // while the final stat is pending. Recheck before publishing the job.
+      signal?.throwIfAborted();
       const job = { id, directory, file, fileName: plan.fileName, bytes, documentCount: plan.documentCount, assetCount: plan.assetCount,
         readers: 0, downloaded: false, released: false };
       jobs.set(id, job);
