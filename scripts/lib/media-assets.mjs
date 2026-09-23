@@ -82,6 +82,7 @@ export async function importMediaAsset(root, request, rawName, { maxBytes = MEDI
     if (!size || !matchesFormat(prefix, extension)) throw reject(415, '文件内容与图片、视频或音频格式不符，未导入。');
     const content = { size, sha256: hash.digest('hex') };
     return await withRegistryLock(root, async () => {
+      if (resolveAssetRoot(root) !== store) throw reject(409, '素材目录在上传期间发生变化，请重新导入。');
       const registry = await readRegistry(root);
       for (const old of registry.assets.filter((asset) => asset.kind === kind && asset.content?.sha256 === content.sha256 && asset.content.size === size)) {
         try {

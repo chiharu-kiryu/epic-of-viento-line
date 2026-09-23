@@ -1,0 +1,45 @@
+TAP version 13
+# Subtest: creation, repeated save and preview retain a legal 255-byte ASCII filename
+ok 1 - creation, repeated save and preview retain a legal 255-byte ASCII filename
+  ---
+  duration_ms: 571.422208
+  ...
+# Subtest: creation, repeated save and preview retain a legal 255-byte Unicode filename
+ok 2 - creation, repeated save and preview retain a legal 255-byte Unicode filename
+  ---
+  duration_ms: 517.364564
+  ...
+# Subtest: an existing long source can be edited without renaming it or losing permissions
+ok 3 - an existing long source can be edited without renaming it or losing permissions
+  ---
+  duration_ms: 220.029219
+  ...
+# Subtest: standardization handles existing 255-byte names without exceeding cache component limits
+ok 4 - standardization handles existing 255-byte names without exceeding cache component limits
+  ---
+  duration_ms: 425.317583
+  ...
+# Subtest: a source filename and another source directory do not collide in derived caches
+ok 5 - a source filename and another source directory do not collide in derived caches
+  ---
+  duration_ms: 954.981123
+  ...
+# Subtest: v2 creation indexes ordinary document folders named like application resources
+ok 6 - v2 creation indexes ordinary document folders named like application resources
+  ---
+  duration_ms: 861.331885
+  ...
+# Subtest: v3 creation indexes ordinary document folders named like application resources
+ok 7 - v3 creation indexes ordinary document folders named like application resources
+  ---
+  duration_ms: 859.464964
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4579.582169

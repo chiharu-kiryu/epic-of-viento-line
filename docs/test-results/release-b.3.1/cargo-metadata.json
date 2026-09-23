@@ -1,0 +1,7 @@
+{
+  "offline": true,
+  "locked": true,
+  "applicationVersion": "0.3.1",
+  "glibVersion": "0.18.5",
+  "glibManifest": "src-tauri/vendor/glib/Cargo.toml"
+}

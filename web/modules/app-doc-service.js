@@ -474,7 +474,7 @@ export function uploadMediaFile(file, { signal, onProgress = () => {} } = {}) {
       let payload;
       try { payload = JSON.parse(xhr.responseText); } catch { reject(new Error(t('素材服务返回了无效响应。'))); return; }
       if (xhr.status >= 200 && xhr.status < 300 && payload.ok === true) resolve(payload.data);
-      else reject(new Error(payload.error || t('素材导入失败。')));
+      else reject(new Error(t(payload.error || '素材导入失败。')));
     };
     xhr.onerror = () => reject(new Error(t('素材连接中断，请重试。')));
     xhr.ontimeout = () => reject(new Error(t('素材导入超时，请重试。')));

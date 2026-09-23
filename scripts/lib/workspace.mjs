@@ -45,16 +45,21 @@ export function readWorkspace(root) {
   return value;
 }
 
-export function resolveAssetRoot(root) {
+function readLocalAssetBinding(root) {
   const file = path.join(root, '.viento/local.json');
-  if (!fs.existsSync(file)) return path.join(root, 'assets');
+  if (!fs.existsSync(file)) return { version: 1 };
   const local = JSON.parse(fs.readFileSync(file, 'utf8'));
-  if (local.version !== 1 || (local.assetStores && (typeof local.assetStores !== 'object' || Array.isArray(local.assetStores)))
+  if (!local || typeof local !== 'object' || Array.isArray(local) || local.version !== 1
+    || (local.assetStores !== undefined && (!local.assetStores || typeof local.assetStores !== 'object' || Array.isArray(local.assetStores)))
     || Object.keys(local.assetStores || {}).some((key) => key !== 'main')) throw new Error('无效的本机素材绑定');
   const target = local.assetStores?.main;
-  if (target === undefined) return path.join(root, 'assets');
-  if (typeof target !== 'string' || !path.isAbsolute(target)) throw new Error('素材目录绑定必须是绝对路径');
-  return path.resolve(target);
+  if (target !== undefined && (typeof target !== 'string' || !path.isAbsolute(target))) throw new Error('素材目录绑定必须是绝对路径');
+  return local;
+}
+
+export function resolveAssetRoot(root) {
+  const target = readLocalAssetBinding(root).assetStores?.main;
+  return target === undefined ? path.join(root, 'assets') : path.resolve(target);
 }
 
 let assetLookupCache = null;
@@ -247,6 +252,19 @@ export async function withRegistryLock(root, operation) {
   finally { if (registryOperations.get(key) === task) registryOperations.delete(key); }
 }
 
+export async function bindWorkspaceAssets(root, directory) {
+  if (!directory) throw new Error('需要 --directory；使用作品库内的 assets/ 时填写该目录');
+  return withRegistryLock(root, async () => {
+    if (![2, 3].includes(readWorkspace(root)?.version)) throw new Error('请先登记作品库');
+    const target = await fsp.realpath(path.resolve(directory));
+    if (!(await fsp.stat(target)).isDirectory()) throw new Error('素材位置必须是文件夹');
+    const file = await resolveContainedPath(root, path.join(root, '.viento/local.json'), { allowMissing: true });
+    const local = readLocalAssetBinding(root);
+    await writeJson(file, { ...local, assetStores: { ...local.assetStores, main: target } });
+    return { root, assetDirectory: target };
+  });
+}
+
 export async function registerWorkspace(root, { name, legacyIndex, scanAssets = true } = {}) {
   const configured = readWorkspace(root);
   const paths = workspacePaths(configured);
@@ -328,19 +346,26 @@ export async function verifyWorkspace(root) {
   if (![2, 3].includes(workspace?.version)) throw new Error('请先登记作品库');
   const registry = await readRegistry(root);
   const assetRoot = resolveAssetRoot(root);
+  // Only an explicit external store selects a separate root. The default
+  // assets directory must obey the same no-link rule as documents and exports.
+  const assetBoundary = path.resolve(assetRoot) === path.resolve(root, 'assets') ? root : assetRoot;
   const problems = [];
   for (const record of registry.assets) {
     try {
-      const real = await fsp.realpath(path.join(assetRoot, record.location.path));
-      const relative = path.relative(await fsp.realpath(assetRoot), real);
-      if (relative.startsWith('..') || path.isAbsolute(relative)) throw new Error('文件越出素材目录');
-      const actual = await fingerprint(real);
+      const file = await resolveContainedPath(assetBoundary, path.join(assetRoot, record.location.path));
+      if (!(await fsp.stat(file)).isFile()) throw new Error('素材必须是实际文件');
+      const actual = await fingerprint(file);
       if (!record.content || actual.size !== record.content.size || actual.sha256 !== record.content.sha256) throw new Error('内容指纹不一致或尚未登记');
     } catch (error) { problems.push({ id: record.id, path: record.location.path, error: error.message }); }
   }
   const assetIds = new Set(registry.assets.map((a) => a.id));
   for (const record of registry.documents) {
-    if (!fs.existsSync(path.join(root, record.sourcePath))) problems.push({ id: record.id, path: record.sourcePath, error: '文档源文件缺失' });
+    try {
+      const file = await resolveContainedPath(root, path.join(root, record.sourcePath));
+      if (!(await fsp.stat(file)).isFile()) throw new Error('文档源必须是实际文件');
+    } catch (error) {
+      problems.push({ id: record.id, path: record.sourcePath, error: error.code === 'ENOENT' ? '文档源文件缺失' : error.message });
+    }
     for (const binding of record.assetBindings) if (!assetIds.has(binding.assetId)) problems.push({ id: record.id, error: `未知素材 ${binding.assetId}` });
   }
   return { assets: registry.assets.length, documents: registry.documents.length, ok: problems.length === 0, problems };

@@ -40,7 +40,9 @@ async function readDocumentSnapshot(absolutePath) {
 async function writeDocumentAtomically(absolutePath, content, { create = false, previousStats = null } = {}) {
   const directory = path.dirname(absolutePath);
   await fs.mkdir(directory, { recursive: true });
-  const temporaryPath = path.join(directory, `.${path.basename(absolutePath)}.${randomUUID()}.tmp`);
+  // A valid 255-byte source name must not overflow the filesystem limit when
+  // creating its temporary sibling. The random name stays short on its own.
+  const temporaryPath = path.join(directory, `.${randomUUID()}.tmp`);
   const handle = await fs.open(temporaryPath, 'wx', previousStats ? previousStats.mode & 0o777 : 0o666);
   try {
     await handle.writeFile(content, 'utf8');

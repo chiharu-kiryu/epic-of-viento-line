@@ -5,6 +5,7 @@ import { toPosix, trimName } from '../lib/paths.mjs';
 import { parseJsonContent, parseTextContent, parseYamlContent } from './parser.mjs';
 import { parserOptionsForSource } from './legacy-profile.mjs';
 import { buildDocumentLayout } from './layout.mjs';
+import { buildStandardOutputPath } from '../lib/standard-cache.mjs';
 
 function parseSourceContent(rawText, relPath, descriptor = {}) {
   const ext = path.extname(relPath).toLowerCase();
@@ -54,15 +55,6 @@ function normalizeParserStats(parserStats, fallback = {}) {
     tableCount: toSafeInt(rawStats.tableCount, 0),
     kvCount: toSafeInt(rawStats.kvCount, 0),
   };
-}
-
-function buildStandardOutputPath(sourceRelativePath) {
-  // Keep the source extension: role.md, role.json and extensionless role are
-  // separate documents and must never share a derived cache file.
-  return toPosix(path.join(
-    path.dirname(sourceRelativePath),
-    `${path.basename(sourceRelativePath)}.json`
-  ));
 }
 
 function buildStandardObject(relativePath, raw, parsedContent, stats, descriptor = {}) {

@@ -1,0 +1,380 @@
+TAP version 13
+# Subtest: custom output preserves the default catalog, prunes its own stale files and excludes itself from sources
+ok 1 - custom output preserves the default catalog, prunes its own stale files and excludes itself from sources
+  ---
+  duration_ms: 1745.849992
+  ...
+# Subtest: no-build still standardizes selected sources without rewriting the static index
+ok 2 - no-build still standardizes selected sources without rewriting the static index
+  ---
+  duration_ms: 360.086829
+  ...
+# Subtest: API preflight validates the extracted request service and still rejects broken requests
+ok 3 - API preflight validates the extracted request service and still rejects broken requests
+  ---
+  duration_ms: 295.115312
+  ...
+# Subtest: static indexing rejects duplicate document identities before replacing an existing index
+ok 4 - static indexing rejects duplicate document identities before replacing an existing index
+  ---
+  duration_ms: 178.022869
+  ...
+# Subtest: creation, repeated save and preview retain a legal 255-byte ASCII filename
+ok 5 - creation, repeated save and preview retain a legal 255-byte ASCII filename
+  ---
+  duration_ms: 801.718131
+  ...
+# Subtest: creation, repeated save and preview retain a legal 255-byte Unicode filename
+ok 6 - creation, repeated save and preview retain a legal 255-byte Unicode filename
+  ---
+  duration_ms: 651.900068
+  ...
+# Subtest: scoped rebuild migrates selected legacy caches and retains untouched cached content and identities
+ok 7 - scoped rebuild migrates selected legacy caches and retains untouched cached content and identities
+  ---
+  duration_ms: 1114.926541
+  ...
+# Subtest: a deleted source with a damaged hashed cache is removed by an exact scoped rebuild
+ok 8 - a deleted source with a damaged hashed cache is removed by an exact scoped rebuild
+  ---
+  duration_ms: 689.366848
+  ...
+# Subtest: rebuilding refuses linked internal cache directories without writing or indexing the target
+ok 9 - rebuilding refuses linked internal cache directories without writing or indexing the target
+  ---
+  duration_ms: 616.131691
+  ...
+# Subtest: an existing long source can be edited without renaming it or losing permissions
+ok 10 - an existing long source can be edited without renaming it or losing permissions
+  ---
+  duration_ms: 239.276726
+  ...
+# Subtest: standardization handles existing 255-byte names without exceeding cache component limits
+ok 11 - standardization handles existing 255-byte names without exceeding cache component limits
+  ---
+  duration_ms: 468.598697
+  ...
+# Subtest: a source filename and another source directory do not collide in derived caches
+ok 12 - a source filename and another source directory do not collide in derived caches
+  ---
+  duration_ms: 910.842849
+  ...
+# Subtest: v2 creation indexes ordinary document folders named like application resources
+ok 13 - v2 creation indexes ordinary document folders named like application resources
+  ---
+  duration_ms: 865.098916
+  ...
+# Subtest: v3 creation indexes ordinary document folders named like application resources
+ok 14 - v3 creation indexes ordinary document folders named like application resources
+  ---
+  duration_ms: 851.461343
+  ...
+# Subtest: capability discovery includes the live project configuration and preview routes
+ok 15 - capability discovery includes the live project configuration and preview routes
+  ---
+  duration_ms: 389.210696
+  ...
+# Subtest: browser module graph is served as JavaScript; server-only modules stay private
+ok 16 - browser module graph is served as JavaScript; server-only modules stay private
+  ---
+  duration_ms: 391.213272
+  ...
+# Subtest: same-version concurrent edits accept one writer, including source-path aliases
+ok 17 - same-version concurrent edits accept one writer, including source-path aliases
+  ---
+  duration_ms: 390.401299
+  ...
+# Subtest: concurrent creation is exclusive and a rejected write does not block subsequent saves
+ok 18 - concurrent creation is exclusive and a rejected write does not block subsequent saves
+  ---
+  duration_ms: 271.821084
+  ...
+# Subtest: preserving the modification time cannot hide an external edit from the save conflict check
+ok 19 - preserving the modification time cannot hide an external edit from the save conflict check
+  ---
+  duration_ms: 255.655379
+  ...
+# Subtest: atomic saves preserve permissions and advance modification times on coarse clocks
+ok 20 - atomic saves preserve permissions and advance modification times on coarse clocks
+  ---
+  duration_ms: 42.025263
+  ...
+# Subtest: static resources do not consume the API rate limit or leak active request counts
+ok 21 - static resources do not consume the API rate limit or leak active request counts
+  ---
+  duration_ms: 266.852147
+  ...
+# Subtest: mutable workspace files revalidate and If-None-Match takes precedence over dates
+ok 22 - mutable workspace files revalidate and If-None-Match takes precedence over dates
+  ---
+  duration_ms: 250.725033
+  ...
+# Subtest: media responses identify their format and support bounded seeking without downloading the whole file
+ok 23 - media responses identify their format and support bounded seeking without downloading the whole file
+  ---
+  duration_ms: 296.084988
+  ...
+# Subtest: an unreadable asset cannot terminate the editing service
+ok 24 - an unreadable asset cannot terminate the editing service
+  ---
+  duration_ms: 240.999912
+  ...
+# Subtest: new document validation refuses paths that cannot be indexed or migrated before submitting
+ok 25 - new document validation refuses paths that cannot be indexed or migrated before submitting
+  ---
+  duration_ms: 40.933771
+  ...
+# Subtest: suggested filenames sanitize arbitrary type labels and fit filesystem filename limits
+ok 26 - suggested filenames sanitize arbitrary type labels and fit filesystem filename limits
+  ---
+  duration_ms: 7.521454
+  ...
+# Subtest: the initial creation hint cannot hide a failed template load
+ok 27 - the initial creation hint cannot hide a failed template load
+  ---
+  duration_ms: 12.006538
+  ...
+# Subtest: a failed index reload after saving is reported as a rebuild failure while the saved editor survives
+ok 28 - a failed index reload after saving is reported as a rebuild failure while the saved editor survives
+  ---
+  duration_ms: 13.791794
+  ...
+# Subtest: an invalid replacement index preserves the current document list and project types
+ok 29 - an invalid replacement index preserves the current document list and project types
+  ---
+  duration_ms: 10.441337
+  ...
+# Subtest: source/block switches retain new edits and do not duplicate display-only headings
+ok 30 - source/block switches retain new edits and do not duplicate display-only headings
+  ---
+  duration_ms: 13.270195
+  ...
+# Subtest: an unchanged source stays clean across modes and index refresh preserves a dirty editor
+ok 31 - an unchanged source stays clean across modes and index refresh preserves a dirty editor
+  ---
+  duration_ms: 14.361884
+  ...
+# Subtest: late source responses cannot reopen a cancelled session; empty sources stay empty
+ok 32 - late source responses cannot reopen a cancelled session; empty sources stay empty
+  ---
+  duration_ms: 11.478256
+  ...
+# Subtest: saving serializes shortcut requests and locks editing until rebuilding finishes
+ok 33 - saving serializes shortcut requests and locks editing until rebuilding finishes
+  ---
+  duration_ms: 11.943984
+  ...
+# Subtest: a changed creation path is an unsaved draft and cancel restores the current document path
+ok 34 - a changed creation path is an unsaved draft and cancel restores the current document path
+  ---
+  duration_ms: 10.389863
+  ...
+# Subtest: suggested creation paths reuse same-type directories and never treat a filename as a folder
+ok 35 - suggested creation paths reuse same-type directories and never treat a filename as a folder
+  ---
+  duration_ms: 5.790397
+  ...
+# Subtest: an older template response cannot replace a newer type or reopen a cancelled creation
+ok 36 - an older template response cannot replace a newer type or reopen a cancelled creation
+  ---
+  duration_ms: 9.981692
+  ...
+# Subtest: conflict reload uses the newly read version, even if the server changed again after the conflict
+ok 37 - conflict reload uses the newly read version, even if the server changed again after the conflict
+  ---
+  duration_ms: 8.195123
+  ...
+# Subtest: failed forced saves keep the original baseline so a normal retry asks about the conflict again
+ok 38 - failed forced saves keep the original baseline so a normal retry asks about the conflict again
+  ---
+  duration_ms: 9.644792
+  ...
+# Subtest: a failed conflict reload retains the block draft and its error until a successful retry
+ok 39 - a failed conflict reload retains the block draft and its error until a successful retry
+  ---
+  duration_ms: 9.897146
+  ...
+# Subtest: save conflict: keep draft only changes the baseline after an approved successful write
+ok 40 - save conflict: keep draft only changes the baseline after an approved successful write
+  ---
+  duration_ms: 7.784468
+  ...
+# Subtest: save conflict: cancel conflict only changes the baseline after an approved successful write
+ok 41 - save conflict: cancel conflict only changes the baseline after an approved successful write
+  ---
+  duration_ms: 7.703368
+  ...
+# Subtest: save conflict: cancel force confirmation only changes the baseline after an approved successful write
+ok 42 - save conflict: cancel force confirmation only changes the baseline after an approved successful write
+  ---
+  duration_ms: 8.966934
+  ...
+# Subtest: save conflict: confirm force save only changes the baseline after an approved successful write
+ok 43 - save conflict: confirm force save only changes the baseline after an approved successful write
+  ---
+  duration_ms: 7.689403
+  ...
+# Subtest: content revision tokens survive reading, conflict reload and subsequent ordinary saving
+ok 44 - content revision tokens survive reading, conflict reload and subsequent ordinary saving
+  ---
+  duration_ms: 10.162996
+  ...
+# Subtest: switching from the editor to browse makes the document content visible again
+ok 45 - switching from the editor to browse makes the document content visible again
+  ---
+  duration_ms: 8.193421
+  ...
+# Subtest: a successful creation stays editable as an existing file if rebuilding fails
+ok 46 - a successful creation stays editable as an existing file if rebuilding fails
+  ---
+  duration_ms: 12.517499
+  ...
+# Subtest: browser textarea normalization preserves source line endings through switches, edits and saves
+ok 47 - browser textarea normalization preserves source line endings through switches, edits and saves
+  ---
+  duration_ms: 12.601985
+  ...
+# Subtest: first index refresh maps a created source to its catalog ID without closing its editor
+ok 48 - first index refresh maps a created source to its catalog ID without closing its editor
+  ---
+  duration_ms: 15.716367
+  ...
+# Subtest: discard cancellation protects dirty drafts on document, mode and editor exit
+ok 49 - discard cancellation protects dirty drafts on document, mode and editor exit
+  ---
+  duration_ms: 10.362764
+  ...
+# Subtest: creation rejects portable path collisions without poisoning the registry: documents/hero.md
+ok 50 - creation rejects portable path collisions without poisoning the registry: documents/hero.md
+  ---
+  duration_ms: 450.160087
+  ...
+# Subtest: creation rejects portable path collisions without poisoning the registry: documents/Café.md
+ok 51 - creation rejects portable path collisions without poisoning the registry: documents/Café.md
+  ---
+  duration_ms: 313.328681
+  ...
+# Subtest: creation rejects portable path collisions without poisoning the registry: documents/characters/two.md
+ok 52 - creation rejects portable path collisions without poisoning the registry: documents/characters/two.md
+  ---
+  duration_ms: 331.983373
+  ...
+# Subtest: unregistered files and concurrent creates also reserve their portable source locations
+ok 53 - unregistered files and concurrent creates also reserve their portable source locations
+  ---
+  duration_ms: 287.056707
+  ...
+# Subtest: a missing registered source cannot silently donate its identity and type to a new document
+ok 54 - a missing registered source cannot silently donate its identity and type to a new document
+  ---
+  duration_ms: 284.442455
+  ...
+# Subtest: creation rejects unindexable and nonportable paths before creating metadata or source files
+ok 55 - creation rejects unindexable and nonportable paths before creating metadata or source files
+  ---
+  duration_ms: 709.402111
+  ...
+# Subtest: queued creation validates the current project definition after an earlier configuration change
+ok 56 - queued creation validates the current project definition after an earlier configuration change
+  ---
+  duration_ms: 55.68497
+  ...
+# Subtest: a failed source publication removes only its new descriptor and permits a clean retry
+ok 57 - a failed source publication removes only its new descriptor and permits a clean retry
+  ---
+  duration_ms: 49.267728
+  ...
+# Subtest: generic registration preserves version, project-owned types and templates without legacy directories
+ok 58 - generic registration preserves version, project-owned types and templates without legacy directories
+  ---
+  duration_ms: 368.325913
+  ...
+# Subtest: custom type survives a user-selected file location, partial rebuild, save and reload
+ok 59 - custom type survives a user-selected file location, partial rebuild, save and reload
+  ---
+  duration_ms: 1173.066259
+  ...
+# Subtest: invalid types and simultaneous creates never leave orphaned metadata or overwrite a source
+ok 60 - invalid types and simultaneous creates never leave orphaned metadata or overwrite a source
+  ---
+  duration_ms: 269.334048
+  ...
+# Subtest: generic documents, project templates and media IDs survive a different workspace root
+ok 61 - generic documents, project templates and media IDs survive a different workspace root
+  ---
+  duration_ms: 1065.29931
+  ...
+# Subtest: generic editor offers only project types, uses local templates and accepts the new document root
+ok 62 - generic editor offers only project types, uses local templates and accepts the new document root
+  ---
+  duration_ms: 11.273313
+  ...
+# Subtest: new manifest layout and template paths are validated while legacy projects keep their original layout
+ok 63 - new manifest layout and template paths are validated while legacy projects keep their original layout
+  ---
+  duration_ms: 74.358079
+  ...
+# Subtest: an empty project exposes creation in edit mode and recovers after cancelling its first draft
+ok 64 - an empty project exposes creation in edit mode and recovers after cancelling its first draft
+  ---
+  duration_ms: 18.510387
+  ...
+# Subtest: project category tabs, counts and searches follow custom types without old game categories
+ok 65 - project category tabs, counts and searches follow custom types without old game categories
+  ---
+  duration_ms: 4.637557
+  ...
+# Subtest: JSON and empty source documents survive standardization, indexing and editor API reads
+ok 66 - JSON and empty source documents survive standardization, indexing and editor API reads
+  ---
+  duration_ms: 1179.58747
+  ...
+# Subtest: merged backstory source strings normalize to path objects without character-index properties
+ok 67 - merged backstory source strings normalize to path objects without character-index properties
+  ---
+  duration_ms: 1.357118
+  ...
+# Subtest: same-stem sources keep separate caches and identities (legacy)
+ok 68 - same-stem sources keep separate caches and identities (legacy)
+  ---
+  duration_ms: 889.343939
+  ...
+# Subtest: same-stem sources keep separate caches and identities (generic v3)
+ok 69 - same-stem sources keep separate caches and identities (generic v3)
+  ---
+  duration_ms: 898.603052
+  ...
+# Subtest: partial rebuild respects dotted folders and migrates only matching legacy cache entries
+ok 70 - partial rebuild respects dotted folders and migrates only matching legacy cache entries
+  ---
+  duration_ms: 201.871102
+  ...
+# Subtest: legacy display-path disambiguation preserves document IDs and part-of navigation
+ok 71 - legacy display-path disambiguation preserves document IDs and part-of navigation
+  ---
+  duration_ms: 375.155192
+  ...
+# Subtest: metadata sorting supports buildings, first-line fields, BOM and original line endings, and is idempotent
+ok 72 - metadata sorting supports buildings, first-line fields, BOM and original line endings, and is idempotent
+  ---
+  duration_ms: 481.995048
+  ...
+# Subtest: metadata sorting leaves JSON/YAML, fenced examples and separate heading sections intact
+ok 73 - metadata sorting leaves JSON/YAML, fenced examples and separate heading sections intact
+  ---
+  duration_ms: 150.38036
+  ...
+# Subtest: invalid metadata sort options fail without expanding the write scope
+ok 74 - invalid metadata sort options fail without expanding the write scope
+  ---
+  duration_ms: 483.969513
+  ...
+1..74
+# tests 74
+# suites 0
+# pass 74
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 7397.27067

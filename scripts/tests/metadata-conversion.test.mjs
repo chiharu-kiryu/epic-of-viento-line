@@ -7,6 +7,7 @@ import { normalizeBackstoryPayload } from '../lib/static-index.mjs';
 import { randomUUID } from 'node:crypto';
 import { PROJECT_DEFAULTS } from '../lib/project-layout.mjs';
 import { registerWorkspace, readRegistry, writeJson } from '../lib/workspace.mjs';
+import { buildStandardOutputPath } from '../standardize-docs/doc-factory.mjs';
 
 const read = (root, name) => fs.readFile(path.join(root, name), 'utf8');
 
@@ -73,13 +74,13 @@ for (const managed of [false, true]) test(`same-stem sources keep separate cache
   assert.equal(docs.length, 4);
   assert.equal(new Set(docs.map(doc => doc.path)).size, 4);
   for (const [file, content] of Object.entries(files)) {
-    const cached = JSON.parse(await read(root, `${cache}/${file}.json`));
+    const cached = JSON.parse(await read(root, `${cache}/${buildStandardOutputPath(file)}`));
     assert.equal(cached.source.path, file);
     assert.equal(cached.raw, content);
     assert.equal(await read(root, file), content);
   }
   const selected = `${documents}/design-rules/规则.md`;
-  const untouched = `${cache}/${documents}/design-rules/规则.txt.json`;
+  const untouched = `${cache}/${buildStandardOutputPath(`${documents}/design-rules/规则.txt`)}`;
   const before = await read(root, untouched);
   await write(root, selected, '# 修改 Markdown\n');
   await write(root, `${documents}/design-rules/规则.txt`, '外部修改，未选择重建\n');
@@ -87,7 +88,7 @@ for (const managed of [false, true]) test(`same-stem sources keep separate cache
   assert.equal(await read(root, untouched), before);
   await fs.rm(path.join(root, selected));
   await node(root, ['scripts/standardize-docs.mjs', selected]);
-  await assert.rejects(fs.access(path.join(root, `${cache}/${selected}.json`)), { code: 'ENOENT' });
+  await assert.rejects(fs.access(path.join(root, cache, buildStandardOutputPath(selected))), { code: 'ENOENT' });
   assert.equal(await read(root, untouched), before);
   await node(root, ['scripts/build-static-doc-site.mjs']);
   docs = JSON.parse(await read(root, index)).docs;
@@ -103,7 +104,7 @@ test('partial rebuild respects dotted folders and migrates only matching legacy 
   await write(root, other, JSON.stringify({ source: { path: 'design-data/chapter.v2/保留.md' }, raw: '范围外缓存' }));
   const before = await read(root, other);
   await node(root, ['scripts/standardize-docs.mjs', 'design-data/chapter.v1']);
-  assert.equal(JSON.parse(await read(root, `docs-standard/${source}.json`)).raw, '# 新场景\n');
+  assert.equal(JSON.parse(await read(root, `docs-standard/${buildStandardOutputPath(source)}`)).raw, '# 新场景\n');
   await assert.rejects(fs.access(path.join(root, 'docs-standard/design-data/chapter.v1/场景.json')), { code: 'ENOENT' });
   assert.equal(await read(root, other), before);
 });

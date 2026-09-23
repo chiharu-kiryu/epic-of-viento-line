@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import path from 'node:path';
 import { PROJECT_ROOT, STANDARD_ROOT as DEFAULT_STANDARD_ROOT, toPosix } from './lib/paths.mjs';
-import { collectFilesRecursive, DEFAULT_SKIP_DIRS } from './lib/scan-files.mjs';
+import { collectStandardPaths } from './lib/standard-cache.mjs';
 
 const args = process.argv.slice(2).filter((arg) => arg && !arg.startsWith('-'));
 const options = new Set(process.argv.slice(2).filter((arg) => arg.startsWith('-')));
@@ -195,9 +195,8 @@ async function main() {
     process.exit(1);
   }
 
-  const files = await collectFilesRecursive(STANDARD_ROOT, {
+  const files = await collectStandardPaths(STANDARD_ROOT, {
     relativeBase: '',
-    skipDirs: DEFAULT_SKIP_DIRS,
     acceptedExtensions: new Set(['.json']),
   });
   const summary = {

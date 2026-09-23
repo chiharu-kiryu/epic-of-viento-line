@@ -13,7 +13,7 @@ import {
   sortHeroImagesForDisplay,
 } from './image-index.mjs';
 import { PROJECT_ROOT, STANDARD_ROOT, toPosix, trimName } from './paths.mjs';
-import { collectFilesRecursive } from './scan-files.mjs';
+import { collectStandardPaths } from './standard-cache.mjs';
 import { attachDocumentHierarchy } from './document-model.mjs';
 import { collectDocumentMedia } from './media-format.mjs';
 import { buildDocumentLayout } from '../standardize-docs/layout.mjs';
@@ -395,7 +395,7 @@ function sourceTypeFromPath(sourcePath) {
 }
 
 async function buildIndexFromStandard(assetCatalog) {
-  const files = await collectFilesRecursive(STANDARD_ROOT, {
+  const files = await collectStandardPaths(STANDARD_ROOT, {
     relativeBase: 'docs-standard',
   });
   const docs = [];

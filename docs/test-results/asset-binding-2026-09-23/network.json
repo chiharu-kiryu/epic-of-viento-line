@@ -1,0 +1,11 @@
+{
+  "sourceFiles": 144,
+  "localImports": 359,
+  "externalImports": 263,
+  "nodeReferences": 143,
+  "functionalEdges": 173,
+  "moduleCycles": 1,
+  "htmlScripts": 1,
+  "localLinks": 379,
+  "embeddedSnapshot": "matches"
+}

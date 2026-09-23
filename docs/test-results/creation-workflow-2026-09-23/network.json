@@ -1,0 +1,13 @@
+{
+  "revision": 18,
+  "sourceFingerprints": 146,
+  "jsModules": 126,
+  "localImports": 371,
+  "externalImports": 271,
+  "nodeSources": 145,
+  "workflowEdges": 173,
+  "moduleCycles": 1,
+  "inlineScripts": 1,
+  "documentLinks": 387,
+  "evidenceFingerprintsAndCountsVerified": true
+}

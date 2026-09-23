@@ -1,0 +1,84 @@
+TAP version 13
+# Subtest: asset rebinding retains other local settings, raw data and registered identities
+ok 1 - asset rebinding retains other local settings, raw data and registered identities # SKIP test name does not match pattern
+  ---
+  duration_ms: 1.276664
+  ...
+# Subtest: asset rebinding respects a live registry lock without replacing the original binding
+ok 2 - asset rebinding respects a live registry lock without replacing the original binding # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.069169
+  ...
+# Subtest: asset rebinding rejects a linked private-directory without changing its target
+ok 3 - asset rebinding rejects a linked private-directory without changing its target # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.071524
+  ...
+# Subtest: asset rebinding rejects a linked local-file without changing its target
+ok 4 - asset rebinding rejects a linked local-file without changing its target # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.070892
+  ...
+# Subtest: asset rebinding rejects invalid destinations without changing the original configuration
+ok 5 - asset rebinding rejects invalid destinations without changing the original configuration # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.065492
+  ...
+# Subtest: workspace verification rejects a replaced asset-file and leaves data untouched
+ok 6 - workspace verification rejects a replaced asset-file and leaves data untouched # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.058279
+  ...
+# Subtest: workspace verification rejects a replaced asset-directory and leaves data untouched
+ok 7 - workspace verification rejects a replaced asset-directory and leaves data untouched # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.061325
+  ...
+# Subtest: workspace verification rejects a replaced default-asset-root and leaves data untouched
+ok 8 - workspace verification rejects a replaced default-asset-root and leaves data untouched # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.071854
+  ...
+# Subtest: workspace verification rejects a replaced document-file and leaves data untouched
+ok 9 - workspace verification rejects a replaced document-file and leaves data untouched # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.145412
+  ...
+# Subtest: workspace verification rejects a replaced document-directory and leaves data untouched
+ok 10 - workspace verification rejects a replaced document-directory and leaves data untouched # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.181238
+  ...
+# Subtest: workspace verification rejects a replaced document-as-directory and leaves data untouched
+ok 11 - workspace verification rejects a replaced document-as-directory and leaves data untouched # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.147525
+  ...
+# Subtest: workspace verification accepts legal asset names starting with two dots
+ok 12 - workspace verification accepts legal asset names starting with two dots # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.067296
+  ...
+# Subtest: media upload refuses a store changed during streaming and can retry into the new store
+not ok 13 - media upload refuses a store changed during streaming and can retry into the new store
+  ---
+  duration_ms: 185.95266
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:155:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  stack: |-
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:167:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 12
+# todo 0
+# duration_ms 314.816954

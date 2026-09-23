@@ -1,0 +1,270 @@
+TAP version 13
+# Subtest: asset rebinding retains other local settings, raw data and registered identities
+not ok 1 - asset rebinding retains other local settings, raw data and registered identities
+  ---
+  duration_ms: 172.348691
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:29:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+        assetStores: {
+          main: '/tmp/viento-asset-binding-C33NiQ/external'
+    -   },
+    -   extensionState: {
+    -     value: 'keep'
+        },
+        version: 1
+      }
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    version: 1
+    assetStores:
+      main: '/tmp/viento-asset-binding-C33NiQ/external'
+    extensionState:
+      value: 'keep'
+  actual:
+    version: 1
+    assetStores:
+      main: '/tmp/viento-asset-binding-C33NiQ/external'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:42:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async startSubtest (node:internal/test_runner/harness:214:3)
+  ...
+# Subtest: asset rebinding respects a live registry lock without replacing the original binding
+not ok 2 - asset rebinding respects a live registry lock without replacing the original binding
+  ---
+  duration_ms: 147.616466
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:57:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:67:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: asset rebinding rejects a linked private-directory without changing its target
+not ok 3 - asset rebinding rejects a linked private-directory without changing its target
+  ---
+  duration_ms: 148.958782
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:73:3'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:88:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: asset rebinding rejects a linked local-file without changing its target
+not ok 4 - asset rebinding rejects a linked local-file without changing its target
+  ---
+  duration_ms: 149.330667
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:73:3'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:88:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: asset rebinding rejects invalid destinations without changing the original configuration
+ok 5 - asset rebinding rejects invalid destinations without changing the original configuration
+  ---
+  duration_ms: 280.003738
+  ...
+# Subtest: workspace verification rejects a replaced asset-file and leaves data untouched
+not ok 6 - workspace verification rejects a replaced asset-file and leaves data untouched
+  ---
+  duration_ms: 12.506364
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:108:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:134:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: workspace verification rejects a replaced asset-directory and leaves data untouched
+not ok 7 - workspace verification rejects a replaced asset-directory and leaves data untouched
+  ---
+  duration_ms: 9.957242
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:108:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:134:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: workspace verification rejects a replaced default-asset-root and leaves data untouched
+not ok 8 - workspace verification rejects a replaced default-asset-root and leaves data untouched
+  ---
+  duration_ms: 15.632554
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:108:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:134:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: workspace verification rejects a replaced document-file and leaves data untouched
+not ok 9 - workspace verification rejects a replaced document-file and leaves data untouched
+  ---
+  duration_ms: 9.316094
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:108:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:134:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: workspace verification rejects a replaced document-directory and leaves data untouched
+not ok 10 - workspace verification rejects a replaced document-directory and leaves data untouched
+  ---
+  duration_ms: 9.111001
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:108:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:134:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: workspace verification rejects a replaced document-as-directory and leaves data untouched
+not ok 11 - workspace verification rejects a replaced document-as-directory and leaves data untouched
+  ---
+  duration_ms: 10.019979
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:108:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:134:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: workspace verification accepts legal asset names starting with two dots
+not ok 12 - workspace verification accepts legal asset names starting with two dots
+  ---
+  duration_ms: 17.020557
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:143:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + [
+    +   {
+    +     error: '文件越出素材目录',
+    +     id: '9cec7dd3-12f5-4297-ac2a-b5abada7e2a7',
+    +     path: '..portrait.png'
+    +   },
+    +   {
+    +     error: '文件越出素材目录',
+    +     id: 'e90e0030-1311-4a56-bdee-c31b34dc8e96',
+    +     path: '..draft/art.png'
+    +   }
+    + ]
+    - []
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0:
+      id: '9cec7dd3-12f5-4297-ac2a-b5abada7e2a7'
+      path: '..portrait.png'
+      error: '文件越出素材目录'
+    1:
+      id: 'e90e0030-1311-4a56-bdee-c31b34dc8e96'
+      path: '..draft/art.png'
+      error: '文件越出素材目录'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/asset-binding.test.mjs:150:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 1
+# fail 11
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1113.73702

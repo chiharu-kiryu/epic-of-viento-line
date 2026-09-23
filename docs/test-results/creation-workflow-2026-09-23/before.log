@@ -1,0 +1,146 @@
+TAP version 13
+# Subtest: creation, repeated save and preview retain a legal 255-byte ASCII filename
+not ok 1 - creation, repeated save and preview retain a legal 255-byte ASCII filename
+  ---
+  duration_ms: 280.38032
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/creation-workflow.test.mjs:30:3'
+  failureType: 'testCodeFailure'
+  error: '{"status":500,"payload":{"ok":false,"error":"internal error","errorCode":"internal_error","requestId":"1790128157242-1"},"data":{"ok":false,"error":"internal error","errorCode":"internal_error","requestId":"1790128157242-1"}}'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 500
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/creation-workflow.test.mjs:37:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async startSubtest (node:internal/test_runner/harness:214:3)
+  ...
+# Subtest: creation, repeated save and preview retain a legal 255-byte Unicode filename
+not ok 2 - creation, repeated save and preview retain a legal 255-byte Unicode filename
+  ---
+  duration_ms: 221.339248
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/creation-workflow.test.mjs:30:3'
+  failureType: 'testCodeFailure'
+  error: '{"status":500,"payload":{"ok":false,"error":"internal error","errorCode":"internal_error","requestId":"1790128157474-1"},"data":{"ok":false,"error":"internal error","errorCode":"internal_error","requestId":"1790128157474-1"}}'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 500
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/creation-workflow.test.mjs:37:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: an existing long source can be edited without renaming it or losing permissions
+not ok 3 - an existing long source can be edited without renaming it or losing permissions
+  ---
+  duration_ms: 216.029476
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/creation-workflow.test.mjs:60:1'
+  failureType: 'testCodeFailure'
+  error: '{"status":500,"payload":{"ok":false,"error":"internal error","errorCode":"internal_error","requestId":"1790128157699-2"},"data":{"ok":false,"error":"internal error","errorCode":"internal_error","requestId":"1790128157699-2"}}'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 500
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/creation-workflow.test.mjs:70:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: standardization handles existing 255-byte names without exceeding cache component limits
+not ok 4 - standardization handles existing 255-byte names without exceeding cache component limits
+  ---
+  duration_ms: 189.117065
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/creation-workflow.test.mjs:76:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. [Error: ENAMETOOLONG: name too long, open '/tmp/viento-test-JXFt6B/.viento/cache/docs-standard/documents/篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇.md.json'] {
+      errno: -36,
+      code: 'ENAMETOOLONG',
+      syscall: 'open',
+      path: '/tmp/viento-test-JXFt6B/.viento/cache/docs-standard/documents/篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇篇.md.json'
+    }
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: a source filename and another source directory do not collide in derived caches
+not ok 5 - a source filename and another source directory do not collide in derived caches
+  ---
+  duration_ms: 189.226525
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/creation-workflow.test.mjs:94:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. [Error: EEXIST: file already exists, mkdir '/tmp/viento-test-m7nRH4/.viento/cache/docs-standard/documents/角色.md.json'] {
+      errno: -17,
+      code: 'EEXIST',
+      syscall: 'mkdir',
+      path: '/tmp/viento-test-m7nRH4/.viento/cache/docs-standard/documents/角色.md.json'
+    }
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: v2 creation indexes ordinary document folders named like application resources
+not ok 6 - v2 creation indexes ordinary document folders named like application resources
+  ---
+  duration_ms: 554.862882
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/creation-workflow.test.mjs:119:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 8
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 8
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/creation-workflow.test.mjs:131:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: v3 creation indexes ordinary document folders named like application resources
+not ok 7 - v3 creation indexes ordinary document folders named like application resources
+  ---
+  duration_ms: 541.802061
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/creation-workflow.test.mjs:119:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 8
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 8
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/creation-workflow.test.mjs:131:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 0
+# fail 7
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2360.920671

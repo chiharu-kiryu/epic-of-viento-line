@@ -1,0 +1,72 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.0",
+  "gitBase": "cd14564abd6bae65b09a6d3b5623684cad46f412",
+  "worktreeBase": {
+    "functionNetworkRevision": 17,
+    "precedingUncommittedFixes": "N50–N54 retained"
+  },
+  "workflows": [
+    "F18",
+    "F19",
+    "F37",
+    "F38"
+  ],
+  "bugs": [
+    "N55",
+    "N56",
+    "N57",
+    "N58"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 7,
+    "passed": 0,
+    "failed": 7,
+    "skipped": 0,
+    "log": "before.log"
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 74,
+    "passed": 74,
+    "failed": 0,
+    "skipped": 0,
+    "newCases": 10,
+    "log": "after.log"
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 226,
+    "passed": 225,
+    "failed": 0,
+    "skipped": 1,
+    "javascriptSyntaxFiles": 120,
+    "apiContractPassed": true,
+    "log": "application.log"
+  },
+  "skipReason": "Node/Rust archive interoperability requires VIENTO_TEST_ARCHIVE_BINARY; native archive code unchanged in this round",
+  "files": {
+    "scripts/lib/doc-file-store.mjs": "2fb508655ee6da8a3c765aefb9f0920eb15957d8e69d3181895c7cb5cbfa1191",
+    "scripts/lib/standard-cache.mjs": "a1983e347994f812365f228af26b94d77afb6a18b70010fbc833a61cc18780af",
+    "scripts/lib/static-index.mjs": "10916a3bc484cbf01eac53027bc0a877de081d8fb18efaab53814b1acade71f3",
+    "scripts/standardize-docs/catalog.mjs": "43b78602bc1e730b0458dc6a882f738522fc81585ca3967e712caec49e20fa10",
+    "scripts/standardize-docs/doc-factory.mjs": "cdf8ef5ff1e5749eec099facbc5271cd68cbd938a9d0d2e4d320e6dbfed9162a",
+    "scripts/tests/build.test.mjs": "c53b3ecd240c13c9ee8ab7bb31e3b3750363a9f1e75c9662843d4505b312b382",
+    "scripts/tests/creation-workflow.test.mjs": "c75d7dbb1f550e8bcfc38263aeb55c71a3cb6ff9981098d930757477d8194fe1",
+    "scripts/tests/metadata-conversion.test.mjs": "742fcd263a2c48ebdd169cfd522cef8dc303193ce857c344f1cd9bbeab2aaa6d",
+    "scripts/validate-standard-docs.mjs": "6a73c9fda6f5a4cd3bae8a45f20fda6b390171baf9edab1c77a58df3468c1583"
+  },
+  "nativeTestsRerun": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "functionNetwork": {
+    "revision": 18,
+    "sourceFingerprints": 146,
+    "nodeSources": 145,
+    "localImportStatements": 371,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

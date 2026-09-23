@@ -514,5 +514,6 @@ export default {
   '音频暂时无法播放，请检查素材是否在线及音频编码。': 'Audio cannot be played. Check media availability and audio encoding.',
   '请选择支持的图片、视频或音频文件。': 'Choose a supported image, video or audio file.',
   '文件内容与图片、视频或音频格式不符，未导入。': 'The file contents do not match the image, video or audio format. Nothing was imported.',
+  '素材目录在上传期间发生变化，请重新导入。': 'The media folder changed during upload. Please import the file again.',
   '素材需要插入到对象或列表中，请先将当前文档整理为对象或列表。': 'Media must be inserted into an object or list. Convert the document to an object or list first.',
 };
