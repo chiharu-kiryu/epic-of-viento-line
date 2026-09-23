@@ -1,7 +1,6 @@
 import { t } from '../i18n/index.js';
 import {
   CATEGORY_LABELS,
-  ASSET_BASE_URL,
 } from './app-state.js';
 import { domElements } from './app-state.js';
 import {
@@ -15,7 +14,7 @@ import {
   splitAbilityKeyName,
   collectAbilitySegmentsFromSections,
   collectHeroAbilitySegmentsFromSections,
-  getNameAvatarDataUrl,
+  applyImageFallbackChain,
   getHeroFallbackPath,
   toDisplayValue,
   sanitizeList,
@@ -645,53 +644,15 @@ function renderHeroBanner(doc) {
   const cover = document.createElement('div');
   cover.className = `hero-poster ${doc.heroImages?.length ? '' : 'placeholder'}`;
 
+  const image = document.createElement('img');
+  image.loading = 'lazy';
+  image.alt = coverImage ? `${title} 图像` : `${title || categoryLabel} 封面占位图`;
+  if (!coverImage) image.className = 'hero-cover-placeholder';
+  applyImageFallbackChain(image, [coverImage, getHeroFallbackPath(doc)], title || categoryLabel);
   if (coverImage) {
-    const image = document.createElement('img');
-    image.loading = 'lazy';
-    image.src = new URL(coverImage, ASSET_BASE_URL).href;
-    image.alt = `${title} 图像`;
-    const fallbackPath = getHeroFallbackPath(doc);
-    const fallbackDataUrl = getNameAvatarDataUrl(title || categoryLabel);
-    if (fallbackPath) {
-      image.onerror = () => {
-        if (image.dataset.placeholderLoaded === '1') {
-          return;
-        }
-        image.dataset.placeholderLoaded = '1';
-        image.src = new URL(fallbackPath, ASSET_BASE_URL).href;
-        image.onerror = () => {
-          if (image.dataset.fallbackTried === '1') {
-            return;
-          }
-          image.dataset.fallbackTried = '1';
-          image.src = fallbackDataUrl;
-        };
-      };
-    }
     banner.style.setProperty('--hero-cover', `url("${image.src}")`);
-    cover.appendChild(image);
-  } else {
-    const placeholder = document.createElement('img');
-    placeholder.loading = 'lazy';
-    placeholder.className = 'hero-cover-placeholder';
-    const fallbackDataUrl = getNameAvatarDataUrl(title || categoryLabel);
-    const fallbackPath = getHeroFallbackPath(doc);
-    if (fallbackPath) {
-      const fallbackSrc = new URL(fallbackPath, ASSET_BASE_URL).href;
-      placeholder.src = fallbackSrc;
-      placeholder.onerror = () => {
-        if (placeholder.dataset.placeholderLoaded === '1') {
-          return;
-        }
-        placeholder.dataset.placeholderLoaded = '1';
-        placeholder.src = fallbackDataUrl;
-      };
-    } else {
-      placeholder.src = fallbackDataUrl;
-    }
-    placeholder.alt = `${title || categoryLabel} 封面占位图`;
-    cover.appendChild(placeholder);
   }
+  cover.appendChild(image);
 
   const info = document.createElement('div');
   info.className = 'hero-identity-meta';

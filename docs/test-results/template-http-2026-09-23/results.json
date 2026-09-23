@@ -1,0 +1,67 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.6",
+  "gitBase": "8315e0b8d656532f5ca2ea785afa426c052cfb45",
+  "scope": "Project template HTTP filenames and UTF-8 BOM preservation through creation, registration, indexing, parser rules and source reopening",
+  "workflows": [
+    "F16",
+    "F19"
+  ],
+  "bugs": [
+    "N89",
+    "N90"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 19,
+    "passed": 4,
+    "failed": 15,
+    "skipped": 0,
+    "log": "before.log",
+    "sourceState": "Pre-fix b.3.6 worktree; N88 retained",
+    "files": {
+      "web/modules/app-doc-service.js": "2d73e543234fcb254c69c064491aabfd0514d3cc3e007963ccb80b7a01af5365",
+      "web/modules/app-services.js": "357cac1b4dd80d3d949568cff25aac62f3c907c5f0d639c20c26191d32ffa07c"
+    },
+    "reproduction": "Ran all 19 new cases directly against the pre-fix clients with the prior N88 service change retained. Ten filename cases and five BOM cases failed; four compatibility cases passed."
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 120,
+    "passed": 120,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after.log",
+    "newCases": 19
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 336,
+    "passed": 335,
+    "failed": 0,
+    "skipped": 1,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 126,
+    "apiContractPassed": true
+  },
+  "skipReason": "Node/Rust archive interoperability requires VIENTO_TEST_ARCHIVE_BINARY; native archive code unchanged",
+  "files": {
+    "scripts/tests/template-http.test.mjs": "4df2ae99351f06a31c92a8d2a838903435c579fc42ec8800fe176053ae6e7f09",
+    "web/modules/app-doc-service.js": "e8e34cbb78984766dfeae5c9eace08f462b346af8fe6a32dc2d623a359510fdb",
+    "web/modules/app-services.js": "f69cd94727616136b766e15a07b78e307a1d823093b3a735a90401a738b79442"
+  },
+  "testEnvironment": "Production editor controller and request modules connect to actual local HTTP servers in temporary registered workspaces. The adapter only resolves browser-relative URLs to the test origin; DOM rendering is a fixture. v2/v3 special filenames select the configured template, leaving similar files intact. Five formats retain BOM/CRLF through creation, registration, rebuild and source reopening, with layout equal to the project preview. Missing templates remain retryable, empty files are valid and HTML is rejected. Original manifest/template/document bytes and existing registry records stay unchanged.",
+  "nativeTestsRerun": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "functionNetwork": {
+    "revision": 37,
+    "sourceFingerprints": 152,
+    "nodeSources": 167,
+    "localImportStatements": 395,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

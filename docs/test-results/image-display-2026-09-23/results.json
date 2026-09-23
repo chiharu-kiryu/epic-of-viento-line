@@ -1,0 +1,77 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.6",
+  "gitBase": "8315e0b8d656532f5ca2ea785afa426c052cfb45",
+  "scope": "Literal image filenames through list, cover, gallery and legacy skill rendering, real HTTP file requests and missing-image fallback",
+  "workflows": [
+    "F12",
+    "F13"
+  ],
+  "bugs": [
+    "N91",
+    "N92",
+    "N93"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 20,
+    "passed": 3,
+    "failed": 17,
+    "skipped": 0,
+    "log": "before.log",
+    "sourceState": "Pre-fix b.3.6 worktree; N88-N90 retained",
+    "files": {
+      "web/modules/app-helpers.js": "abd39d5bd25ed8e498cc0e71425329d87a2b5709e308513f084c20784d704ba3",
+      "web/modules/app-render.js": "5afceae51ca01a210266fdfa8d594d4b3abdd5bb7abcc24048e96e626332dd0d",
+      "web/modules/app-runtime.js": "1637381e3e6cf7a787d82bf123ca6885144412ea34a704e4151be23011d1399f"
+    },
+    "reproduction": "Ran all 20 new cases against the pre-fix renderers and resolver. Twelve filename consistency cases, four literal fallback path cases and one missing generic cover case failed; two ordinary filename cases and the rejected-input compatibility case passed."
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 102,
+    "passed": 101,
+    "failed": 0,
+    "skipped": 1,
+    "log": "after.log",
+    "newCases": 20
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 356,
+    "passed": 355,
+    "failed": 0,
+    "skipped": 1,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 127,
+    "apiContractPassed": true
+  },
+  "commands": {
+    "before": "node --test scripts/tests/image-display.test.mjs",
+    "after": "node --test scripts/tests/image-display.test.mjs scripts/tests/media.test.mjs scripts/tests/structured-render.test.mjs scripts/tests/workspace-layout.test.mjs scripts/tests/export.test.mjs scripts/tests/editor-filtering.test.mjs",
+    "application": "node scripts/check-project.mjs --app-only"
+  },
+  "skipReason": "Node/Rust archive interoperability requires VIENTO_TEST_ARCHIVE_BINARY; native archive code unchanged",
+  "files": {
+    "scripts/tests/image-display.test.mjs": "bd8e05ded9a0625728997427f2bea7e844f409483c40e863df540598b2ac8d7b",
+    "web/modules/app-helpers.js": "58be5d3a6c61878859258091a58b8ac228506c22a7078ad2ff518fda529065b7",
+    "web/modules/app-render.js": "4be44478807a23a637b443e39dfd79c7008799fe0f9c4e239531f418a12e56c3",
+    "web/modules/app-runtime.js": "1a93cb42abb1a63a285813d926f18f996de8e310c88ecd6e5f24c2e054efcffa"
+  },
+  "testEnvironment": "Actual cover/helper functions and the production editor controller execute in DOM fixtures and request files from real local HTTP servers in temporary registered workspaces. The adapter changes only the ephemeral server port, preserving the renderer-generated URL path, query and fragment. Raw filename identity is checked by returned file contents against decoys. Missing-image events are explicitly invoked to exercise fallback progression; no image decoding is simulated. Source BOM/CRLF, asset bytes and registry records remain unchanged.",
+  "nativeTestsRerun": false,
+  "nativePlaybackTested": false,
+  "imageDecodingTested": false,
+  "visualLayoutTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "functionNetwork": {
+    "revision": 38,
+    "sourceFingerprints": 153,
+    "nodeSources": 173,
+    "localImportStatements": 400,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

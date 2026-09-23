@@ -345,7 +345,7 @@ export async function loadTemplateContent({
 
   const normalizedTemplatePath = templatePath.startsWith('/') ? templatePath : `/${templatePath}`;
   const { response, text } = await fetchTextApiRequest(
-    normalizedTemplatePath,
+    normalizedTemplatePath.split('/').map(encodeURIComponent).join('/'),
     { cache: 'no-store' },
     requestTimeoutMs,
     requestLabel,

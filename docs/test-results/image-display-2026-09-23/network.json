@@ -1,0 +1,14 @@
+{
+  "revision": 38,
+  "sourceFiles": 153,
+  "javascriptModules": 133,
+  "localImports": 400,
+  "externalImports": 302,
+  "eventBindings": 96,
+  "testDeclarations": 281,
+  "nodeSourceReferences": 173,
+  "workflowEdges": 173,
+  "moduleCycles": 1,
+  "htmlScripts": 1,
+  "localMarkdownLinks": 470
+}

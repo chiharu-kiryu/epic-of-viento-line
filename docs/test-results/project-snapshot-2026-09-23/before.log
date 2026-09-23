@@ -1,0 +1,131 @@
+TAP version 13
+# Subtest: project snapshot: generated template revision belongs to the displayed manifest
+not ok 1 - project snapshot: generated template revision belongs to the displayed manifest
+  ---
+  duration_ms: 211.411485
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-snapshot.test.mjs:58:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: old settings must not receive the newer manifest revision
+        at file:///tmp/viento-test-7tL7pV/[eval1]:30:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 'd39d347771f40633271cda63c1fad3d4f56fcb0cdb9b61c75a19b3be1d854f0e',
+      expected: 'd39d347771f40633271cda63c1fad3d4f56fcb0cdb9b61c75a19b3be1d854f0e',
+      operator: 'notStrictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-7tL7pV/[eval1]:30:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: project snapshot: stale generated form cannot undo a concurrent rule change
+not ok 2 - project snapshot: stale generated form cannot undo a concurrent rule change
+  ---
+  duration_ms: 202.077089
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-snapshot.test.mjs:66:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: Missing expected rejection.
+        at async file:///tmp/viento-test-0tJ1wS/[eval1]:31:7 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: undefined,
+      expected: { statusCode: 409 },
+      operator: 'rejects'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    async file:///tmp/viento-test-0tJ1wS/[eval1]:31:7 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: project snapshot: file-backed template revision belongs to the displayed manifest
+not ok 3 - project snapshot: file-backed template revision belongs to the displayed manifest
+  ---
+  duration_ms: 191.664532
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-snapshot.test.mjs:58:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: old settings must not receive the newer manifest revision
+        at file:///tmp/viento-test-GeX0fR/[eval1]:30:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: '35a478e62ed59eb48c753a2c7207b893ff060c89d6ded2b52432801bb0a3642f',
+      expected: '35a478e62ed59eb48c753a2c7207b893ff060c89d6ded2b52432801bb0a3642f',
+      operator: 'notStrictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-GeX0fR/[eval1]:30:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: project snapshot: stale file-backed form cannot undo a concurrent rule change
+not ok 4 - project snapshot: stale file-backed form cannot undo a concurrent rule change
+  ---
+  duration_ms: 203.09052
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/project-snapshot.test.mjs:66:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: Missing expected rejection.
+        at async file:///tmp/viento-test-Ien8an/[eval1]:31:7 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: undefined,
+      expected: { statusCode: 409 },
+      operator: 'rejects'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    async file:///tmp/viento-test-Ien8an/[eval1]:31:7 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: project snapshot: reopening and editing only a label keeps template bytes and explicit parser rules
+ok 5 - project snapshot: reopening and editing only a label keeps template bytes and explicit parser rules
+  ---
+  duration_ms: 61.13342
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 1
+# fail 4
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1041.113504

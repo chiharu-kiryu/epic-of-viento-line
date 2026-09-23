@@ -2,22 +2,22 @@
   "metadata": {
     "schemaVersion": "viento-function-network-v1",
     "title": "Viento Studio 功能链路网络",
-    "version": "b.3.6",
+    "version": "b.3.7",
     "date": "2026-09-23",
     "gitBase": "51d522cb919c20b15815b129bd62e859af9a97a0",
-    "sourceState": "b.3.6 发布快照：整合 N81–N87 筛选、语言切换与导出取消修复，版本和界面清单已同步；安装程序未更新",
+    "sourceState": "b.3.7 发布快照：整合 N88–N93 项目设置冲突、模板读取、图片地址与缺图回退修复，版本和界面清单已同步；安装程序未更新",
     "method": "人工核对业务入口与关键调用；使用本机 Acorn 解析 ES 模块声明、静态字面量动态导入、显式事件绑定和路由表",
     "runtimeTrace": false,
     "verification": {
-      "sourceFingerprints": "150 selected code files and all 121 vendored glib files matched the release worktree",
-      "references": "165 node source references, module imports and document links checked",
+      "sourceFingerprints": "153 selected code files and all 121 vendored glib files matched the release worktree",
+      "references": "173 node source references, module imports and document links checked",
       "graphIntegrity": "workflow edges and module SCCs recomputed",
       "pageScript": "JavaScript syntax checked; embedded snapshot matches JSON",
       "browserPreview": "not executed: in-app browser URL policy rejected local HTML navigation",
-      "applicationRegression": "b.3.6 release, Node v24.19.0: app-only 312 tests, 311 passed, 0 failed, 1 native archive interoperability test skipped; version, 124 JavaScript syntax checks and API contract passed",
+      "applicationRegression": "b.3.7 release, Node v24.19.0: app-only 356 tests, 355 passed, 0 failed, 1 native archive interoperability test skipped; version, 127 JavaScript syntax checks and API contract passed",
       "nativeRegression": "Prior 2026-09-13 evidence: b.2.9, cargo test --offline --locked: 22 core + 1 startup + 5 optimized glib regressions passed; 1 existing large-workspace test ignored; not rerun for this JavaScript-only change",
-      "nativeWindowInteraction": "Not rerun for this JavaScript/Node release. Controller/DOM tests cover filtering and language changes with isolated translation state, controlled requests and in-memory files. Export cancellation tests run real ZIP writers and HTTP requests in temporary workspaces; earlier native evidence retained.",
-      "applicationTestsPassed": 311,
+      "nativeWindowInteraction": "Not rerun for this JavaScript/Node release. Tests use temporary workspaces, actual local HTTP services, production editor controllers and renderers in DOM fixtures. Manifest snapshot conflicts, v2/v3 template filenames, five formats with BOM/CRLF through create/save/reopen, image filenames and fallback progression checked. Missing-image events are explicitly invoked; no native window, image decoding or visual layout validation.",
+      "applicationTestsPassed": 355,
       "archiveInterop": "Not rerun on 2026-09-23: VIENTO_TEST_ARCHIVE_BINARY was not configured. Previous 2026-09-13 v2/v3 Node/Rust archive tests passed; native archive code unchanged.",
       "nativeTestReport": "docs/NATIVE_WORKFLOW_TEST_b.2.8.1.md",
       "closeBridgeRegression": "3 passed after localized native close confirmation change",
@@ -26,10 +26,10 @@
       "libraryControllerRegression": "3 new library controller tests and 9 settings tests passed",
       "nativeExportTestReport": "docs/NATIVE_EXPORT_TEST_b.2.8.1.md",
       "exportDialogRegression": "12 dialog tests and 3 language tests passed, including 2 new native-save scenarios",
-      "releaseNotes": "docs/RELEASE_b.3.6.md",
+      "releaseNotes": "docs/RELEASE_b.3.7.md",
       "systemNodeObservation": "Initial Node v18.19.1 full run: 193 assertions passed, request-lifecycle worker did not exit and was terminated. Isolated reruns on system and bundled runtimes both passed all 4 tests with normal exit; root cause unconfirmed.",
-      "releaseValidation": "docs/test-results/release-b.3.6/results.json",
-      "versionCorrection": "Historical b.2.9 correction: beta digits are 0–9, b.9.9 advances to 1.0.0. Earlier logs retain their original versions; this release advances b.3.5 to b.3.6.",
+      "releaseValidation": "docs/test-results/release-b.3.7/results.json",
+      "versionCorrection": "Historical b.2.9 correction: beta digits are 0–9, b.9.9 advances to 1.0.0. Earlier logs retain their original versions; this release advances b.3.6 to b.3.7.",
       "versionRuleRegression": "b.2.9: 4 version tests passed (all 100 beta transitions, stable carry, invalid formats); JavaScript/Python agreed on 122 cases; next-version CLI, release manifest/lock/UI consistency and Cargo metadata passed. Source archive verified 253 files and was removed after validation. Full application/Rust regressions were not rerun for this version-rule change.",
       "securityRegression": "Unpatched glib 0.18.5 reproduced a null-pointer precondition violation (SIGABRT); exact two-line upstream backport passes all 5 iterator tests with glib opt-level=3. All other 120 of 121 upstream package files match.",
       "securityReport": "docs/SECURITY_GLIB_b.2.9.md",
@@ -39,8 +39,8 @@
       "saveConflictRegression": "Node v18.19.1: 35 focused tests passed, including 8 new cases; reproduced failed-force retry overwrites, hidden reload failures and preserved-timestamp external edits before fixing them",
       "saveConflictReport": "docs/SAVE_CONFLICT_BUGFIX_b.2.9.md",
       "saveConflictValidation": "docs/test-results/save-conflicts-2026-09-23/results.json",
-      "releaseVersionValidation": "b.3.6 / 0.3.6 matched all manifests, locks and UI labels; next-version CLI returned b.3.7; offline locked Cargo metadata confirmed application 0.3.6 and the sole locally patched glib dependency",
-      "releaseSourceArchive": "b.3.6 release: 509 source files and all 121 vendored glib files verified; unpacked offline locked Cargo metadata resolves application 0.3.6 and local patched glib. Temporary verification archive removed.",
+      "releaseVersionValidation": "b.3.7 / 0.3.7 matched all manifests, locks and UI labels; next-version CLI returned b.3.8; offline locked Cargo metadata confirmed application 0.3.7 and the sole locally patched glib dependency",
+      "releaseSourceArchive": "b.3.7 release: 535 source files and all 121 vendored glib files verified; unpacked offline locked Cargo metadata resolves application 0.3.7 and local patched glib. Temporary verification archive removed.",
       "assetBindingRegression": "Node v18.19.1: 78 focused tests, 77 passed, 0 failed, 1 native archive interoperability skipped; 13 new cases reproduce binding lock/config loss, linked paths, invalid verification and rebinding during upload",
       "assetBindingReport": "docs/ASSET_BINDING_BUGFIX_b.3.0.md",
       "assetBindingValidation": "docs/test-results/asset-binding-2026-09-23/results.json",
@@ -79,7 +79,16 @@
       "editorLanguageValidation": "docs/test-results/editor-language-2026-09-23/results.json",
       "exportCancellationRegression": "Node v18.19.1: 55 focused tests, 54 passed, 0 failed, 1 native archive interoperability skipped. All 3 new cases failed before the fix and now cover repeated late cancellation for document/workspace exports, immediate staging cleanup, full quota recovery, interrupted HTTP response, retry, byte-exact download and release; authored files unchanged.",
       "exportCancellationReport": "docs/EXPORT_CANCELLATION_BUGFIX_b.3.5.md",
-      "exportCancellationValidation": "docs/test-results/export-cancellation-2026-09-23/results.json"
+      "exportCancellationValidation": "docs/test-results/export-cancellation-2026-09-23/results.json",
+      "projectSnapshotRegression": "Node v18.19.1: all 57 focused tests passed. Five new cases (4 failures and 1 compatibility pass before the fix) cover generated/file-backed template snapshot revision consistency, stale-save rejection, external manifest byte preservation, fresh-read/save recovery and stable parser rules/template bytes.",
+      "projectSnapshotReport": "docs/PROJECT_SNAPSHOT_BUGFIX_b.3.6.md",
+      "projectSnapshotValidation": "docs/test-results/project-snapshot-2026-09-23/results.json",
+      "templateHttpRegression": "Node v18.19.1: all 120 focused tests passed. Nineteen new cases (15 failures and 4 compatibility passes before the fix) cover v2/v3 fragment/percent filenames, similar-file protection, BOM/CRLF across Markdown/TXT/JSON/YAML/YML creation/indexing/reopen, selected parser rules and type, missing-template retry and HTML rejection.",
+      "templateHttpReport": "docs/TEMPLATE_HTTP_BUGFIX_b.3.6.md",
+      "templateHttpValidation": "docs/test-results/template-http-2026-09-23/results.json",
+      "imageDisplayRegression": "Node v18.19.1: 102 focused tests, 101 passed, 0 failed, 1 native archive interoperability skipped. Twenty new cases (17 failures and 3 compatibility passes before the fix) cover literal fragment/percent filenames, encoded separator text, continuous dots in filenames/directories, ordinary Unicode/spaces, similar-file protection, missing/empty cover and skill fallbacks, generic cover avatars, stable exhausted fallbacks and rejected paths/origins.",
+      "imageDisplayReport": "docs/IMAGE_DISPLAY_BUGFIX_b.3.6.md",
+      "imageDisplayValidation": "docs/test-results/image-display-2026-09-23/results.json"
     },
     "scope": "功能级有向业务步骤 + 文件级静态相对导入；不穷举运行时动态路径、第三方库内部或每次函数调用",
     "projectDataRead": false,
@@ -88,9 +97,9 @@
       "workflows": 50,
       "functionalNodes": 66,
       "functionalEdges": 173,
-      "sourceFiles": 150,
-      "jsModules": 130,
-      "relativeImportStatements": 384,
+      "sourceFiles": 153,
+      "jsModules": 133,
+      "relativeImportStatements": 400,
       "explicitEventBindings": 96,
       "businessApiPaths": 11,
       "businessApiOperations": 16,
@@ -102,68 +111,68 @@
     "limitations": [
       "workflow-step 是业务步骤顺序，不能当作直接函数调用边。",
       "文件导入关系不代表调用次数、调用顺序、用户使用频率或性能。",
-      "测试声明包含参数化模板，声明数不等于执行数；本轮完整 app-only 校验通过 311 项，1 项原生归档互通跳过；Rust 和原生窗口测试沿用此前记录。",
+      "测试声明包含参数化模板，声明数不等于执行数；本轮完整 app-only 校验通过 355 项，1 项原生归档互通跳过；Rust 和原生窗口测试沿用此前记录。",
       "没有读取实际作品正文、素材内容、本机秘密或网络服务。",
       "归档互通回归需设置 VIENTO_TEST_ARCHIVE_BINARY；本轮未配置，明确跳过；原生归档代码未变。",
       "第三方 glib 仅将实际修复文件加入功能图源码清单；其余文件通过 vendor/glib-upstream.json 的原包指纹核验，不展开第三方模块调用图。"
     ],
-    "snapshotRevision": 35,
+    "snapshotRevision": 39,
     "repairLog": "docs/NETWORK_BUGFIX_b.2.8.1.md",
     "previousSnapshot": {
-      "revision": 34,
-      "commit": "c05024d5ab52efa331d56314932c8b58059fe8f5",
-      "sourceState": "b.3.5 工作树：保留 N81–N86 筛选及语言修复，新增 N87 导出 ZIP 完成到任务登记之间的取消检查与清理；尚未提交或安装",
+      "revision": 38,
+      "commit": "8315e0b8d656532f5ca2ea785afa426c052cfb45",
+      "sourceState": "b.3.6 工作树：保留 N88–N90 项目类型读取与模板 HTTP 修复，新增 N91–N93 图片地址、连续点名称与缺图回退修复；尚未提交或安装",
       "changedSources": [],
       "releaseFiles": [
         {
           "file": "VERSION",
-          "before": "0d1728ebc7c0c280eb6bbaaaa3ca1104ae8920697b9781a2143d25718bc1ef55",
-          "after": "a1b31f4d9321bfd3a9ff8066b0f4c25cd9579750b9f9eb96f25176c04e95ff8e"
+          "before": "a1b31f4d9321bfd3a9ff8066b0f4c25cd9579750b9f9eb96f25176c04e95ff8e",
+          "after": "e057a7bcba37836b2c6e2fe7f5862b9a73937fb9d9656d0898249c4d5a0d2db0"
         },
         {
           "file": "package.json",
-          "before": "406bd1dab399fd45564585d78e18082f4fc74abd6c2ff360e7ea3a2c0b72f1a3",
-          "after": "5aaee8dc25286f102d21b5660a934aa8489ec0a6d3254b52902d1d34313a6d48"
+          "before": "5aaee8dc25286f102d21b5660a934aa8489ec0a6d3254b52902d1d34313a6d48",
+          "after": "dfb3056ec8abb22e5939f7587f48534c2c98b433cc80771ba38355ce24f0fc71"
         },
         {
           "file": "package-lock.json",
-          "before": "b0570b0ec8b6bc4b062258232f5c28381c9ddf948be0400115e0a4444d24d13b",
-          "after": "c6ecd1b0d801648a62a89911c8a104dffd5e232c8476956c647c34338547afdc"
+          "before": "c6ecd1b0d801648a62a89911c8a104dffd5e232c8476956c647c34338547afdc",
+          "after": "fadb9cc61487b1ae295cf69177efc2674a5966ad6ee40f6e32afd307f85c91b9"
         },
         {
           "file": "src-tauri/Cargo.toml",
-          "before": "ed4783efca4e157c8f8e9f8278620c53965ae53dd446b6cdb0d511a674c1d834",
-          "after": "b87a47d43f9e4d0f922a11f321f5e8a909c8c5afb53a8ecfdd890839a55de409"
+          "before": "b87a47d43f9e4d0f922a11f321f5e8a909c8c5afb53a8ecfdd890839a55de409",
+          "after": "baf56601962fb73326b6a5e5063203b42e08e015dc83b51eb725355d789db62b"
         },
         {
           "file": "src-tauri/Cargo.lock",
-          "before": "73fcc5ea1bdbe3fcaa10b57bc1e507fdd4899219962ce3ecdfff6fbe69cf0967",
-          "after": "b5fae9f26829607d1b9f4cc9f9c8148ca71b55f8d66fc7169b25d8fb431de3fc"
+          "before": "b5fae9f26829607d1b9f4cc9f9c8148ca71b55f8d66fc7169b25d8fb431de3fc",
+          "after": "098719013a2b3fbfaa7d3bd956d986d43e1607c37ec076bcc3b08ef12297a2be"
         },
         {
           "file": "src-tauri/tauri.conf.json",
-          "before": "362ecf330200efc2ff13a739d46504054bc478114d5e4205ec778a547d870a65",
-          "after": "2567e77b0a87313fbc78b9da7ec78ec3ebf0fdefc79e15d3171666c8695ae5ea"
+          "before": "2567e77b0a87313fbc78b9da7ec78ec3ebf0fdefc79e15d3171666c8695ae5ea",
+          "after": "6be1c180a4a5503de1d82c01f603a4ed9b0faf8bdf3619bd6777d35990b05189"
         },
         {
           "file": "web/index.html",
-          "before": "0d4f9a88d9ce4b3d05aa4c62e4d01aa4762066a5192bf5b348961acf714c2539",
-          "after": "954522a1201ca81d8b31fdb54f338b0f8b8762bbd5460116bf46cdaec8dd6f88"
+          "before": "954522a1201ca81d8b31fdb54f338b0f8b8762bbd5460116bf46cdaec8dd6f88",
+          "after": "ea6c62a63af675868bbe81433474406cfaa43b12971c68a574862ca5a380dd40"
         },
         {
           "file": "desktop/ui/index.html",
-          "before": "bfe1929f1186268c803ce7d04d707cd6f0016b9813dac6a6689ebb4b9efa1584",
-          "after": "b6d5972a621dad4876c2f04b0718faa4fdf3573b84b0f7f1d225bfb560dfd534"
+          "before": "b6d5972a621dad4876c2f04b0718faa4fdf3573b84b0f7f1d225bfb560dfd534",
+          "after": "e47bdd2b6c12a875f2aad15ee9bacfd3dd47b79d4f9385916862395a59180167"
         },
         {
           "file": "README.md",
-          "before": "f4bb7a706e452b2fb1a48fb58c1640c5d75540e136a4dda1120a06a13e088b96",
-          "after": "e9b4f7ab5c3059b6782a58adf608abd8b14edbdbbc21dfd4b88d2943b0bd4501"
+          "before": "e9b4f7ab5c3059b6782a58adf608abd8b14edbdbbc21dfd4b88d2943b0bd4501",
+          "after": "4f8e55a0f5a96e848f7a31eb99687ebac34257747d90232344d571dcb353f9ce"
         },
         {
           "file": "desktop/README.md",
-          "before": "eb4f2da99b16dc440efeec38e3467bc68fc85fb0a143f04c1fff9198ffb19ade",
-          "after": "0a55c65afcdbf900977116c841ee3086c7bdb52972e72ecc899a9a0440f0cd02"
+          "before": "0a55c65afcdbf900977116c841ee3086c7bdb52972e72ecc899a9a0440f0cd02",
+          "after": "8eeb77a9e6caa105088d58d710e8b624c9862961d195734e10d20539481ac942"
         }
       ]
     },
@@ -1444,6 +1453,130 @@
             "after": "334ba54cabb4fb9d71d3a6529273d8c2256734b45440d7ff998a410f938794a4"
           }
         ]
+      },
+      {
+        "fromRevision": 34,
+        "toRevision": 35,
+        "commit": "c05024d5ab52efa331d56314932c8b58059fe8f5",
+        "changedSources": [],
+        "releaseFiles": [
+          {
+            "file": "VERSION",
+            "before": "0d1728ebc7c0c280eb6bbaaaa3ca1104ae8920697b9781a2143d25718bc1ef55",
+            "after": "a1b31f4d9321bfd3a9ff8066b0f4c25cd9579750b9f9eb96f25176c04e95ff8e"
+          },
+          {
+            "file": "package.json",
+            "before": "406bd1dab399fd45564585d78e18082f4fc74abd6c2ff360e7ea3a2c0b72f1a3",
+            "after": "5aaee8dc25286f102d21b5660a934aa8489ec0a6d3254b52902d1d34313a6d48"
+          },
+          {
+            "file": "package-lock.json",
+            "before": "b0570b0ec8b6bc4b062258232f5c28381c9ddf948be0400115e0a4444d24d13b",
+            "after": "c6ecd1b0d801648a62a89911c8a104dffd5e232c8476956c647c34338547afdc"
+          },
+          {
+            "file": "src-tauri/Cargo.toml",
+            "before": "ed4783efca4e157c8f8e9f8278620c53965ae53dd446b6cdb0d511a674c1d834",
+            "after": "b87a47d43f9e4d0f922a11f321f5e8a909c8c5afb53a8ecfdd890839a55de409"
+          },
+          {
+            "file": "src-tauri/Cargo.lock",
+            "before": "73fcc5ea1bdbe3fcaa10b57bc1e507fdd4899219962ce3ecdfff6fbe69cf0967",
+            "after": "b5fae9f26829607d1b9f4cc9f9c8148ca71b55f8d66fc7169b25d8fb431de3fc"
+          },
+          {
+            "file": "src-tauri/tauri.conf.json",
+            "before": "362ecf330200efc2ff13a739d46504054bc478114d5e4205ec778a547d870a65",
+            "after": "2567e77b0a87313fbc78b9da7ec78ec3ebf0fdefc79e15d3171666c8695ae5ea"
+          },
+          {
+            "file": "web/index.html",
+            "before": "0d4f9a88d9ce4b3d05aa4c62e4d01aa4762066a5192bf5b348961acf714c2539",
+            "after": "954522a1201ca81d8b31fdb54f338b0f8b8762bbd5460116bf46cdaec8dd6f88"
+          },
+          {
+            "file": "desktop/ui/index.html",
+            "before": "bfe1929f1186268c803ce7d04d707cd6f0016b9813dac6a6689ebb4b9efa1584",
+            "after": "b6d5972a621dad4876c2f04b0718faa4fdf3573b84b0f7f1d225bfb560dfd534"
+          },
+          {
+            "file": "README.md",
+            "before": "f4bb7a706e452b2fb1a48fb58c1640c5d75540e136a4dda1120a06a13e088b96",
+            "after": "e9b4f7ab5c3059b6782a58adf608abd8b14edbdbbc21dfd4b88d2943b0bd4501"
+          },
+          {
+            "file": "desktop/README.md",
+            "before": "eb4f2da99b16dc440efeec38e3467bc68fc85fb0a143f04c1fff9198ffb19ade",
+            "after": "0a55c65afcdbf900977116c841ee3086c7bdb52972e72ecc899a9a0440f0cd02"
+          }
+        ]
+      },
+      {
+        "fromRevision": 35,
+        "toRevision": 36,
+        "commit": "8315e0b8d656532f5ca2ea785afa426c052cfb45",
+        "changedSources": [
+          {
+            "file": "scripts/lib/project-service.mjs",
+            "before": "e50cb1a7abdbff7027c561b3feaa531e2543163a538f20850df62e4f459878bd",
+            "after": "2f1f83c237574edc746f576c1d2782cf6fcb7f3c01de09a9564837097d85654a"
+          },
+          {
+            "file": "scripts/tests/project-snapshot.test.mjs",
+            "before": null,
+            "after": "442fd8529e7f09011fee3ccf18df1c909206f3d677fcde0f0b8c38e052868da8"
+          }
+        ]
+      },
+      {
+        "fromRevision": 36,
+        "toRevision": 37,
+        "commit": "8315e0b8d656532f5ca2ea785afa426c052cfb45",
+        "changedSources": [
+          {
+            "file": "scripts/tests/template-http.test.mjs",
+            "before": null,
+            "after": "4df2ae99351f06a31c92a8d2a838903435c579fc42ec8800fe176053ae6e7f09"
+          },
+          {
+            "file": "web/modules/app-doc-service.js",
+            "before": "2d73e543234fcb254c69c064491aabfd0514d3cc3e007963ccb80b7a01af5365",
+            "after": "e8e34cbb78984766dfeae5c9eace08f462b346af8fe6a32dc2d623a359510fdb"
+          },
+          {
+            "file": "web/modules/app-services.js",
+            "before": "357cac1b4dd80d3d949568cff25aac62f3c907c5f0d639c20c26191d32ffa07c",
+            "after": "f69cd94727616136b766e15a07b78e307a1d823093b3a735a90401a738b79442"
+          }
+        ]
+      },
+      {
+        "fromRevision": 37,
+        "toRevision": 38,
+        "commit": "8315e0b8d656532f5ca2ea785afa426c052cfb45",
+        "changedSources": [
+          {
+            "file": "scripts/tests/image-display.test.mjs",
+            "before": null,
+            "after": "bd8e05ded9a0625728997427f2bea7e844f409483c40e863df540598b2ac8d7b"
+          },
+          {
+            "file": "web/modules/app-helpers.js",
+            "before": "abd39d5bd25ed8e498cc0e71425329d87a2b5709e308513f084c20784d704ba3",
+            "after": "58be5d3a6c61878859258091a58b8ac228506c22a7078ad2ff518fda529065b7"
+          },
+          {
+            "file": "web/modules/app-render.js",
+            "before": "5afceae51ca01a210266fdfa8d594d4b3abdd5bb7abcc24048e96e626332dd0d",
+            "after": "4be44478807a23a637b443e39dfd79c7008799fe0f9c4e239531f418a12e56c3"
+          },
+          {
+            "file": "web/modules/app-runtime.js",
+            "before": "1637381e3e6cf7a787d82bf123ca6885144412ea34a704e4151be23011d1399f",
+            "after": "1a93cb42abb1a63a285813d926f18f996de8e310c88ecd6e5f24c2e054efcffa"
+          }
+        ]
       }
     ],
     "vendoredDependencies": [
@@ -1483,7 +1616,7 @@
       "sources": [
         {
           "file": "web/modules/app-runtime.js",
-          "line": 5024,
+          "line": 4991,
           "symbol": "initApp"
         },
         {
@@ -1492,78 +1625,83 @@
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 1661,
+          "line": 1659,
           "symbol": "handleSaveConflict"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 3574,
+          "line": 3541,
           "symbol": "enterEditMode"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 1814,
+          "line": 1812,
           "symbol": "setMode"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 2682,
+          "line": 2680,
           "symbol": "resetDocEditorState"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 2102,
+          "line": 2100,
           "symbol": "loadCreateTypeTemplate"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 2161,
+          "line": 2159,
           "symbol": "setCreateTypeState"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 2279,
+          "line": 2277,
           "symbol": "updateCreatePathValidation"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 3646,
+          "line": 3613,
           "symbol": "saveNewDoc"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 3746,
+          "line": 3713,
           "symbol": "saveExistingDoc"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 3996,
+          "line": 3963,
           "symbol": "syncDocEditorSource"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 4713,
+          "line": 4680,
           "symbol": "selectDoc"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 4892,
+          "line": 4859,
           "symbol": "loadData"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 4602,
+          "line": 4569,
           "symbol": "renderFilteredDocs"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 884,
+          "line": 882,
           "symbol": "renderIndexLoadView"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 1487,
+          "line": 1485,
           "symbol": "syncModeButtons"
+        },
+        {
+          "file": "web/modules/app-helpers.js",
+          "line": 1289,
+          "symbol": "createDocButton"
         }
       ]
     },
@@ -1585,7 +1723,7 @@
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 2570,
+          "line": 2568,
           "symbol": "setEditInputMode"
         }
       ]
@@ -1662,7 +1800,7 @@
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 749,
+          "line": 747,
           "symbol": "refreshLanguageUi"
         }
       ]
@@ -1671,7 +1809,7 @@
       "id": "request",
       "label": "浏览器请求层",
       "layer": "界面",
-      "description": "统一索引、源文档、模板、素材、项目与导出请求，处理超时和错误。",
+      "description": "统一索引、源文档、模板、素材、项目与导出请求，处理超时和错误。 模板路径逐段编码，文本读取保留 UTF-8 BOM。",
       "sources": [
         {
           "file": "web/modules/app-doc-service.js",
@@ -1680,6 +1818,16 @@
         {
           "file": "web/modules/app-services.js",
           "line": 1
+        },
+        {
+          "file": "web/modules/app-doc-service.js",
+          "line": 337,
+          "symbol": "loadTemplateContent"
+        },
+        {
+          "file": "web/modules/app-services.js",
+          "line": 227,
+          "symbol": "fetchTextApiRequest"
         }
       ]
     },
@@ -1687,7 +1835,7 @@
       "id": "render",
       "label": "通用布局与内容渲染",
       "layer": "界面",
-      "description": "消费 viento-layout-v1、字段与内容块，数组/对象/0/false/null 保持类型。",
+      "description": "消费 viento-layout-v1、字段与内容块，数组/对象/0/false/null 保持类型。 封面与旧技能卡片使用同一图片回退链。",
       "sources": [
         {
           "file": "web/modules/app-document-layout.js",
@@ -1701,8 +1849,18 @@
         },
         {
           "file": "web/modules/app-render.js",
-          "line": 745,
+          "line": 706,
           "symbol": "buildCommonCards"
+        },
+        {
+          "file": "web/modules/app-render.js",
+          "line": 621,
+          "symbol": "renderHeroBanner"
+        },
+        {
+          "file": "web/modules/app-runtime.js",
+          "line": 3024,
+          "symbol": "buildHeroSkillCards"
         }
       ]
     },
@@ -1710,7 +1868,7 @@
       "id": "media_render",
       "label": "图片、视频与音频控件",
       "layer": "界面",
-      "description": "解析本地素材 URL，呈现图片或原生播放器、字幕说明和下载链接。",
+      "description": "解析本地素材 URL，呈现图片或原生播放器、字幕说明和下载链接。 展示索引中的本地图片文件名逐段编码，合法的连续点名称可用；候选耗尽后显示名称头像。",
       "sources": [
         {
           "file": "web/modules/app-media-render.js",
@@ -1721,6 +1879,21 @@
           "file": "web/modules/app-media-render.js",
           "line": 58,
           "symbol": "renderMediaText"
+        },
+        {
+          "file": "web/modules/app-helpers.js",
+          "line": 589,
+          "symbol": "resolveImageUrl"
+        },
+        {
+          "file": "web/modules/app-helpers.js",
+          "line": 655,
+          "symbol": "applyImageFallbackChain"
+        },
+        {
+          "file": "web/modules/app-runtime.js",
+          "line": 3212,
+          "symbol": "renderGallery"
         }
       ]
     },
@@ -1740,7 +1913,7 @@
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 3162,
+          "line": 3129,
           "symbol": "renderHeroSkillCards"
         }
       ]
@@ -1994,7 +2167,7 @@
       "id": "project_service",
       "label": "项目配置与模板服务",
       "layer": "服务",
-      "description": "校验新增标识、默认目录和 revision，先写模板再切换清单，防止重复新增和过时覆盖。",
+      "description": "校验新增标识、默认目录和 revision，先写模板再切换清单，防止重复新增和过时覆盖。 版本标记与响应使用同一份清单，防止并发读取混用新旧配置。",
       "sources": [
         {
           "file": "scripts/lib/project-service.mjs",
@@ -2008,7 +2181,7 @@
         },
         {
           "file": "scripts/lib/project-service.mjs",
-          "line": 77,
+          "line": 79,
           "symbol": "saveProjectTemplate"
         }
       ]
@@ -2454,22 +2627,22 @@
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 1113,
+          "line": 1111,
           "symbol": "logRuntimeError"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 901,
+          "line": 899,
           "symbol": "retryLoadData"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 994,
+          "line": 992,
           "symbol": "getFriendlyRequestError"
         },
         {
           "file": "web/modules/app-runtime.js",
-          "line": 3532,
+          "line": 3499,
           "symbol": "fetchEditableSource"
         }
       ]
@@ -4537,11 +4710,12 @@
         "editor"
       ],
       "effect": "在已载入且带归属关系的展示索引中筛选、自定义类别计数、分组与分批渲染。",
-      "boundary": "不写磁盘；附属故事按归属展示，不重复列成顶层独立条目。 编辑、新建或读取中筛选只更新列表，保留当前文档；浏览模式仍按结果自动选中。自动刷新保留窄窗口侧栏，明确点选文档才收起。",
+      "boundary": "不写磁盘；附属故事按归属展示，不重复列成顶层独立条目。 编辑、新建或读取中筛选只更新列表，保留当前文档；浏览模式仍按结果自动选中。自动刷新保留窄窗口侧栏，明确点选文档才收起。 缩略图允许文件名、目录名内部的连续点，仍拒绝父目录跳转和不受支持的来源。",
       "tests": [
         "scripts/tests/generic-project.test.mjs",
         "scripts/tests/document-model.test.mjs",
-        "scripts/tests/editor-filtering.test.mjs"
+        "scripts/tests/editor-filtering.test.mjs",
+        "scripts/tests/image-display.test.mjs"
       ]
     },
     {
@@ -4557,10 +4731,11 @@
         "assets"
       ],
       "effect": "优先展示通用 layout 的标题、字段、正文、表格和媒体。",
-      "boundary": "缺少通用 layout 时有 legacy_ui 回退；旧展示路径重名时按文档 ID 或源路径区分，归属链接随之更新。",
+      "boundary": "缺少通用 layout 时有 legacy_ui 回退；旧展示路径重名时按文档 ID 或源路径区分，归属链接随之更新。 封面、图库、列表和旧技能图统一编码原始文件名，支持 #、% 与连续点；缺图按候选顺序回退到名称头像，通用类型无需旧英雄占位路径。",
       "tests": [
         "scripts/tests/structured-render.test.mjs",
-        "scripts/tests/media.test.mjs"
+        "scripts/tests/media.test.mjs",
+        "scripts/tests/image-display.test.mjs"
       ]
     },
     {
@@ -4623,7 +4798,7 @@
         "memory"
       ],
       "effect": "优先加载项目模板并建议安全的文件名、目录和扩展名；界面与服务共用新建路径校验。",
-      "boundary": "模板读取失败明确提示空模板；重试成功恢复正常提示。选定类型不会因为更换保存目录而丢失。 模板加载期间先比较草稿路径和文档类型，立即清除上一份预览。 只有当前模板请求可更新正文、缓存和错误状态；取消后的旧请求也不能执行后续新建收尾。 模板加载及新建草稿期间可筛选目录，不因自动选中触发放弃确认或改变草稿路径/类型。 内置类型名称原位翻译，项目自定义名称保持原文；语言变化不重发模板请求或改动草稿路径和所选类型。",
+      "boundary": "模板读取失败明确提示空模板；重试成功恢复正常提示。选定类型不会因为更换保存目录而丢失。 模板加载期间先比较草稿路径和文档类型，立即清除上一份预览。 只有当前模板请求可更新正文、缓存和错误状态；取消后的旧请求也不能执行后续新建收尾。 模板加载及新建草稿期间可筛选目录，不因自动选中触发放弃确认或改变草稿路径/类型。 内置类型名称原位翻译，项目自定义名称保持原文；语言变化不重发模板请求或改动草稿路径和所选类型。 请求按路径组成部分编码模板文件名，避免片段与百分号读错文件；文本响应保留 UTF-8 BOM，沿用请求超时和取消。",
       "tests": [
         "scripts/tests/templates.test.mjs",
         "scripts/tests/generic-project.test.mjs",
@@ -4631,7 +4806,8 @@
         "scripts/tests/project-engine.test.mjs",
         "scripts/tests/editor-dialogs.test.mjs",
         "scripts/tests/editor-filtering.test.mjs",
-        "scripts/tests/editor-language.test.mjs"
+        "scripts/tests/editor-language.test.mjs",
+        "scripts/tests/template-http.test.mjs"
       ]
     },
     {
@@ -4702,13 +4878,14 @@
         "editor"
       ],
       "effect": "在登记锁内重新读取类型、检查可迁移位置冲突，再建立 UUID 并独占创建源文件。",
-      "boundary": "保护大小写/Unicode 等价名称、父目录和缺失源文件的登记身份；失败回滚本次登记，保存成功后即作为已有文档继续编辑。 成功创建返回内容版本，后续保存沿用同一校验。 合法 255 字节文件名可以新建、再次保存和刷新预览，身份与权限保持完整。 取消重试与手动更换扩展名后的保存使用当前路径、类型和源字节，模板缓存保留最新接受的内容。 自动补后缀后同步最终草稿路径和预览上下文，并再次检查文件名长度；重名失败可换名重试，保留原正文、登记及所选类型。 首次获得目录标识时承接已保存的完整正文与版本，退出后不回退为展示摘要。",
+      "boundary": "保护大小写/Unicode 等价名称、父目录和缺失源文件的登记身份；失败回滚本次登记，保存成功后即作为已有文档继续编辑。 成功创建返回内容版本，后续保存沿用同一校验。 合法 255 字节文件名可以新建、再次保存和刷新预览，身份与权限保持完整。 取消重试与手动更换扩展名后的保存使用当前路径、类型和源字节，模板缓存保留最新接受的内容。 自动补后缀后同步最终草稿路径和预览上下文，并再次检查文件名长度；重名失败可换名重试，保留原正文、登记及所选类型。 首次获得目录标识时承接已保存的完整正文与版本，退出后不回退为展示摘要。 来自真实 HTTP 模板的 BOM 与换行在五种格式的新建、索引和原文重开中保持一致，清单规则与所选类型继续生效。",
       "tests": [
         "scripts/tests/generic-project.test.mjs",
         "scripts/tests/editor-runtime.test.mjs",
         "scripts/tests/creation-workflow.test.mjs",
         "scripts/tests/editor-dialogs.test.mjs",
-        "scripts/tests/editor-index-refresh.test.mjs"
+        "scripts/tests/editor-index-refresh.test.mjs",
+        "scripts/tests/template-http.test.mjs"
       ]
     },
     {
@@ -4791,9 +4968,10 @@
         "project_ui"
       ],
       "effect": "加载类型、模板原文、字段规则、warnings 和 revision。",
-      "boundary": "已有文档草稿或忙碌操作必须先结束；读取不保存模板，旧的无效默认目录显示问题并允许修正。",
+      "boundary": "已有文档草稿或忙碌操作必须先结束；读取不保存模板，旧的无效默认目录显示问题并允许修正。 版本标记从生成响应所用的同一份清单计算，读取边界发生外部修改时不会把新标记配给旧类型或规则。",
       "tests": [
-        "scripts/tests/project-engine.test.mjs"
+        "scripts/tests/project-engine.test.mjs",
+        "scripts/tests/project-snapshot.test.mjs"
       ]
     },
     {
@@ -4835,12 +5013,13 @@
         "editor"
       ],
       "effect": "revision、默认目录及新增标识校验 → 保留模板源格式 → 写指纹模板 → 原子更新清单 → 重建。",
-      "boundary": "新增不能覆盖已有类型，失败保留草稿；正常编辑兼容旧调用。旧正文/UUID/归属不重写；重建失败给 indexWarning，返回时索引读取失败保留窗口供重试。",
+      "boundary": "新增不能覆盖已有类型，失败保留草稿；正常编辑兼容旧调用。旧正文/UUID/归属不重写；重建失败给 indexWarning，返回时索引读取失败保留窗口供重试。 读取期间发生外部清单更新时，旧表单返回版本冲突，不写入模板；重新读取后可以保留外部规则继续保存。",
       "tests": [
         "scripts/tests/project-engine.test.mjs",
         "desktop/tests/native-smoke.py",
         "scripts/tests/editor-dialogs.test.mjs",
-        "scripts/tests/editor-runtime.test.mjs"
+        "scripts/tests/editor-runtime.test.mjs",
+        "scripts/tests/project-snapshot.test.mjs"
       ]
     },
     {
@@ -8658,6 +8837,56 @@
       ]
     },
     {
+      "from": "scripts/tests/image-display.test.mjs",
+      "to": "scripts/tests/helpers.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 5,
+      "symbols": [
+        "fixture",
+        "write",
+        "serve"
+      ]
+    },
+    {
+      "from": "scripts/tests/image-display.test.mjs",
+      "to": "scripts/lib/workspace.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 6,
+      "symbols": [
+        "registerWorkspace",
+        "readRegistry"
+      ]
+    },
+    {
+      "from": "scripts/tests/image-display.test.mjs",
+      "to": "scripts/tests/editor-harness.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 7,
+      "symbols": [
+        "Element",
+        "editorHarness"
+      ]
+    },
+    {
+      "from": "scripts/tests/image-display.test.mjs",
+      "to": "web/modules/app-helpers.js",
+      "kind": "dynamic-import",
+      "local": true,
+      "line": 19,
+      "symbols": []
+    },
+    {
+      "from": "scripts/tests/image-display.test.mjs",
+      "to": "web/modules/app-render.js",
+      "kind": "dynamic-import",
+      "local": true,
+      "line": 20,
+      "symbols": []
+    },
+    {
       "from": "scripts/tests/media.test.mjs",
       "to": "scripts/tests/helpers.mjs",
       "kind": "import",
@@ -8966,6 +9195,50 @@
       ]
     },
     {
+      "from": "scripts/tests/project-snapshot.test.mjs",
+      "to": "scripts/tests/helpers.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 6,
+      "symbols": [
+        "fixture",
+        "write",
+        "node"
+      ]
+    },
+    {
+      "from": "scripts/tests/project-snapshot.test.mjs",
+      "to": "scripts/lib/project-layout.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 7,
+      "symbols": [
+        "PROJECT_DEFAULTS"
+      ]
+    },
+    {
+      "from": "scripts/tests/project-snapshot.test.mjs",
+      "to": "scripts/lib/workspace.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 8,
+      "symbols": [
+        "registerWorkspace",
+        "readRegistry"
+      ]
+    },
+    {
+      "from": "scripts/tests/project-snapshot.test.mjs",
+      "to": "scripts/lib/project-service.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 9,
+      "symbols": [
+        "readProjectConfiguration",
+        "saveProjectTemplate"
+      ]
+    },
+    {
       "from": "scripts/tests/request-lifecycle.test.mjs",
       "to": "web/modules/app-services.js",
       "kind": "import",
@@ -9081,6 +9354,81 @@
       "local": true,
       "line": 15,
       "symbols": []
+    },
+    {
+      "from": "scripts/tests/template-http.test.mjs",
+      "to": "scripts/tests/helpers.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 7,
+      "symbols": [
+        "fixture",
+        "write",
+        "serve",
+        "request"
+      ]
+    },
+    {
+      "from": "scripts/tests/template-http.test.mjs",
+      "to": "scripts/lib/project-layout.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 8,
+      "symbols": [
+        "PROJECT_DEFAULTS"
+      ]
+    },
+    {
+      "from": "scripts/tests/template-http.test.mjs",
+      "to": "scripts/lib/workspace.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 9,
+      "symbols": [
+        "registerWorkspace",
+        "readRegistry"
+      ]
+    },
+    {
+      "from": "scripts/tests/template-http.test.mjs",
+      "to": "scripts/lib/doc-api-contract.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 10,
+      "symbols": [
+        "API_REQUEST_KEYS"
+      ]
+    },
+    {
+      "from": "scripts/tests/template-http.test.mjs",
+      "to": "scripts/tests/editor-harness.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 11,
+      "symbols": [
+        "editorHarness"
+      ]
+    },
+    {
+      "from": "scripts/tests/template-http.test.mjs",
+      "to": "scripts/tests/dialog-harness.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 12,
+      "symbols": [
+        "dialogHarness"
+      ]
+    },
+    {
+      "from": "scripts/tests/template-http.test.mjs",
+      "to": "web/modules/app-services.js",
+      "kind": "import",
+      "local": true,
+      "line": 13,
+      "symbols": [
+        "fetchTextApiRequest",
+        "fetchJsonApiRequest"
+      ]
     },
     {
       "from": "scripts/tests/templates.test.mjs",
@@ -9609,8 +9957,7 @@
       "local": true,
       "line": 2,
       "symbols": [
-        "CATEGORY_LABELS",
-        "ASSET_BASE_URL"
+        "CATEGORY_LABELS"
       ]
     },
     {
@@ -9618,7 +9965,7 @@
       "to": "web/modules/app-state.js",
       "kind": "import",
       "local": true,
-      "line": 6,
+      "line": 5,
       "symbols": [
         "domElements"
       ]
@@ -9628,7 +9975,7 @@
       "to": "web/modules/app-helpers.js",
       "kind": "import",
       "local": true,
-      "line": 7,
+      "line": 6,
       "symbols": [
         "formatSize",
         "formatTime",
@@ -9640,7 +9987,7 @@
         "splitAbilityKeyName",
         "collectAbilitySegmentsFromSections",
         "collectHeroAbilitySegmentsFromSections",
-        "getNameAvatarDataUrl",
+        "applyImageFallbackChain",
         "getHeroFallbackPath",
         "toDisplayValue",
         "sanitizeList"
@@ -9651,7 +9998,7 @@
       "to": "web/modules/app-type-templates.js",
       "kind": "import",
       "local": true,
-      "line": 23,
+      "line": 22,
       "symbols": [
         "getDocTemplate"
       ]
@@ -9661,7 +10008,7 @@
       "to": "web/modules/app-document-layout.js",
       "kind": "import",
       "local": true,
-      "line": 24,
+      "line": 23,
       "symbols": [
         "hasDocumentLayout",
         "renderDocumentLayout"
@@ -9708,7 +10055,6 @@
         "CATEGORY_LABELS",
         "CATEGORY_TAG",
         "CATEGORY_ORDER",
-        "ASSET_BASE_URL",
         "EDITABLE_SOURCE_PREFIXES",
         "APP_ERROR_MESSAGES",
         "APP_REQUEST_LABELS",
@@ -9720,14 +10066,13 @@
       "to": "web/modules/app-helpers.js",
       "kind": "import",
       "local": true,
-      "line": 20,
+      "line": 19,
       "symbols": [
         "getTabCounts",
         "getHeroDisplayDocs",
         "getVisibleDocs",
         "getSearchIndex",
         "getHeroImagesForDisplay",
-        "getNameAvatarDataUrl",
         "getHeroSkillImagePlaceholderPath",
         "applyImageFallbackChain",
         "createDetailsGroup",
@@ -9750,7 +10095,7 @@
       "to": "web/modules/app-render.js",
       "kind": "import",
       "local": true,
-      "line": 43,
+      "line": 41,
       "symbols": [
         "renderHeroBanner",
         "buildCommonCards",
@@ -9762,7 +10107,7 @@
       "to": "web/modules/app-structured.js",
       "kind": "import",
       "local": true,
-      "line": 44,
+      "line": 42,
       "symbols": [
         "renderStructuredBlocks",
         "hasRenderableToken"
@@ -9773,7 +10118,7 @@
       "to": "web/modules/app-type-templates.js",
       "kind": "import",
       "local": true,
-      "line": 45,
+      "line": 43,
       "symbols": [
         "getDocTemplate",
         "DOC_TYPE_TEMPLATE_DEFS"
@@ -9784,7 +10129,7 @@
       "to": "web/modules/app-editor-draft.js",
       "kind": "import",
       "local": true,
-      "line": 46,
+      "line": 44,
       "symbols": [
         "createBlockDraft",
         "serializeBlockDraft",
@@ -9796,7 +10141,7 @@
       "to": "web/modules/app-media-editor.js",
       "kind": "import",
       "local": true,
-      "line": 47,
+      "line": 45,
       "symbols": [
         "setupMediaEditor"
       ]
@@ -9806,7 +10151,7 @@
       "to": "web/modules/app-export.js",
       "kind": "import",
       "local": true,
-      "line": 48,
+      "line": 46,
       "symbols": [
         "setupExport"
       ]
@@ -9816,7 +10161,7 @@
       "to": "web/modules/app-project-settings.js",
       "kind": "import",
       "local": true,
-      "line": 49,
+      "line": 47,
       "symbols": [
         "setupProjectSettings"
       ]
@@ -9826,7 +10171,7 @@
       "to": "scripts/lib/doc-api-contract.mjs",
       "kind": "import",
       "local": true,
-      "line": 50,
+      "line": 48,
       "symbols": [
         "API_ERRORS",
         "API_RESPONSE",
@@ -9839,7 +10184,7 @@
       "to": "web/modules/app-doc-service.js",
       "kind": "import",
       "local": true,
-      "line": 51,
+      "line": 49,
       "symbols": [
         "detectEditBackendAvailability",
         "loadDocIndexPayload",
@@ -12310,6 +12655,46 @@
       ]
     },
     {
+      "from": "scripts/tests/image-display.test.mjs",
+      "to": "node:test",
+      "kind": "import",
+      "local": false,
+      "line": 1,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/image-display.test.mjs",
+      "to": "node:assert/strict",
+      "kind": "import",
+      "local": false,
+      "line": 2,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/image-display.test.mjs",
+      "to": "node:fs/promises",
+      "kind": "import",
+      "local": false,
+      "line": 3,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/image-display.test.mjs",
+      "to": "node:path",
+      "kind": "import",
+      "local": false,
+      "line": 4,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
       "from": "scripts/tests/media.test.mjs",
       "to": "node:test",
       "kind": "import",
@@ -12500,6 +12885,56 @@
       ]
     },
     {
+      "from": "scripts/tests/project-snapshot.test.mjs",
+      "to": "node:test",
+      "kind": "import",
+      "local": false,
+      "line": 1,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/project-snapshot.test.mjs",
+      "to": "node:assert/strict",
+      "kind": "import",
+      "local": false,
+      "line": 2,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/project-snapshot.test.mjs",
+      "to": "node:fs/promises",
+      "kind": "import",
+      "local": false,
+      "line": 3,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/project-snapshot.test.mjs",
+      "to": "node:path",
+      "kind": "import",
+      "local": false,
+      "line": 4,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/project-snapshot.test.mjs",
+      "to": "node:crypto",
+      "kind": "import",
+      "local": false,
+      "line": 5,
+      "symbols": [
+        "randomUUID"
+      ]
+    },
+    {
       "from": "scripts/tests/request-lifecycle.test.mjs",
       "to": "node:test",
       "kind": "import",
@@ -12647,6 +13082,66 @@
       "line": 2,
       "symbols": [
         "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/template-http.test.mjs",
+      "to": "node:test",
+      "kind": "import",
+      "local": false,
+      "line": 1,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/template-http.test.mjs",
+      "to": "node:assert/strict",
+      "kind": "import",
+      "local": false,
+      "line": 2,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/template-http.test.mjs",
+      "to": "node:fs/promises",
+      "kind": "import",
+      "local": false,
+      "line": 3,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/template-http.test.mjs",
+      "to": "node:path",
+      "kind": "import",
+      "local": false,
+      "line": 4,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/template-http.test.mjs",
+      "to": "node:vm",
+      "kind": "import",
+      "local": false,
+      "line": 5,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/template-http.test.mjs",
+      "to": "node:crypto",
+      "kind": "import",
+      "local": false,
+      "line": 6,
+      "symbols": [
+        "randomUUID"
       ]
     },
     {
@@ -13118,8 +13613,8 @@
     {
       "path": "scripts/lib/project-service.mjs",
       "area": "engine",
-      "lines": 118,
-      "sha256": "e50cb1a7abdbff7027c561b3feaa531e2543163a538f20850df62e4f459878bd"
+      "lines": 120,
+      "sha256": "2f1f83c237574edc746f576c1d2782cf6fcb7f3c01de09a9564837097d85654a"
     },
     {
       "path": "scripts/lib/rebuild-config.mjs",
@@ -13458,6 +13953,12 @@
       "sha256": "b737c241e908164240998fa8de160db614b7791cfa46689b3bd8ed118c5fce55"
     },
     {
+      "path": "scripts/tests/image-display.test.mjs",
+      "area": "test",
+      "lines": 140,
+      "sha256": "bd8e05ded9a0625728997427f2bea7e844f409483c40e863df540598b2ac8d7b"
+    },
+    {
       "path": "scripts/tests/media.test.mjs",
       "area": "test",
       "lines": 404,
@@ -13482,6 +13983,12 @@
       "sha256": "27062dab6b98dcfd8ba7c60efb591c0d9a414f8671f1872cf138cf4fe265f6e9"
     },
     {
+      "path": "scripts/tests/project-snapshot.test.mjs",
+      "area": "test",
+      "lines": 106,
+      "sha256": "442fd8529e7f09011fee3ccf18df1c909206f3d677fcde0f0b8c38e052868da8"
+    },
+    {
       "path": "scripts/tests/request-lifecycle.test.mjs",
       "area": "test",
       "lines": 64,
@@ -13504,6 +14011,12 @@
       "area": "test",
       "lines": 23,
       "sha256": "b5b5e69437832179dc0fa45032f74466154bc9409d8078cb09ff4815b33ed685"
+    },
+    {
+      "path": "scripts/tests/template-http.test.mjs",
+      "area": "test",
+      "lines": 143,
+      "sha256": "4df2ae99351f06a31c92a8d2a838903435c579fc42ec8800fe176053ae6e7f09"
     },
     {
       "path": "scripts/tests/templates.test.mjs",
@@ -13635,7 +14148,7 @@
       "path": "web/modules/app-doc-service.js",
       "area": "editor",
       "lines": 487,
-      "sha256": "2d73e543234fcb254c69c064491aabfd0514d3cc3e007963ccb80b7a01af5365"
+      "sha256": "e8e34cbb78984766dfeae5c9eace08f462b346af8fe6a32dc2d623a359510fdb"
     },
     {
       "path": "web/modules/app-document-layout.js",
@@ -13659,7 +14172,7 @@
       "path": "web/modules/app-helpers.js",
       "area": "editor",
       "lines": 1697,
-      "sha256": "abd39d5bd25ed8e498cc0e71425329d87a2b5709e308513f084c20784d704ba3"
+      "sha256": "58be5d3a6c61878859258091a58b8ac228506c22a7078ad2ff518fda529065b7"
     },
     {
       "path": "web/modules/app-media-editor.js",
@@ -13682,20 +14195,20 @@
     {
       "path": "web/modules/app-render.js",
       "area": "editor",
-      "lines": 1110,
-      "sha256": "5afceae51ca01a210266fdfa8d594d4b3abdd5bb7abcc24048e96e626332dd0d"
+      "lines": 1071,
+      "sha256": "4be44478807a23a637b443e39dfd79c7008799fe0f9c4e239531f418a12e56c3"
     },
     {
       "path": "web/modules/app-runtime.js",
       "area": "editor",
-      "lines": 5372,
-      "sha256": "1637381e3e6cf7a787d82bf123ca6885144412ea34a704e4151be23011d1399f"
+      "lines": 5339,
+      "sha256": "1a93cb42abb1a63a285813d926f18f996de8e310c88ecd6e5f24c2e054efcffa"
     },
     {
       "path": "web/modules/app-services.js",
       "area": "editor",
-      "lines": 258,
-      "sha256": "357cac1b4dd80d3d949568cff25aac62f3c907c5f0d639c20c26191d32ffa07c"
+      "lines": 259,
+      "sha256": "f69cd94727616136b766e15a07b78e307a1d823093b3a735a90401a738b79442"
     },
     {
       "path": "web/modules/app-state.js",
@@ -14152,231 +14665,231 @@
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 3197,
+      "line": 3164,
       "event": "click",
       "target": "button",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 4365,
+      "line": 4332,
       "event": "click",
       "target": "button",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5052,
+      "line": 5019,
       "event": "click",
       "target": "sidebarToggleBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5053,
+      "line": 5020,
       "event": "click",
       "target": "sidebarBackdropEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5058,
+      "line": 5025,
       "event": "input",
       "target": "searchInput",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5076,
+      "line": 5043,
       "event": "click",
       "target": "searchClearEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5090,
+      "line": 5057,
       "event": "click",
       "target": "loadRetryBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5096,
+      "line": 5063,
       "event": "click",
       "target": "runtimeErrorClearBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5102,
+      "line": 5069,
       "event": "click",
       "target": "runtimeErrorListEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5108,
+      "line": 5075,
       "event": "click",
       "target": "editBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5128,
+      "line": 5095,
       "event": "click",
       "target": "editCreateBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5134,
+      "line": 5101,
       "event": "change",
       "target": "createTypeSelectEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5150,
+      "line": 5117,
       "event": "click",
       "target": "editSourceModeBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5163,
+      "line": 5130,
       "event": "click",
       "target": "editBlockModeBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5176,
+      "line": 5143,
       "event": "input",
       "target": "createPathInputEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5182,
+      "line": 5149,
       "event": "blur",
       "target": "createPathInputEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5188,
+      "line": 5155,
       "event": "keydown",
       "target": "createPathInputEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5203,
+      "line": 5170,
       "event": "click",
       "target": "editSaveBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5218,
+      "line": 5185,
       "event": "input",
       "target": "editEditorEl",
       "handler": "onSourceInput"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5222,
+      "line": 5189,
       "event": "input",
       "target": "editBlockEditorEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5230,
+      "line": 5197,
       "event": "keydown",
       "target": "editBlockEditorEl",
       "handler": "handleEditorSaveShortcut"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5234,
+      "line": 5201,
       "event": "click",
       "target": "editCancelBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5244,
+      "line": 5211,
       "event": "click",
       "target": "button",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5253,
+      "line": 5220,
       "event": "click",
       "target": "saveConflictDialogEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5261,
+      "line": 5228,
       "event": "click",
       "target": "editRebuildBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5274,
+      "line": 5241,
       "event": "click",
       "target": "modeBrowseBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5280,
+      "line": 5247,
       "event": "click",
       "target": "modeEditBtnEl",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5305,
+      "line": 5272,
       "event": "keydown",
       "target": "editEditorEl",
       "handler": "handleEditorSaveShortcut"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5309,
+      "line": 5276,
       "event": "resize",
       "target": "window",
       "handler": "resizeBlockEditors"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5310,
+      "line": 5277,
       "event": "error",
       "target": "window",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5315,
+      "line": 5282,
       "event": "unhandledrejection",
       "target": "window",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5319,
+      "line": 5286,
       "event": "keydown",
       "target": "window",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-runtime.js",
-      "line": 5343,
+      "line": 5310,
       "event": "beforeunload",
       "target": "window",
       "handler": "(inline)"
@@ -15328,6 +15841,31 @@
       "name": "desktop language preferences require the local session and stay outside the project"
     },
     {
+      "file": "scripts/tests/image-display.test.mjs",
+      "line": 79,
+      "name": "image display: ${surface} requests the registered ${label} filename literally"
+    },
+    {
+      "file": "scripts/tests/image-display.test.mjs",
+      "line": 90,
+      "name": "image display: list and gallery accept dots inside a filename or directory (${file})"
+    },
+    {
+      "file": "scripts/tests/image-display.test.mjs",
+      "line": 96,
+      "name": "image display: ${surface} ${primary ? 'missing' : 'empty'} image uses a literal fallback path and ends at an avatar"
+    },
+    {
+      "file": "scripts/tests/image-display.test.mjs",
+      "line": 120,
+      "name": "image display: a generic document with a missing cover still gets a stable avatar"
+    },
+    {
+      "file": "scripts/tests/image-display.test.mjs",
+      "line": 134,
+      "name": "image display: unsupported origins, backslashes and parent segments remain rejected"
+    },
+    {
       "file": "scripts/tests/media.test.mjs",
       "line": 33,
       "name": "inline images and videos parse at the start, in prose and fields, but never inside code"
@@ -15533,6 +16071,21 @@
       "name": "official example is an independent definition; adoption preserves IDs, sources, ownership and original templates"
     },
     {
+      "file": "scripts/tests/project-snapshot.test.mjs",
+      "line": 58,
+      "name": "project snapshot: ${template ? 'file-backed' : 'generated'} template revision belongs to the displayed manifest"
+    },
+    {
+      "file": "scripts/tests/project-snapshot.test.mjs",
+      "line": 66,
+      "name": "project snapshot: stale ${template ? 'file-backed' : 'generated'} form cannot undo a concurrent rule change"
+    },
+    {
+      "file": "scripts/tests/project-snapshot.test.mjs",
+      "line": 91,
+      "name": "project snapshot: reopening and editing only a label keeps template bytes and explicit parser rules"
+    },
+    {
       "file": "scripts/tests/request-lifecycle.test.mjs",
       "line": 26,
       "name": "JSON and template timeouts remain active while response bodies are loading"
@@ -15653,6 +16206,26 @@
       "name": "runtime content rendering suppresses only fields that were actually displayed in cards"
     },
     {
+      "file": "scripts/tests/template-http.test.mjs",
+      "line": 90,
+      "name": "template HTTP: v${version} ${label} loads the configured file before creating and reopening"
+    },
+    {
+      "file": "scripts/tests/template-http.test.mjs",
+      "line": 111,
+      "name": "template HTTP: ${extension} keeps BOM and CRLF through the reader, creation, indexing and reopening"
+    },
+    {
+      "file": "scripts/tests/template-http.test.mjs",
+      "line": 124,
+      "name": "template HTTP: a missing file remains retryable and a valid empty template can be saved"
+    },
+    {
+      "file": "scripts/tests/template-http.test.mjs",
+      "line": 138,
+      "name": "template HTTP: an HTML fallback remains an error instead of becoming document source"
+    },
+    {
       "file": "scripts/tests/templates.test.mjs",
       "line": 5,
       "name": "templates accept arbitrary OC fields, ignore sidecars and reject malformed structured input"
@@ -15750,23 +16323,27 @@
     },
     {
       "file": "scripts/lib/workspace.mjs",
-      "consumers": 23
+      "consumers": 26
     },
     {
       "file": "scripts/lib/project-layout.mjs",
+      "consumers": 21
+    },
+    {
+      "file": "scripts/tests/helpers.mjs",
       "consumers": 19
+    },
+    {
+      "file": "scripts/lib/doc-api-contract.mjs",
+      "consumers": 18
     },
     {
       "file": "web/i18n/index.js",
       "consumers": 18
     },
     {
-      "file": "scripts/lib/doc-api-contract.mjs",
-      "consumers": 17
-    },
-    {
-      "file": "scripts/tests/helpers.mjs",
-      "consumers": 16
+      "file": "scripts/tests/editor-harness.mjs",
+      "consumers": 15
     },
     {
       "file": "scripts/lib/media-format.mjs",
@@ -15778,10 +16355,6 @@
     },
     {
       "file": "scripts/standardize-docs/doc-factory.mjs",
-      "consumers": 13
-    },
-    {
-      "file": "scripts/tests/editor-harness.mjs",
       "consumers": 13
     }
   ],

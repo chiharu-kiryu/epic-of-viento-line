@@ -11,7 +11,6 @@ import {
   CATEGORY_LABELS,
   CATEGORY_TAG,
   CATEGORY_ORDER,
-  ASSET_BASE_URL,
   EDITABLE_SOURCE_PREFIXES,
   APP_ERROR_MESSAGES,
   APP_REQUEST_LABELS,
@@ -23,7 +22,6 @@ import {
   getVisibleDocs,
   getSearchIndex,
   getHeroImagesForDisplay,
-  getNameAvatarDataUrl,
   getHeroSkillImagePlaceholderPath,
   applyImageFallbackChain,
   createDetailsGroup,
@@ -3081,45 +3079,14 @@ function buildHeroSkillCards(doc) {
     media.className = 'hero-skill-media';
     const iconLabel = normalizeDisplayValue(item.name || item.key || APP_RUNTIME_TEXTS.heroSkill.fallbackName);
     const fallbackIconPath = getHeroSkillImagePlaceholderPath(doc, iconLabel);
-    const fallbackIconDataUrl = getNameAvatarDataUrl(iconLabel);
-    const applyFallback = (imgEl) => {
-      if (imgEl.dataset.placeholderLoaded === '1') {
-        return;
-      }
-      imgEl.dataset.placeholderLoaded = '1';
-      if (fallbackIconPath) {
-        imgEl.src = new URL(fallbackIconPath, ASSET_BASE_URL).href;
-      } else {
-        imgEl.src = fallbackIconDataUrl;
-      }
-      imgEl.onerror = () => {
-        if (imgEl.dataset.placeholderFallbacked === '1') {
-          return;
-        }
-        imgEl.dataset.placeholderFallbacked = '1';
-        imgEl.src = fallbackIconDataUrl;
-      };
-    };
-    if (item.icon) {
-      const img = document.createElement('img');
-      img.loading = 'lazy';
-      img.src = new URL(item.icon, ASSET_BASE_URL).href;
-      img.alt = `${item.name || item.key || APP_RUNTIME_TEXTS.heroSkill.fallbackName}${APP_RUNTIME_TEXTS.heroSkill.mediaImageAltSuffix}`;
-      img.onerror = () => applyFallback(img);
-      media.appendChild(img);
-    } else {
-      const placeholder = document.createElement('img');
-      placeholder.className = 'hero-skill-empty';
-      placeholder.loading = 'lazy';
-      if (fallbackIconPath) {
-        placeholder.src = new URL(fallbackIconPath, ASSET_BASE_URL).href;
-      } else {
-        placeholder.src = fallbackIconDataUrl;
-      }
-      placeholder.alt = `${iconLabel || APP_RUNTIME_TEXTS.heroSkill.fallbackName} ${APP_RUNTIME_TEXTS.heroSkill.mediaPlaceholderSuffix}`;
-      placeholder.onerror = () => applyFallback(placeholder);
-      media.appendChild(placeholder);
-    }
+    const img = document.createElement('img');
+    img.loading = 'lazy';
+    if (!item.icon) img.className = 'hero-skill-empty';
+    img.alt = item.icon
+      ? `${iconLabel}${APP_RUNTIME_TEXTS.heroSkill.mediaImageAltSuffix}`
+      : `${iconLabel} ${APP_RUNTIME_TEXTS.heroSkill.mediaPlaceholderSuffix}`;
+    applyImageFallbackChain(img, [item.icon, fallbackIconPath], iconLabel);
+    media.appendChild(img);
 
     const info = document.createElement('div');
     info.className = 'hero-skill-info';

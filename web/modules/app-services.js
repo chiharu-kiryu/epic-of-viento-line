@@ -236,7 +236,8 @@ export async function fetchTextApiRequest(
     timeoutMs,
     requestLabel,
     async (response) => {
-      const rawText = await response.text();
+      // Preserve an authored UTF-8 BOM when copying a template into a new file.
+      const rawText = new TextDecoder('utf-8', { ignoreBOM: true }).decode(await response.arrayBuffer());
       const trimmedText = rawText.trim();
       if (!response.ok) {
         const contentType = response.headers.get('content-type') || '';

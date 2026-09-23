@@ -1,0 +1,435 @@
+TAP version 13
+# Subtest: template HTTP: v2 fragment filename loads the configured file before creating and reopening
+not ok 1 - template HTTP: v2 fragment filename loads the configured file before creating and reopening
+  ---
+  duration_ms: 328.715456
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:90:4'
+  failureType: 'testCodeFailure'
+  error: '输入新建路径与内容后，点击“创建文档”'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    # 目标模板
+    
+    姓名：星裔
+    灵魂数量：0
+    
+  actual: |-
+    # 不能读取的同名文件
+    
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:95:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async startSubtest (node:internal/test_runner/harness:214:3)
+  ...
+# Subtest: template HTTP: v2 fragment directory loads the configured file before creating and reopening
+not ok 2 - template HTTP: v2 fragment directory loads the configured file before creating and reopening
+  ---
+  duration_ms: 237.569704
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:90:4'
+  failureType: 'testCodeFailure'
+  error: '模板加载失败，已使用空模板：模板加载失败（404：Not found）'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    # 目标模板
+    
+    姓名：星裔
+    灵魂数量：0
+    
+  actual: ''
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:95:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template HTTP: v2 literal percent loads the configured file before creating and reopening
+not ok 3 - template HTTP: v2 literal percent loads the configured file before creating and reopening
+  ---
+  duration_ms: 231.162081
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:90:4'
+  failureType: 'testCodeFailure'
+  error: '模板加载失败，已使用空模板：模板加载失败（400：bad path）'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    # 目标模板
+    
+    姓名：星裔
+    灵魂数量：0
+    
+  actual: ''
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:95:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template HTTP: v2 percent escape loads the configured file before creating and reopening
+not ok 4 - template HTTP: v2 percent escape loads the configured file before creating and reopening
+  ---
+  duration_ms: 228.624295
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:90:4'
+  failureType: 'testCodeFailure'
+  error: '输入新建路径与内容后，点击“创建文档”'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    # 目标模板
+    
+    姓名：星裔
+    灵魂数量：0
+    
+  actual: |-
+    # 不能读取的解码文件
+    
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:95:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template HTTP: v2 encoded separator text loads the configured file before creating and reopening
+not ok 5 - template HTTP: v2 encoded separator text loads the configured file before creating and reopening
+  ---
+  duration_ms: 233.985652
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:90:4'
+  failureType: 'testCodeFailure'
+  error: '模板加载失败，已使用空模板：模板加载失败（400：bad path）'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    # 目标模板
+    
+    姓名：星裔
+    灵魂数量：0
+    
+  actual: ''
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:95:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template HTTP: v2 ordinary Unicode and spaces loads the configured file before creating and reopening
+ok 6 - template HTTP: v2 ordinary Unicode and spaces loads the configured file before creating and reopening
+  ---
+  duration_ms: 533.995735
+  ...
+# Subtest: template HTTP: v3 fragment filename loads the configured file before creating and reopening
+not ok 7 - template HTTP: v3 fragment filename loads the configured file before creating and reopening
+  ---
+  duration_ms: 231.539508
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:90:4'
+  failureType: 'testCodeFailure'
+  error: '输入新建路径与内容后，点击“创建文档”'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    # 目标模板
+    
+    姓名：星裔
+    灵魂数量：0
+    
+  actual: |-
+    # 不能读取的同名文件
+    
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:95:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template HTTP: v3 fragment directory loads the configured file before creating and reopening
+not ok 8 - template HTTP: v3 fragment directory loads the configured file before creating and reopening
+  ---
+  duration_ms: 224.761042
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:90:4'
+  failureType: 'testCodeFailure'
+  error: '模板加载失败，已使用空模板：模板加载失败（404：Not found）'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    # 目标模板
+    
+    姓名：星裔
+    灵魂数量：0
+    
+  actual: ''
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:95:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template HTTP: v3 literal percent loads the configured file before creating and reopening
+not ok 9 - template HTTP: v3 literal percent loads the configured file before creating and reopening
+  ---
+  duration_ms: 229.28382
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:90:4'
+  failureType: 'testCodeFailure'
+  error: '模板加载失败，已使用空模板：模板加载失败（400：bad path）'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    # 目标模板
+    
+    姓名：星裔
+    灵魂数量：0
+    
+  actual: ''
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:95:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template HTTP: v3 percent escape loads the configured file before creating and reopening
+not ok 10 - template HTTP: v3 percent escape loads the configured file before creating and reopening
+  ---
+  duration_ms: 225.750031
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:90:4'
+  failureType: 'testCodeFailure'
+  error: '输入新建路径与内容后，点击“创建文档”'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    # 目标模板
+    
+    姓名：星裔
+    灵魂数量：0
+    
+  actual: |-
+    # 不能读取的解码文件
+    
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:95:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template HTTP: v3 encoded separator text loads the configured file before creating and reopening
+not ok 11 - template HTTP: v3 encoded separator text loads the configured file before creating and reopening
+  ---
+  duration_ms: 223.121656
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:90:4'
+  failureType: 'testCodeFailure'
+  error: '模板加载失败，已使用空模板：模板加载失败（400：bad path）'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    # 目标模板
+    
+    姓名：星裔
+    灵魂数量：0
+    
+  actual: ''
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:95:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template HTTP: v3 ordinary Unicode and spaces loads the configured file before creating and reopening
+ok 12 - template HTTP: v3 ordinary Unicode and spaces loads the configured file before creating and reopening
+  ---
+  duration_ms: 535.885254
+  ...
+# Subtest: template HTTP: md keeps BOM and CRLF through the reader, creation, indexing and reopening
+not ok 13 - template HTTP: md keeps BOM and CRLF through the reader, creation, indexing and reopening
+  ---
+  duration_ms: 233.406242
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:111:4'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '# 星裔\r\n\r\n姓名：星裔\r\n灵魂数量：0\r\n可繁衍：false\r\n'
+    - '﻿# 星裔\r\n\r\n姓名：星裔\r\n灵魂数量：0\r\n可繁衍：false\r\n'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    ﻿# 星裔
+    
+    姓名：星裔
+    灵魂数量：0
+    可繁衍：false
+    
+  actual: |-
+    # 星裔
+    
+    姓名：星裔
+    灵魂数量：0
+    可繁衍：false
+    
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:115:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template HTTP: txt keeps BOM and CRLF through the reader, creation, indexing and reopening
+not ok 14 - template HTTP: txt keeps BOM and CRLF through the reader, creation, indexing and reopening
+  ---
+  duration_ms: 233.506008
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:111:4'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '星裔\r\n\r\n姓名：星裔\r\n灵魂数量：0\r\n可繁衍：false\r\n'
+    - '﻿星裔\r\n\r\n姓名：星裔\r\n灵魂数量：0\r\n可繁衍：false\r\n'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    ﻿星裔
+    
+    姓名：星裔
+    灵魂数量：0
+    可繁衍：false
+    
+  actual: |-
+    星裔
+    
+    姓名：星裔
+    灵魂数量：0
+    可繁衍：false
+    
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:115:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template HTTP: json keeps BOM and CRLF through the reader, creation, indexing and reopening
+not ok 15 - template HTTP: json keeps BOM and CRLF through the reader, creation, indexing and reopening
+  ---
+  duration_ms: 229.692417
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:111:4'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '{\r\n  "姓名": "星裔", "灵魂数量": 0, "可繁衍": false\r\n}\r\n'
+    - '﻿{\r\n  "姓名": "星裔", "灵魂数量": 0, "可繁衍": false\r\n}\r\n'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    ﻿{
+      "姓名": "星裔", "灵魂数量": 0, "可繁衍": false
+    }
+    
+  actual: |-
+    {
+      "姓名": "星裔", "灵魂数量": 0, "可繁衍": false
+    }
+    
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:115:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template HTTP: yaml keeps BOM and CRLF through the reader, creation, indexing and reopening
+not ok 16 - template HTTP: yaml keeps BOM and CRLF through the reader, creation, indexing and reopening
+  ---
+  duration_ms: 242.148563
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:111:4'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '# 模板注释\r\n姓名: 星裔\r\n灵魂数量: 0\r\n可繁衍: false\r\n'
+    - '﻿# 模板注释\r\n姓名: 星裔\r\n灵魂数量: 0\r\n可繁衍: false\r\n'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    ﻿# 模板注释
+    姓名: 星裔
+    灵魂数量: 0
+    可繁衍: false
+    
+  actual: |-
+    # 模板注释
+    姓名: 星裔
+    灵魂数量: 0
+    可繁衍: false
+    
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:115:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template HTTP: yml keeps BOM and CRLF through the reader, creation, indexing and reopening
+not ok 17 - template HTTP: yml keeps BOM and CRLF through the reader, creation, indexing and reopening
+  ---
+  duration_ms: 228.731169
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:111:4'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '# 模板注释\r\n姓名: 星裔\r\n灵魂数量: 0\r\n可繁衍: false\r\n'
+    - '﻿# 模板注释\r\n姓名: 星裔\r\n灵魂数量: 0\r\n可繁衍: false\r\n'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    ﻿# 模板注释
+    姓名: 星裔
+    灵魂数量: 0
+    可繁衍: false
+    
+  actual: |-
+    # 模板注释
+    姓名: 星裔
+    灵魂数量: 0
+    可繁衍: false
+    
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/template-http.test.mjs:115:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: template HTTP: a missing file remains retryable and a valid empty template can be saved
+ok 18 - template HTTP: a missing file remains retryable and a valid empty template can be saved
+  ---
+  duration_ms: 537.763271
+  ...
+# Subtest: template HTTP: an HTML fallback remains an error instead of becoming document source
+ok 19 - template HTTP: an HTML fallback remains an error instead of becoming document source
+  ---
+  duration_ms: 225.865641
+  ...
+1..19
+# tests 19
+# suites 0
+# pass 4
+# fail 15
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5538.98546

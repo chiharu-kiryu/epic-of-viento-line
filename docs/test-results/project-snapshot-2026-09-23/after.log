@@ -1,0 +1,295 @@
+TAP version 13
+# Subtest: reopening an aborted export ignores its late failure and allows a fresh export
+ok 1 - reopening an aborted export ignores its late failure and allows a fresh export
+  ---
+  duration_ms: 41.32027
+  ...
+# Subtest: an aborted export arriving after reopen is released without blocking the new dialog
+ok 2 - an aborted export arriving after reopen is released without blocking the new dialog
+  ---
+  duration_ms: 17.705764
+  ...
+# Subtest: opening export during a save cannot leave a permanently busy snapshot
+ok 3 - opening export during a save cannot leave a permanently busy snapshot
+  ---
+  duration_ms: 13.093725
+  ...
+# Subtest: an expired native export can be regenerated in the same dialog after cancelling its save picker
+ok 4 - an expired native export can be regenerated in the same dialog after cancelling its save picker
+  ---
+  duration_ms: 24.656791
+  ...
+# Subtest: native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+ok 5 - native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+  ---
+  duration_ms: 30.056446
+  ...
+# Subtest: cancelling media import during structured insertion keeps the draft and uploaded assets
+ok 6 - cancelling media import during structured insertion keeps the draft and uploaded assets
+  ---
+  duration_ms: 18.417419
+  ...
+# Subtest: late media preparation cannot overwrite a draft whose content changed
+ok 7 - late media preparation cannot overwrite a draft whose content changed
+  ---
+  duration_ms: 16.869046
+  ...
+# Subtest: existing media still inserts into an unchanged structured draft and releases the editor
+ok 8 - existing media still inserts into an unchanged structured draft and releases the editor
+  ---
+  duration_ms: 23.309984
+  ...
+# Subtest: media preview loads immediately after reading a document without requiring another input event
+ok 9 - media preview loads immediately after reading a document without requiring another input event
+  ---
+  duration_ms: 55.714103
+  ...
+# Subtest: media preview stops when switching to browse: existing document
+ok 10 - media preview stops when switching to browse: existing document
+  ---
+  duration_ms: 34.917763
+  ...
+# Subtest: media preview stops when switching to browse: first unsaved document
+ok 11 - media preview stops when switching to browse: first unsaved document
+  ---
+  duration_ms: 34.248087
+  ...
+# Subtest: media preview clears the previous template immediately while a different type is loading
+ok 12 - media preview clears the previous template immediately while a different type is loading
+  ---
+  duration_ms: 34.756992
+  ...
+# Subtest: media preview clears when types share a source path and ignores the old pending response
+ok 13 - media preview clears when types share a source path and ignores the old pending response
+  ---
+  duration_ms: 36.195289
+  ...
+# Subtest: media preview and a first dirty draft survive a cancelled mode switch, then close together after confirmation
+ok 14 - media preview and a first dirty draft survive a cancelled mode switch, then close together after confirmation
+  ---
+  duration_ms: 41.685495
+  ...
+# Subtest: media preview keeps unchanged playback through source/block switches and saving without altering source bytes
+ok 15 - media preview keeps unchanged playback through source/block switches and saving without altering source bytes
+  ---
+  duration_ms: 31.170977
+  ...
+# Subtest: media preview discards a late result after removing media or leaving and reopening the editor
+ok 16 - media preview discards a late result after removing media or leaving and reopening the editor
+  ---
+  duration_ms: 70.667236
+  ...
+# Subtest: template loading: changing a new draft extension refreshes media parsing and ignores the previous path response
+ok 17 - template loading: changing a new draft extension refreshes media parsing and ignores the previous path response
+  ---
+  duration_ms: 57.406387
+  ...
+# Subtest: type settings distinguish creation from editing and retain a rejected new draft for retry or cancel
+ok 18 - type settings distinguish creation from editing and retain a rejected new draft for retry or cancel
+  ---
+  duration_ms: 60.76723
+  ...
+# Subtest: template preview and save retain original BOM and line endings when only its label changes
+ok 19 - template preview and save retain original BOM and line endings when only its label changes
+  ---
+  duration_ms: 32.799871
+  ...
+# Subtest: returning from saved project settings keeps editing locked until the new index applies
+ok 20 - returning from saved project settings keeps editing locked until the new index applies
+  ---
+  duration_ms: 29.136751
+  ...
+# Subtest: discarding edits after a template save cannot leave a closed dialog marked dirty
+ok 21 - discarding edits after a template save cannot leave a closed dialog marked dirty
+  ---
+  duration_ms: 44.533566
+  ...
+# Subtest: a failed project index application keeps the settings available for retry without another save
+ok 22 - a failed project index application keeps the settings available for retry without another save
+  ---
+  duration_ms: 27.22694
+  ...
+# Subtest: save recovery: a duplicate creation preserves the draft and an HTTP retry registers only the new selected type
+ok 23 - save recovery: a duplicate creation preserves the draft and an HTTP retry registers only the new selected type
+  ---
+  duration_ms: 556.009083
+  ...
+# Subtest: creation rejects portable path collisions without poisoning the registry: documents/hero.md
+ok 24 - creation rejects portable path collisions without poisoning the registry: documents/hero.md
+  ---
+  duration_ms: 372.54875
+  ...
+# Subtest: creation rejects portable path collisions without poisoning the registry: documents/Café.md
+ok 25 - creation rejects portable path collisions without poisoning the registry: documents/Café.md
+  ---
+  duration_ms: 340.091511
+  ...
+# Subtest: creation rejects portable path collisions without poisoning the registry: documents/characters/two.md
+ok 26 - creation rejects portable path collisions without poisoning the registry: documents/characters/two.md
+  ---
+  duration_ms: 304.071962
+  ...
+# Subtest: unregistered files and concurrent creates also reserve their portable source locations
+ok 27 - unregistered files and concurrent creates also reserve their portable source locations
+  ---
+  duration_ms: 269.956804
+  ...
+# Subtest: a missing registered source cannot silently donate its identity and type to a new document
+ok 28 - a missing registered source cannot silently donate its identity and type to a new document
+  ---
+  duration_ms: 292.964911
+  ...
+# Subtest: creation rejects unindexable and nonportable paths before creating metadata or source files
+ok 29 - creation rejects unindexable and nonportable paths before creating metadata or source files
+  ---
+  duration_ms: 661.355211
+  ...
+# Subtest: queued creation validates the current project definition after an earlier configuration change
+ok 30 - queued creation validates the current project definition after an earlier configuration change
+  ---
+  duration_ms: 42.402279
+  ...
+# Subtest: a failed source publication removes only its new descriptor and permits a clean retry
+ok 31 - a failed source publication removes only its new descriptor and permits a clean retry
+  ---
+  duration_ms: 52.954458
+  ...
+# Subtest: generic registration preserves version, project-owned types and templates without legacy directories
+ok 32 - generic registration preserves version, project-owned types and templates without legacy directories
+  ---
+  duration_ms: 360.268809
+  ...
+# Subtest: custom type survives a user-selected file location, partial rebuild, save and reload
+ok 33 - custom type survives a user-selected file location, partial rebuild, save and reload
+  ---
+  duration_ms: 1257.339824
+  ...
+# Subtest: invalid types and simultaneous creates never leave orphaned metadata or overwrite a source
+ok 34 - invalid types and simultaneous creates never leave orphaned metadata or overwrite a source
+  ---
+  duration_ms: 281.29268
+  ...
+# Subtest: generic documents, project templates and media IDs survive a different workspace root
+ok 35 - generic documents, project templates and media IDs survive a different workspace root
+  ---
+  duration_ms: 1139.498957
+  ...
+# Subtest: generic editor offers only project types, uses local templates and accepts the new document root
+ok 36 - generic editor offers only project types, uses local templates and accepts the new document root
+  ---
+  duration_ms: 9.516967
+  ...
+# Subtest: new manifest layout and template paths are validated while legacy projects keep their original layout
+ok 37 - new manifest layout and template paths are validated while legacy projects keep their original layout
+  ---
+  duration_ms: 105.560441
+  ...
+# Subtest: an empty project exposes creation in edit mode and recovers after cancelling its first draft
+ok 38 - an empty project exposes creation in edit mode and recovers after cancelling its first draft
+  ---
+  duration_ms: 13.985878
+  ...
+# Subtest: project category tabs, counts and searches follow custom types without old game categories
+ok 39 - project category tabs, counts and searches follow custom types without old game categories
+  ---
+  duration_ms: 10.105821
+  ...
+# Subtest: type/template API applies live to creation, indexing and exports at an arbitrary document location
+ok 40 - type/template API applies live to creation, indexing and exports at an arbitrary document location
+  ---
+  duration_ms: 1307.556689
+  ...
+# Subtest: template edits preserve source and descriptors, reject stale saves, and prune only their own previous revision
+ok 41 - template edits preserve source and descriptors, reject stale saves, and prune only their own previous revision
+  ---
+  duration_ms: 101.05858
+  ...
+# Subtest: adding an existing type ID cannot overwrite its rules or template; editing it still works
+ok 42 - adding an existing type ID cannot overwrite its rules or template; editing it still works
+  ---
+  duration_ms: 673.615684
+  ...
+# Subtest: type preview and save reject an unusable default location: hidden folder
+ok 43 - type preview and save reject an unusable default location: hidden folder
+  ---
+  duration_ms: 268.032184
+  ...
+# Subtest: type preview and save reject an unusable default location: nested hidden folder
+ok 44 - type preview and save reject an unusable default location: nested hidden folder
+  ---
+  duration_ms: 263.642141
+  ...
+# Subtest: type preview and save reject an unusable default location: reserved folder
+ok 45 - type preview and save reject an unusable default location: reserved folder
+  ---
+  duration_ms: 271.886541
+  ...
+# Subtest: type preview and save reject an unusable default location: nested reserved folder
+ok 46 - type preview and save reject an unusable default location: nested reserved folder
+  ---
+  duration_ms: 292.806593
+  ...
+# Subtest: type preview and save reject an unusable default location: overlong UTF-8 folder
+ok 47 - type preview and save reject an unusable default location: overlong UTF-8 folder
+  ---
+  duration_ms: 279.588254
+  ...
+# Subtest: old type locations remain readable and can be repaired before creating documents at the new default
+ok 48 - old type locations remain readable and can be repaired before creating documents at the new default
+  ---
+  duration_ms: 638.791674
+  ...
+# Subtest: malformed templates and escaping configuration cannot publish changes
+ok 49 - malformed templates and escaping configuration cannot publish changes
+  ---
+  duration_ms: 87.591364
+  ...
+# Subtest: project rules replace historical notation and path guesses in the same parser
+ok 50 - project rules replace historical notation and path guesses in the same parser
+  ---
+  duration_ms: 1.064085
+  ...
+# Subtest: official example is an independent definition; adoption preserves IDs, sources, ownership and original templates
+ok 51 - official example is an independent definition; adoption preserves IDs, sources, ownership and original templates
+  ---
+  duration_ms: 412.572605
+  ...
+# Subtest: project snapshot: generated template revision belongs to the displayed manifest
+ok 52 - project snapshot: generated template revision belongs to the displayed manifest
+  ---
+  duration_ms: 345.327782
+  ...
+# Subtest: project snapshot: stale generated form cannot undo a concurrent rule change
+ok 53 - project snapshot: stale generated form cannot undo a concurrent rule change
+  ---
+  duration_ms: 368.72542
+  ...
+# Subtest: project snapshot: file-backed template revision belongs to the displayed manifest
+ok 54 - project snapshot: file-backed template revision belongs to the displayed manifest
+  ---
+  duration_ms: 257.376822
+  ...
+# Subtest: project snapshot: stale file-backed form cannot undo a concurrent rule change
+ok 55 - project snapshot: stale file-backed form cannot undo a concurrent rule change
+  ---
+  duration_ms: 263.666106
+  ...
+# Subtest: project snapshot: reopening and editing only a label keeps template bytes and explicit parser rules
+ok 56 - project snapshot: reopening and editing only a label keeps template bytes and explicit parser rules
+  ---
+  duration_ms: 86.909996
+  ...
+# Subtest: templates accept arbitrary OC fields, ignore sidecars and reject malformed structured input
+ok 57 - templates accept arbitrary OC fields, ignore sidecars and reject malformed structured input
+  ---
+  duration_ms: 818.482133
+  ...
+1..57
+# tests 57
+# suites 0
+# pass 57
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6237.213594

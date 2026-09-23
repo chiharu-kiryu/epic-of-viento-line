@@ -1,0 +1,350 @@
+TAP version 13
+# Subtest: image display: cover requests the registered fragment filename literally
+not ok 1 - image display: cover requests the registered fragment filename literally
+  ---
+  duration_ms: 314.191792
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:79:4'
+  failureType: 'testCodeFailure'
+  error: 'must read the intended file, not a similar filename'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'target:原画.png#定稿.png'
+  actual: 'wrong similar file'
+  operator: 'strictEqual'
+  stack: |-
+    readsFile (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:66:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:84:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async startSubtest (node:internal/test_runner/harness:214:3)
+  ...
+# Subtest: image display: cover requests the registered percent escape filename literally
+not ok 2 - image display: cover requests the registered percent escape filename literally
+  ---
+  duration_ms: 245.30099
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:79:4'
+  failureType: 'testCodeFailure'
+  error: 'must read the intended file, not a similar filename'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'target:原画%20定稿.png'
+  actual: 'wrong similar file'
+  operator: 'strictEqual'
+  stack: |-
+    readsFile (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:66:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:84:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: image display: cover requests the registered literal percent filename literally
+not ok 3 - image display: cover requests the registered literal percent filename literally
+  ---
+  duration_ms: 223.066515
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:79:4'
+  failureType: 'testCodeFailure'
+  error: 'http://127.0.0.1/assets/100%%E5%8E%9F%E7%94%BB.png'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 400
+  operator: 'strictEqual'
+  stack: |-
+    readsFile (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:65:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:84:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: image display: cover requests the registered encoded separator text filename literally
+not ok 4 - image display: cover requests the registered encoded separator text filename literally
+  ---
+  duration_ms: 240.634261
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:79:4'
+  failureType: 'testCodeFailure'
+  error: 'http://127.0.0.1/assets/%E5%8E%9F%E7%94%BB%2f%E5%AE%9A%E7%A8%BF.png'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 400
+  operator: 'strictEqual'
+  stack: |-
+    readsFile (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:65:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:84:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: image display: cover requests the registered double dots filename literally
+not ok 5 - image display: cover requests the registered double dots filename literally
+  ---
+  duration_ms: 249.61574
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:79:4'
+  failureType: 'testCodeFailure'
+  error: 'a real file must not be replaced by an avatar'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'http:'
+  actual: 'data:'
+  operator: 'strictEqual'
+  stack: |-
+    readsFile (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:60:10)
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:86:9)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: image display: cover requests the registered ordinary Unicode and spaces filename literally
+ok 6 - image display: cover requests the registered ordinary Unicode and spaces filename literally
+  ---
+  duration_ms: 250.428041
+  ...
+# Subtest: image display: skill requests the registered fragment filename literally
+not ok 7 - image display: skill requests the registered fragment filename literally
+  ---
+  duration_ms: 237.690339
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:79:4'
+  failureType: 'testCodeFailure'
+  error: 'must read the intended file, not a similar filename'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'target:原画.png#定稿.png'
+  actual: 'wrong similar file'
+  operator: 'strictEqual'
+  stack: |-
+    readsFile (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:66:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:84:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: image display: skill requests the registered percent escape filename literally
+not ok 8 - image display: skill requests the registered percent escape filename literally
+  ---
+  duration_ms: 235.25025
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:79:4'
+  failureType: 'testCodeFailure'
+  error: 'must read the intended file, not a similar filename'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'target:原画%20定稿.png'
+  actual: 'wrong similar file'
+  operator: 'strictEqual'
+  stack: |-
+    readsFile (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:66:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:84:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: image display: skill requests the registered literal percent filename literally
+not ok 9 - image display: skill requests the registered literal percent filename literally
+  ---
+  duration_ms: 248.109791
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:79:4'
+  failureType: 'testCodeFailure'
+  error: 'http://127.0.0.1/assets/100%%E5%8E%9F%E7%94%BB.png'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 400
+  operator: 'strictEqual'
+  stack: |-
+    readsFile (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:65:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:84:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: image display: skill requests the registered encoded separator text filename literally
+not ok 10 - image display: skill requests the registered encoded separator text filename literally
+  ---
+  duration_ms: 248.363916
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:79:4'
+  failureType: 'testCodeFailure'
+  error: 'http://127.0.0.1/assets/%E5%8E%9F%E7%94%BB%2f%E5%AE%9A%E7%A8%BF.png'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 400
+  operator: 'strictEqual'
+  stack: |-
+    readsFile (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:65:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:84:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: image display: skill requests the registered double dots filename literally
+not ok 11 - image display: skill requests the registered double dots filename literally
+  ---
+  duration_ms: 240.695787
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:79:4'
+  failureType: 'testCodeFailure'
+  error: 'a real file must not be replaced by an avatar'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'http:'
+  actual: 'data:'
+  operator: 'strictEqual'
+  stack: |-
+    readsFile (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:60:10)
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:86:9)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: image display: skill requests the registered ordinary Unicode and spaces filename literally
+ok 12 - image display: skill requests the registered ordinary Unicode and spaces filename literally
+  ---
+  duration_ms: 262.065092
+  ...
+# Subtest: image display: list and gallery accept dots inside a filename or directory (assets/原画..定稿.png)
+not ok 13 - image display: list and gallery accept dots inside a filename or directory (assets/原画..定稿.png)
+  ---
+  duration_ms: 232.46827
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:90:67'
+  failureType: 'testCodeFailure'
+  error: 'http://127.0.0.1/assets/images/heros/%E5%8A%9B%E9%87%8F/%E6%B5%8B%E8%AF%95%E8%A7%92%E8%89%B2/%E6%B5%8B%E8%AF%95%E8%A7%92%E8%89%B2.png'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    readsFile (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:65:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:93:46)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: image display: list and gallery accept dots inside a filename or directory (assets/草案..定稿/原画.png)
+not ok 14 - image display: list and gallery accept dots inside a filename or directory (assets/草案..定稿/原画.png)
+  ---
+  duration_ms: 224.091765
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:90:67'
+  failureType: 'testCodeFailure'
+  error: 'http://127.0.0.1/assets/images/heros/%E5%8A%9B%E9%87%8F/%E6%B5%8B%E8%AF%95%E8%A7%92%E8%89%B2/%E6%B5%8B%E8%AF%95%E8%A7%92%E8%89%B2.png'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    readsFile (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:65:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:93:46)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: image display: cover missing image uses a literal fallback path and ends at an avatar
+not ok 15 - image display: cover missing image uses a literal fallback path and ends at an avatar
+  ---
+  duration_ms: 224.432082
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:96:80'
+  failureType: 'testCodeFailure'
+  error: 'http://127.0.0.1/assets/images/heros/%E5%8A%9B%E9%87%8F/%E8%A7%92%E8%89%B2#100%/%E8%A7%92%E8%89%B2#100%.png'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    readsFile (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:65:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:111:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: image display: cover empty image uses a literal fallback path and ends at an avatar
+not ok 16 - image display: cover empty image uses a literal fallback path and ends at an avatar
+  ---
+  duration_ms: 220.55942
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:96:80'
+  failureType: 'testCodeFailure'
+  error: 'http://127.0.0.1/assets/images/heros/%E5%8A%9B%E9%87%8F/%E8%A7%92%E8%89%B2#100%/%E8%A7%92%E8%89%B2#100%.png'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    readsFile (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:65:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:111:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: image display: skill missing image uses a literal fallback path and ends at an avatar
+not ok 17 - image display: skill missing image uses a literal fallback path and ends at an avatar
+  ---
+  duration_ms: 239.524464
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:96:80'
+  failureType: 'testCodeFailure'
+  error: 'http://127.0.0.1/assets/images/heros/%E5%8A%9B%E9%87%8F/%E8%A7%92%E8%89%B2#100%/%E6%96%A9%E5%87%BB#100%.png'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    readsFile (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:65:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:111:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: image display: skill empty image uses a literal fallback path and ends at an avatar
+not ok 18 - image display: skill empty image uses a literal fallback path and ends at an avatar
+  ---
+  duration_ms: 243.338286
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:96:80'
+  failureType: 'testCodeFailure'
+  error: 'http://127.0.0.1/assets/images/heros/%E5%8A%9B%E9%87%8F/%E8%A7%92%E8%89%B2#100%/%E6%96%A9%E5%87%BB#100%.png'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    readsFile (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:65:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:111:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: image display: a generic document with a missing cover still gets a stable avatar
+not ok 19 - image display: a generic document with a missing cover still gets a stable avatar
+  ---
+  duration_ms: 224.431602
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:120:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'undefined'
+    - 'function'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'function'
+  actual: 'undefined'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/image-display.test.mjs:126:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: image display: unsupported origins, backslashes and parent segments remain rejected
+ok 20 - image display: unsupported origins, backslashes and parent segments remain rejected
+  ---
+  duration_ms: 0.42747
+  ...
+1..20
+# tests 20
+# suites 0
+# pass 3
+# fail 17
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4765.262533

@@ -1,0 +1,62 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.6",
+  "gitBase": "8315e0b8d656532f5ca2ea785afa426c052cfb45",
+  "scope": "Project configuration read/revision coherence, stale save conflicts, external rule preservation and fresh-read/save recovery",
+  "workflows": [
+    "F23",
+    "F25"
+  ],
+  "bugs": [
+    "N88"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 5,
+    "passed": 1,
+    "failed": 4,
+    "skipped": 0,
+    "log": "before.log",
+    "serviceSourceState": "Unchanged b.3.6 release service at 8315e0b",
+    "serviceSourceSha256": "e50cb1a7abdbff7027c561b3feaa531e2543163a538f20850df62e4f459878bd",
+    "reproduction": "Ran all 5 new cases against the unchanged release service. Four failures reproduced mixed revisions and wrongly accepted stale saves; one existing-behavior case passed."
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 57,
+    "passed": 57,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after.log",
+    "newCases": 5
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 317,
+    "passed": 316,
+    "failed": 0,
+    "skipped": 1,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 125,
+    "apiContractPassed": true
+  },
+  "skipReason": "Node/Rust archive interoperability requires VIENTO_TEST_ARCHIVE_BINARY; native archive code unchanged",
+  "files": {
+    "scripts/lib/project-service.mjs": "2f1f83c237574edc746f576c1d2782cf6fcb7f3c01de09a9564837097d85654a",
+    "scripts/tests/project-snapshot.test.mjs": "442fd8529e7f09011fee3ccf18df1c909206f3d677fcde0f0b8c38e052868da8"
+  },
+  "testEnvironment": "Temporary registered workspaces run actual configuration reads and saves. Isolated child processes atomically replace the manifest immediately after its first read returns, without timers. Generated and file-backed templates both reject stale saves before template writes, preserve the external manifest bytes, and save correctly after a fresh read. Original document bytes and registry records stay identical. Label-only edits retain template source bytes and explicit parser rules. Existing engine/template/dialog tests also ran; no native window interaction.",
+  "nativeTestsRerun": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "functionNetwork": {
+    "revision": 36,
+    "sourceFingerprints": 151,
+    "nodeSources": 165,
+    "localImportStatements": 388,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

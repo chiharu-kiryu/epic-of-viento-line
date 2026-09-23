@@ -629,7 +629,7 @@ function resolveImageUrl(rawImagePath = '') {
   }
 
   const normalizedRelativePath = imagePath.replace(/^\/+/, '');
-  if (normalizedRelativePath.includes('..') || normalizedRelativePath.includes('\\')) {
+  if (normalizedRelativePath.split('/').some((part) => part === '.' || part === '..') || normalizedRelativePath.includes('\\')) {
     return '';
   }
 

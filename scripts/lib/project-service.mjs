@@ -47,7 +47,9 @@ export async function readProjectConfiguration(root) {
   const manifest = readWorkspace(root);
   if (!manifest || manifest.version < 2) throw fail('请先登记项目，再管理类型和模板');
   const types = await definitions(root, manifest);
-  const revision = createHash('sha256').update(await fs.readFile(path.join(root, 'workspace.json')));
+  // Version the same manifest that supplies the displayed settings. Re-reading
+  // the file here can attach a newer revision to an older form during a change.
+  const revision = createHash('sha256').update(JSON.stringify(manifest));
   const warnings = [];
   const entries = [];
   for (const type of types) {
