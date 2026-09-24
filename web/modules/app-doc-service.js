@@ -1,6 +1,6 @@
 import { t } from '../i18n/index.js';
 import { API_PATHS, API_REQUEST_KEYS, DOC_CAPABILITIES_FIELDS } from '../../scripts/lib/doc-api-contract.mjs';
-import { fetchJsonApiRequest, fetchTextApiRequest, withCacheBust } from './app-services.js';
+import { fetchJsonApiRequest, fetchTextApiRequest, fetchWithTimeout, makeRequestError, safeParseJsonResponse, withCacheBust } from './app-services.js';
 import { APP_ERROR_MESSAGES, APP_REQUEST_LABELS } from './app-state.js';
 
 const DOC_API_TOKEN_STORAGE_KEY = 'doc-api-token';
@@ -438,6 +438,23 @@ export async function requestExport(payload, signal) {
   return (await fetchJsonApiRequest(API_PATHS.EXPORT, withAuthHeaders({
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal,
   }), 60 * 60 * 1000, t('准备导出'))).payload;
+}
+
+export async function checkExport(id, signal) {
+  // Probe one byte through the download route, renewing its idle lifetime
+  // without buffering the ZIP or claiming that the whole file was downloaded.
+  const label = t('检查导出文件');
+  return fetchWithTimeout(`${API_PATHS.EXPORT}?id=${encodeURIComponent(id)}`, {
+    headers: { Range: 'bytes=0-0' }, cache: 'no-store', signal,
+  }, 10000, label, async response => {
+    if (!response.ok) throw makeRequestError(response, await safeParseJsonResponse(response), label);
+    if (response.status !== 206 || !/^bytes 0-0\/[1-9]\d*$/.test(response.headers.get('content-range') || '')
+      || Number(response.headers.get('content-length')) !== 1) {
+      await response.body?.cancel();
+      throw new Error(t('后端返回了非预期响应格式'));
+    }
+    if ((await response.arrayBuffer()).byteLength !== 1) throw new Error(t('后端返回了非预期响应格式'));
+  });
 }
 
 export async function releaseExport(id) {

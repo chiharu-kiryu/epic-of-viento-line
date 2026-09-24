@@ -80,6 +80,11 @@ class DialogElement extends Element {
   }
   focus() { this.ownerDocument.activeElement = this; }
   select() { this.focus(); this.selectionStart = 0; this.selectionEnd = this.value.length; }
+  setRangeText(text, start, end, selectionMode) {
+    if (selectionMode !== 'end') throw new Error('This fixture only models selectionMode=end');
+    this.value = this.value.slice(0, start) + text + this.value.slice(end);
+    this.selectionStart = this.selectionEnd = start + text.length;
+  }
   showModal() { this.open = true; }
   close() { if (!this.open) return; this.open = false; setImmediate(() => this.dispatch('close')); }
   requestSubmit() { this.dispatch('submit', { bubbles: true }); }

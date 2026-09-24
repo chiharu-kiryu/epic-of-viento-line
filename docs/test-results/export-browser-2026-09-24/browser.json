@@ -1,0 +1,73 @@
+{
+  "date": "2026-09-24",
+  "browser": "Codex in-app browser",
+  "fixtureRoot": "/tmp/viento-test-NDx0uD",
+  "origin": "http://127.0.0.1:38715",
+  "scenario": "Actual page controls: prepare document share, click download, invalidate only the test job via the real release endpoint, click the old download button, regenerate in the same dialog, download again, close dialog and tab.",
+  "downloadEvents": 2,
+  "expiredMessage": "导出文件已过期，请重新导出",
+  "startButtonReenabled": true,
+  "downloadButtonHiddenOnExpiry": true,
+  "sourceBytesUnchanged": true,
+  "tabClosed": true,
+  "initialSetup": "The first page load had no generated index (404). Standardized and indexed this synthetic fixture, reloaded, then completed the browser workflow.",
+  "browserDownloadFilePersistenceVerified": true,
+  "matchedDownloadsRemoved": [
+    {
+      "name": "Browser export fixture-网页 (1).zip",
+      "sha256": "2558e2bcdf6eca8affbc4aebfdf76c2782f1c45f24cfa1651ebe67530e4e7c07"
+    },
+    {
+      "name": "Browser export fixture-网页.zip",
+      "sha256": "0e0ed4b77538c422490f383434659cb637415ee00b0695d6807bc390bcdf242a"
+    }
+  ],
+  "archiveHashes": [
+    "0e0ed4b77538c422490f383434659cb637415ee00b0695d6807bc390bcdf242a",
+    "2558e2bcdf6eca8affbc4aebfdf76c2782f1c45f24cfa1651ebe67530e4e7c07"
+  ],
+  "metrics": {
+    "ok": true,
+    "data": {
+      "startedAt": "2026-09-24T04:40:37.416Z",
+      "activeRequests": 1,
+      "totalRequests": 10,
+      "errorRequests": 1,
+      "successRequests": 9,
+      "averageResponseMs": 3.3,
+      "statusCodes": {
+        "200": 7,
+        "206": 2,
+        "410": 1
+      },
+      "routes": {
+        "GET /api/capabilities": {
+          "count": 2,
+          "errorCount": 0,
+          "averageResponseMs": 0.58,
+          "lastStatusCode": 200,
+          "lastDurationMs": 0.27,
+          "lastAt": "2026-09-24T04:41:47.711Z"
+        },
+        "POST /api/export": {
+          "count": 3,
+          "errorCount": 0,
+          "averageResponseMs": 8.69,
+          "lastStatusCode": 200,
+          "lastDurationMs": 8.89,
+          "lastAt": "2026-09-24T04:43:27.632Z"
+        },
+        "GET /api/export": {
+          "count": 5,
+          "errorCount": 1,
+          "averageResponseMs": 1.15,
+          "lastStatusCode": 200,
+          "lastDurationMs": 0.86,
+          "lastAt": "2026-09-24T04:43:42.407Z"
+        }
+      }
+    },
+    "requestId": "1790225079972-11"
+  },
+  "fixtureRemoved": true
+}

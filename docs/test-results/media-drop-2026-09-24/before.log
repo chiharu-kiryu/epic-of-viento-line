@@ -1,0 +1,181 @@
+TAP version 13
+# Subtest: dropping on a block uses that block while focus remains on another block
+not ok 1 - dropping on a block uses that block while focus remains on another block
+  ---
+  duration_ms: 55.558147
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-drop.test.mjs:65:70'
+  failureType: 'testCodeFailure'
+  error: 'the previous block selection must not be replaced'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '保留这一段。'
+  actual: |-
+    
+    
+    ![立绘.png](asset:abcdefab-1234-5678-90ab-abcdefabcdef)
+    
+    段。
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-drop.test.mjs:74:10)
+    runNextTicks (node:internal/process/task_queues:60:5)
+    process.processImmediate (node:internal/timers:447:9)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async startSubtest (node:internal/test_runner/harness:214:3)
+  ...
+# Subtest: dropping on a block uses that block while focus remains on the drop target
+ok 2 - dropping on a block uses that block while focus remains on the drop target
+  ---
+  duration_ms: 29.049751
+  ...
+# Subtest: dropping on a block uses that block while focus remains on toolbar
+ok 3 - dropping on a block uses that block while focus remains on toolbar
+  ---
+  duration_ms: 26.023303
+  ...
+# Subtest: pasting into the active block and choosing existing media still respect the captured selection
+not ok 4 - pasting into the active block and choosing existing media still respect the captured selection
+  ---
+  duration_ms: 29.86971
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-drop.test.mjs:82:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '插在这里：\n\n![立绘.png](asset:abcdefab-1234-5678-90ab-abcdefabcdef)\n\n后'
+    - '插在这里：\n' +
+    -   '\n' +
+    -   '![立绘.png](asset:abcdefab-1234-5678-90ab-abcdefabcdef)\n' +
+    -   '\n' +
+    -   '后\n' +
+    -   '\n' +
+    -   '![立绘.png](asset:abcdefab-1234-5678-90ab-abcdefabcdef)\n' +
+    -   '\n'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: |-
+    插在这里：
+    
+    ![立绘.png](asset:abcdefab-1234-5678-90ab-abcdefabcdef)
+    
+    后
+    
+    ![立绘.png](asset:abcdefab-1234-5678-90ab-abcdefabcdef)
+    
+    
+  actual: |-
+    插在这里：
+    
+    ![立绘.png](asset:abcdefab-1234-5678-90ab-abcdefabcdef)
+    
+    后
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-drop.test.mjs:95:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: a queued close cannot clear the target or pending list of a reopened media dialog
+not ok 5 - a queued close cannot clear the target or pending list of a reopened media dialog
+  ---
+  duration_ms: 28.96648
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-drop.test.mjs:99:1'
+  failureType: 'testCodeFailure'
+  error: 'the new list response must not be invalidated by the old close event'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-drop.test.mjs:114:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: dropping outside an input uses the active editor and source mode preserves its selection
+ok 6 - dropping outside an input uses the active editor and source mode preserves its selection
+  ---
+  duration_ms: 23.023396
+  ...
+# Subtest: cancelled and late uploads leave both the focused block and drop target intact
+not ok 7 - cancelled and late uploads leave both the focused block and drop target intact
+  ---
+  duration_ms: 25.124563
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-drop.test.mjs:129:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '\n\n![立绘.png](asset:abcdefab-1234-5678-90ab-abcdefabcdef)\n\n段。'
+    - '保留这一段。'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '保留这一段。'
+  actual: |-
+    
+    
+    ![立绘.png](asset:abcdefab-1234-5678-90ab-abcdefabcdef)
+    
+    段。
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-drop.test.mjs:143:10)
+    runNextTicks (node:internal/process/task_queues:60:5)
+    process.processImmediate (node:internal/timers:447:9)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: a late upload cannot insert into a changed document or a replaced block
+ok 8 - a late upload cannot insert into a changed document or a replaced block
+  ---
+  duration_ms: 22.2937
+  ...
+# Subtest: dropped image, audio and video survive actual HTTP import, save, reopen and reference indexing in the target block
+not ok 9 - dropped image, audio and video survive actual HTTP import, save, reopen and reference indexing in the target block
+  ---
+  duration_ms: 327.765744
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-drop.test.mjs:160:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '\n' +
+    +   '\n' +
+    +   '![立绘.png](asset:ca5d2744-947d-40d0-a94e-fee9031e99e1)\n' +
+    +   '\n' +
+    +   '!audio[配音.wav](asset:4fcf5843-e870-4f80-9558-775e217592ac)\n' +
+    +   '\n' +
+    +   '!video[片段.mp4](asset:2aaf5be9-d5d7-4346-863a-6e6073765c2f)\n' +
+    +   '\n' +
+    +   '段。'
+    - '保留这一段。'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '保留这一段。'
+  actual: |-
+    
+    
+    ![立绘.png](asset:ca5d2744-947d-40d0-a94e-fee9031e99e1)
+    
+    !audio[配音.wav](asset:4fcf5843-e870-4f80-9558-775e217592ac)
+    
+    !video[片段.mp4](asset:2aaf5be9-d5d7-4346-863a-6e6073765c2f)
+    
+    段。
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-drop.test.mjs:190:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 4
+# fail 5
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 721.671092

@@ -1,0 +1,118 @@
+{
+  "date": "2026-09-24",
+  "version": "b.4.0",
+  "gitBase": "c27f8c9e790fd6fd1313f329c0c40edb640eb6b6",
+  "scope": "Check prepared browser exports before handing off downloads; restore generation on expiry, retain retryable packages after transient failures, and cancel stale handoffs without revoking active downloads",
+  "workflows": [
+    "F34",
+    "F35"
+  ],
+  "bugs": [
+    "N108"
+  ],
+  "retainedBugs": [
+    "N107"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 12,
+    "passed": 0,
+    "failed": 12,
+    "skipped": 0,
+    "log": "before.log",
+    "replay": "before-replay.json",
+    "sourceState": "Final test replayed against the prior browser controller, client, English catalogue and HTML in an isolated copy; N107 server changes retained. Restored production fingerprints match the previous snapshot and release baseline.",
+    "files": {
+      "web/modules/app-export.js": "c94d24aca6e452f3709107e14797f2a31c1153ebf6008abf549bcd68614f873b",
+      "web/modules/app-doc-service.js": "e8e34cbb78984766dfeae5c9eace08f462b346af8fe6a32dc2d623a359510fdb",
+      "web/i18n/en.js": "baec8bfc40321d6ec9d2c0a45e0bb313a4b809fed1bc0e368decafec9a6b69a9",
+      "web/index.html": "e3784d58bb5b28efb9cde8617072aa7229590ba8db303da7d475902b9db2631b"
+    },
+    "testFileSha256": "534d7241bb024bd2120edc2ef30d5dd9d757efb015ca26003dcb30a3df19dfc0",
+    "reproduction": "Old download anchor handed the URL off immediately, never checked availability and had no cancellation/retry state for such a check; both actual HTTP controller cases observed no preflight request. The added malformed-probe case confirms the missing client guard."
+  },
+  "initialFocusedRun": {
+    "runtime": "Node v18.19.1",
+    "tests": 91,
+    "passed": 79,
+    "failed": 11,
+    "skipped": 1,
+    "log": "after-initial.log",
+    "failure": "Eleven new test teardown hooks compared textarea content to CRLF source rather than the LF-normalized display value; all functional assertions reached cleanup.",
+    "resolution": "Snapshot the textarea value immediately after assignment and compare it after the workflow. Disk and ZIP byte comparisons remain unchanged; final replay uses the corrected test."
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 91,
+    "passed": 90,
+    "failed": 0,
+    "skipped": 1,
+    "log": "after.log",
+    "newCases": 12
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 462,
+    "passed": 460,
+    "failed": 0,
+    "skipped": 2,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 137,
+    "apiContractPassed": true,
+    "versionValidationPassed": true,
+    "nativeArchiveBinaryConfigured": false,
+    "skipReason": "Native archive interoperability and registry agreement require VIENTO_TEST_ARCHIVE_BINARY; prior b.4.0 native evidence retained."
+  },
+  "browser": {
+    "record": "browser.json",
+    "actualPageControlsTested": true,
+    "downloadEvents": 2,
+    "downloadedZipDigestsMatched": 2,
+    "expiredRecoveryInSameDialog": true,
+    "temporaryFixtureAndDownloadsRemoved": true,
+    "initialFixtureIndexBuiltBeforeWorkflow": true
+  },
+  "commands": {
+    "before": "/usr/bin/node --test scripts/tests/export-browser.test.mjs (isolated preceding-browser-code replay)",
+    "after": "/usr/bin/node --test scripts/tests/export-browser.test.mjs scripts/tests/editor-dialogs.test.mjs scripts/tests/export-bridge.test.mjs scripts/tests/export-downloads.test.mjs scripts/tests/export.test.mjs scripts/tests/export-cleanup.test.mjs scripts/tests/request-lifecycle.test.mjs scripts/tests/i18n.test.mjs",
+    "application": "env -u VIENTO_TEST_ARCHIVE_BINARY /home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node scripts/check-project.mjs --app-only"
+  },
+  "files": {
+    "scripts/tests/editor-dialogs.test.mjs": "30e214da1b22add4dffa5ab36a709595519f8adecd79556d0507883895c471a5",
+    "scripts/tests/export-browser.test.mjs": "534d7241bb024bd2120edc2ef30d5dd9d757efb015ca26003dcb30a3df19dfc0",
+    "web/i18n/en.js": "3d4371059d41d6fa1296c3358e175e98ce8c2365ffb0497ffd593baac05f934b",
+    "web/modules/app-doc-service.js": "b243dba11cb896b8e9d6da356f5cfee2cc7ca01d7bad97818f86d0d8e8a5dc19",
+    "web/modules/app-export.js": "415c2772eca5003ff81177cd52db8af4c0bffb15da0f7d6d88bf1267a725117e",
+    "web/index.html": "cea4cdd3ebac96042f3b3e3390c2d6b587b462be02d6937b53ea430b1a0fa3ef"
+  },
+  "testEnvironment": "Production controllers in event-capable DOM fixtures; real export client and edit/browse HTTP servers on synthetic projects; actual in-app browser downloads with SHA-256 comparison to server staging files. No daily workspace data accessed.",
+  "limitations": [
+    "A validity probe and the following browser download are separate requests. Service exit or external deletion between them remains a browser transfer failure.",
+    "DOM error/cancellation races are controlled in automated tests; actual browser smoke covers successful download, unavailable job recovery and repeated download.",
+    "Native windows, Rust archive tests and media decoding were not rerun."
+  ],
+  "nativeArchiveModuleTestsRerun": false,
+  "fullTauriLibraryTestsRerun": false,
+  "nativeWindowTested": false,
+  "nativePlaybackTested": false,
+  "browserDownloadManagerTested": true,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "cleanup": {
+    "temporaryFixtureProjectsRemoved": true,
+    "replayRemoved": true,
+    "browserFixtureRemoved": true,
+    "browserTabClosed": true,
+    "matchedBrowserDownloadsRemoved": 2
+  },
+  "functionNetwork": {
+    "revision": 53,
+    "sourceFingerprints": 163,
+    "additionalHtmlFingerprints": 1,
+    "nodeSources": 181,
+    "localImportStatements": 452,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

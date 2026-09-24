@@ -17,8 +17,10 @@ export function setupMediaEditor(adapter) {
   const fileSize = (bytes) => bytes < 1024 * 1024 ? `${Math.ceil(bytes / 1024)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
   const status = (text, error = false) => { message.textContent = text; message.classList.toggle('is-error', error); };
   const editableInput = (node) => node?.tagName === 'TEXTAREA' && surface.contains(node);
-  const capture = () => {
-    if (editableInput(document.activeElement)) lastInput = document.activeElement;
+  const capture = (preferredInput = null) => {
+    // A file drop does not necessarily move focus from the previous block.
+    if (editableInput(preferredInput)) lastInput = preferredInput;
+    else if (editableInput(document.activeElement)) lastInput = document.activeElement;
     return adapter.getContext(lastInput);
   };
   const pausePreview = () => preview.querySelectorAll('audio, video').forEach((player) => player.pause());
@@ -178,8 +180,7 @@ export function setupMediaEditor(adapter) {
     const files = Array.from(event.dataTransfer?.files || []);
     if (!files.length || !adapter.isEditable()) return;
     event.preventDefault();
-    if (editableInput(event.target)) lastInput = event.target;
-    void importFiles(files, capture());
+    void importFiles(files, capture(event.target));
   });
   button.addEventListener('click', () => {
     if (!adapter.isEditable() || adapter.isBusy()) return;
@@ -190,7 +191,11 @@ export function setupMediaEditor(adapter) {
   cancel.addEventListener('click', () => aborter?.abort());
   close.addEventListener('click', () => dialog.close());
   dialog.addEventListener('cancel', (event) => { if (adapter.isBusy()) { event.preventDefault(); aborter?.abort(); } });
-  dialog.addEventListener('close', () => { ++listGeneration; context = null; });
+  dialog.addEventListener('close', () => {
+    // The previous dialog's queued close may arrive after it has reopened.
+    if (dialog.open) return;
+    ++listGeneration; context = null;
+  });
   search.addEventListener('input', () => { limit = 60; renderList(); });
   kind.addEventListener('change', () => { limit = 60; renderList(); });
   more.addEventListener('click', () => { limit += 60; renderList(); });

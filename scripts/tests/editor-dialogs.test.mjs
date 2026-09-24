@@ -36,7 +36,7 @@ test('reopening an aborted export ignores its late failure and allows a fresh ex
   element('docExportStartBtn').click();
   calls[1].resolve({ id: 'new', fileName: '角色.zip', bytes: 123, assetCount: 1 });
   await flushDialogs();
-  assert.match(element('docExportDownload').href, /id=new/);
+  assert.match(element('docExportMessage').textContent, /已准备好 角色\.zip/);
   assert.equal(element('docExportDownload').hidden, false);
 });
 

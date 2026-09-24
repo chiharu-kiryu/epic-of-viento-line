@@ -351,8 +351,13 @@ async function handleExport(response, request, requestUrl, service, requestId = 
         response.setHeader('Content-Disposition', `attachment; filename="viento-export.zip"; filename*=UTF-8''${encodeURIComponent(job.fileName)}`);
         response.setHeader('Cache-Control', 'no-store');
         await sendFile(job.file, response, request);
-        return response.writableFinished && (response.statusCode === 200
-          || (response.statusCode === 206 && Number(response.getHeader('Content-Length')) === job.bytes));
+        if (!response.writableFinished) return false;
+        if (response.statusCode === 200) return true;
+        if (response.statusCode !== 206) return false;
+        // Use the actual response bounds: suffix/open ranges and overlong ends
+        // are normalized by sendFile. Only a completed response proves a range.
+        const range = /^bytes (\d+)-(\d+)\/(\d+)$/.exec(response.getHeader('Content-Range') || '');
+        return range ? { start: Number(range[1]), end: Number(range[2]), total: Number(range[3]) } : false;
       });
     } else {
       const payload = await readRequestJsonBody(request);

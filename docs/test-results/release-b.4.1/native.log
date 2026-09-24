@@ -1,0 +1,67 @@
+   Compiling version_check v0.9.5
+   Compiling cfg-if v1.0.4
+   Compiling proc-macro2 v1.0.107
+   Compiling generic-array v0.14.7
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling libc v0.2.189
+   Compiling typenum v1.20.1
+   Compiling unicode-ident v1.0.24
+   Compiling crc32fast v1.5.1
+   Compiling getrandom v0.4.3
+   Compiling zmij v1.0.23
+   Compiling rustix v1.1.4
+   Compiling syn v3.0.5
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling tinyvec_macros v0.1.1
+   Compiling serde v1.0.229
+   Compiling simd-adler32 v0.3.10
+   Compiling serde_json v1.0.151
+   Compiling log v0.4.34
+   Compiling hashbrown v0.17.1
+   Compiling linux-raw-sys v0.12.1
+   Compiling equivalent v1.0.2
+   Compiling zlib-rs v0.6.7
+   Compiling bumpalo v3.20.3
+   Compiling bitflags v2.13.1
+   Compiling memchr v2.8.3
+   Compiling zopfli v0.8.3
+   Compiling indexmap v2.14.2
+   Compiling flate2 v1.1.10
+   Compiling serde_derive v1.0.229
+   Compiling tinyvec v1.13.2
+   Compiling digest v0.10.7
+   Compiling cpufeatures v0.2.17
+   Compiling fastrand v2.5.0
+   Compiling itoa v1.0.18
+   Compiling once_cell v1.21.4
+   Compiling tempfile v3.27.0
+   Compiling sha2 v0.10.9
+   Compiling unicode-normalization v0.1.25
+   Compiling zip v4.6.1
+   Compiling uuid v1.26.0
+   Compiling viento-studio v0.4.1 (/tmp/viento-release-b41-6fn7mijq/src-tauri)
+    Finished `test` profile [unoptimized] target(s) in 9.07s
+     Running unittests src/lib.rs (/tmp/viento-release-b41-6fn7mijq/target/debug/deps/viento_studio-0a7927eace9cc815)
+
+running 14 tests
+test workspace::tests::full_project_migration_roundtrip ... ignored, full-size source and asset migration; set VIENTO_TEST_SOURCE_ROOT
+test workspace::tests::backup_snapshots_detect_replaced_files_even_when_size_and_modified_time_are_preserved ... ok
+test workspace::tests::compatibility_guard_blocks_old_readers_and_never_replaces_a_missing_public_manifest ... ok
+test workspace::tests::imports_legacy_v1_archives_without_changing_identity_or_source_bytes ... ok
+test workspace::tests::wrong_checksum_rolls_back_the_entire_import ... ok
+test workspace::tests::new_workspaces_copy_seed_or_templates_without_sharing_or_overwriting_data ... ok
+test workspace::tests::imports_are_validated_before_committing_and_existing_folders_are_preserved ... ok
+test workspace::tests::v2_archive_carries_metadata_and_external_assets_but_not_local_bindings ... ok
+test workspace::tests::imports_reject_portable_directory_file_and_unicode_collisions_before_restore ... ok
+test workspace::tests::generic_projects_are_empty_and_keep_custom_types_templates_and_media_on_restore ... ok
+test workspace::tests::archive_roundtrip_preserves_sources_binary_assets_and_excludes_cache ... ok
+test workspace::tests::native_exports_reject_paths_that_would_merge_on_another_filesystem ... ok
+test workspace::tests::registered_asset_fingerprints_protect_backup_and_restore_even_when_zip_checksums_match ... ok
+test workspace::tests::missing_registered_sources_and_asset_bindings_cannot_be_reported_as_complete_archives ... ok
+
+test result: ok. 13 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+   Compiling viento-studio v0.4.1 (/tmp/viento-release-b41-6fn7mijq/src-tauri)
+    Finished `dev` profile [unoptimized] target(s) in 0.79s

@@ -1,0 +1,685 @@
+TAP version 13
+# Subtest: capability discovery includes the live project configuration and preview routes
+ok 1 - capability discovery includes the live project configuration and preview routes
+  ---
+  duration_ms: 853.372604
+  ...
+# Subtest: browser module graph is served as JavaScript; server-only modules stay private
+ok 2 - browser module graph is served as JavaScript; server-only modules stay private
+  ---
+  duration_ms: 580.695581
+  ...
+# Subtest: same-version concurrent edits accept one writer, including source-path aliases
+ok 3 - same-version concurrent edits accept one writer, including source-path aliases
+  ---
+  duration_ms: 489.765503
+  ...
+# Subtest: concurrent creation is exclusive and a rejected write does not block subsequent saves
+ok 4 - concurrent creation is exclusive and a rejected write does not block subsequent saves
+  ---
+  duration_ms: 340.358047
+  ...
+# Subtest: preserving the modification time cannot hide an external edit from the save conflict check
+ok 5 - preserving the modification time cannot hide an external edit from the save conflict check
+  ---
+  duration_ms: 332.100973
+  ...
+# Subtest: atomic saves preserve permissions and advance modification times on coarse clocks
+ok 6 - atomic saves preserve permissions and advance modification times on coarse clocks
+  ---
+  duration_ms: 72.247782
+  ...
+# Subtest: static resources do not consume the API rate limit or leak active request counts
+ok 7 - static resources do not consume the API rate limit or leak active request counts
+  ---
+  duration_ms: 299.419675
+  ...
+# Subtest: mutable workspace files revalidate and If-None-Match takes precedence over dates
+ok 8 - mutable workspace files revalidate and If-None-Match takes precedence over dates
+  ---
+  duration_ms: 286.437352
+  ...
+# Subtest: media responses identify their format and support bounded seeking without downloading the whole file
+ok 9 - media responses identify their format and support bounded seeking without downloading the whole file
+  ---
+  duration_ms: 341.10938
+  ...
+# Subtest: local media avoids persistent HTTP copies with internal storage
+ok 10 - local media avoids persistent HTTP copies with internal storage
+  ---
+  duration_ms: 407.129208
+  ...
+# Subtest: local media avoids persistent HTTP copies with external storage
+ok 11 - local media avoids persistent HTTP copies with external storage
+  ---
+  duration_ms: 430.018569
+  ...
+# Subtest: an unreadable asset cannot terminate the editing service
+ok 12 - an unreadable asset cannot terminate the editing service
+  ---
+  duration_ms: 293.387263
+  ...
+# Subtest: reopening an aborted export ignores its late failure and allows a fresh export
+ok 13 - reopening an aborted export ignores its late failure and allows a fresh export
+  ---
+  duration_ms: 97.960813
+  ...
+# Subtest: an aborted export arriving after reopen is released without blocking the new dialog
+ok 14 - an aborted export arriving after reopen is released without blocking the new dialog
+  ---
+  duration_ms: 54.945269
+  ...
+# Subtest: opening export during a save cannot leave a permanently busy snapshot
+ok 15 - opening export during a save cannot leave a permanently busy snapshot
+  ---
+  duration_ms: 32.595787
+  ...
+# Subtest: an expired native export can be regenerated in the same dialog after cancelling its save picker
+ok 16 - an expired native export can be regenerated in the same dialog after cancelling its save picker
+  ---
+  duration_ms: 30.328088
+  ...
+# Subtest: native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+ok 17 - native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+  ---
+  duration_ms: 40.685167
+  ...
+# Subtest: cancelling media import during structured insertion keeps the draft and uploaded assets
+ok 18 - cancelling media import during structured insertion keeps the draft and uploaded assets
+  ---
+  duration_ms: 16.636994
+  ...
+# Subtest: late media preparation cannot overwrite a draft whose content changed
+ok 19 - late media preparation cannot overwrite a draft whose content changed
+  ---
+  duration_ms: 22.079016
+  ...
+# Subtest: existing media still inserts into an unchanged structured draft and releases the editor
+ok 20 - existing media still inserts into an unchanged structured draft and releases the editor
+  ---
+  duration_ms: 43.803267
+  ...
+# Subtest: media preview loads immediately after reading a document without requiring another input event
+ok 21 - media preview loads immediately after reading a document without requiring another input event
+  ---
+  duration_ms: 119.531825
+  ...
+# Subtest: media preview stops when switching to browse: existing document
+ok 22 - media preview stops when switching to browse: existing document
+  ---
+  duration_ms: 47.971175
+  ...
+# Subtest: media preview stops when switching to browse: first unsaved document
+ok 23 - media preview stops when switching to browse: first unsaved document
+  ---
+  duration_ms: 53.187138
+  ...
+# Subtest: media preview clears the previous template immediately while a different type is loading
+ok 24 - media preview clears the previous template immediately while a different type is loading
+  ---
+  duration_ms: 57.230778
+  ...
+# Subtest: media preview clears when types share a source path and ignores the old pending response
+ok 25 - media preview clears when types share a source path and ignores the old pending response
+  ---
+  duration_ms: 44.297455
+  ...
+# Subtest: media preview and a first dirty draft survive a cancelled mode switch, then close together after confirmation
+ok 26 - media preview and a first dirty draft survive a cancelled mode switch, then close together after confirmation
+  ---
+  duration_ms: 50.092247
+  ...
+# Subtest: media preview keeps unchanged playback through source/block switches and saving without altering source bytes
+ok 27 - media preview keeps unchanged playback through source/block switches and saving without altering source bytes
+  ---
+  duration_ms: 52.630786
+  ...
+# Subtest: media preview discards a late result after removing media or leaving and reopening the editor
+ok 28 - media preview discards a late result after removing media or leaving and reopening the editor
+  ---
+  duration_ms: 83.978831
+  ...
+# Subtest: template loading: changing a new draft extension refreshes media parsing and ignores the previous path response
+ok 29 - template loading: changing a new draft extension refreshes media parsing and ignores the previous path response
+  ---
+  duration_ms: 50.22004
+  ...
+# Subtest: type settings distinguish creation from editing and retain a rejected new draft for retry or cancel
+ok 30 - type settings distinguish creation from editing and retain a rejected new draft for retry or cancel
+  ---
+  duration_ms: 67.407126
+  ...
+# Subtest: template preview and save retain original BOM and line endings when only its label changes
+ok 31 - template preview and save retain original BOM and line endings when only its label changes
+  ---
+  duration_ms: 41.647277
+  ...
+# Subtest: returning from saved project settings keeps editing locked until the new index applies
+ok 32 - returning from saved project settings keeps editing locked until the new index applies
+  ---
+  duration_ms: 34.374672
+  ...
+# Subtest: discarding edits after a template save cannot leave a closed dialog marked dirty
+ok 33 - discarding edits after a template save cannot leave a closed dialog marked dirty
+  ---
+  duration_ms: 38.581755
+  ...
+# Subtest: a failed project index application keeps the settings available for retry without another save
+ok 34 - a failed project index application keeps the settings available for retry without another save
+  ---
+  duration_ms: 50.245003
+  ...
+# Subtest: a late saved result from a disconnected save attempt cannot settle its retry
+ok 35 - a late saved result from a disconnected save attempt cannot settle its retry
+  ---
+  duration_ms: 50.340158
+  ...
+# Subtest: a late cancelled result from a disconnected save attempt cannot settle its retry
+ok 36 - a late cancelled result from a disconnected save attempt cannot settle its retry
+  ---
+  duration_ms: 31.809321
+  ...
+# Subtest: a late failed result from a disconnected save attempt cannot settle its retry
+ok 37 - a late failed result from a disconnected save attempt cannot settle its retry
+  ---
+  duration_ms: 22.208794
+  ...
+# Subtest: native export results require both the current request and package identities
+ok 38 - native export results require both the current request and package identities
+  ---
+  duration_ms: 14.959946
+  ...
+# Subtest: a matching native result can arrive before its HTTP acknowledgement and settle only once
+ok 39 - a matching native result can arrive before its HTTP acknowledgement and settle only once
+  ---
+  duration_ms: 32.116631
+  ...
+# Subtest: authenticated native export handoffs forward a separate request identity while retaining the same ZIP
+ok 40 - authenticated native export handoffs forward a separate request identity while retaining the same ZIP
+  ---
+  duration_ms: 305.269345
+  ...
+# Subtest: native export handoffs reject missing or invalid request identities without opening a picker
+ok 41 - native export handoffs reject missing or invalid request identities without opening a picker
+  ---
+  duration_ms: 275.956538
+  ...
+# Subtest: late export cancellation removes the completed document ZIP and leaves all three job slots available
+ok 42 - late export cancellation removes the completed document ZIP and leaves all three job slots available
+  ---
+  duration_ms: 1185.04212
+  ...
+# Subtest: late export cancellation removes the completed workspace ZIP and leaves all three job slots available
+ok 43 - late export cancellation removes the completed workspace ZIP and leaves all three job slots available
+  ---
+  duration_ms: 606.592655
+  ...
+# Subtest: disconnecting HTTP after ZIP completion cancels publication and permits a fresh download and release
+ok 44 - disconnecting HTTP after ZIP completion cancels publication and permits a fresh download and release
+  ---
+  duration_ms: 610.786729
+  ...
+# Subtest: HTTP release can retry a failed removal without reviving the download or leaking its ZIP
+ok 45 - HTTP release can retry a failed removal without reviving the download or leaking its ZIP
+  ---
+  duration_ms: 1002.538394
+  ...
+# Subtest: concurrent releases wait for the same removal and both report its failure before a successful retry
+ok 46 - concurrent releases wait for the same removal and both report its failure before a successful retry
+  ---
+  duration_ms: 499.839961
+  ...
+# Subtest: expired exports automatically retry transient cleanup failures without another user request
+ok 47 - expired exports automatically retry transient cleanup failures without another user request
+  ---
+  duration_ms: 588.201526
+  ...
+# Subtest: two active downloads retain exact ZIP bytes until both finish and cleanup failure cannot fail the completed download
+ok 48 - two active downloads retain exact ZIP bytes until both finish and cleanup failure cannot fail the completed download
+  ---
+  duration_ms: 543.080812
+  ...
+# Subtest: an interrupted download keeps its original failure when releasing the last reader also fails
+ok 49 - an interrupted download keeps its original failure when releasing the last reader also fails
+  ---
+  duration_ms: 367.412214
+  ...
+# Subtest: cancelled document generation preserves cancellation and retries failed staging cleanup
+ok 50 - cancelled document generation preserves cancellation and retries failed staging cleanup
+  ---
+  duration_ms: 383.933223
+  ...
+# Subtest: cancelled workspace generation preserves cancellation and retries failed staging cleanup
+ok 51 - cancelled workspace generation preserves cancellation and retries failed staging cleanup
+  ---
+  duration_ms: 386.469787
+  ...
+# Subtest: generation I/O failure survives a cleanup failure and the next successful export starts cleanly
+ok 52 - generation I/O failure survives a cleanup failure and the next successful export starts cleanly
+  ---
+  duration_ms: 379.515797
+  ...
+# Subtest: failed quota eviction retains the pending cleanup and protects all unfinished exports until recovery
+ok 53 - failed quota eviction retains the pending cleanup and protects all unfinished exports until recovery
+  ---
+  duration_ms: 405.760169
+  ...
+# Subtest: three segmented document downloads release capacity for a fourth complete export
+ok 54 - three segmented document downloads release capacity for a fourth complete export
+  ---
+  duration_ms: 831.928651
+  ...
+# Subtest: three segmented workspace downloads release capacity for a fourth complete export
+ok 55 - three segmented workspace downloads release capacity for a fourth complete export
+  ---
+  duration_ms: 825.628097
+  ...
+# Subtest: overlapping repeated and out-of-order ranges only free a slot after the final gap is filled
+ok 56 - overlapping repeated and out-of-order ranges only free a slot after the final gap is filled
+  ---
+  duration_ms: 675.397
+  ...
+# Subtest: suffix and clamped ranges use their actual returned bounds when completing a download
+ok 57 - suffix and clamped ranges use their actual returned bounds when completing a download
+  ---
+  duration_ms: 563.768942
+  ...
+# Subtest: partial, not-modified, unsatisfiable and HEAD responses do not claim a complete download
+ok 58 - partial, not-modified, unsatisfiable and HEAD responses do not claim a complete download
+  ---
+  duration_ms: 545.817687
+  ...
+# Subtest: completed ranges belong to one export and cannot fill gaps in another export
+ok 59 - completed ranges belong to one export and cannot fill gaps in another export
+  ---
+  duration_ms: 559.333748
+  ...
+# Subtest: an interrupted HTTP range does not cover its missing bytes and remains retryable
+ok 60 - an interrupted HTTP range does not cover its missing bytes and remains retryable
+  ---
+  duration_ms: 571.695228
+  ...
+# Subtest: concurrent ranges can finish out of order while active readers remain protected from eviction
+ok 61 - concurrent ranges can finish out of order while active readers remain protected from eviction
+  ---
+  duration_ms: 486.546471
+  ...
+# Subtest: document preparation cancellation stops the remaining registry-tree work
+ok 62 - document preparation cancellation stops the remaining registry-tree work
+  ---
+  duration_ms: 814.267172
+  ...
+# Subtest: document preparation cancellation stops the remaining registry-read work
+ok 63 - document preparation cancellation stops the remaining registry-read work
+  ---
+  duration_ms: 537.799033
+  ...
+# Subtest: document final snapshot cancellation stops after the current file stat
+ok 64 - document final snapshot cancellation stops after the current file stat
+  ---
+  duration_ms: 431.06436
+  ...
+# Subtest: document output failure cancels its final registry scan without an external abort
+ok 65 - document output failure cancels its final registry scan without an external abort
+  ---
+  duration_ms: 412.948871
+  ...
+# Subtest: workspace preparation cancellation stops the remaining registry-tree work
+ok 66 - workspace preparation cancellation stops the remaining registry-tree work
+  ---
+  duration_ms: 380.098019
+  ...
+# Subtest: workspace preparation cancellation stops the remaining registry-read work
+ok 67 - workspace preparation cancellation stops the remaining registry-read work
+  ---
+  duration_ms: 364.723532
+  ...
+# Subtest: workspace final snapshot cancellation stops after the current file stat
+ok 68 - workspace final snapshot cancellation stops after the current file stat
+  ---
+  duration_ms: 367.698555
+  ...
+# Subtest: workspace output failure cancels its final registry scan without an external abort
+ok 69 - workspace output failure cancels its final registry scan without an external abort
+  ---
+  duration_ms: 401.773514
+  ...
+# Subtest: cancelled source preparation preserves cancellation for valid returned bytes
+ok 70 - cancelled source preparation preserves cancellation for valid returned bytes
+  ---
+  duration_ms: 350.618047
+  ...
+# Subtest: cancelled source preparation preserves cancellation for malformed returned bytes
+ok 71 - cancelled source preparation preserves cancellation for malformed returned bytes
+  ---
+  duration_ms: 340.04578
+  ...
+# Subtest: workspace cancellation stops recursive asset enumeration before scanning more folders
+ok 72 - workspace cancellation stops recursive asset enumeration before scanning more folders
+  ---
+  duration_ms: 358.707172
+  ...
+# Subtest: already cancelled planning performs no metadata reads
+ok 73 - already cancelled planning performs no metadata reads
+  ---
+  duration_ms: 303.232892
+  ...
+# Subtest: an already cancelled creation preserves all three existing completed jobs
+ok 74 - an already cancelled creation preserves all three existing completed jobs
+  ---
+  duration_ms: 362.926442
+  ...
+# Subtest: uncancelled malformed metadata is still rejected and can be repaired for export
+ok 75 - uncancelled malformed metadata is still rejected and can be repaired for export
+  ---
+  duration_ms: 270.06773
+  ...
+# Subtest: uncancelled malformed source is still rejected and can be repaired for export
+ok 76 - uncancelled malformed source is still rejected and can be repaired for export
+  ---
+  duration_ms: 268.99284
+  ...
+# Subtest: HTTP disconnect during registry preparation stops scanning and permits a complete retry download
+ok 77 - HTTP disconnect during registry preparation stops scanning and permits a complete retry download
+  ---
+  duration_ms: 427.164952
+  ...
+# Subtest: v2 export rejects a newly appearing assets and retries with its exact bytes
+ok 78 - v2 export rejects a newly appearing assets and retries with its exact bytes
+  ---
+  duration_ms: 132.252758
+  ...
+# Subtest: v2 export rejects a newly appearing templates and retries with its exact bytes
+ok 79 - v2 export rejects a newly appearing templates and retries with its exact bytes
+  ---
+  duration_ms: 47.921593
+  ...
+# Subtest: v2 export rejects a newly appearing metadata and retries with its exact bytes
+ok 80 - v2 export rejects a newly appearing metadata and retries with its exact bytes
+  ---
+  duration_ms: 109.903084
+  ...
+# Subtest: v2 export rejects a newly appearing guard and retries with its exact bytes
+ok 81 - v2 export rejects a newly appearing guard and retries with its exact bytes
+  ---
+  duration_ms: 26.420945
+  ...
+# Subtest: v2 export rejects a newly appearing public manifest and retries with its exact bytes
+ok 82 - v2 export rejects a newly appearing public manifest and retries with its exact bytes
+  ---
+  duration_ms: 27.408729
+  ...
+# Subtest: v2 export still accepts unchanged missing optional directories and guards
+ok 83 - v2 export still accepts unchanged missing optional directories and guards
+  ---
+  duration_ms: 12.395763
+  ...
+# Subtest: v3 export rejects a newly appearing assets and retries with its exact bytes
+ok 84 - v3 export rejects a newly appearing assets and retries with its exact bytes
+  ---
+  duration_ms: 24.558688
+  ...
+# Subtest: v3 export rejects a newly appearing templates and retries with its exact bytes
+ok 85 - v3 export rejects a newly appearing templates and retries with its exact bytes
+  ---
+  duration_ms: 34.695919
+  ...
+# Subtest: v3 export rejects a newly appearing metadata and retries with its exact bytes
+ok 86 - v3 export rejects a newly appearing metadata and retries with its exact bytes
+  ---
+  duration_ms: 45.173331
+  ...
+# Subtest: v3 export rejects a newly appearing guard and retries with its exact bytes
+ok 87 - v3 export rejects a newly appearing guard and retries with its exact bytes
+  ---
+  duration_ms: 22.979763
+  ...
+# Subtest: v3 export rejects a newly appearing public manifest and retries with its exact bytes
+ok 88 - v3 export rejects a newly appearing public manifest and retries with its exact bytes
+  ---
+  duration_ms: 30.303896
+  ...
+# Subtest: v3 export still accepts unchanged missing optional directories and guards
+ok 89 - v3 export still accepts unchanged missing optional directories and guards
+  ---
+  duration_ms: 10.644522
+  ...
+# Subtest: legacy export can synthesize a manifest without writing one into the project
+ok 90 - legacy export can synthesize a manifest without writing one into the project
+  ---
+  duration_ms: 7.568381
+  ...
+# Subtest: document sharing ignores unrelated new directories and preserves the selected source
+ok 91 - document sharing ignores unrelated new directories and preserves the selected source
+  ---
+  duration_ms: 20.484576
+  ...
+# Subtest: workspace snapshots exclude ordinary cache activity and non-project root files
+ok 92 - workspace snapshots exclude ordinary cache activity and non-project root files
+  ---
+  duration_ms: 13.915037
+  ...
+# Subtest: new files inside an already existing empty asset folder remain protected
+ok 93 - new files inside an already existing empty asset folder remain protected
+  ---
+  duration_ms: 28.89687
+  ...
+# Subtest: a dangling link replacing an absent asset root is detected without following it
+ok 94 - a dangling link replacing an absent asset root is detected without following it
+  ---
+  duration_ms: 15.171201
+  ...
+# Subtest: HTTP export rejects late first media import, cleans its staging job and downloads a complete retry
+ok 95 - HTTP export rejects late first media import, cleans its staging job and downloads a complete retry
+  ---
+  duration_ms: 634.643038
+  ...
+# Subtest: document cancellation during resolve waits for cleanup and cannot start a late reader
+ok 96 - document cancellation during resolve waits for cleanup and cannot start a late reader
+  ---
+  duration_ms: 1088.804547
+  ...
+# Subtest: document cancellation during open waits for cleanup and cannot start a late reader
+ok 97 - document cancellation during open waits for cleanup and cannot start a late reader
+  ---
+  duration_ms: 556.87752
+  ...
+# Subtest: document cancellation during stat waits for cleanup and cannot start a late reader
+ok 98 - document cancellation during stat waits for cleanup and cannot start a late reader
+  ---
+  duration_ms: 468.300628
+  ...
+# Subtest: document cancellation during an active read waits for its descriptor to close
+ok 99 - document cancellation during an active read waits for its descriptor to close
+  ---
+  duration_ms: 478.927269
+  ...
+# Subtest: document success waits for an earlier input close before exposing the job
+ok 100 - document success waits for an earlier input close before exposing the job
+  ---
+  duration_ms: 426.431591
+  ...
+# Subtest: workspace cancellation during resolve waits for cleanup and cannot start a late reader
+ok 101 - workspace cancellation during resolve waits for cleanup and cannot start a late reader
+  ---
+  duration_ms: 441.213503
+  ...
+# Subtest: workspace cancellation during open waits for cleanup and cannot start a late reader
+ok 102 - workspace cancellation during open waits for cleanup and cannot start a late reader
+  ---
+  duration_ms: 442.021593
+  ...
+# Subtest: workspace cancellation during stat waits for cleanup and cannot start a late reader
+ok 103 - workspace cancellation during stat waits for cleanup and cannot start a late reader
+  ---
+  duration_ms: 438.580996
+  ...
+# Subtest: workspace cancellation during an active read waits for its descriptor to close
+ok 104 - workspace cancellation during an active read waits for its descriptor to close
+  ---
+  duration_ms: 419.977001
+  ...
+# Subtest: workspace success waits for an earlier input close before exposing the job
+ok 105 - workspace success waits for an earlier input close before exposing the job
+  ---
+  duration_ms: 384.605205
+  ...
+# Subtest: ZIP output failure during resolve stops pending inputs and preserves the original error
+ok 106 - ZIP output failure during resolve stops pending inputs and preserves the original error
+  ---
+  duration_ms: 355.922086
+  ...
+# Subtest: ZIP output failure during open stops pending inputs and preserves the original error
+ok 107 - ZIP output failure during open stops pending inputs and preserves the original error
+  ---
+  duration_ms: 348.073721
+  ...
+# Subtest: ZIP output failure during stat stops pending inputs and preserves the original error
+ok 108 - ZIP output failure during stat stops pending inputs and preserves the original error
+  ---
+  duration_ms: 338.857808
+  ...
+# Subtest: a source stat error still waits for close and leaves a complete export retry available
+ok 109 - a source stat error still waits for close and leaves a complete export retry available
+  ---
+  duration_ms: 341.703298
+  ...
+# Subtest: document exports include owned stories, exact sources and referenced external media in both formats
+ok 110 - document exports include owned stories, exact sources and referenced external media in both formats
+  ---
+  duration_ms: 460.158519
+  ...
+# Subtest: JSON and YAML typed fields export using the generic layout and media bindings
+ok 111 - JSON and YAML typed fields export using the generic layout and media bindings
+  ---
+  duration_ms: 222.955071
+  ...
+# Subtest: explicit audio bindings export a player even when the source does not embed the audio
+ok 112 - explicit audio bindings export a player even when the source does not embed the audio
+  ---
+  duration_ms: 202.231465
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the md reference index
+ok 113 - sharing carries declared asset IDs recognized by the md reference index
+  ---
+  duration_ms: 740.28014
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the txt reference index
+ok 114 - sharing carries declared asset IDs recognized by the txt reference index
+  ---
+  duration_ms: 636.234969
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the json reference index
+ok 115 - sharing carries declared asset IDs recognized by the json reference index
+  ---
+  duration_ms: 534.203219
+  ...
+# Subtest: sharing carries declared asset IDs recognized by the yaml reference index
+ok 116 - sharing carries declared asset IDs recognized by the yaml reference index
+  ---
+  duration_ms: 528.821533
+  ...
+# Subtest: multiple attachment roles share one player per document while keeping each owned story complete
+ok 117 - multiple attachment roles share one player per document while keeping each owned story complete
+  ---
+  duration_ms: 86.858659
+  ...
+# Subtest: declared missing assets reject sharing, then retry succeeds after the reference is repaired
+ok 118 - declared missing assets reject sharing, then retry succeeds after the reference is repaired
+  ---
+  duration_ms: 96.061404
+  ...
+# Subtest: sharing retains indexed legacy image paths, relative links and unregistered local images
+ok 119 - sharing retains indexed legacy image paths, relative links and unregistered local images
+  ---
+  duration_ms: 543.099309
+  ...
+# Subtest: v2 relative image references resolve against the original document directory
+ok 120 - v2 relative image references resolve against the original document directory
+  ---
+  duration_ms: 513.914238
+  ...
+# Subtest: v3 relative image references resolve against the original document directory
+ok 121 - v3 relative image references resolve against the original document directory
+  ---
+  duration_ms: 427.309454
+  ...
+# Subtest: sharing preserves distinct percent and space filenames, registered identities and renamed aliases
+ok 122 - sharing preserves distinct percent and space filenames, registered identities and renamed aliases
+  ---
+  duration_ms: 109.72486
+  ...
+# Subtest: owned stories retain nested heading levels in HTML and Markdown shares
+ok 123 - owned stories retain nested heading levels in HTML and Markdown shares
+  ---
+  duration_ms: 63.543708
+  ...
+# Subtest: v2 complete project packages preserve migration contract, metadata and all external media
+ok 124 - v2 complete project packages preserve migration contract, metadata and all external media
+  ---
+  duration_ms: 92.257904
+  ...
+# Subtest: v3 complete project packages preserve migration contract, metadata and all external media
+ok 125 - v3 complete project packages preserve migration contract, metadata and all external media
+  ---
+  duration_ms: 76.746904
+  ...
+# Subtest: missing assets, traversal, symlinks and changed source snapshots cannot produce a successful export
+ok 126 - missing assets, traversal, symlinks and changed source snapshots cannot produce a successful export
+  ---
+  duration_ms: 83.14927
+  ...
+# Subtest: complete exports reject directory aliases and file-directory conflicts without changing project bytes
+ok 127 - complete exports reject directory aliases and file-directory conflicts without changing project bytes
+  ---
+  duration_ms: 157.143127
+  ...
+# Subtest: editor and native v2/v3 archives round-trip with exact sources, metadata and external media
+ok 128 - editor and native v2/v3 archives round-trip with exact sources, metadata and external media # SKIP
+  ---
+  duration_ms: 0.102051
+  ...
+# Subtest: HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup
+ok 129 - HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup
+  ---
+  duration_ms: 844.545173
+  ...
+# Subtest: consecutive browser exports recycle completed downloads instead of exhausting the three-job limit
+ok 130 - consecutive browser exports recycle completed downloads instead of exhausting the three-job limit
+  ---
+  duration_ms: 360.791501
+  ...
+# Subtest: releasing or expiring an export cannot remove a file being downloaded
+ok 131 - releasing or expiring an export cannot remove a file being downloaded
+  ---
+  duration_ms: 158.802024
+  ...
+# Subtest: export range requests keep their real status in diagnostics and remain retryable
+ok 132 - export range requests keep their real status in diagnostics and remain retryable
+  ---
+  duration_ms: 280.407566
+  ...
+# Subtest: pending and interrupted exports remain protected from automatic quota eviction
+ok 133 - pending and interrupted exports remain protected from automatic quota eviction
+  ---
+  duration_ms: 110.837832
+  ...
+# Subtest: export entry blocks unsaved and new drafts without changing editor state
+ok 134 - export entry blocks unsaved and new drafts without changing editor state
+  ---
+  duration_ms: 2.102288
+  ...
+# Subtest: expired and interrupted jobs release temporary disk space while retaining source files
+ok 135 - expired and interrupted jobs release temporary disk space while retaining source files
+  ---
+  duration_ms: 174.074812
+  ...
+1..135
+# tests 135
+# suites 0
+# pass 134
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 7855.124192

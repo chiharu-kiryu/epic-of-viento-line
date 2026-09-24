@@ -1,0 +1,111 @@
+{
+  "date": "2026-09-24",
+  "version": "b.4.0",
+  "gitBase": "c27f8c9e790fd6fd1313f329c0c40edb640eb6b6",
+  "scope": "Preserve the explicit media drop target and prevent a queued close from clearing a reopened media dialog target and list request",
+  "workflows": [
+    "F28",
+    "F29"
+  ],
+  "bugs": [
+    "N109",
+    "N110"
+  ],
+  "retainedBugs": [
+    "N107",
+    "N108"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 9,
+    "passed": 4,
+    "failed": 5,
+    "skipped": 0,
+    "log": "before.log",
+    "files": {
+      "web/modules/app-media-editor.js": "fa03582cc8b56c3ab161acbf28e9cca15da5110e8742f7647fdad39a3cb5fcb2"
+    },
+    "testFileSha256": "015a0e0d117d0505e5d3250bbb15560a4316bc31ba158bb406d00eb683c0dfb9",
+    "sourceState": "Final nine cases executed on the unchanged preceding media controller before applying the production fix. The preceding controller hash matches release HEAD and revision 53."
+  },
+  "fixtureSetup": {
+    "log": "fixture-initial.log",
+    "tests": 8,
+    "passed": 0,
+    "failed": 8,
+    "reason": "The first fixture omitted the generic project documents path and used the wrong HTTP adapter parameter shape, so no valid edit session started.",
+    "resolution": "Set workspace paths, adapt pathValue and assert successful edit entry. Reran final tests before changing production code."
+  },
+  "discovery": {
+    "log": "discovery.log",
+    "tests": 8,
+    "passed": 4,
+    "failed": 4,
+    "note": "Confirmed wrong-block writes and additionally exposed queued close during paste-then-reopen; a ninth dedicated delayed-list regression was added before the final pre-fix run."
+  },
+  "newCases": {
+    "runtime": "Node v18.19.1",
+    "tests": 9,
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after-new.log"
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 97,
+    "passed": 97,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after.log",
+    "newCases": 9
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 471,
+    "passed": 469,
+    "failed": 0,
+    "skipped": 2,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 138,
+    "apiContractPassed": true,
+    "versionValidationPassed": true,
+    "nativeArchiveBinaryConfigured": false,
+    "skipReason": "Native archive interoperability and registry agreement require VIENTO_TEST_ARCHIVE_BINARY; prior b.4.0 native evidence retained."
+  },
+  "commands": {
+    "before": "/usr/bin/node --test scripts/tests/media-drop.test.mjs",
+    "after": "/usr/bin/node --test scripts/tests/media-drop.test.mjs scripts/tests/media.test.mjs scripts/tests/editor-dialogs.test.mjs scripts/tests/editor-runtime.test.mjs scripts/tests/editor-draft.test.mjs",
+    "application": "env -u VIENTO_TEST_ARCHIVE_BINARY /home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node scripts/check-project.mjs --app-only"
+  },
+  "files": {
+    "scripts/tests/dialog-harness.mjs": "b7fc854c98c0572410b6de1ba01ff2b79e2c9d81091e478fcc15c056ad3a287a",
+    "scripts/tests/media-drop.test.mjs": "015a0e0d117d0505e5d3250bbb15560a4316bc31ba158bb406d00eb683c0dfb9",
+    "web/modules/app-media-editor.js": "1bf880a611bd105ab626684a252d4bc1e78d6c6a235759375213f8a75dd2b991"
+  },
+  "testEnvironment": "Real editor and media controllers joined in the event-capable DOM fixture; controlled focus/drop/cancel/close event timing. HTTP adapter uploads actual synthetic image/audio/video bytes to a temporary server, then the actual editor saves and reopens. Rebuild/registry/asset bytes checked independently.",
+  "limitations": [
+    "The drop uses the target textarea selection; mouse-coordinate caret placement is not implemented.",
+    "DOM events and focus are simulated; native browser drag-and-drop, file pickers and XHR upload progress were not exercised.",
+    "The synthetic MP4 verifies import/reference/byte retention, not codec playback. Native windows, Rust and media decoding were not rerun."
+  ],
+  "nativeArchiveModuleTestsRerun": false,
+  "fullTauriLibraryTestsRerun": false,
+  "nativeWindowTested": false,
+  "nativePlaybackTested": false,
+  "browserNativeDropTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "cleanup": {
+    "temporaryProjects": "Existing test fixture teardown hooks completed; no persistent test workspace, service or media output created."
+  },
+  "functionNetwork": {
+    "revision": 54,
+    "sourceFingerprints": 164,
+    "nodeSources": 181,
+    "localImportStatements": 458,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

@@ -1,0 +1,55 @@
+TAP version 13
+# Subtest: dropping on a block uses that block while focus remains on another block
+ok 1 - dropping on a block uses that block while focus remains on another block
+  ---
+  duration_ms: 54.520008
+  ...
+# Subtest: dropping on a block uses that block while focus remains on the drop target
+ok 2 - dropping on a block uses that block while focus remains on the drop target
+  ---
+  duration_ms: 29.402009
+  ...
+# Subtest: dropping on a block uses that block while focus remains on toolbar
+ok 3 - dropping on a block uses that block while focus remains on toolbar
+  ---
+  duration_ms: 27.665539
+  ...
+# Subtest: pasting into the active block and choosing existing media still respect the captured selection
+ok 4 - pasting into the active block and choosing existing media still respect the captured selection
+  ---
+  duration_ms: 29.934634
+  ...
+# Subtest: a queued close cannot clear the target or pending list of a reopened media dialog
+ok 5 - a queued close cannot clear the target or pending list of a reopened media dialog
+  ---
+  duration_ms: 30.466827
+  ...
+# Subtest: dropping outside an input uses the active editor and source mode preserves its selection
+ok 6 - dropping outside an input uses the active editor and source mode preserves its selection
+  ---
+  duration_ms: 21.596146
+  ...
+# Subtest: cancelled and late uploads leave both the focused block and drop target intact
+ok 7 - cancelled and late uploads leave both the focused block and drop target intact
+  ---
+  duration_ms: 25.247379
+  ...
+# Subtest: a late upload cannot insert into a changed document or a replaced block
+ok 8 - a late upload cannot insert into a changed document or a replaced block
+  ---
+  duration_ms: 25.039258
+  ...
+# Subtest: dropped image, audio and video survive actual HTTP import, save, reopen and reference indexing in the target block
+ok 9 - dropped image, audio and video survive actual HTTP import, save, reopen and reference indexing in the target block
+  ---
+  duration_ms: 674.335658
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1060.243923

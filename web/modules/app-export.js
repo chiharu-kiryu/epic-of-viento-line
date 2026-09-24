@@ -1,6 +1,6 @@
 import { t, onLanguageChange, translateMessage } from '../i18n/index.js';
 import { API_PATHS } from '../../scripts/lib/doc-api-contract.mjs';
-import { requestExport, releaseExport } from './app-doc-service.js';
+import { requestExport, checkExport, releaseExport } from './app-doc-service.js';
 
 export function exportAvailability(context, kind) {
   if (context.busy) return t('正在保存或更新内容，请完成后再导出。');
@@ -23,7 +23,7 @@ export function setupExport({ getContext, setBusy }) {
   const kind = () => options.querySelector('input[name="exportKind"]:checked').value;
   const discard = () => {
     if (job && !downloadStarted) void releaseExport(job.id).catch(() => {});
-    job = null; download.hidden = true; download.removeAttribute('href'); save.hidden = true; downloadStarted = false;
+    job = null; download.hidden = true; save.hidden = true; downloadStarted = false;
   };
   function refresh() {
     byId('docExportDocumentOptions').hidden = kind() !== 'document';
@@ -33,6 +33,7 @@ export function setupExport({ getContext, setBusy }) {
       : t('原始正文与引用素材一并打包。解压后即可阅读；音视频保留原始格式。'));
     start.disabled = !!controller || nativePending || !!reason || !!job;
     options.disabled = !!controller || nativePending;
+    download.disabled = !!controller || nativePending || !job;
     cancel.hidden = !controller || nativePending;
     close.disabled = nativePending;
   }
@@ -88,6 +89,29 @@ export function setupExport({ getContext, setBusy }) {
     }
     finally { nativePending = false; setBusy(false); save.disabled = false; refresh(); }
   }
+  async function saveBrowser() {
+    if (!job || controller || nativePending) return;
+    const prepared = job, requestSession = session;
+    const requestController = new AbortController(); controller = requestController;
+    setBusy(true); refresh(); message.textContent = t('正在检查导出文件…');
+    try {
+      await checkExport(prepared.id, requestController.signal);
+      if (requestSession !== session || job !== prepared || !dialog.open) return;
+      requestController.signal.throwIfAborted();
+      const link = document.createElement('a');
+      link.href = `${API_PATHS.EXPORT}?id=${encodeURIComponent(prepared.id)}`;
+      link.download = prepared.fileName; link.hidden = true; dialog.append(link);
+      try { link.click(); } finally { link.remove(); }
+      downloadStarted = true;
+      message.textContent = t('下载已交给浏览器。请先解压整个文件，再打开正文。');
+    } catch (error) {
+      if (requestSession !== session || job !== prepared || !dialog.open) return;
+      if (requestController.signal.aborted) message.textContent = t('已取消下载，可以重试。');
+      else if (error.status === 410) {
+        discard(); message.textContent = t('导出文件已过期，请重新导出');
+      } else message.textContent = t`下载失败：${error.message}`;
+    } finally { controller = null; setBusy(false); refresh(); }
+  }
   byId('docExportBtn')?.addEventListener('click', () => {
     if (nativePending) return;
     const current = getContext();
@@ -106,7 +130,7 @@ export function setupExport({ getContext, setBusy }) {
   close.addEventListener('click', closeDialog);
   dialog.addEventListener('cancel', (event) => { event.preventDefault(); closeDialog(); });
   cancel.addEventListener('click', () => controller?.abort());
-  download.addEventListener('click', () => { downloadStarted = true; message.textContent = t('下载已交给浏览器。请先解压整个文件，再打开正文。'); });
+  download.addEventListener('click', () => { void saveBrowser(); });
   save.addEventListener('click', () => { void saveNative(); });
   start.addEventListener('click', async () => {
     if (controller || nativePending || job || exportAvailability(getContext(), kind())) return;
@@ -121,7 +145,7 @@ export function setupExport({ getContext, setBusy }) {
       job = prepared;
       message.textContent = t`已准备好 ${job.fileName}（${(job.bytes / 1024 ** 2).toFixed(1)} MB，${job.assetCount} 个素材）。`;
       if (native) save.hidden = false;
-      else { download.href = `${API_PATHS.EXPORT}?id=${encodeURIComponent(job.id)}`; download.download = job.fileName; download.hidden = false; }
+      else download.hidden = false;
     } catch (error) {
       if (requestSession === session && dialog.open) message.textContent = requestController.signal.aborted ? t('已取消导出，原始内容保留。') : t`导出失败：${error.message}`;
     } finally { controller = null; setBusy(false); refresh(); }

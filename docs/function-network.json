@@ -2,23 +2,23 @@
   "metadata": {
     "schemaVersion": "viento-function-network-v1",
     "title": "Viento Studio 功能链路网络",
-    "version": "b.4.0",
+    "version": "b.4.1",
     "date": "2026-09-24",
     "gitBase": "51d522cb919c20b15815b129bd62e859af9a97a0",
-    "sourceState": "b.4.0 发布快照：整合 N104–N106 导出快照、读取关闭、准备与最终复查取消修复，以及本地素材 no-store 策略；版本与界面已同步，安装程序未更新",
+    "sourceState": "b.4.1 发布内容：收录 N107–N110 分段下载完成与名额回收、浏览器下载过期和取消重试、素材拖放目标保护及窗口重开修复；版本与界面同步；未构建或替换安装包",
     "method": "人工核对业务入口与关键调用；使用本机 Acorn 解析 ES 模块声明、静态字面量动态导入、显式事件绑定和路由表",
     "runtimeTrace": false,
     "verification": {
-      "sourceFingerprints": "161 selected source files and all 121 vendored glib files matched the release worktree",
-      "references": "181 node source references, desktop bridge/native command locations, module imports and document links checked",
+      "sourceFingerprints": "164 selected code files matched the preceding repaired worktree; 10 version and release-document files recorded separately; native sources and vendored glib unchanged",
+      "references": "181 node source references, imports and document links checked; business routes and native commands unchanged",
       "graphIntegrity": "workflow edges and module SCCs recomputed",
       "pageScript": "JavaScript syntax checked; embedded snapshot matches JSON",
       "browserPreview": "not executed: in-app browser URL policy rejected local HTML navigation",
-      "applicationRegression": "b.4.0 release, Node v24.19.0 with VIENTO_TEST_ARCHIVE_BINARY: app-only 490 tests, 490 passed, 0 failed, 0 skipped; version, 135 JavaScript syntax checks and API contract passed",
-      "nativeRegression": "b.4.0 release: rebuilt production workspace.rs, project-defaults.json and the unchanged official archive CLI; all 61 dependency versions/checksums match the project lockfile. Archive module tests: 13 passed, 0 failed, 1 real large-workspace test ignored. Prior actual Tauri library evidence remains 22 passed, 1 ignored, with matching source hashes. Initial temporary build omitted project defaults; the original relative layout was restored and the build passed without production Rust changes.",
-      "nativeWindowInteraction": "No native window or media decoding checks for this release. Actual HTTP/media range/ZIP/native archive operations use synthetic projects. Prior actual Tauri library tests retained with matching sources. Installed application and daily works unchanged.",
-      "applicationTestsPassed": 490,
-      "archiveInterop": "b.4.0 release: freshly compiled production archive binary passed v2/v3 Node/Rust round trips and native registry agreement checks, including byte-exact source, metadata, assets and templates and exclusion of caches/local bindings.",
+      "applicationRegression": "b.4.1 release, Node v24.19.0 with VIENTO_TEST_ARCHIVE_BINARY: app-only 519 tests passed, zero failures or skips; version, 138 JavaScript syntax checks and API contract passed",
+      "nativeRegression": "Recompiled production archive module and official CLI separately from the Tauri host: 13 tests passed, 0 failed, 1 real-workspace test ignored; 61 dependency versions/checksums matched the project lock. Prior full Tauri library result of 22 passed and 1 ignored retained with matching source hashes.",
+      "nativeWindowInteraction": "No native window, file picker, browser native drop or media decoding rerun for this release. Prior browser export smoke and controlled media drop/close event tests remain in their original reports.",
+      "applicationTestsPassed": 519,
+      "archiveInterop": "Enabled both previously skipped native archive groups using the freshly built official CLI: actual v2/v3 Node/Rust roundtrips, byte comparisons, registry contract rejection/recovery and temporary directory cleanup passed.",
       "nativeTestReport": "docs/NATIVE_WORKFLOW_TEST_b.2.8.1.md",
       "closeBridgeRegression": "3 passed after localized native close confirmation change",
       "nativeDriverStability": "Earlier runs saw connection resets; final persistent-connection runs passed. Separate 2,000-request probes did not reproduce the resets; underlying trigger remains unconfirmed.",
@@ -26,10 +26,10 @@
       "libraryControllerRegression": "3 new library controller tests and 9 settings tests passed",
       "nativeExportTestReport": "docs/NATIVE_EXPORT_TEST_b.2.8.1.md",
       "exportDialogRegression": "12 dialog tests and 3 language tests passed, including 2 new native-save scenarios",
-      "releaseNotes": "docs/RELEASE_b.4.0.md",
+      "releaseNotes": "docs/RELEASE_b.4.1.md",
       "systemNodeObservation": "Initial Node v18.19.1 full run: 193 assertions passed, request-lifecycle worker did not exit and was terminated. Isolated reruns on system and bundled runtimes both passed all 4 tests with normal exit; root cause unconfirmed.",
-      "releaseValidation": "docs/test-results/release-b.4.0/results.json",
-      "versionCorrection": "Historical b.2.9 correction: beta digits are 0–9 and b.9.9 advances to 1.0.0. Earlier logs retain their original versions; this release advances b.3.9 to b.4.0.",
+      "releaseValidation": "docs/test-results/release-b.4.1/results.json",
+      "versionCorrection": "Beta digits remain 0–9 and b.9.9 advances to 1.0.0; this patch advances b.4.0 to b.4.1. Historical reports retain the version under which they were run.",
       "versionRuleRegression": "b.2.9: 4 version tests passed (all 100 beta transitions, stable carry, invalid formats); JavaScript/Python agreed on 122 cases; next-version CLI, release manifest/lock/UI consistency and Cargo metadata passed. Source archive verified 253 files and was removed after validation. Full application/Rust regressions were not rerun for this version-rule change.",
       "securityRegression": "Unpatched glib 0.18.5 reproduced a null-pointer precondition violation (SIGABRT); exact two-line upstream backport passes all 5 iterator tests with glib opt-level=3. All other 120 of 121 upstream package files match.",
       "securityReport": "docs/SECURITY_GLIB_b.2.9.md",
@@ -39,8 +39,8 @@
       "saveConflictRegression": "Node v18.19.1: 35 focused tests passed, including 8 new cases; reproduced failed-force retry overwrites, hidden reload failures and preserved-timestamp external edits before fixing them",
       "saveConflictReport": "docs/SAVE_CONFLICT_BUGFIX_b.2.9.md",
       "saveConflictValidation": "docs/test-results/save-conflicts-2026-09-23/results.json",
-      "releaseVersionValidation": "b.4.0 / 0.4.0 matched manifests, locks and UI labels; next-version CLI returned b.4.1; offline locked Cargo metadata confirmed application 0.4.0 and the sole locally patched glib dependency",
-      "releaseSourceArchive": "b.4.0 release: 629 source files and all 121 vendored glib files verified, including exact bytes and executable modes; unpacked offline locked Cargo metadata resolves application 0.4.0 and local patched glib, and all 161 selected source fingerprints match. Temporary verification archive removed.",
+      "releaseVersionValidation": "b.4.1 / 0.4.1 matched manifests, locks and UI labels; next-version CLI returned b.4.2; offline locked Cargo metadata confirmed application 0.4.1 and the sole locally patched glib 0.18.5",
+      "releaseSourceArchive": "b.4.1 release: 664 source files verified byte-for-byte and by executable mode, including 121 vendored glib files; unpacked offline locked Cargo metadata resolves application 0.4.1 and the local patched glib; all 164 selected source fingerprints match. Temporary verification archive removed.",
       "assetBindingRegression": "Node v18.19.1: 78 focused tests, 77 passed, 0 failed, 1 native archive interoperability skipped; 13 new cases reproduce binding lock/config loss, linked paths, invalid verification and rebinding during upload",
       "assetBindingReport": "docs/ASSET_BINDING_BUGFIX_b.3.0.md",
       "assetBindingValidation": "docs/test-results/asset-binding-2026-09-23/results.json",
@@ -115,7 +115,17 @@
       "exportPreparationValidation": "docs/test-results/export-preparation-2026-09-23/results.json",
       "diskOptimizationRegression": "49 focused tests passed. Before the policy change, both new internal/external asset cases failed the no-store check; 10 unrelated tests were filtered out. Successful response bytes and originals unchanged. Git fsck passed and all 17,814 objects, refs and reflogs preserved.",
       "diskOptimizationReport": "docs/DISK_OPTIMIZATION_2026-09-24.md",
-      "diskOptimizationValidation": "docs/test-results/disk-optimization-2026-09-24/results.json"
+      "diskOptimizationValidation": "docs/test-results/disk-optimization-2026-09-24/results.json",
+      "exportDownloadsRegression": "Node v18.19.1: 135 focused tests, 134 passed, 0 failed, 1 native archive interoperability skipped. Eight new real HTTP cases: 7 failed and 1 compatible case passed before the fix. Complete segmented transfers now free inactive quota; overlaps, gaps, cross-job ranges, interrupted responses and concurrent readers remain protected.",
+      "exportDownloadsReport": "docs/EXPORT_DOWNLOADS_BUGFIX_b.4.0.md",
+      "exportDownloadsValidation": "docs/test-results/export-downloads-2026-09-24/results.json",
+      "exportBrowserRegression": "Node v18.19.1: 91 focused tests, 90 passed, 0 failed, 1 native archive interoperability skipped. Twelve new cases all failed in the pre-fix replay and now cover expiry recovery, network/server/timeout retry, cancellation, stale results, single-flight activation, language, actual edit/browse HTTP and bounded range probes.",
+      "exportBrowserReport": "docs/EXPORT_BROWSER_BUGFIX_b.4.0.md",
+      "exportBrowserValidation": "docs/test-results/export-browser-2026-09-24/results.json",
+      "exportBrowserInteraction": "Codex in-app browser: prepare/download, release only the synthetic job, observe expiry and enabled regeneration, prepare/download again. Two persisted ZIP SHA-256 digests match server files; both removed, tab closed and temporary server/project cleaned.",
+      "mediaDropRegression": "Node v18.19.1: 97 focused tests passed, zero failed or skipped. Nine new cases: pre-fix 5 failures and 4 compatibility passes; after-fix all 9 pass. Focused wrong-block selection, source/paste compatibility, queued close and list races, cancellation/retry, stale drafts and real HTTP image/audio/video preservation.",
+      "mediaDropReport": "docs/MEDIA_DROP_BUGFIX_b.4.0.md",
+      "mediaDropValidation": "docs/test-results/media-drop-2026-09-24/results.json"
     },
     "scope": "功能级有向业务步骤 + 文件级静态相对导入；不穷举运行时动态路径、第三方库内部或每次函数调用",
     "projectDataRead": false,
@@ -124,9 +134,9 @@
       "workflows": 50,
       "functionalNodes": 66,
       "functionalEdges": 173,
-      "sourceFiles": 161,
-      "jsModules": 141,
-      "relativeImportStatements": 440,
+      "sourceFiles": 164,
+      "jsModules": 144,
+      "relativeImportStatements": 458,
       "explicitEventBindings": 96,
       "businessApiPaths": 11,
       "businessApiOperations": 16,
@@ -138,68 +148,68 @@
     "limitations": [
       "workflow-step 是业务步骤顺序，不能当作直接函数调用边。",
       "文件导入关系不代表调用次数、调用顺序、用户使用频率或性能。",
-      "测试声明包含参数化模板，声明数不等于执行数；本次发布 app-only 校验 490 项全部通过。归档模块 13 通过、1 项真实作品测试忽略；此前实际 Tauri 库 22 通过、1 忽略的证据保留，原生窗口未重跑。",
+      "测试声明包含参数化模板，声明数不等于执行数；b.4.1 发布应用校验 519 通过、0 失败、0 跳过，已启用实际原生归档互通。原生归档模块 13 通过、1 忽略；完整 Tauri 库和窗口未重跑，保留此前证据。",
       "没有读取实际作品正文、素材内容、本机秘密或网络服务。",
-      "归档互通与原生登记契约回归需设置 VIENTO_TEST_ARCHIVE_BINARY；本次发布已配置并全部通过。",
+      "归档互通与原生登记契约回归需设置 VIENTO_TEST_ARCHIVE_BINARY；本轮未配置并明确跳过，b.4.0 发布通过证据保留。",
       "第三方 glib 仅将实际修复文件加入功能图源码清单；其余文件通过 vendor/glib-upstream.json 的原包指纹核验，不展开第三方模块调用图。"
     ],
-    "snapshotRevision": 51,
+    "snapshotRevision": 55,
     "repairLog": "docs/NETWORK_BUGFIX_b.2.8.1.md",
     "previousSnapshot": {
-      "revision": 50,
-      "commit": "a55ddc0b42783ae6448a8f2540f4f14da84aba18",
-      "sourceState": "b.3.9 工作树：保留 N104–N106，增加本地素材 no-store 策略及 HTTP 回归；已清理 WebKit 响应副本、旧打包临时文件，并无损压缩 Git 对象；尚未提交或安装",
+      "revision": 54,
+      "commit": "c27f8c9e790fd6fd1313f329c0c40edb640eb6b6",
+      "sourceState": "b.4.0 工作树：保留 N107–N108，新增 N109 拖放文本框目标保护和 N110 素材窗口重开时序修复；实际编辑器与 HTTP 服务验证三类素材的保存、重开及索引；尚未提交或安装",
       "changedSources": [],
       "releaseFiles": [
         {
           "file": "VERSION",
-          "before": "3039e3d48888c87c081abbd10bcf6ef233b13af713feaef375e6304a8a226c6a",
-          "after": "24db18fc7253c624e44df687133e75d86603fda5620a666ab2ac3acb49f0db30"
+          "before": "24db18fc7253c624e44df687133e75d86603fda5620a666ab2ac3acb49f0db30",
+          "after": "fb1aefd805175d2dbe0263a5c418d2a99c5967b3b6ca738e3bb8bd4354149ffe"
         },
         {
           "file": "package.json",
-          "before": "dbbaa0fa46ea9134b39d520cbb69887a6e067fd47e8ba170b1e3119c13b1c269",
-          "after": "280964ce1c97c478ee00de29f046027d5c6b8448bb0ea2b7fd28674232064937"
+          "before": "280964ce1c97c478ee00de29f046027d5c6b8448bb0ea2b7fd28674232064937",
+          "after": "b3c759e1379fec12f26030bffce9671260385989834c812cf4bcf2bc613537ca"
         },
         {
           "file": "package-lock.json",
-          "before": "1eb0d4d5d03a1b1cf191aa651179300e38070ff81eb1b87bd2be784694fa3aa7",
-          "after": "717528103ed98b7862da7ca7b7076b4d94e700e496e14944da32bb3a43ed9347"
+          "before": "717528103ed98b7862da7ca7b7076b4d94e700e496e14944da32bb3a43ed9347",
+          "after": "f84b64fd3a52933222550db6cb7dc414dba35f8e750c8cf9c76d0f89e9b4d2d6"
         },
         {
           "file": "src-tauri/Cargo.toml",
-          "before": "0797bfc5b900e31ef4aae073aa4d2f3ae18a70fecaa6ff1a7d3b37e85aad1d08",
-          "after": "d6f5d07887df30afeaefb7f8ecb3b587821bc91e9d688dde8fbbceb42ad9d30c"
+          "before": "d6f5d07887df30afeaefb7f8ecb3b587821bc91e9d688dde8fbbceb42ad9d30c",
+          "after": "ff695d39a901f6649b1cfb12075ad60e3ee6e4edd7025a6f60def0aa4af03212"
         },
         {
           "file": "src-tauri/Cargo.lock",
-          "before": "63a26f733c0111d725759ec4115fc742993ccbfdd2765142f6c7bd614dab2ff3",
-          "after": "94e5b1ffdd03134212c305d82fa2da218596a7c0d57aae2e2b103ec78a4c4e21"
+          "before": "94e5b1ffdd03134212c305d82fa2da218596a7c0d57aae2e2b103ec78a4c4e21",
+          "after": "5aff1e4f73cb0f6dd0cfe1c011308a95274968e17cc599b619d8a260e939ac29"
         },
         {
           "file": "src-tauri/tauri.conf.json",
-          "before": "7f3ece33067406fa5bc0c82b91f3c1eb3499e6e785b11a68d50d3f7afcc22579",
-          "after": "7ec6990bebf11b3fbc59ff2f533543162ad1c535b462987ff0790bb54812cb69"
+          "before": "7ec6990bebf11b3fbc59ff2f533543162ad1c535b462987ff0790bb54812cb69",
+          "after": "914106cbe1aad35b05a6de7e942873a73416dbc17ccfe1f91bebad5b10ca44ff"
         },
         {
           "file": "web/index.html",
-          "before": "4913298cfd0707b2a925d33844031b104931761f7aaf2d5aec3f5fe318471d9d",
-          "after": "e3784d58bb5b28efb9cde8617072aa7229590ba8db303da7d475902b9db2631b"
+          "before": "cea4cdd3ebac96042f3b3e3390c2d6b587b462be02d6937b53ea430b1a0fa3ef",
+          "after": "e569b6b88cbce39aaa706ef11e3524ba294a0ab548c14d10603514bcd279ddb1"
         },
         {
           "file": "desktop/ui/index.html",
-          "before": "6100e45fbbddc87637f96c5a4b2796676593d309c35218a5950d0c8ccbc93f19",
-          "after": "02575def9e6b12b0ae42b35b3d701ed1a507044c23cadc16685611e8dfe5a3d2"
+          "before": "02575def9e6b12b0ae42b35b3d701ed1a507044c23cadc16685611e8dfe5a3d2",
+          "after": "c2517363d722a6353930f04fd84b3881dd7c0bbfbf16ac008c712d417a77fb83"
         },
         {
           "file": "README.md",
-          "before": "10c43e7a9a2cbe64c7e4346a5a6fb92002d1d043695f15d13cb20177aba39a56",
-          "after": "dd1f2293c1e3fa546e4077f02d9667498862489ba0d9315ce63a948932ca4d9d"
+          "before": "dd1f2293c1e3fa546e4077f02d9667498862489ba0d9315ce63a948932ca4d9d",
+          "after": "7d39b78a90ff94478b5c384f4ac99a5fa374e9d0f7a3d542bc3de4b6d9600005"
         },
         {
           "file": "desktop/README.md",
-          "before": "fed5e9aa303f36715cb2f4a5c1e8b7687db62aa79be10df827dc00865a92a9af",
-          "after": "69f143e085f5a404fe233b7ab1a30c83decb0a38427d15235f9f5db312370cce"
+          "before": "69f143e085f5a404fe233b7ab1a30c83decb0a38427d15235f9f5db312370cce",
+          "after": "d5b6ad90ab6bdcb82070c9698f88384dac72166a2dcba10d60d4a9a06f3d2dff"
         }
       ]
     },
@@ -1966,6 +1976,145 @@
             "after": "b0771064f67fe681decd14abd4de299cb87a94ca54090231a599217f2cd35ea9"
           }
         ]
+      },
+      {
+        "fromRevision": 50,
+        "toRevision": 51,
+        "commit": "a55ddc0b42783ae6448a8f2540f4f14da84aba18",
+        "changedSources": [],
+        "releaseFiles": [
+          {
+            "file": "VERSION",
+            "before": "3039e3d48888c87c081abbd10bcf6ef233b13af713feaef375e6304a8a226c6a",
+            "after": "24db18fc7253c624e44df687133e75d86603fda5620a666ab2ac3acb49f0db30"
+          },
+          {
+            "file": "package.json",
+            "before": "dbbaa0fa46ea9134b39d520cbb69887a6e067fd47e8ba170b1e3119c13b1c269",
+            "after": "280964ce1c97c478ee00de29f046027d5c6b8448bb0ea2b7fd28674232064937"
+          },
+          {
+            "file": "package-lock.json",
+            "before": "1eb0d4d5d03a1b1cf191aa651179300e38070ff81eb1b87bd2be784694fa3aa7",
+            "after": "717528103ed98b7862da7ca7b7076b4d94e700e496e14944da32bb3a43ed9347"
+          },
+          {
+            "file": "src-tauri/Cargo.toml",
+            "before": "0797bfc5b900e31ef4aae073aa4d2f3ae18a70fecaa6ff1a7d3b37e85aad1d08",
+            "after": "d6f5d07887df30afeaefb7f8ecb3b587821bc91e9d688dde8fbbceb42ad9d30c"
+          },
+          {
+            "file": "src-tauri/Cargo.lock",
+            "before": "63a26f733c0111d725759ec4115fc742993ccbfdd2765142f6c7bd614dab2ff3",
+            "after": "94e5b1ffdd03134212c305d82fa2da218596a7c0d57aae2e2b103ec78a4c4e21"
+          },
+          {
+            "file": "src-tauri/tauri.conf.json",
+            "before": "7f3ece33067406fa5bc0c82b91f3c1eb3499e6e785b11a68d50d3f7afcc22579",
+            "after": "7ec6990bebf11b3fbc59ff2f533543162ad1c535b462987ff0790bb54812cb69"
+          },
+          {
+            "file": "web/index.html",
+            "before": "4913298cfd0707b2a925d33844031b104931761f7aaf2d5aec3f5fe318471d9d",
+            "after": "e3784d58bb5b28efb9cde8617072aa7229590ba8db303da7d475902b9db2631b"
+          },
+          {
+            "file": "desktop/ui/index.html",
+            "before": "6100e45fbbddc87637f96c5a4b2796676593d309c35218a5950d0c8ccbc93f19",
+            "after": "02575def9e6b12b0ae42b35b3d701ed1a507044c23cadc16685611e8dfe5a3d2"
+          },
+          {
+            "file": "README.md",
+            "before": "10c43e7a9a2cbe64c7e4346a5a6fb92002d1d043695f15d13cb20177aba39a56",
+            "after": "dd1f2293c1e3fa546e4077f02d9667498862489ba0d9315ce63a948932ca4d9d"
+          },
+          {
+            "file": "desktop/README.md",
+            "before": "fed5e9aa303f36715cb2f4a5c1e8b7687db62aa79be10df827dc00865a92a9af",
+            "after": "69f143e085f5a404fe233b7ab1a30c83decb0a38427d15235f9f5db312370cce"
+          }
+        ]
+      },
+      {
+        "fromRevision": 51,
+        "toRevision": 52,
+        "commit": "c27f8c9e790fd6fd1313f329c0c40edb640eb6b6",
+        "changedSources": [
+          {
+            "file": "scripts/lib/doc-server-routes.mjs",
+            "before": "e12777dd309e186de3ed5d37dd2e7e005dbb35179fcda2c2b86fee7e7b8f841b",
+            "after": "0dba0147927f2e858bc985ccf8577ee38af5b04a28c281f8ce2b16ee1124cd09"
+          },
+          {
+            "file": "scripts/lib/export-service.mjs",
+            "before": "d0329596700e5f650a4d1010532ae3d0252c012041829413227acea6e5271f14",
+            "after": "9653115876193f7bbe0f1b69a79e7ea73a7bba82a35f99c936086a36668f682e"
+          },
+          {
+            "file": "scripts/tests/export-downloads.test.mjs",
+            "before": null,
+            "after": "05e21123992eb1d21ef7170f661277d05db92b40ed1e03ecf6234a7fcdbbbdf0"
+          }
+        ]
+      },
+      {
+        "fromRevision": 52,
+        "toRevision": 53,
+        "commit": "c27f8c9e790fd6fd1313f329c0c40edb640eb6b6",
+        "changedSources": [
+          {
+            "file": "scripts/tests/editor-dialogs.test.mjs",
+            "before": "fce1b40c31b639c5a4cc7905a9af7643be7bc8797244b54d75344b2b9e736365",
+            "after": "30e214da1b22add4dffa5ab36a709595519f8adecd79556d0507883895c471a5"
+          },
+          {
+            "file": "scripts/tests/export-browser.test.mjs",
+            "before": null,
+            "after": "534d7241bb024bd2120edc2ef30d5dd9d757efb015ca26003dcb30a3df19dfc0"
+          },
+          {
+            "file": "web/i18n/en.js",
+            "before": "baec8bfc40321d6ec9d2c0a45e0bb313a4b809fed1bc0e368decafec9a6b69a9",
+            "after": "3d4371059d41d6fa1296c3358e175e98ce8c2365ffb0497ffd593baac05f934b"
+          },
+          {
+            "file": "web/modules/app-doc-service.js",
+            "before": "e8e34cbb78984766dfeae5c9eace08f462b346af8fe6a32dc2d623a359510fdb",
+            "after": "b243dba11cb896b8e9d6da356f5cfee2cc7ca01d7bad97818f86d0d8e8a5dc19"
+          },
+          {
+            "file": "web/modules/app-export.js",
+            "before": "c94d24aca6e452f3709107e14797f2a31c1153ebf6008abf549bcd68614f873b",
+            "after": "415c2772eca5003ff81177cd52db8af4c0bffb15da0f7d6d88bf1267a725117e"
+          },
+          {
+            "file": "web/index.html",
+            "before": "e3784d58bb5b28efb9cde8617072aa7229590ba8db303da7d475902b9db2631b",
+            "after": "cea4cdd3ebac96042f3b3e3390c2d6b587b462be02d6937b53ea430b1a0fa3ef"
+          }
+        ]
+      },
+      {
+        "fromRevision": 53,
+        "toRevision": 54,
+        "commit": "c27f8c9e790fd6fd1313f329c0c40edb640eb6b6",
+        "changedSources": [
+          {
+            "file": "scripts/tests/dialog-harness.mjs",
+            "before": "b675d9727277e6c471e3077909218dfd0159ed5707d382b203c550564d485eb4",
+            "after": "b7fc854c98c0572410b6de1ba01ff2b79e2c9d81091e478fcc15c056ad3a287a"
+          },
+          {
+            "file": "scripts/tests/media-drop.test.mjs",
+            "before": null,
+            "after": "015a0e0d117d0505e5d3250bbb15560a4316bc31ba158bb406d00eb683c0dfb9"
+          },
+          {
+            "file": "web/modules/app-media-editor.js",
+            "before": "fa03582cc8b56c3ab161acbf28e9cca15da5110e8742f7647fdad39a3cb5fcb2",
+            "after": "1bf880a611bd105ab626684a252d4bc1e78d6c6a235759375213f8a75dd2b991"
+          }
+        ]
       }
     ],
     "vendoredDependencies": [
@@ -1982,7 +2131,7 @@
         "regression": "src-tauri/tests/glib_variant_iter.rs"
       }
     ],
-    "projectDataAccess": "Release validation uses synthetic projects only. The preceding local disk audit retains its 5,005 protected-file checks; no daily works read or changed for this release."
+    "projectDataAccess": "Synthetic projects only. Release checks include actual Node/Rust archive interoperability and registry consistency; temporary native build removed; daily works and backups unchanged."
   },
   "nodes": [
     {
@@ -2140,7 +2289,7 @@
       "id": "media_ui",
       "label": "素材选择与草稿预览",
       "layer": "界面",
-      "description": "筛选、导入、复用、粘贴、拖入图片/视频/音频；维护异步草稿预览。",
+      "description": "筛选、导入、复用、粘贴、拖入图片/视频/音频；维护异步草稿预览。 拖放优先使用目标文本框；快速重开不受旧关闭事件影响。",
       "sources": [
         {
           "file": "web/modules/app-media-editor.js",
@@ -2149,7 +2298,7 @@
         },
         {
           "file": "web/modules/app-media-editor.js",
-          "line": 39,
+          "line": 41,
           "symbol": "schedulePreview"
         }
       ]
@@ -2158,7 +2307,7 @@
       "id": "export_ui",
       "label": "编辑器导出窗口",
       "layer": "界面",
-      "description": "选择文档分享或整库迁移，准备导出、保存、取消与释放临时包。 原生保存按独立请求标识匹配回执，断线重试隔离旧结果。",
+      "description": "选择文档分享或整库迁移，准备导出、保存、取消与释放临时包。 原生保存按独立请求标识匹配回执，断线重试隔离旧结果。 浏览器下载按钮先核对可用性；过期恢复生成，网络错误保留重试，关闭后的旧结果不再下载。",
       "sources": [
         {
           "file": "web/modules/app-export.js",
@@ -2172,12 +2321,12 @@
         },
         {
           "file": "web/modules/app-export.js",
-          "line": 52,
+          "line": 53,
           "symbol": "nativeSave"
         },
         {
           "file": "web/modules/app-export.js",
-          "line": 75,
+          "line": 76,
           "symbol": "saveNative"
         }
       ]
@@ -2505,7 +2654,7 @@
       "sources": [
         {
           "file": "scripts/lib/doc-server-routes.mjs",
-          "line": 484,
+          "line": 489,
           "symbol": "handleApiRequest"
         },
         {
@@ -2631,26 +2780,26 @@
       "id": "export_jobs",
       "label": "导出任务生命周期",
       "layer": "服务",
-      "description": "串行生成，最多 3 个任务；额度满时回收已完整下载且空闲的旧任务，下载期间暂停过期和文件清理。登记前核对取消；取消/失败任务先撤销访问，清理成功后才释放名额，清理异常自动重试，并发释放共享结果。 已取消请求在回收名额和准备前退出，保留旧的已完成导出包。",
+      "description": "串行生成，最多 3 个任务；额度满时回收已完整下载且空闲的旧任务，下载期间暂停过期和文件清理。登记前核对取消；取消/失败任务先撤销访问，清理成功后才释放名额，清理异常自动重试，并发释放共享结果。 已取消请求在回收名额和准备前退出，保留旧的已完成导出包。 分段响应按任务合并成功字节范围，全部收齐后可回收空闲任务；重叠不重复计数，缺段和中断仍保留重试。",
       "sources": [
         {
           "file": "scripts/lib/export-service.mjs",
-          "line": 8,
+          "line": 31,
           "symbol": "createExportService"
         },
         {
           "file": "scripts/lib/export-service.mjs",
-          "line": 62,
+          "line": 85,
           "symbol": "create"
         },
         {
           "file": "scripts/lib/export-service.mjs",
-          "line": 16,
+          "line": 39,
           "symbol": "release"
         },
         {
           "file": "scripts/lib/export-service.mjs",
-          "line": 48,
+          "line": 71,
           "symbol": "download"
         }
       ]
@@ -5511,13 +5660,14 @@
         "media_ui"
       ],
       "effect": "流式上传 → 格式/体积检测 → SHA-256 去重 → UUID 位置 → 登记。",
-      "boundary": "单文件上限 256 MiB；中断清理本次临时文件；取消也终止草稿补丁请求，已成功登记的素材保留在列表。 上传途中素材根变化时，持锁提交返回 409 并清理临时文件；重新导入使用当前素材根。",
+      "boundary": "单文件上限 256 MiB；中断清理本次临时文件；取消也终止草稿补丁请求，已成功登记的素材保留在列表。 上传途中素材根变化时，持锁提交返回 409 并清理临时文件；重新导入使用当前素材根。 分块拖放优先捕获接收文件的文本框及其选择范围，不用其他段仍保留的焦点覆盖目标；无文本框目标时沿用当前编辑位置。取消后复用已导入素材仍保留该目标。",
       "tests": [
         "scripts/tests/media.test.mjs",
         "desktop/tests/native-smoke.py",
         "scripts/tests/editor-dialogs.test.mjs",
         "scripts/tests/request-lifecycle.test.mjs",
-        "scripts/tests/asset-binding.test.mjs"
+        "scripts/tests/asset-binding.test.mjs",
+        "scripts/tests/media-drop.test.mjs"
       ]
     },
     {
@@ -5535,10 +5685,11 @@
         "memory"
       ],
       "effect": "文本在光标写 ![] / !video[] / !audio[]；JSON/YAML 走源范围插入。",
-      "boundary": "结构化插入保留缩进、BOM、注释、格式和值，支持缩进的行内列表及带指令/标记的空 YAML；显式数值、标签和锚点不覆盖。响应返回后重新核对取消状态和草稿，仍需保存正文。",
+      "boundary": "结构化插入保留缩进、BOM、注释、格式和值，支持缩进的行内列表及带指令/标记的空 YAML；显式数值、标签和锚点不覆盖。响应返回后重新核对取消状态和草稿，仍需保存正文。 素材窗口快速重开时，旧关闭事件不清除新目标或使新列表请求失效。实际编辑器与 HTTP 服务联合验证三类素材插入目标段、保存、重开和引用索引，保留其他段、BOM、CRLF 及素材字节。",
       "tests": [
         "scripts/tests/media.test.mjs",
-        "scripts/tests/editor-dialogs.test.mjs"
+        "scripts/tests/editor-dialogs.test.mjs",
+        "scripts/tests/media-drop.test.mjs"
       ]
     },
     {
@@ -5608,7 +5759,7 @@
         "share"
       ],
       "effect": "从已保存原文重新解析，递归携带附属文档、嵌入媒体、裸 ID、旧图片路径及附件素材；保留元数据、原始 sources 和故事章节层级，百分号名称与旧别名按索引规则解析。",
-      "boundary": "不是完整项目恢复包；不把无关素材全部带入；未保存/新建草稿不能导出。 保存或重建忙碌时暂缓打开导出。 包内源路径按每层目录检查大小写/Unicode 及文件目录冲突。 未嵌入的引用列为关联素材，每篇文档按素材身份去重；未知 ID 或缺失文件失败后可修复重试。代码围栏与 YAML 注释仍排除。 ZIP 完成后的最后一次异步读取结束后，再检查取消状态才登记任务；取消的分享包立即清理，原文与素材保持不变。 取消或生成失败后若目录无法立即删除，保留已撤销的清理记录和名额，自动重试且不覆盖原来的取消/失败原因。 ZIP 写入使用统一停止状态，取消或写入失败后不接纳迟到的文件打开结果；已经开始的输入操作和实际关闭完成后才结束。 准备阶段将取消传入登记读取、目录扫描和正文读取；异步操作返回后先检查停止状态，迟到的坏正文不覆盖取消原因。",
+      "boundary": "不是完整项目恢复包；不把无关素材全部带入；未保存/新建草稿不能导出。 保存或重建忙碌时暂缓打开导出。 包内源路径按每层目录检查大小写/Unicode 及文件目录冲突。 未嵌入的引用列为关联素材，每篇文档按素材身份去重；未知 ID 或缺失文件失败后可修复重试。代码围栏与 YAML 注释仍排除。 ZIP 完成后的最后一次异步读取结束后，再检查取消状态才登记任务；取消的分享包立即清理，原文与素材保持不变。 取消或生成失败后若目录无法立即删除，保留已撤销的清理记录和名额，自动重试且不覆盖原来的取消/失败原因。 ZIP 写入使用统一停止状态，取消或写入失败后不接纳迟到的文件打开结果；已经开始的输入操作和实际关闭完成后才结束。 准备阶段将取消传入登记读取、目录扫描和正文读取；异步操作返回后先检查停止状态，迟到的坏正文不覆盖取消原因。 分享包通过多个成功分段收齐后，可在下一次导出时回收空闲任务；逐字节拼接和 ZIP 清单已回归核对。",
       "tests": [
         "scripts/tests/export.test.mjs",
         "desktop/tests/native-smoke.py",
@@ -5618,7 +5769,8 @@
         "scripts/tests/export-cancellation.test.mjs",
         "scripts/tests/export-cleanup.test.mjs",
         "scripts/tests/export-streams.test.mjs",
-        "scripts/tests/export-preparation.test.mjs"
+        "scripts/tests/export-preparation.test.mjs",
+        "scripts/tests/export-downloads.test.mjs"
       ]
     },
     {
@@ -5642,7 +5794,7 @@
         "archive"
       ],
       "effect": "Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与外置素材；两端 v2/v3 往返逐文件核验。",
-      "boundary": "独立于作品库 Rust 导出；本机配置/缓存排除，导出前后验证源快照。 保存或重建忙碌时暂缓打开导出。 每层目录及文件位置检查跨系统冲突。互通回归需显式配置原生归档测试二进制。 完整包同样在登记前核对取消；清理成功后释放相应暂存和名额。 b.3.8 发布已启用实际原生归档程序重跑 v2/v3 Node/Rust 往返，并核对两端登记契约、导入失败清理及合法共享背景的恢复和重建。 临时包清理失败时继续跟踪，不提前释放名额；原生成结果保留，清理恢复后可继续导出。 完整包记录可选目录和清单原本缺失的状态；首次新增素材、模板、元数据或恢复清单时，完成前报 409，重新生成才包含新增内容。缓存和无关文件不参与这项检查。 成功包也等待已开始的输入关闭；完整包和分享包共用停止状态、读取管线及关闭收尾。 素材递归扫描和最终复查支持取消；已经取消的创建在回收旧任务名额前退出，保留原来的已完成导出包。",
+      "boundary": "独立于作品库 Rust 导出；本机配置/缓存排除，导出前后验证源快照。 保存或重建忙碌时暂缓打开导出。 每层目录及文件位置检查跨系统冲突。互通回归需显式配置原生归档测试二进制。 完整包同样在登记前核对取消；清理成功后释放相应暂存和名额。 b.3.8 发布已启用实际原生归档程序重跑 v2/v3 Node/Rust 往返，并核对两端登记契约、导入失败清理及合法共享背景的恢复和重建。 临时包清理失败时继续跟踪，不提前释放名额；原生成结果保留，清理恢复后可继续导出。 完整包记录可选目录和清单原本缺失的状态；首次新增素材、模板、元数据或恢复清单时，完成前报 409，重新生成才包含新增内容。缓存和无关文件不参与这项检查。 成功包也等待已开始的输入关闭；完整包和分享包共用停止状态、读取管线及关闭收尾。 素材递归扫描和最终复查支持取消；已经取消的创建在回收旧任务名额前退出，保留原来的已完成导出包。 完整项目包的分段下载同样累计成功区间，三个已收齐的任务不再阻塞下一次创建。",
       "tests": [
         "scripts/tests/export.test.mjs",
         "desktop/tests/native-smoke.py",
@@ -5653,7 +5805,8 @@
         "scripts/tests/export-cleanup.test.mjs",
         "scripts/tests/export-snapshot.test.mjs",
         "scripts/tests/export-streams.test.mjs",
-        "scripts/tests/export-preparation.test.mjs"
+        "scripts/tests/export-preparation.test.mjs",
+        "scripts/tests/export-downloads.test.mjs"
       ]
     },
     {
@@ -5670,14 +5823,16 @@
         "share"
       ],
       "effect": "桌面先按任务 ID 打开并持有已准备归档，再选择位置并复核、原子复制；网页直接 GET /api/export?id=… 下载。",
-      "boundary": "保存窗口等待期间缓存路径被清理仍可完成当前保存；取消覆盖保留旧文件，普通保存错误可重选位置。明确过期的任务可在原窗口重新生成；编辑网页不获得任意原生文件访问。 多个网页下载持有同一包时，等最后一个读取结束才删除；删除故障不改变已完成的下载，也不覆盖读取中断原因。 每次保存生成独立请求标识，由桌面桥校验、宿主随成功/取消/错误结果回传；界面同时核对请求与导出包。断线后保存同一包时，旧回执不解除新等待，也不释放包。",
+      "boundary": "保存窗口等待期间缓存路径被清理仍可完成当前保存；取消覆盖保留旧文件，普通保存错误可重选位置。明确过期的任务可在原窗口重新生成；编辑网页不获得任意原生文件访问。 多个网页下载持有同一包时，等最后一个读取结束才删除；删除故障不改变已完成的下载，也不覆盖读取中断原因。 每次保存生成独立请求标识，由桌面桥校验、宿主随成功/取消/错误结果回传；界面同时核对请求与导出包。断线后保存同一包时，旧回执不解除新等待，也不释放包。 成功 206 响应按实际 Content-Range 记录范围；重复/乱序合并，304、416、断开的响应不计入完成，不同任务相互隔离。 浏览器“下载文件”先通过现有 Range 接口核对一个字节，再创建临时下载链接；410 恢复重新生成，普通错误保留包供重试，核对不会缓冲整包或误判完整下载。",
       "tests": [
         "src-tauri/src/export.rs",
         "desktop/tests/native-smoke.py",
         "desktop/tests/native_export_workflow.py",
         "scripts/tests/editor-dialogs.test.mjs",
         "scripts/tests/export-cleanup.test.mjs",
-        "scripts/tests/export-bridge.test.mjs"
+        "scripts/tests/export-bridge.test.mjs",
+        "scripts/tests/export-downloads.test.mjs",
+        "scripts/tests/export-browser.test.mjs"
       ]
     },
     {
@@ -5693,7 +5848,7 @@
         "export_cache"
       ],
       "effect": "取消生成、释放或空闲过期可回收任务；已完整下载的闲置任务可让出额度，活动下载持有文件直至结束。",
-      "boundary": "默认 15 分钟空闲过期；未完成、中断或活动下载不被额度回收。关闭重开时丢弃旧会话响应，迟到的旧包单独释放；原文与已保存备份保留。 原生保存持有已打开文件直到完成或取消；取消后再遇到 410 时清除失效任务，恢复生成入口。 写入器结束监听之后到任务登记之前的取消及 HTTP 断开也会清理暂存目录并解除生成锁，随后可重试生成、下载和释放。 删除成功后才移除任务并释放名额；并发释放等待同一次结果。临时删除失败时保留已撤销的任务，服务运行期间每 30 秒自动重试，也可主动重试。已撤销任务返回 410，三个名额包含待清理项，避免故障期间不断积累文件。 旧保存回执和旧 HTTP 确认不能结束新的原生保存等待；当前结果可以早于 HTTP 确认到达，监听器只结算一次并清理。 完整包快照冲突也走失败清理；真实 HTTP 验证清理后重试、下载包含新增文件及释放后的过期状态。 输出流失败并不代表源文件已关闭；跟踪等待中的解析、打开、查询、读取、关闭及最终快照检查，保留首次错误，收尾后才进入任务清理或发布成功。 最终复查使用写入器自身的停止信号，客户端未取消时的输出失败也会终止剩余登记读取；真实 HTTP 断线后可在收尾完成后重试。",
+      "boundary": "默认 15 分钟空闲过期；未完成、中断或活动下载不被额度回收。关闭重开时丢弃旧会话响应，迟到的旧包单独释放；原文与已保存备份保留。 原生保存持有已打开文件直到完成或取消；取消后再遇到 410 时清除失效任务，恢复生成入口。 写入器结束监听之后到任务登记之前的取消及 HTTP 断开也会清理暂存目录并解除生成锁，随后可重试生成、下载和释放。 删除成功后才移除任务并释放名额；并发释放等待同一次结果。临时删除失败时保留已撤销的任务，服务运行期间每 30 秒自动重试，也可主动重试。已撤销任务返回 410，三个名额包含待清理项，避免故障期间不断积累文件。 旧保存回执和旧 HTTP 确认不能结束新的原生保存等待；当前结果可以早于 HTTP 确认到达，监听器只结算一次并清理。 完整包快照冲突也走失败清理；真实 HTTP 验证清理后重试、下载包含新增文件及释放后的过期状态。 输出流失败并不代表源文件已关闭；跟踪等待中的解析、打开、查询、读取、关闭及最终快照检查，保留首次错误，收尾后才进入任务清理或发布成功。 最终复查使用写入器自身的停止信号，客户端未取消时的输出失败也会终止剩余登记读取；真实 HTTP 断线后可在收尾完成后重试。 已收齐所有区间仍要等活动读取者退出才可回收；缺段保持名额与文件，允许重试，清理与过期规则沿用。 浏览器核对支持取消，关闭/重开后迟到结果不再交出文件；既有下载已交接时，后续关闭继续保留包。真实浏览器两次落盘 ZIP 已核对摘要并清理。",
       "tests": [
         "scripts/tests/export.test.mjs",
         "scripts/tests/editor-dialogs.test.mjs",
@@ -5703,7 +5858,9 @@
         "scripts/tests/export-bridge.test.mjs",
         "scripts/tests/export-snapshot.test.mjs",
         "scripts/tests/export-streams.test.mjs",
-        "scripts/tests/export-preparation.test.mjs"
+        "scripts/tests/export-preparation.test.mjs",
+        "scripts/tests/export-downloads.test.mjs",
+        "scripts/tests/export-browser.test.mjs"
       ]
     },
     {
@@ -9210,6 +9367,94 @@
       ]
     },
     {
+      "from": "scripts/tests/export-browser.test.mjs",
+      "to": "scripts/tests/helpers.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 7,
+      "symbols": [
+        "fixture",
+        "write",
+        "serve",
+        "request"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-browser.test.mjs",
+      "to": "scripts/lib/workspace.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 8,
+      "symbols": [
+        "registerWorkspace"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-browser.test.mjs",
+      "to": "scripts/lib/project-layout.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 9,
+      "symbols": [
+        "PROJECT_DEFAULTS"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-browser.test.mjs",
+      "to": "scripts/lib/doc-api-contract.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 10,
+      "symbols": [
+        "API_PATHS"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-browser.test.mjs",
+      "to": "scripts/tests/dialog-harness.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 11,
+      "symbols": [
+        "dialogHarness",
+        "flushDialogs"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-browser.test.mjs",
+      "to": "scripts/tests/editor-harness.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 12,
+      "symbols": [
+        "deferred"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-browser.test.mjs",
+      "to": "web/modules/app-services.js",
+      "kind": "import",
+      "local": true,
+      "line": 13,
+      "symbols": [
+        "fetchWithTimeout",
+        "fetchJsonApiRequest",
+        "makeRequestError",
+        "safeParseJsonResponse"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-browser.test.mjs",
+      "to": "web/i18n/index.js",
+      "kind": "import",
+      "local": true,
+      "line": 14,
+      "symbols": [
+        "applyLanguage",
+        "onLanguageChange"
+      ]
+    },
+    {
       "from": "scripts/tests/export-cancellation.test.mjs",
       "to": "scripts/tests/helpers.mjs",
       "kind": "import",
@@ -9283,6 +9528,47 @@
     },
     {
       "from": "scripts/tests/export-cleanup.test.mjs",
+      "to": "scripts/lib/process.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 6,
+      "symbols": [
+        "runCommand"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-downloads.test.mjs",
+      "to": "scripts/tests/helpers.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 3,
+      "symbols": [
+        "fixture",
+        "write"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-downloads.test.mjs",
+      "to": "scripts/lib/workspace.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 4,
+      "symbols": [
+        "registerWorkspace"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-downloads.test.mjs",
+      "to": "scripts/lib/project-layout.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 5,
+      "symbols": [
+        "PROJECT_DEFAULTS"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-downloads.test.mjs",
       "to": "scripts/lib/process.mjs",
       "kind": "import",
       "local": true,
@@ -9698,6 +9984,75 @@
       "local": true,
       "line": 20,
       "symbols": []
+    },
+    {
+      "from": "scripts/tests/media-drop.test.mjs",
+      "to": "scripts/tests/helpers.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 8,
+      "symbols": [
+        "fixture",
+        "write",
+        "serve",
+        "request"
+      ]
+    },
+    {
+      "from": "scripts/tests/media-drop.test.mjs",
+      "to": "scripts/lib/workspace.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 9,
+      "symbols": [
+        "registerWorkspace",
+        "readRegistry",
+        "verifyWorkspace"
+      ]
+    },
+    {
+      "from": "scripts/tests/media-drop.test.mjs",
+      "to": "scripts/lib/project-layout.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 10,
+      "symbols": [
+        "PROJECT_DEFAULTS"
+      ]
+    },
+    {
+      "from": "scripts/tests/media-drop.test.mjs",
+      "to": "scripts/lib/media-format.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 11,
+      "symbols": [
+        "MEDIA_MAX_BYTES",
+        "mediaKindForName",
+        "mediaMarkup"
+      ]
+    },
+    {
+      "from": "scripts/tests/media-drop.test.mjs",
+      "to": "scripts/tests/dialog-harness.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 12,
+      "symbols": [
+        "dialogHarness",
+        "flushDialogs"
+      ]
+    },
+    {
+      "from": "scripts/tests/media-drop.test.mjs",
+      "to": "scripts/tests/editor-harness.mjs",
+      "kind": "import",
+      "local": true,
+      "line": 13,
+      "symbols": [
+        "deferred",
+        "editorHarness"
+      ]
     },
     {
       "from": "scripts/tests/media.test.mjs",
@@ -10585,6 +10940,9 @@
       "symbols": [
         "fetchJsonApiRequest",
         "fetchTextApiRequest",
+        "fetchWithTimeout",
+        "makeRequestError",
+        "safeParseJsonResponse",
         "withCacheBust"
       ]
     },
@@ -10670,6 +11028,7 @@
       "line": 3,
       "symbols": [
         "requestExport",
+        "checkExport",
         "releaseExport"
       ]
     },
@@ -13464,6 +13823,66 @@
       ]
     },
     {
+      "from": "scripts/tests/export-browser.test.mjs",
+      "to": "node:test",
+      "kind": "import",
+      "local": false,
+      "line": 1,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-browser.test.mjs",
+      "to": "node:assert/strict",
+      "kind": "import",
+      "local": false,
+      "line": 2,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-browser.test.mjs",
+      "to": "node:fs/promises",
+      "kind": "import",
+      "local": false,
+      "line": 3,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-browser.test.mjs",
+      "to": "node:path",
+      "kind": "import",
+      "local": false,
+      "line": 4,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-browser.test.mjs",
+      "to": "node:crypto",
+      "kind": "import",
+      "local": false,
+      "line": 5,
+      "symbols": [
+        "randomUUID"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-browser.test.mjs",
+      "to": "node:timers/promises",
+      "kind": "import",
+      "local": false,
+      "line": 6,
+      "symbols": [
+        "setTimeout"
+      ]
+    },
+    {
       "from": "scripts/tests/export-cancellation.test.mjs",
       "to": "node:test",
       "kind": "import",
@@ -13530,6 +13949,27 @@
       "local": false,
       "line": 2,
       "symbols": [
+        "randomUUID"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-downloads.test.mjs",
+      "to": "node:test",
+      "kind": "import",
+      "local": false,
+      "line": 1,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/export-downloads.test.mjs",
+      "to": "node:crypto",
+      "kind": "import",
+      "local": false,
+      "line": 2,
+      "symbols": [
+        "randomBytes",
         "randomUUID"
       ]
     },
@@ -13943,6 +14383,76 @@
       "line": 4,
       "symbols": [
         "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/media-drop.test.mjs",
+      "to": "node:test",
+      "kind": "import",
+      "local": false,
+      "line": 1,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/media-drop.test.mjs",
+      "to": "node:assert/strict",
+      "kind": "import",
+      "local": false,
+      "line": 2,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/media-drop.test.mjs",
+      "to": "node:fs/promises",
+      "kind": "import",
+      "local": false,
+      "line": 3,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/media-drop.test.mjs",
+      "to": "node:path",
+      "kind": "import",
+      "local": false,
+      "line": 4,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/media-drop.test.mjs",
+      "to": "node:vm",
+      "kind": "import",
+      "local": false,
+      "line": 5,
+      "symbols": [
+        "default"
+      ]
+    },
+    {
+      "from": "scripts/tests/media-drop.test.mjs",
+      "to": "node:crypto",
+      "kind": "import",
+      "local": false,
+      "line": 6,
+      "symbols": [
+        "randomUUID"
+      ]
+    },
+    {
+      "from": "scripts/tests/media-drop.test.mjs",
+      "to": "node:timers/promises",
+      "kind": "import",
+      "local": false,
+      "line": 7,
+      "symbols": [
+        "setTimeout"
       ]
     },
     {
@@ -14794,8 +15304,8 @@
     {
       "path": "scripts/lib/doc-server-routes.mjs",
       "area": "engine",
-      "lines": 636,
-      "sha256": "e12777dd309e186de3ed5d37dd2e7e005dbb35179fcda2c2b86fee7e7b8f841b"
+      "lines": 641,
+      "sha256": "0dba0147927f2e858bc985ccf8577ee38af5b04a28c281f8ce2b16ee1124cd09"
     },
     {
       "path": "scripts/lib/doc-server-static-routes.mjs",
@@ -14836,8 +15346,8 @@
     {
       "path": "scripts/lib/export-service.mjs",
       "area": "engine",
-      "lines": 116,
-      "sha256": "d0329596700e5f650a4d1010532ae3d0252c012041829413227acea6e5271f14"
+      "lines": 139,
+      "sha256": "9653115876193f7bbe0f1b69a79e7ea73a7bba82a35f99c936086a36668f682e"
     },
     {
       "path": "scripts/lib/image-index.mjs",
@@ -15172,8 +15682,8 @@
     {
       "path": "scripts/tests/dialog-harness.mjs",
       "area": "test",
-      "lines": 120,
-      "sha256": "b675d9727277e6c471e3077909218dfd0159ed5707d382b203c550564d485eb4"
+      "lines": 125,
+      "sha256": "b7fc854c98c0572410b6de1ba01ff2b79e2c9d81091e478fcc15c056ad3a287a"
     },
     {
       "path": "scripts/tests/doc-api.test.mjs",
@@ -15197,7 +15707,7 @@
       "path": "scripts/tests/editor-dialogs.test.mjs",
       "area": "test",
       "lines": 534,
-      "sha256": "fce1b40c31b639c5a4cc7905a9af7643be7bc8797244b54d75344b2b9e736365"
+      "sha256": "30e214da1b22add4dffa5ab36a709595519f8adecd79556d0507883895c471a5"
     },
     {
       "path": "scripts/tests/editor-draft.test.mjs",
@@ -15242,6 +15752,12 @@
       "sha256": "64b87229ab624c9f3f96e3244042cc288fb7bac377bbb0118a756f648cc037ab"
     },
     {
+      "path": "scripts/tests/export-browser.test.mjs",
+      "area": "test",
+      "lines": 187,
+      "sha256": "534d7241bb024bd2120edc2ef30d5dd9d757efb015ca26003dcb30a3df19dfc0"
+    },
+    {
       "path": "scripts/tests/export-cancellation.test.mjs",
       "area": "test",
       "lines": 137,
@@ -15252,6 +15768,12 @@
       "area": "test",
       "lines": 237,
       "sha256": "7f9553c65c3b8cd34a5668febb422aba8e3200886c0bfc9d332140911af11a7d"
+    },
+    {
+      "path": "scripts/tests/export-downloads.test.mjs",
+      "area": "test",
+      "lines": 246,
+      "sha256": "05e21123992eb1d21ef7170f661277d05db92b40ed1e03ecf6234a7fcdbbbdf0"
     },
     {
       "path": "scripts/tests/export-preparation.test.mjs",
@@ -15300,6 +15822,12 @@
       "area": "test",
       "lines": 140,
       "sha256": "bd8e05ded9a0625728997427f2bea7e844f409483c40e863df540598b2ac8d7b"
+    },
+    {
+      "path": "scripts/tests/media-drop.test.mjs",
+      "area": "test",
+      "lines": 212,
+      "sha256": "015a0e0d117d0505e5d3250bbb15560a4316bc31ba158bb406d00eb683c0dfb9"
     },
     {
       "path": "scripts/tests/media.test.mjs",
@@ -15478,8 +16006,8 @@
     {
       "path": "web/i18n/en.js",
       "area": "editor",
-      "lines": 522,
-      "sha256": "baec8bfc40321d6ec9d2c0a45e0bb313a4b809fed1bc0e368decafec9a6b69a9"
+      "lines": 526,
+      "sha256": "3d4371059d41d6fa1296c3358e175e98ce8c2365ffb0497ffd593baac05f934b"
     },
     {
       "path": "web/i18n/index.js",
@@ -15496,8 +16024,8 @@
     {
       "path": "web/modules/app-doc-service.js",
       "area": "editor",
-      "lines": 487,
-      "sha256": "e8e34cbb78984766dfeae5c9eace08f462b346af8fe6a32dc2d623a359510fdb"
+      "lines": 504,
+      "sha256": "b243dba11cb896b8e9d6da356f5cfee2cc7ca01d7bad97818f86d0d8e8a5dc19"
     },
     {
       "path": "web/modules/app-document-layout.js",
@@ -15514,8 +16042,8 @@
     {
       "path": "web/modules/app-export.js",
       "area": "editor",
-      "lines": 131,
-      "sha256": "c94d24aca6e452f3709107e14797f2a31c1153ebf6008abf549bcd68614f873b"
+      "lines": 155,
+      "sha256": "415c2772eca5003ff81177cd52db8af4c0bffb15da0f7d6d88bf1267a725117e"
     },
     {
       "path": "web/modules/app-helpers.js",
@@ -15526,8 +16054,8 @@
     {
       "path": "web/modules/app-media-editor.js",
       "area": "editor",
-      "lines": 203,
-      "sha256": "fa03582cc8b56c3ab161acbf28e9cca15da5110e8742f7647fdad39a3cb5fcb2"
+      "lines": 208,
+      "sha256": "1bf880a611bd105ab626684a252d4bc1e78d6c6a235759375213f8a75dd2b991"
     },
     {
       "path": "web/modules/app-media-render.js",
@@ -15706,70 +16234,70 @@
     },
     {
       "file": "web/modules/app-doc-service.js",
-      "line": 483,
+      "line": 500,
       "event": "abort",
       "target": "signal",
       "handler": "abort"
     },
     {
       "file": "web/modules/app-export.js",
-      "line": 64,
+      "line": 65,
       "event": "viento-export-result",
       "target": "window",
       "handler": "receive"
     },
     {
       "file": "web/modules/app-export.js",
-      "line": 91,
+      "line": 115,
       "event": "click",
       "target": "byId('docExportBtn')",
       "handler": "() => {\n    if (nativePending) return;\n    const current = getContext();\n    if (current.busy && !controller) { window.alert(exportAvailability(current, kind())); return; }\n    // An aborted request may still be settling when this window is reopened.\n    // Track its busy state through controller, never through the new snapshot.\n    context = { ...current, busy: false };\n    session += 1;\n    discard();\n    if (!context.path) options.querySelector('input[value=\"workspace\"]').checked = true;\n    byId('docExportContext').textContent = context.title ? t`当前文档：${context.title}` : t('导出当前作品');\n    message.textContent = '';\n    refresh(); dialog.showModal();\n  }"
     },
     {
       "file": "web/modules/app-export.js",
-      "line": 105,
+      "line": 129,
       "event": "change",
       "target": "options",
       "handler": "() => { discard(); message.textContent = ''; refresh(); }"
     },
     {
       "file": "web/modules/app-export.js",
-      "line": 106,
+      "line": 130,
       "event": "click",
       "target": "close",
       "handler": "closeDialog"
     },
     {
       "file": "web/modules/app-export.js",
-      "line": 107,
+      "line": 131,
       "event": "cancel",
       "target": "dialog",
       "handler": "(event) => { event.preventDefault(); closeDialog(); }"
     },
     {
       "file": "web/modules/app-export.js",
-      "line": 108,
+      "line": 132,
       "event": "click",
       "target": "cancel",
       "handler": "() => controller?.abort()"
     },
     {
       "file": "web/modules/app-export.js",
-      "line": 109,
+      "line": 133,
       "event": "click",
       "target": "download",
       "handler": "() => { downloadStarted = true; message.textContent = t('下载已交给浏览器。请先解压整个文件，再打开正文。'); }"
     },
     {
       "file": "web/modules/app-export.js",
-      "line": 110,
+      "line": 134,
       "event": "click",
       "target": "save",
       "handler": "() => { void saveNative(); }"
     },
     {
       "file": "web/modules/app-export.js",
-      "line": 111,
+      "line": 135,
       "event": "click",
       "target": "start",
       "handler": "async () => {\n    if (controller || nativePending || job || exportAvailability(getContext(), kind())) return;\n    const requestSession = session;\n    const requestController = new AbortController(); controller = requestController;\n    setBusy(true); refresh(); message.textContent = t('正在整理正文与素材并校验文件…');\n    try {\n      const prepared = await requestExport({ kind: kind(), format: format.value, path: context.path, includeChildren: byId('docExportChildren').checked }, requestController.signal);\n      if (requestController.signal.aborted || requestSession !== session || !dialog.open) {\n        void releaseExport(prepared.id).catch(() => {}); return;\n      }\n      job = prepared;\n      message.textContent = t`已准备好 ${job.fileName}（${(job.bytes / 1024 ** 2).toFixed(1)} MB，${job.assetCount} 个素材）。`;\n      if (native) save.hidden = false;\n      else { download.href = `${API_PATHS.EXPORT}?id=${encodeURIComponent(job.id)}`; download.download = job.fileName; download.hidden = false; }\n    } catch (error) {\n      if (requestSession === session && dialog.open) message.textContent = requestController.signal.aborted ? t('已取消导出，原始内容保留。') : t`导出失败：${error.message}`;\n    } finally { controller = null; setBusy(false); refresh(); }\n    if (native && job && dialog.open) await saveNative();\n  }"
@@ -15790,119 +16318,119 @@
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 81,
+      "line": 83,
       "event": "click",
       "target": "item",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 165,
+      "line": 167,
       "event": "focusin",
       "target": "surface",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 166,
+      "line": 168,
       "event": "input",
       "target": "surface",
       "handler": "schedulePreview"
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 167,
+      "line": 169,
       "event": "paste",
       "target": "surface",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 172,
+      "line": 174,
       "event": "dragover",
       "target": "surface",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 175,
+      "line": 177,
       "event": "dragleave",
       "target": "surface",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 176,
+      "line": 178,
       "event": "drop",
       "target": "surface",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 184,
+      "line": 185,
       "event": "click",
       "target": "button",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 188,
+      "line": 189,
       "event": "click",
       "target": "importer",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 189,
+      "line": 190,
       "event": "change",
       "target": "picker",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 190,
+      "line": 191,
       "event": "click",
       "target": "cancel",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 191,
+      "line": 192,
       "event": "click",
       "target": "close",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 192,
+      "line": 193,
       "event": "cancel",
       "target": "dialog",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 193,
+      "line": 194,
       "event": "close",
       "target": "dialog",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 194,
+      "line": 199,
       "event": "input",
       "target": "search",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 195,
+      "line": 200,
       "event": "change",
       "target": "kind",
       "handler": "(inline)"
     },
     {
       "file": "web/modules/app-media-editor.js",
-      "line": 196,
+      "line": 201,
       "event": "click",
       "target": "more",
       "handler": "(inline)"
@@ -17050,6 +17578,46 @@
       "name": "native export handoffs reject missing or invalid request identities without opening a picker"
     },
     {
+      "file": "scripts/tests/export-browser.test.mjs",
+      "line": 56,
+      "name": "an expired browser download is stopped and can be regenerated in the same dialog"
+    },
+    {
+      "file": "scripts/tests/export-browser.test.mjs",
+      "line": 70,
+      "name": "browser download ${failure.name}: ${failure.message} retains the package for retry"
+    },
+    {
+      "file": "scripts/tests/export-browser.test.mjs",
+      "line": 81,
+      "name": "cancelling a browser availability check preserves the prepared package and allows retry"
+    },
+    {
+      "file": "scripts/tests/export-browser.test.mjs",
+      "line": 91,
+      "name": "a late ${outcome} check cannot download or alter a closed and reopened dialog"
+    },
+    {
+      "file": "scripts/tests/export-browser.test.mjs",
+      "line": 103,
+      "name": "closing during a repeated check does not revoke an earlier browser handoff"
+    },
+    {
+      "file": "scripts/tests/export-browser.test.mjs",
+      "line": 111,
+      "name": "repeated activation checks once, locks options and translates status without changing the download name"
+    },
+    {
+      "file": "scripts/tests/export-browser.test.mjs",
+      "line": 138,
+      "name": "browser check uses one HTTP byte and recovers an unavailable job against ${script}"
+    },
+    {
+      "file": "scripts/tests/export-browser.test.mjs",
+      "line": 177,
+      "name": "a non-range or malformed probe is rejected without reading a full archive into memory"
+    },
+    {
       "file": "scripts/tests/export-cancellation.test.mjs",
       "line": 64,
       "name": "late export cancellation removes the completed ${kind} ZIP and leaves all three job slots available"
@@ -17098,6 +17666,41 @@
       "file": "scripts/tests/export-cleanup.test.mjs",
       "line": 215,
       "name": "failed quota eviction retains the pending cleanup and protects all unfinished exports until recovery"
+    },
+    {
+      "file": "scripts/tests/export-downloads.test.mjs",
+      "line": 121,
+      "name": "three segmented ${kind} downloads release capacity for a fourth complete export"
+    },
+    {
+      "file": "scripts/tests/export-downloads.test.mjs",
+      "line": 137,
+      "name": "overlapping repeated and out-of-order ranges only free a slot after the final gap is filled"
+    },
+    {
+      "file": "scripts/tests/export-downloads.test.mjs",
+      "line": 149,
+      "name": "suffix and clamped ranges use their actual returned bounds when completing a download"
+    },
+    {
+      "file": "scripts/tests/export-downloads.test.mjs",
+      "line": 161,
+      "name": "partial, not-modified, unsatisfiable and HEAD responses do not claim a complete download"
+    },
+    {
+      "file": "scripts/tests/export-downloads.test.mjs",
+      "line": 176,
+      "name": "completed ranges belong to one export and cannot fill gaps in another export"
+    },
+    {
+      "file": "scripts/tests/export-downloads.test.mjs",
+      "line": 191,
+      "name": "an interrupted HTTP range does not cover its missing bytes and remains retryable"
+    },
+    {
+      "file": "scripts/tests/export-downloads.test.mjs",
+      "line": 222,
+      "name": "concurrent ranges can finish out of order while active readers remain protected from eviction"
     },
     {
       "file": "scripts/tests/export-preparation.test.mjs",
@@ -17428,6 +18031,41 @@
       "file": "scripts/tests/image-display.test.mjs",
       "line": 134,
       "name": "image display: unsupported origins, backslashes and parent segments remain rejected"
+    },
+    {
+      "file": "scripts/tests/media-drop.test.mjs",
+      "line": 65,
+      "name": "dropping on a block uses that block while focus remains on ${focus}"
+    },
+    {
+      "file": "scripts/tests/media-drop.test.mjs",
+      "line": 82,
+      "name": "pasting into the active block and choosing existing media still respect the captured selection"
+    },
+    {
+      "file": "scripts/tests/media-drop.test.mjs",
+      "line": 99,
+      "name": "a queued close cannot clear the target or pending list of a reopened media dialog"
+    },
+    {
+      "file": "scripts/tests/media-drop.test.mjs",
+      "line": 120,
+      "name": "dropping outside an input uses the active editor and source mode preserves its selection"
+    },
+    {
+      "file": "scripts/tests/media-drop.test.mjs",
+      "line": 129,
+      "name": "cancelled and late uploads leave both the focused block and drop target intact"
+    },
+    {
+      "file": "scripts/tests/media-drop.test.mjs",
+      "line": 147,
+      "name": "a late upload cannot insert into a changed document or a replaced block"
+    },
+    {
+      "file": "scripts/tests/media-drop.test.mjs",
+      "line": 160,
+      "name": "dropped image, audio and video survive actual HTTP import, save, reopen and reference indexing in the target block"
     },
     {
       "file": "scripts/tests/media.test.mjs",
@@ -17908,7 +18546,7 @@
   "moduleHubs": [
     {
       "file": "scripts/lib/workspace.mjs",
-      "consumers": 35
+      "consumers": 38
     },
     {
       "file": "scripts/lib/paths.mjs",
@@ -17916,31 +18554,31 @@
     },
     {
       "file": "scripts/lib/project-layout.mjs",
-      "consumers": 29
+      "consumers": 32
     },
     {
       "file": "scripts/tests/helpers.mjs",
-      "consumers": 27
+      "consumers": 30
     },
     {
       "file": "scripts/lib/doc-api-contract.mjs",
-      "consumers": 19
+      "consumers": 20
     },
     {
       "file": "web/i18n/index.js",
-      "consumers": 18
+      "consumers": 19
     },
     {
       "file": "scripts/lib/process.mjs",
-      "consumers": 17
+      "consumers": 18
     },
     {
       "file": "scripts/tests/editor-harness.mjs",
-      "consumers": 16
+      "consumers": 18
     },
     {
       "file": "scripts/lib/media-format.mjs",
-      "consumers": 14
+      "consumers": 15
     },
     {
       "file": "scripts/standardize-docs/doc-factory.mjs",

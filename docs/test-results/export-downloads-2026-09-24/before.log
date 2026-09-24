@@ -1,0 +1,246 @@
+TAP version 13
+# Subtest: three segmented document downloads release capacity for a fourth complete export
+not ok 1 - three segmented document downloads release capacity for a fourth complete export
+  ---
+  duration_ms: 420.349021
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-downloads.test.mjs:121:47'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: {"ok":false,"error":"请先下载或关闭已有导出，再继续","errorCode":"export_failed"}
+        at create (file:///tmp/viento-test-J6sHQf/[eval1]:29:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async file:///tmp/viento-test-J6sHQf/[eval1]:91:18 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 409,
+      expected: 200,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    create (file:///tmp/viento-test-J6sHQf/[eval1]:29:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async file:///tmp/viento-test-J6sHQf/[eval1]:91:18 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: three segmented workspace downloads release capacity for a fourth complete export
+not ok 2 - three segmented workspace downloads release capacity for a fourth complete export
+  ---
+  duration_ms: 404.114842
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-downloads.test.mjs:121:47'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: {"ok":false,"error":"请先下载或关闭已有导出，再继续","errorCode":"export_failed"}
+        at create (file:///tmp/viento-test-KWwPui/[eval1]:29:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async file:///tmp/viento-test-KWwPui/[eval1]:91:18 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 409,
+      expected: 200,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    create (file:///tmp/viento-test-KWwPui/[eval1]:29:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async file:///tmp/viento-test-KWwPui/[eval1]:91:18 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: overlapping repeated and out-of-order ranges only free a slot after the final gap is filled
+not ok 3 - overlapping repeated and out-of-order ranges only free a slot after the final gap is filled
+  ---
+  duration_ms: 411.801372
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-downloads.test.mjs:137:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: {"ok":false,"error":"请先下载或关闭已有导出，再继续","errorCode":"export_failed"}
+        at create (file:///tmp/viento-test-Ykdoar/[eval1]:29:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async file:///tmp/viento-test-Ykdoar/[eval1]:89:5 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 409,
+      expected: 200,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    create (file:///tmp/viento-test-Ykdoar/[eval1]:29:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async file:///tmp/viento-test-Ykdoar/[eval1]:89:5 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: suffix and clamped ranges use their actual returned bounds when completing a download
+not ok 4 - suffix and clamped ranges use their actual returned bounds when completing a download
+  ---
+  duration_ms: 398.28088
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-downloads.test.mjs:149:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: {"ok":false,"error":"请先下载或关闭已有导出，再继续","errorCode":"export_failed"}
+        at create (file:///tmp/viento-test-PI1zJI/[eval1]:29:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async file:///tmp/viento-test-PI1zJI/[eval1]:87:18 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 409,
+      expected: 200,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    create (file:///tmp/viento-test-PI1zJI/[eval1]:29:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async file:///tmp/viento-test-PI1zJI/[eval1]:87:18 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: partial, not-modified, unsatisfiable and HEAD responses do not claim a complete download
+ok 5 - partial, not-modified, unsatisfiable and HEAD responses do not claim a complete download
+  ---
+  duration_ms: 408.760829
+  ...
+# Subtest: completed ranges belong to one export and cannot fill gaps in another export
+not ok 6 - completed ranges belong to one export and cannot fill gaps in another export
+  ---
+  duration_ms: 416.356184
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-downloads.test.mjs:176:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: {"ok":false,"error":"请先下载或关闭已有导出，再继续","errorCode":"export_failed"}
+        at create (file:///tmp/viento-test-mSNjvt/[eval1]:29:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async file:///tmp/viento-test-mSNjvt/[eval1]:90:5 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 409,
+      expected: 200,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    create (file:///tmp/viento-test-mSNjvt/[eval1]:29:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async file:///tmp/viento-test-mSNjvt/[eval1]:90:5 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: an interrupted HTTP range does not cover its missing bytes and remains retryable
+not ok 7 - an interrupted HTTP range does not cover its missing bytes and remains retryable
+  ---
+  duration_ms: 411.08971
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-downloads.test.mjs:191:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: {"ok":false,"error":"请先下载或关闭已有导出，再继续","errorCode":"export_failed"}
+        at create (file:///tmp/viento-test-rj5MjD/[eval1]:29:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async file:///tmp/viento-test-rj5MjD/[eval1]:108:5 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 409,
+      expected: 200,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    create (file:///tmp/viento-test-rj5MjD/[eval1]:29:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async file:///tmp/viento-test-rj5MjD/[eval1]:108:5 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: concurrent ranges can finish out of order while active readers remain protected from eviction
+not ok 8 - concurrent ranges can finish out of order while active readers remain protected from eviction
+  ---
+  duration_ms: 416.26686
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-downloads.test.mjs:222:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: {"ok":false,"error":"请先下载或关闭已有导出，再继续","errorCode":"export_failed"}
+        at create (file:///tmp/viento-test-qZzLJi/[eval1]:29:12)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async file:///tmp/viento-test-qZzLJi/[eval1]:101:7 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 409,
+      expected: 200,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    create (file:///tmp/viento-test-qZzLJi/[eval1]:29:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async file:///tmp/viento-test-qZzLJi/[eval1]:101:7 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 1
+# fail 7
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3425.10499

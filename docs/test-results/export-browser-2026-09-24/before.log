@@ -1,0 +1,256 @@
+TAP version 13
+# Subtest: an expired browser download is stopped and can be regenerated in the same dialog
+not ok 1 - an expired browser download is stopped and can be regenerated in the same dialog
+  ---
+  duration_ms: 20.875731
+  location: 'file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:56:1'
+  failureType: 'testCodeFailure'
+  error: 'an unchecked link must not download an error response as a ZIP'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0:
+      href: '/api/export?id=prepared'
+      fileName: '角色 #100%.zip'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:58:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async startSubtest (node:internal/test_runner/harness:214:3)
+  ...
+# Subtest: browser download TypeError: network unavailable retains the package for retry
+not ok 2 - browser download TypeError: network unavailable retains the package for retry
+  ---
+  duration_ms: 12.826165
+  location: 'file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:70:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:72:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: browser download Error: temporary server failure retains the package for retry
+not ok 3 - browser download Error: temporary server failure retains the package for retry
+  ---
+  duration_ms: 9.655089
+  location: 'file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:70:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:72:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: browser download TimeoutError: check timed out retains the package for retry
+not ok 4 - browser download TimeoutError: check timed out retains the package for retry
+  ---
+  duration_ms: 9.209025
+  location: 'file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:70:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:72:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: cancelling a browser availability check preserves the prepared package and allows retry
+not ok 5 - cancelling a browser availability check preserves the prepared package and allows retry
+  ---
+  duration_ms: 9.01165
+  location: 'file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:81:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:83:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: a late success check cannot download or alter a closed and reopened dialog
+not ok 6 - a late success check cannot download or alter a closed and reopened dialog
+  ---
+  duration_ms: 8.558657
+  location: 'file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:91:47'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:93:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: a late expired check cannot download or alter a closed and reopened dialog
+not ok 7 - a late expired check cannot download or alter a closed and reopened dialog
+  ---
+  duration_ms: 11.621079
+  location: 'file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:91:47'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:93:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: closing during a repeated check does not revoke an earlier browser handoff
+not ok 8 - closing during a repeated check does not revoke an earlier browser handoff
+  ---
+  duration_ms: 8.309187
+  location: 'file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:103:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:105:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: repeated activation checks once, locks options and translates status without changing the download name
+not ok 9 - repeated activation checks once, locks options and translates status without changing the download name
+  ---
+  duration_ms: 8.210385
+  location: 'file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:111:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:113:10)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: browser check uses one HTTP byte and recovers an unavailable job against doc-site-server.mjs
+not ok 10 - browser check uses one HTTP byte and recovers an unavailable job against doc-site-server.mjs
+  ---
+  duration_ms: 365.304775
+  location: 'file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:138:68'
+  failureType: 'testCodeFailure'
+  error: 'real client must probe before handing the file off'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:162:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: browser check uses one HTTP byte and recovers an unavailable job against browse-server.mjs
+not ok 11 - browser check uses one HTTP byte and recovers an unavailable job against browse-server.mjs
+  ---
+  duration_ms: 293.471793
+  location: 'file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:138:68'
+  failureType: 'testCodeFailure'
+  error: 'real client must probe before handing the file off'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:162:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: a non-range or malformed probe is rejected without reading a full archive into memory
+not ok 12 - a non-range or malformed probe is rejected without reading a full archive into memory
+  ---
+  duration_ms: 2.653557
+  location: 'file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:177:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'undefined'
+    - 'function'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'function'
+  actual: 'undefined'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/viento-test-Z18qLn/scripts/tests/export-browser.test.mjs:183:12)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 0
+# fail 12
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 903.210514

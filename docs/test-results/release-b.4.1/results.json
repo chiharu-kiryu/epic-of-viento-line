@@ -1,0 +1,92 @@
+{
+  "date": "2026-09-24",
+  "version": "b.4.1",
+  "buildVersion": "0.4.1",
+  "gitBase": "c27f8c9e790fd6fd1313f329c0c40edb640eb6b6",
+  "bugs": [
+    "N107",
+    "N108",
+    "N109",
+    "N110"
+  ],
+  "newExecutionCases": 29,
+  "application": {
+    "runtime": "Node v24.19.0 with VIENTO_TEST_ARCHIVE_BINARY configured",
+    "tests": 519,
+    "passed": 519,
+    "failed": 0,
+    "skipped": 0,
+    "javascriptSyntaxFiles": 138,
+    "apiContractPassed": true,
+    "log": "application.log"
+  },
+  "native": {
+    "scope": "Production workspace.rs with project-defaults.json and unchanged official CLI; prior full Tauri library evidence retained with matching hashes",
+    "tests": 14,
+    "passed": 13,
+    "failed": 0,
+    "ignored": 1,
+    "ignoredReason": "Existing full-size migration test requires VIENTO_TEST_SOURCE_ROOT; daily works untouched",
+    "log": "native.log",
+    "buildEvidence": "native-build.json",
+    "resolvedDependenciesVerified": 61
+  },
+  "retainedTauriLibrary": {
+    "versionAtTest": "b.3.8 worktree before the b.3.9 release",
+    "passed": 22,
+    "failed": 0,
+    "ignored": 1,
+    "sourceFingerprintsMatch": true,
+    "evidence": "docs/test-results/export-bridge-2026-09-23/native-build.json"
+  },
+  "retainedBrowserSmoke": {
+    "report": "docs/test-results/export-browser-2026-09-24/browser.json",
+    "actualDownloadEvents": 2,
+    "downloadedZipDigestsMatched": 2,
+    "repeatedDuringRelease": false
+  },
+  "cargoMetadata": "offline locked; application 0.4.1 and a single glib 0.18.5 from src-tauri/vendor/glib",
+  "cargoMetadataEvidence": "cargo.json",
+  "nextVersion": "b.4.2",
+  "functionNetworkRevision": 55,
+  "files": {
+    "VERSION": "fb1aefd805175d2dbe0263a5c418d2a99c5967b3b6ca738e3bb8bd4354149ffe",
+    "package.json": "b3c759e1379fec12f26030bffce9671260385989834c812cf4bcf2bc613537ca",
+    "package-lock.json": "f84b64fd3a52933222550db6cb7dc414dba35f8e750c8cf9c76d0f89e9b4d2d6",
+    "src-tauri/Cargo.toml": "ff695d39a901f6649b1cfb12075ad60e3ee6e4edd7025a6f60def0aa4af03212",
+    "src-tauri/Cargo.lock": "5aff1e4f73cb0f6dd0cfe1c011308a95274968e17cc599b619d8a260e939ac29",
+    "src-tauri/tauri.conf.json": "914106cbe1aad35b05a6de7e942873a73416dbc17ccfe1f91bebad5b10ca44ff",
+    "web/index.html": "e569b6b88cbce39aaa706ef11e3524ba294a0ab548c14d10603514bcd279ddb1",
+    "desktop/ui/index.html": "c2517363d722a6353930f04fd84b3881dd7c0bbfbf16ac008c712d417a77fb83",
+    "README.md": "7d39b78a90ff94478b5c384f4ac99a5fa374e9d0f7a3d542bc3de4b6d9600005",
+    "desktop/README.md": "d5b6ad90ab6bdcb82070c9698f88384dac72166a2dcba10d60d4a9a06f3d2dff",
+    "scripts/lib/doc-server-routes.mjs": "0dba0147927f2e858bc985ccf8577ee38af5b04a28c281f8ce2b16ee1124cd09",
+    "scripts/lib/export-service.mjs": "9653115876193f7bbe0f1b69a79e7ea73a7bba82a35f99c936086a36668f682e",
+    "scripts/tests/export-downloads.test.mjs": "05e21123992eb1d21ef7170f661277d05db92b40ed1e03ecf6234a7fcdbbbdf0",
+    "scripts/tests/editor-dialogs.test.mjs": "30e214da1b22add4dffa5ab36a709595519f8adecd79556d0507883895c471a5",
+    "scripts/tests/export-browser.test.mjs": "534d7241bb024bd2120edc2ef30d5dd9d757efb015ca26003dcb30a3df19dfc0",
+    "web/i18n/en.js": "3d4371059d41d6fa1296c3358e175e98ce8c2365ffb0497ffd593baac05f934b",
+    "web/modules/app-doc-service.js": "b243dba11cb896b8e9d6da356f5cfee2cc7ca01d7bad97818f86d0d8e8a5dc19",
+    "web/modules/app-export.js": "415c2772eca5003ff81177cd52db8af4c0bffb15da0f7d6d88bf1267a725117e",
+    "scripts/tests/dialog-harness.mjs": "b7fc854c98c0572410b6de1ba01ff2b79e2c9d81091e478fcc15c056ad3a287a",
+    "scripts/tests/media-drop.test.mjs": "015a0e0d117d0505e5d3250bbb15560a4316bc31ba158bb406d00eb683c0dfb9",
+    "web/modules/app-media-editor.js": "1bf880a611bd105ab626684a252d4bc1e78d6c6a235759375213f8a75dd2b991"
+  },
+  "nativeArchiveTestsRerun": true,
+  "fullTauriLibraryTestsRerun": false,
+  "nativeWindowTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "functionNetworkValidation": "network.json",
+  "versionFiles": "version-files.json",
+  "temporaryNativeBuildRemoved": true,
+  "sourceArchive": {
+    "filesVerified": 664,
+    "allArchivedBytesMatchSource": true,
+    "fileModesVerified": true,
+    "vendoredGlibFilesVerified": 121,
+    "unpackedCargoMetadataVerified": true,
+    "unpackedSourceFingerprintsVerified": 164,
+    "temporaryFilesRemoved": true
+  }
+}

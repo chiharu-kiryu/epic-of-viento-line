@@ -1,0 +1,13 @@
+{
+  "temporaryDirectory": "/tmp/viento-test-Z18qLn",
+  "baseline": "c27f8c9e790fd6fd1313f329c0c40edb640eb6b6",
+  "sourceSha256": {
+    "web/modules/app-export.js": "c94d24aca6e452f3709107e14797f2a31c1153ebf6008abf549bcd68614f873b",
+    "web/modules/app-doc-service.js": "e8e34cbb78984766dfeae5c9eace08f462b346af8fe6a32dc2d623a359510fdb",
+    "web/i18n/en.js": "baec8bfc40321d6ec9d2c0a45e0bb313a4b809fed1bc0e368decafec9a6b69a9",
+    "web/index.html": "e3784d58bb5b28efb9cde8617072aa7229590ba8db303da7d475902b9db2631b"
+  },
+  "testFileSha256": "534d7241bb024bd2120edc2ef30d5dd9d757efb015ca26003dcb30a3df19dfc0",
+  "exitCode": 1,
+  "removed": true
+}

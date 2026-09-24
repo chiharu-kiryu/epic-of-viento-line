@@ -1,0 +1,495 @@
+TAP version 13
+# Subtest: reopening an aborted export ignores its late failure and allows a fresh export
+ok 1 - reopening an aborted export ignores its late failure and allows a fresh export
+  ---
+  duration_ms: 28.760497
+  ...
+# Subtest: an aborted export arriving after reopen is released without blocking the new dialog
+ok 2 - an aborted export arriving after reopen is released without blocking the new dialog
+  ---
+  duration_ms: 15.563331
+  ...
+# Subtest: opening export during a save cannot leave a permanently busy snapshot
+ok 3 - opening export during a save cannot leave a permanently busy snapshot
+  ---
+  duration_ms: 9.753893
+  ...
+# Subtest: an expired native export can be regenerated in the same dialog after cancelling its save picker
+ok 4 - an expired native export can be regenerated in the same dialog after cancelling its save picker
+  ---
+  duration_ms: 15.769246
+  ...
+# Subtest: native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+ok 5 - native save failures retain a retryable package and keep close/options guarded only while the picker is pending
+  ---
+  duration_ms: 12.134966
+  ...
+# Subtest: cancelling media import during structured insertion keeps the draft and uploaded assets
+ok 6 - cancelling media import during structured insertion keeps the draft and uploaded assets
+  ---
+  duration_ms: 10.435963
+  ...
+# Subtest: late media preparation cannot overwrite a draft whose content changed
+ok 7 - late media preparation cannot overwrite a draft whose content changed
+  ---
+  duration_ms: 12.809772
+  ...
+# Subtest: existing media still inserts into an unchanged structured draft and releases the editor
+ok 8 - existing media still inserts into an unchanged structured draft and releases the editor
+  ---
+  duration_ms: 14.263905
+  ...
+# Subtest: media preview loads immediately after reading a document without requiring another input event
+ok 9 - media preview loads immediately after reading a document without requiring another input event
+  ---
+  duration_ms: 53.928103
+  ...
+# Subtest: media preview stops when switching to browse: existing document
+ok 10 - media preview stops when switching to browse: existing document
+  ---
+  duration_ms: 29.582546
+  ...
+# Subtest: media preview stops when switching to browse: first unsaved document
+ok 11 - media preview stops when switching to browse: first unsaved document
+  ---
+  duration_ms: 29.669743
+  ...
+# Subtest: media preview clears the previous template immediately while a different type is loading
+ok 12 - media preview clears the previous template immediately while a different type is loading
+  ---
+  duration_ms: 26.313407
+  ...
+# Subtest: media preview clears when types share a source path and ignores the old pending response
+ok 13 - media preview clears when types share a source path and ignores the old pending response
+  ---
+  duration_ms: 28.968125
+  ...
+# Subtest: media preview and a first dirty draft survive a cancelled mode switch, then close together after confirmation
+ok 14 - media preview and a first dirty draft survive a cancelled mode switch, then close together after confirmation
+  ---
+  duration_ms: 26.649302
+  ...
+# Subtest: media preview keeps unchanged playback through source/block switches and saving without altering source bytes
+ok 15 - media preview keeps unchanged playback through source/block switches and saving without altering source bytes
+  ---
+  duration_ms: 53.568472
+  ...
+# Subtest: media preview discards a late result after removing media or leaving and reopening the editor
+ok 16 - media preview discards a late result after removing media or leaving and reopening the editor
+  ---
+  duration_ms: 31.884938
+  ...
+# Subtest: template loading: changing a new draft extension refreshes media parsing and ignores the previous path response
+ok 17 - template loading: changing a new draft extension refreshes media parsing and ignores the previous path response
+  ---
+  duration_ms: 30.798901
+  ...
+# Subtest: type settings distinguish creation from editing and retain a rejected new draft for retry or cancel
+ok 18 - type settings distinguish creation from editing and retain a rejected new draft for retry or cancel
+  ---
+  duration_ms: 41.666614
+  ...
+# Subtest: template preview and save retain original BOM and line endings when only its label changes
+ok 19 - template preview and save retain original BOM and line endings when only its label changes
+  ---
+  duration_ms: 27.157007
+  ...
+# Subtest: returning from saved project settings keeps editing locked until the new index applies
+ok 20 - returning from saved project settings keeps editing locked until the new index applies
+  ---
+  duration_ms: 19.360884
+  ...
+# Subtest: discarding edits after a template save cannot leave a closed dialog marked dirty
+ok 21 - discarding edits after a template save cannot leave a closed dialog marked dirty
+  ---
+  duration_ms: 25.503752
+  ...
+# Subtest: a failed project index application keeps the settings available for retry without another save
+ok 22 - a failed project index application keeps the settings available for retry without another save
+  ---
+  duration_ms: 23.297866
+  ...
+# Subtest: source drafting restores browser-normalized newlines and preserves untouched mixed-ending lines
+ok 23 - source drafting restores browser-normalized newlines and preserves untouched mixed-ending lines
+  ---
+  duration_ms: 1.637986
+  ...
+# Subtest: block mode round trips source exactly, including whitespace, fences and table alignment
+ok 24 - block mode round trips source exactly, including whitespace, fences and table alignment
+  ---
+  duration_ms: 1.529627
+  ...
+# Subtest: editing a block changes only that source span and preserves original line endings
+ok 25 - editing a block changes only that source span and preserves original line endings
+  ---
+  duration_ms: 0.231895
+  ...
+# Subtest: tilde and nested backtick fences keep blank lines inside one editable block
+ok 26 - tilde and nested backtick fences keep blank lines inside one editable block
+  ---
+  duration_ms: 0.241093
+  ...
+# Subtest: new document validation refuses paths that cannot be indexed or migrated before submitting
+ok 27 - new document validation refuses paths that cannot be indexed or migrated before submitting
+  ---
+  duration_ms: 41.247219
+  ...
+# Subtest: save recovery: an auto-completed filename remains the draft and preview path after a rejected creation
+ok 28 - save recovery: an auto-completed filename remains the draft and preview path after a rejected creation
+  ---
+  duration_ms: 14.527952
+  ...
+# Subtest: save recovery: HTTP 401 retains the source draft and reports a rejected rebuild without losing a successful save
+ok 29 - save recovery: HTTP 401 retains the source draft and reports a rejected rebuild without losing a successful save
+  ---
+  duration_ms: 12.146338
+  ...
+# Subtest: save recovery: HTTP 403 retains the blocks draft and reports a rejected rebuild without losing a successful save
+ok 30 - save recovery: HTTP 403 retains the blocks draft and reports a rejected rebuild without losing a successful save
+  ---
+  duration_ms: 12.306536
+  ...
+# Subtest: save recovery: adding the default extension cannot submit an overlong filename and shortening it permits retry
+ok 31 - save recovery: adding the default extension cannot submit an overlong filename and shortening it permits retry
+  ---
+  duration_ms: 13.317277
+  ...
+# Subtest: suggested filenames sanitize arbitrary type labels and fit filesystem filename limits
+ok 32 - suggested filenames sanitize arbitrary type labels and fit filesystem filename limits
+  ---
+  duration_ms: 12.864919
+  ...
+# Subtest: the initial creation hint cannot hide a failed template load
+ok 33 - the initial creation hint cannot hide a failed template load
+  ---
+  duration_ms: 10.016027
+  ...
+# Subtest: a failed index reload after saving is reported as a rebuild failure while the saved editor survives
+ok 34 - a failed index reload after saving is reported as a rebuild failure while the saved editor survives
+  ---
+  duration_ms: 13.700453
+  ...
+# Subtest: an invalid replacement index preserves the current document list and project types
+ok 35 - an invalid replacement index preserves the current document list and project types
+  ---
+  duration_ms: 9.221541
+  ...
+# Subtest: source/block switches retain new edits and do not duplicate display-only headings
+ok 36 - source/block switches retain new edits and do not duplicate display-only headings
+  ---
+  duration_ms: 10.031105
+  ...
+# Subtest: an unchanged source stays clean across modes and index refresh preserves a dirty editor
+ok 37 - an unchanged source stays clean across modes and index refresh preserves a dirty editor
+  ---
+  duration_ms: 10.728905
+  ...
+# Subtest: late source responses cannot reopen a cancelled session; empty sources stay empty
+ok 38 - late source responses cannot reopen a cancelled session; empty sources stay empty
+  ---
+  duration_ms: 9.06993
+  ...
+# Subtest: source loading: a cancelled read cannot replace the cache or revision of a reopened and saved document
+ok 39 - source loading: a cancelled read cannot replace the cache or revision of a reopened and saved document
+  ---
+  duration_ms: 12.450252
+  ...
+# Subtest: source loading: returning to browse discards an unfinished selection read instead of refilling the cleared editor
+ok 40 - source loading: returning to browse discards an unfinished selection read instead of refilling the cleared editor
+  ---
+  duration_ms: 9.274963
+  ...
+# Subtest: source loading: a failed abandoned read cannot add diagnostics after selecting another document
+ok 41 - source loading: a failed abandoned read cannot add diagnostics after selecting another document
+  ---
+  duration_ms: 10.809481
+  ...
+# Subtest: source loading: an index refresh cannot attach an old source response to a replacement catalog entry
+ok 42 - source loading: an index refresh cannot attach an old source response to a replacement catalog entry
+  ---
+  duration_ms: 14.104899
+  ...
+# Subtest: source loading: a superseded conflict reload keeps the dirty draft until reloading the current entry succeeds
+ok 43 - source loading: a superseded conflict reload keeps the dirty draft until reloading the current entry succeeds
+  ---
+  duration_ms: 14.075082
+  ...
+# Subtest: source loading: unauthorized responses preserve the last source and permit an empty-source retry
+ok 44 - source loading: unauthorized responses preserve the last source and permit an empty-source retry
+  ---
+  duration_ms: 9.907779
+  ...
+# Subtest: source loading: missing responses preserve the last source and permit an empty-source retry
+ok 45 - source loading: missing responses preserve the last source and permit an empty-source retry
+  ---
+  duration_ms: 9.655895
+  ...
+# Subtest: source loading: malformed responses preserve the last source and permit an empty-source retry
+ok 46 - source loading: malformed responses preserve the last source and permit an empty-source retry
+  ---
+  duration_ms: 8.755255
+  ...
+# Subtest: saving serializes shortcut requests and locks editing until rebuilding finishes
+ok 47 - saving serializes shortcut requests and locks editing until rebuilding finishes
+  ---
+  duration_ms: 8.335319
+  ...
+# Subtest: a changed creation path is an unsaved draft and cancel restores the current document path
+ok 48 - a changed creation path is an unsaved draft and cancel restores the current document path
+  ---
+  duration_ms: 9.313027
+  ...
+# Subtest: suggested creation paths reuse same-type directories and never treat a filename as a folder
+ok 49 - suggested creation paths reuse same-type directories and never treat a filename as a folder
+  ---
+  duration_ms: 7.086801
+  ...
+# Subtest: an older template response cannot replace a newer type or reopen a cancelled creation
+ok 50 - an older template response cannot replace a newer type or reopen a cancelled creation
+  ---
+  duration_ms: 9.604336
+  ...
+# Subtest: template loading: a cancelled response cannot replace the fresh cache used by the next creation and save
+ok 51 - template loading: a cancelled response cannot replace the fresh cache used by the next creation and save
+  ---
+  duration_ms: 12.036648
+  ...
+# Subtest: template loading: cancelling a first draft does not cache its late response before reopening
+ok 52 - template loading: cancelling a first draft does not cache its late response before reopening
+  ---
+  duration_ms: 9.836803
+  ...
+# Subtest: template loading: an old failure cannot poison a valid empty template or report an error in the new session
+ok 53 - template loading: an old failure cannot poison a valid empty template or report an error in the new session
+  ---
+  duration_ms: 15.294054
+  ...
+# Subtest: template loading: a cancelled creation cannot move the caret or scroll of a newer draft of the same type
+ok 54 - template loading: a cancelled creation cannot move the caret or scroll of a newer draft of the same type
+  ---
+  duration_ms: 17.2763
+  ...
+# Subtest: conflict reload uses the newly read version, even if the server changed again after the conflict
+ok 55 - conflict reload uses the newly read version, even if the server changed again after the conflict
+  ---
+  duration_ms: 10.822214
+  ...
+# Subtest: failed forced saves keep the original baseline so a normal retry asks about the conflict again
+ok 56 - failed forced saves keep the original baseline so a normal retry asks about the conflict again
+  ---
+  duration_ms: 8.864345
+  ...
+# Subtest: a failed conflict reload retains the block draft and its error until a successful retry
+ok 57 - a failed conflict reload retains the block draft and its error until a successful retry
+  ---
+  duration_ms: 8.751648
+  ...
+# Subtest: save conflict: keep draft only changes the baseline after an approved successful write
+ok 58 - save conflict: keep draft only changes the baseline after an approved successful write
+  ---
+  duration_ms: 7.52926
+  ...
+# Subtest: save conflict: cancel conflict only changes the baseline after an approved successful write
+ok 59 - save conflict: cancel conflict only changes the baseline after an approved successful write
+  ---
+  duration_ms: 9.020745
+  ...
+# Subtest: save conflict: cancel force confirmation only changes the baseline after an approved successful write
+ok 60 - save conflict: cancel force confirmation only changes the baseline after an approved successful write
+  ---
+  duration_ms: 10.859527
+  ...
+# Subtest: save conflict: confirm force save only changes the baseline after an approved successful write
+ok 61 - save conflict: confirm force save only changes the baseline after an approved successful write
+  ---
+  duration_ms: 7.787226
+  ...
+# Subtest: content revision tokens survive reading, conflict reload and subsequent ordinary saving
+ok 62 - content revision tokens survive reading, conflict reload and subsequent ordinary saving
+  ---
+  duration_ms: 9.228484
+  ...
+# Subtest: switching from the editor to browse makes the document content visible again
+ok 63 - switching from the editor to browse makes the document content visible again
+  ---
+  duration_ms: 7.016115
+  ...
+# Subtest: a successful creation stays editable as an existing file if rebuilding fails
+ok 64 - a successful creation stays editable as an existing file if rebuilding fails
+  ---
+  duration_ms: 10.551004
+  ...
+# Subtest: browser textarea normalization preserves source line endings through switches, edits and saves
+ok 65 - browser textarea normalization preserves source line endings through switches, edits and saves
+  ---
+  duration_ms: 11.879245
+  ...
+# Subtest: first index refresh maps a created source to its catalog ID without closing its editor
+ok 66 - first index refresh maps a created source to its catalog ID without closing its editor
+  ---
+  duration_ms: 12.896078
+  ...
+# Subtest: discard cancellation protects dirty drafts on document, mode and editor exit
+ok 67 - discard cancellation protects dirty drafts on document, mode and editor exit
+  ---
+  duration_ms: 7.549058
+  ...
+# Subtest: dropping on a block uses that block while focus remains on another block
+ok 68 - dropping on a block uses that block while focus remains on another block
+  ---
+  duration_ms: 67.606093
+  ...
+# Subtest: dropping on a block uses that block while focus remains on the drop target
+ok 69 - dropping on a block uses that block while focus remains on the drop target
+  ---
+  duration_ms: 39.257597
+  ...
+# Subtest: dropping on a block uses that block while focus remains on toolbar
+ok 70 - dropping on a block uses that block while focus remains on toolbar
+  ---
+  duration_ms: 31.141349
+  ...
+# Subtest: pasting into the active block and choosing existing media still respect the captured selection
+ok 71 - pasting into the active block and choosing existing media still respect the captured selection
+  ---
+  duration_ms: 35.04147
+  ...
+# Subtest: a queued close cannot clear the target or pending list of a reopened media dialog
+ok 72 - a queued close cannot clear the target or pending list of a reopened media dialog
+  ---
+  duration_ms: 39.690098
+  ...
+# Subtest: dropping outside an input uses the active editor and source mode preserves its selection
+ok 73 - dropping outside an input uses the active editor and source mode preserves its selection
+  ---
+  duration_ms: 28.489917
+  ...
+# Subtest: cancelled and late uploads leave both the focused block and drop target intact
+ok 74 - cancelled and late uploads leave both the focused block and drop target intact
+  ---
+  duration_ms: 30.849098
+  ...
+# Subtest: a late upload cannot insert into a changed document or a replaced block
+ok 75 - a late upload cannot insert into a changed document or a replaced block
+  ---
+  duration_ms: 31.848397
+  ...
+# Subtest: dropped image, audio and video survive actual HTTP import, save, reopen and reference indexing in the target block
+ok 76 - dropped image, audio and video survive actual HTTP import, save, reopen and reference indexing in the target block
+  ---
+  duration_ms: 716.665077
+  ...
+# Subtest: inline images and videos parse at the start, in prose and fields, but never inside code
+ok 77 - inline images and videos parse at the start, in prose and fields, but never inside code
+  ---
+  duration_ms: 9.503943
+  ...
+# Subtest: media URLs reject executable, remote and escaping sources while preserving local encoded names
+ok 78 - media URLs reject executable, remote and escaping sources while preserving local encoded names
+  ---
+  duration_ms: 0.875872
+  ...
+# Subtest: stable media URL forms normalize UUID casing to the registered identity
+ok 79 - stable media URL forms normalize UUID casing to the registered identity
+  ---
+  duration_ms: 0.218089
+  ...
+# Subtest: audio references render in prose, custom fields and structured media without autoplay or source loss
+ok 80 - audio references render in prose, custom fields and structured media without autoplay or source loss
+  ---
+  duration_ms: 9.165924
+  ...
+# Subtest: JSON and YAML insertion preserves existing source bytes, comments and structured values
+ok 81 - JSON and YAML insertion preserves existing source bytes, comments and structured values
+  ---
+  duration_ms: 21.126896
+  ...
+# Subtest: media insertion keeps indented YAML maps valid, including BOM, comments and existing lists
+ok 82 - media insertion keeps indented YAML maps valid, including BOM, comments and existing lists
+  ---
+  duration_ms: 13.326545
+  ...
+# Subtest: media insertion preserves an existing YAML flow list: indented map with BOM/CRLF
+ok 83 - media insertion preserves an existing YAML flow list: indented map with BOM/CRLF
+  ---
+  duration_ms: 2.669156
+  ...
+# Subtest: media insertion preserves an existing YAML flow list: indented flow map
+ok 84 - media insertion preserves an existing YAML flow list: indented flow map
+  ---
+  duration_ms: 2.749831
+  ...
+# Subtest: media insertion preserves an existing YAML flow list: list on a separate indented line
+ok 85 - media insertion preserves an existing YAML flow list: list on a separate indented line
+  ---
+  duration_ms: 2.700076
+  ...
+# Subtest: media insertion accepts an empty YAML document: document end and BOM/CRLF
+ok 86 - media insertion accepts an empty YAML document: document end and BOM/CRLF
+  ---
+  duration_ms: 1.901612
+  ...
+# Subtest: media insertion accepts an empty YAML document: YAML directive
+ok 87 - media insertion accepts an empty YAML document: YAML directive
+  ---
+  duration_ms: 1.450015
+  ...
+# Subtest: media insertion accepts an empty YAML document: start marker without a final newline
+ok 88 - media insertion accepts an empty YAML document: start marker without a final newline
+  ---
+  duration_ms: 0.985854
+  ...
+# Subtest: reused media survives consecutive structured insertion, save, reopen, index and both export formats
+ok 89 - reused media survives consecutive structured insertion, save, reopen, index and both export formats
+  ---
+  duration_ms: 1529.529401
+  ...
+# Subtest: preview tolerates cyclic YAML aliases and interrupted imports leave no partial files
+ok 90 - preview tolerates cyclic YAML aliases and interrupted imports leave no partial files
+  ---
+  duration_ms: 57.356971
+  ...
+# Subtest: concurrent imports reuse identical bytes, keep names independent of paths and clean rejected uploads
+ok 91 - concurrent imports reuse identical bytes, keep names independent of paths and clean rejected uploads
+  ---
+  duration_ms: 79.778647
+  ...
+# Subtest: audio imports share registry formats, reuse existing audio and reject mislabeled or oversized files
+ok 92 - audio imports share registry formats, reuse existing audio and reject mislabeled or oversized files
+  ---
+  duration_ms: 169.139643
+  ...
+# Subtest: imports respect an external asset store and reject linked destination directories
+ok 93 - imports respect an external asset store and reject linked destination directories
+  ---
+  duration_ms: 94.432376
+  ...
+# Subtest: image: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+ok 94 - image: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+  ---
+  duration_ms: 1114.341283
+  ...
+# Subtest: audio: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+ok 95 - audio: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+  ---
+  duration_ms: 1132.891502
+  ...
+# Subtest: media import locks editing navigation without discarding the source draft
+ok 96 - media import locks editing navigation without discarding the source draft
+  ---
+  duration_ms: 17.542471
+  ...
+# Subtest: draft preview requests cannot consume the allowance for document reads and writes
+ok 97 - draft preview requests cannot consume the allowance for document reads and writes
+  ---
+  duration_ms: 217.555208
+  ...
+1..97
+# tests 97
+# suites 0
+# pass 97
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4724.876896

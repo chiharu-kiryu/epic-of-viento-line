@@ -5,6 +5,29 @@ import { resolveContainedPath } from './contained-path.mjs';
 import { exportError, planExport, writeExportZip } from './export-package.mjs';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+function recordDownload(job, result) {
+  if (job.downloaded) return;
+  if (result === true) {
+    job.downloaded = true;
+    job.ranges = [];
+    return;
+  }
+  if (!result || !Number.isSafeInteger(result.start) || !Number.isSafeInteger(result.end)
+    || result.total !== job.bytes || result.start < 0 || result.end < result.start || result.end >= job.bytes) return;
+  const ranges = [...(job.ranges || []), [result.start, result.end]].sort((a, b) => a[0] - b[0]);
+  const merged = [];
+  for (const [start, end] of ranges) {
+    const last = merged.at(-1);
+    if (last && start <= last[1] + 1) last[1] = Math.max(last[1], end);
+    else merged.push([start, end]);
+  }
+  job.downloaded = merged.length === 1 && merged[0][0] === 0 && merged[0][1] === job.bytes - 1;
+  // Bound bookkeeping for highly fragmented requests. Unrecorded ranges stay
+  // unproven, so they cannot make an incomplete package eligible for eviction.
+  job.ranges = job.downloaded ? [] : merged.slice(0, 128);
+}
+
 export function createExportService(root, { ttlMs = 15 * 60 * 1000 } = {}) {
   const jobs = new Map();
   let busy = false;
@@ -50,7 +73,7 @@ export function createExportService(root, { ttlMs = 15 * 60 * 1000 } = {}) {
     job.readers += 1;
     clearTimeout(job.timer);
     try {
-      if (await consume(job) === true) job.downloaded = true;
+      recordDownload(job, await consume(job));
     } finally {
       job.readers -= 1;
       // Cleanup has its own retry lifecycle; it must not change a completed
