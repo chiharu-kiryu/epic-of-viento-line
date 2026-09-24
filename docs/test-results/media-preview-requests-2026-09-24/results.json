@@ -1,0 +1,150 @@
+{
+  "date": "2026-09-24",
+  "version": "b.4.1",
+  "gitBase": "40923a0b76993b1b458f3c01312bcaba1408fa96",
+  "scope": "Cancel obsolete draft-media preview reads on new input, removed references, context changes, saving or editor exit while preserving drafts, unchanged players and independent explicit insertion/upload",
+  "workflows": [
+    "F18",
+    "F21",
+    "F30"
+  ],
+  "bugs": [
+    "N113"
+  ],
+  "retainedBugs": [
+    "N111",
+    "N112"
+  ],
+  "before": {
+    "runtime": "Node v24.19.0",
+    "tests": 13,
+    "passed": 1,
+    "failed": 12,
+    "skipped": 0,
+    "log": "before.log",
+    "files": {
+      "web/modules/app-media-editor.js": "2173bd05d11bd968a38849e40ae3b6bdb9448a129ee76d432d9767396cb33518"
+    },
+    "testFileSha256": "3d63e055e829cf2455013d6eea23e4f811390a7e521d19eaead6d9ee8c2721f6",
+    "sourceState": "Final 13 cases, including corrected fixture versions, replayed in an isolated source copy against the verified revision-57 controller with N111 already applied. HTTP failures show obsolete connections still open after 3 seconds. Temporary copy removed."
+  },
+  "fixtureSetup": {
+    "log": "after-fixture-initial.log",
+    "tests": 13,
+    "passed": 12,
+    "failed": 1,
+    "skipped": 0,
+    "reason": "The first post-fix run reached save and exposed invalid fixture version strings one/two. Corrected to contract-valid 1/2, asserted editable session/version, then reran both final pre-fix and post-fix cases. This fixture failure is not a production defect."
+  },
+  "newCases": {
+    "runtime": "Node v24.19.0",
+    "tests": 13,
+    "passed": 13,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after-new.log",
+    "exitedNormally": true
+  },
+  "after": {
+    "runtime": "Node v24.19.0",
+    "tests": 70,
+    "passed": 70,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after.log",
+    "newCases": 13,
+    "exitedNormally": true
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 506,
+    "passed": 504,
+    "failed": 0,
+    "skipped": 2,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 141,
+    "apiContractPassed": true,
+    "versionValidationPassed": true,
+    "nativeArchiveBinaryConfigured": false,
+    "skipReason": "Native archive interoperability and registry agreement require VIENTO_TEST_ARCHIVE_BINARY; b.4.1 release native evidence retained."
+  },
+  "browser": {
+    "record": "browser.json",
+    "activeCancellationVerified": true,
+    "cancellationDurations": [
+      {
+        "preview": 1,
+        "milliseconds": 1116
+      },
+      {
+        "preview": 2,
+        "milliseconds": 927
+      }
+    ],
+    "initialAttemptOnlyVerifiedTimeoutRecovery": true,
+    "dirtyDraftPreserved": true,
+    "saveReloadVerified": true,
+    "assetBytesAndReferencesVerified": true,
+    "observations": [
+      "Initial manual browser steps were farther apart than the 15-second request deadline, so those first two close events only prove timeout recovery.",
+      "The second browser pass grouped input and save actions after 1.2-second debounce waits in one UI call. Both incomplete bodies closed in under three seconds, before the normal request deadline; the third preview completed."
+    ],
+    "fixtureRemoved": true,
+    "serversStopped": true,
+    "tabsClosed": true,
+    "cancellationDurationOrigin": "Elapsed from the proxy first-byte event to response close."
+  },
+  "commands": {
+    "before": "Isolated verified pre-fix source copy: bundled Node v24.19.0 --test scripts/tests/media-preview-requests.test.mjs",
+    "newCases": "/home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test scripts/tests/media-preview-requests.test.mjs",
+    "after": "/home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test scripts/tests/media-preview-requests.test.mjs scripts/tests/media-loading.test.mjs scripts/tests/media-recovery.test.mjs scripts/tests/media-drop.test.mjs scripts/tests/editor-dialogs.test.mjs scripts/tests/request-lifecycle.test.mjs",
+    "application": "env -u VIENTO_TEST_ARCHIVE_BINARY /home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node scripts/check-project.mjs --app-only"
+  },
+  "files": {
+    "scripts/tests/media-preview-requests.test.mjs": "3d63e055e829cf2455013d6eea23e4f811390a7e521d19eaead6d9ee8c2721f6",
+    "web/modules/app-media-editor.js": "b9a598bdba32a719c33165b925df8f1fb6efa3f82429fa0dfe54fc17a9087320"
+  },
+  "evidenceSha256": {
+    "before.log": "53295e569152e15d33ca161c4e7098a4cb33ff42fdd04aad1585ab9727bd4d1e",
+    "after-fixture-initial.log": "41d8db3265f2bfd8caec63cfbc75fd2940c8aeb4707d5e87433f0fd4cc61e0d7",
+    "after-new.log": "99d302d5626c9582cc1fb427bb0cee035b2fa204f071aa5c32988e6b11df25b3",
+    "after.log": "c4c572b001d054fd5dca030d4003ae9bb6bd17e1bfeba104fc748375dc886fe2",
+    "application.log": "45199c2bf83336ec56a5cafbed0b52cad435d22cee85676b46540790dd6841b7",
+    "browser-events.log": "8c9e90357acaceb4d153fc2d4efea70ff0176c8565ab97c7be35772f0430da82",
+    "browser-cancel-events.log": "7a96c64fef11d433f22f8ca953a5bca95c0278d8bed2c1b29d298ba9a4901675",
+    "browser.json": "a250fcd9ff8e33ae3f7ff02a83e7d90154ac9c6b9bba9bb98e7c909d9fd24878"
+  },
+  "testEnvironment": "Actual editor and media controllers joined in an event-capable DOM. Two cases use the actual API client and real HTTP servers holding headers/body, checking response closure and a successful next request. Separate browser smoke uses the actual project service behind fault proxies, plus real UI editing, saving and reload.",
+  "limitations": [
+    "Path/type changes and editor exit use controlled DOM/editor state; the browser pass specifically covers input/save cancellation.",
+    "The fault proxy delays already-parsed response bytes; client cancellation does not establish interruption of synchronous server parsing.",
+    "The first browser attempt reached the normal 15-second deadline; only the separately logged second attempt establishes active cancellation.",
+    "No native Tauri window, audio/video playback, Rust or native archive groups were rerun."
+  ],
+  "nativeArchiveModuleTestsRerun": false,
+  "fullTauriLibraryTestsRerun": false,
+  "nativeWindowTested": false,
+  "nativePlaybackTested": false,
+  "browserPreviewCancellationTested": true,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "cleanup": {
+    "automatedFixtures": "HTTP servers closed; test callbacks handled both cancellation and late responses.",
+    "preFixReplay": "Isolated source copy removed.",
+    "browserFixture": {
+      "root": "/tmp/viento-test-9wXaFf",
+      "removed": true,
+      "serversStopped": true,
+      "tabsClosed": true
+    }
+  },
+  "functionNetwork": {
+    "revision": 58,
+    "sourceFingerprints": 167,
+    "nodeSources": 181,
+    "localImportStatements": 475,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

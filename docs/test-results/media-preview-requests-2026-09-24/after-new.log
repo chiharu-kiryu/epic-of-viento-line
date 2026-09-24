@@ -1,0 +1,21 @@
+✔ preview requests: new input cancels the pending draft immediately and only the newest result is shown (42.21672ms)
+✔ preview requests: remove media cancels the old request without reviving its result (16.377316ms)
+✔ preview requests: exit editor cancels the old request without reviving its result (15.599047ms)
+✔ preview requests: change path cancels the old request without reviving its result (21.934569ms)
+✔ preview requests: change type cancels the old request without reviving its result (13.436171ms)
+✔ preview requests: start save cancels the old request without reviving its result (13.058702ms)
+✔ preview requests: a late cancelled completion cannot erase the newer cancellation owner (13.321906ms)
+✔ preview requests: cancellation and failed parsing preserve the last player, draft and selection until a valid retry (14.868296ms)
+✔ preview requests: cancelling a preview does not cancel structured reuse insertion (15.871799ms)
+✔ preview requests: cancelling a preview does not cancel structured upload insertion (18.832651ms)
+✔ preview requests: debounce still sends only the final draft without locking or changing it (16.017542ms)
+✔ preview requests: real HTTP cancellation closes a held pre-header connection and permits a fresh preview (53.275091ms)
+✔ preview requests: real HTTP cancellation closes a held response body and permits a fresh preview (24.517334ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 400.503038

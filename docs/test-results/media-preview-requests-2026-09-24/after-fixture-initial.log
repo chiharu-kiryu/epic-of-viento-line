@@ -1,0 +1,35 @@
+✔ preview requests: new input cancels the pending draft immediately and only the newest result is shown (39.880441ms)
+✔ preview requests: remove media cancels the old request without reviving its result (13.945944ms)
+✔ preview requests: exit editor cancels the old request without reviving its result (13.894659ms)
+✔ preview requests: change path cancels the old request without reviving its result (24.664545ms)
+✔ preview requests: change type cancels the old request without reviving its result (15.391876ms)
+✔ preview requests: start save cancels the old request without reviving its result (12.3496ms)
+✔ preview requests: a late cancelled completion cannot erase the newer cancellation owner (11.405841ms)
+✖ preview requests: cancellation and failed parsing preserve the last player, draft and selection until a valid retry (13.78382ms)
+✔ preview requests: cancelling a preview does not cancel structured reuse insertion (13.846608ms)
+✔ preview requests: cancelling a preview does not cancel structured upload insertion (14.355151ms)
+✔ preview requests: debounce still sends only the final draft without locking or changing it (14.002259ms)
+✔ preview requests: real HTTP cancellation closes a held pre-header connection and permits a fresh preview (43.509027ms)
+✔ preview requests: real HTTP cancellation closes a held response body and permits a fresh preview (19.604316ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 12
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 360.929975
+
+✖ failing tests:
+
+test at scripts/tests/media-preview-requests.test.mjs:108:1
+✖ preview requests: cancellation and failed parsing preserve the last player, draft and selection until a valid retry (13.78382ms)
+  TypeError: document.createTextNode is not a function
+      at renderRuntimeErrorPanel (evalmachine.<anonymous>:1698:39)
+      at logRuntimeError (evalmachine.<anonymous>:1603:3)
+      at logRuntimeErrorOrMessage (evalmachine.<anonymous>:1729:18)
+      at saveExistingDoc (evalmachine.<anonymous>:4256:47)
+      at Object.saveCurrentDoc (evalmachine.<anonymous>:4008:16)
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-requests.test.mjs:120:19)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)

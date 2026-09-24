@@ -1,0 +1,175 @@
+TAP version 13
+# Subtest: a catalogue failure after a partial import preserves a selectable asset and the original error
+not ok 1 - a catalogue failure after a partial import preserves a selectable asset and the original error
+  ---
+  duration_ms: 20.090886
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:65:1'
+  failureType: 'testCodeFailure'
+  error: 'the confirmed imported asset must remain selectable'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    assertRecovered (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:61:10)
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:72:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async startSubtest (node:internal/test_runner/harness:214:3)
+  ...
+# Subtest: cancelling the second upload releases the editor even if catalogue refresh would never finish
+not ok 2 - cancelling the second upload releases the editor even if catalogue refresh would never finish
+  ---
+  duration_ms: 13.44674
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:81:1'
+  failureType: 'testCodeFailure'
+  error: 'a secondary catalogue read must not keep the editor locked'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    assertRecovered (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:54:10)
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:95:39)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: a failed structured insertion retains its uploaded asset for retry without changing the draft
+not ok 3 - a failed structured insertion retains its uploaded asset for retry without changing the draft
+  ---
+  duration_ms: 11.983004
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:102:1'
+  failureType: 'testCodeFailure'
+  error: 'the confirmed imported asset must remain selectable'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    assertRecovered (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:61:10)
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:112:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: the stale list requested before importing cannot hide the recovered asset
+not ok 4 - the stale list requested before importing cannot hide the recovered asset
+  ---
+  duration_ms: 8.162135
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:118:1'
+  failureType: 'testCodeFailure'
+  error: 'a secondary catalogue read must not keep the editor locked'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    assertRecovered (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:54:10)
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:122:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: recovered assets are visible despite old search, type and pagination filters
+not ok 5 - recovered assets are visible despite old search, type and pagination filters
+  ---
+  duration_ms: 15.129798
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:128:1'
+  failureType: 'testCodeFailure'
+  error: 'the confirmed imported asset must remain selectable'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    assertRecovered (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:61:10)
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:136:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: duplicate import responses refresh a cached missing asset once and retain unrelated missing assets
+not ok 6 - duplicate import responses refresh a cached missing asset once and retain unrelated missing assets
+  ---
+  duration_ms: 13.797058
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:144:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    assertRecovered (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:62:10)
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:148:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: a failure before any successful import keeps existing filters and offers a normal retry
+ok 7 - a failure before any successful import keeps existing filters and offers a normal retry
+  ---
+  duration_ms: 9.144177
+  ...
+# Subtest: a partial drop import can recover without having opened or fetched the project media list
+not ok 8 - a partial drop import can recover without having opened or fetched the project media list
+  ---
+  duration_ms: 7.249913
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:166:1'
+  failureType: 'testCodeFailure'
+  error: 'the confirmed imported asset must remain selectable'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    assertRecovered (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:61:10)
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:169:25)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: md: actual partial upload recovery, reuse, save, reopen and indexing preserve source and media bytes
+not ok 9 - md: actual partial upload recovery, reuse, save, reopen and indexing preserve source and media bytes
+  ---
+  duration_ms: 298.841652
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:174:41'
+  failureType: 'testCodeFailure'
+  error: 'the confirmed imported asset must remain selectable'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    assertRecovered (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:61:10)
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:204:37)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: json: actual partial upload recovery, reuse, save, reopen and indexing preserve source and media bytes
+not ok 10 - json: actual partial upload recovery, reuse, save, reopen and indexing preserve source and media bytes
+  ---
+  duration_ms: 254.184892
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:174:41'
+  failureType: 'testCodeFailure'
+  error: 'the confirmed imported asset must remain selectable'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    assertRecovered (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:61:10)
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-recovery.test.mjs:204:37)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 1
+# fail 9
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 787.348936

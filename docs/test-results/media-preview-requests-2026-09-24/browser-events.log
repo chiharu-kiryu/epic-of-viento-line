@@ -1,0 +1,5 @@
+{"event":"held","preview":1,"bytes":278,"content":"# 预览取消验证\n\n正文保留。\n\n![预览图片.svg](asset:4a804498-5faf-438d-aa30-108fafb1a769)\n","at":1790231005826}
+{"event":"closed","preview":1,"ended":false,"at":1790231020820}
+{"event":"held","preview":2,"bytes":312,"content":"# 预览取消验证\n\n正文保留。\n\n![预览图片.svg](asset:4a804498-5faf-438d-aa30-108fafb1a769)\n\n继续编辑后的新正文。\n","at":1790231027723}
+{"event":"closed","preview":2,"ended":false,"at":1790231042719}
+{"event":"completed","preview":3,"at":1790231048624}

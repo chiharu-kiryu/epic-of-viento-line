@@ -30,11 +30,27 @@ export function renderMedia(media) {
   const status = document.createElement('p');
   status.className = 'doc-media-status';
   status.hidden = true;
+  const retry = document.createElement('button');
+  retry.type = 'button';
+  retry.className = 'doc-btn doc-btn-ghost doc-media-retry';
+  retry.dataset.i18n = '重试加载';
+  retry.textContent = t('重试加载');
+  retry.hidden = true;
+  retry.addEventListener('click', () => {
+    // Reload only this resource; keep the draft and other players intact.
+    if (timed) element.load();
+    else element.src = url;
+  });
   element.addEventListener('error', () => {
     status.hidden = false;
+    retry.hidden = false;
     status.dataset.i18n = media.type === 'audio' ? '音频暂时无法播放，请检查素材是否在线及音频编码。'
       : media.type === 'video' ? '视频暂时无法播放，请检查素材是否在线及视频编码。' : '图片暂时无法读取，请检查素材是否在线。';
     status.textContent = t(status.dataset.i18n);
+  });
+  element.addEventListener(timed ? 'loadeddata' : 'load', () => {
+    status.hidden = true;
+    retry.hidden = true;
   });
   element.src = url;
   figure.appendChild(element);
@@ -52,6 +68,7 @@ export function renderMedia(media) {
     figure.appendChild(link);
   }
   figure.appendChild(status);
+  figure.appendChild(retry);
   return figure;
 }
 

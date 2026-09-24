@@ -1,0 +1,24 @@
+{
+  "application": "0.4.2",
+  "cargoMetadata": "offline locked",
+  "glib": {
+    "version": "0.18.5",
+    "manifest": "src-tauri/vendor/glib/Cargo.toml"
+  },
+  "vendoredGlibFiles": 121,
+  "retainedTauriLibrarySourceHashes": {
+    "src-tauri/src/lib.rs": "360893da8f9abf9d6778c45a9b227677a7194245951d3ed019e8994dec9931fa",
+    "src-tauri/src/export.rs": "5df6d3f84c1fea268802b9a0d508c7ce282af40ac105bd940b2c40b7a2503446",
+    "src-tauri/src/workspace.rs": "31517d2900ca84286dc86f549f89895581f3be45d0f05d9a27b8272b7b6fbf8c"
+  },
+  "retainedTauriLibrary": {
+    "passed": 22,
+    "failed": 0,
+    "ignored": 1
+  },
+  "unmodifiedUpstreamFilesVerified": 120,
+  "patchedFilesVerified": [
+    "src/variant_iter.rs"
+  ],
+  "vendoredHashesVerified": true
+}

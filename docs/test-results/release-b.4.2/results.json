@@ -1,0 +1,125 @@
+{
+  "date": "2026-09-24",
+  "version": "b.4.2",
+  "buildVersion": "0.4.2",
+  "gitBase": "40923a0b76993b1b458f3c01312bcaba1408fa96",
+  "bugs": [
+    "N111",
+    "N112",
+    "N113"
+  ],
+  "newExecutionCases": 35,
+  "application": {
+    "runtime": "Node v24.19.0 with VIENTO_TEST_ARCHIVE_BINARY",
+    "tests": 554,
+    "passed": 554,
+    "failed": 0,
+    "skipped": 0,
+    "javascriptSyntaxFiles": 141,
+    "apiContractPassed": true,
+    "log": "application.log"
+  },
+  "native": {
+    "scope": "Production workspace.rs + project-defaults.json + unchanged official workspace-archive CLI",
+    "tests": 14,
+    "passed": 13,
+    "failed": 0,
+    "ignored": 1,
+    "ignoredReason": "Full-size real-workspace migration needs VIENTO_TEST_SOURCE_ROOT; synthetic roundtrips and contract corpus did run.",
+    "log": "native.log",
+    "buildEvidence": "native-build.json",
+    "resolvedDependenciesVerified": 61
+  },
+  "retainedTauriLibrary": {
+    "versionAtTest": "b.3.8 worktree before b.3.9 release",
+    "passed": 22,
+    "failed": 0,
+    "ignored": 1,
+    "sourceFingerprintsMatch": true,
+    "evidence": "docs/test-results/export-bridge-2026-09-23/native-build.json"
+  },
+  "retainedAuditEvidence": [
+    {
+      "bugs": [
+        "N111"
+      ],
+      "newExecutionCases": 10,
+      "report": "docs/test-results/media-recovery-2026-09-24/results.json",
+      "browser": "docs/test-results/media-recovery-2026-09-24/browser.json",
+      "evidenceHashesVerified": true,
+      "browserRepeatedDuringRelease": false
+    },
+    {
+      "bugs": [
+        "N112"
+      ],
+      "newExecutionCases": 12,
+      "report": "docs/test-results/media-loading-2026-09-24/results.json",
+      "browser": "docs/test-results/media-loading-2026-09-24/browser.json",
+      "evidenceHashesVerified": true,
+      "browserRepeatedDuringRelease": false
+    },
+    {
+      "bugs": [
+        "N113"
+      ],
+      "newExecutionCases": 13,
+      "report": "docs/test-results/media-preview-requests-2026-09-24/results.json",
+      "browser": "docs/test-results/media-preview-requests-2026-09-24/browser.json",
+      "evidenceHashesVerified": true,
+      "browserRepeatedDuringRelease": false
+    }
+  ],
+  "sourceContinuityVerified": {
+    "N111AfterMatchesN113Before": true,
+    "finalAuditSourcesMatchWorktree": true
+  },
+  "cargoMetadata": "offline locked; application 0.4.2 and sole glib 0.18.5 from src-tauri/vendor/glib",
+  "cargoMetadataEvidence": "cargo.json",
+  "nextVersion": "b.4.3",
+  "functionNetworkRevision": 59,
+  "files": {
+    "VERSION": "b13dfbfb00d49b8046c87b82459274a606687d7c86764389c1107be8b1ac2e63",
+    "package.json": "bddfdb1a1860934954b4a228756cd313572cd27be91e4421b9ee56579015103b",
+    "package-lock.json": "33e6c614d29e3c0692f0c3e0d8d76d0af24de72f706c0404b66f083ecf3c6f0d",
+    "src-tauri/Cargo.toml": "affa757e40a772af319ba7edda05ced0cf422b97098deff9b03b15cc8421a1e9",
+    "src-tauri/Cargo.lock": "9917d503259aad24a679176dba47b99abe4f3021390f682d84d4104f8f1c6e56",
+    "src-tauri/tauri.conf.json": "7c59f35a05695e7d183e96077819751eb16c26f74849cd0148dcde4685067f12",
+    "web/index.html": "8f0b8df0e65789b3d8ff019929e5927885175c6802a6d61f731f50b7cd8175d9",
+    "desktop/ui/index.html": "b749fb9d44044d538d10d298b4dd76875447bf780261a88d0e141ab78a63bdd8",
+    "README.md": "f3be2d313bc3c2be9d5c9b2c3cae4b7d65f28e1d6254f5d49128d219a6752e37",
+    "desktop/README.md": "8eb24d1c07a553baa431275a7e07766e3909b01ce8dd8b67a55adaf5b0208d1a",
+    "scripts/tests/media-recovery.test.mjs": "ae35b77f80bbefd7dff5f1a96ce6eae509aebdf5eb6ea816f885f47b89a75bfb",
+    "web/modules/app-media-editor.js": "b9a598bdba32a719c33165b925df8f1fb6efa3f82429fa0dfe54fc17a9087320",
+    "scripts/tests/media-loading.test.mjs": "d019b915c86fa6d54e830d934ebfc9a9b8f1a3f3226c8a270a4c8cb242625c90",
+    "web/modules/app-media-render.js": "a8b3b1aff81deaf915de895ad45ca9c6e61b3e4abd54d3f42aebc7dc1ba42231",
+    "web/styles.css": "4fc2936c3319426d9bde8a9c7144e76d848182258f94ca40b1c7c60f1a1bdfd7",
+    "scripts/tests/media-preview-requests.test.mjs": "3d63e055e829cf2455013d6eea23e4f811390a7e521d19eaead6d9ee8c2721f6"
+  },
+  "nativeArchiveTestsRerun": true,
+  "fullTauriLibraryTestsRerun": false,
+  "nativeWindowTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "functionNetworkValidation": "network.json",
+  "versionFiles": "version-files.json",
+  "temporaryNativeBuildRemoved": true,
+  "sourceArchive": {
+    "filesVerified": 704,
+    "allArchivedBytesMatchSource": true,
+    "fileModesVerified": true,
+    "vendoredGlibFilesVerified": 121,
+    "unpackedCargoMetadataVerified": true,
+    "unpackedSourceFingerprintsVerified": 167,
+    "temporaryFilesRemoved": true,
+    "verificationScope": "Application source snapshot including reports; this result and its evidence digests were finalized after archive verification."
+  },
+  "evidenceSha256": {
+    "application.log": "f4f353e1eb89eafb1718b82b254636a2d89e86b5db7c6d3878b55d853ecec1c9",
+    "native.log": "843008422b27b1bc141b2fc1aa02f80de0cb63291006c09bfcf428d6fd3581e8",
+    "native-build.json": "69705b74276ee4dbcad70104d91c1ffb01acc469af7d12b9ef19e5436b502a4d",
+    "cargo.json": "e845ec8fe94973583de423d100dedcfbf67cdbc5609f434c708cf09b492a5833",
+    "network.json": "760d47338040f6226797871847befeaef466627169cc2c7de4f581480cb62b1e",
+    "version-files.json": "339409e780790188b22d8c0a590beb9bcae84e67dd8d37e7e2804cdde47b4bd9"
+  }
+}

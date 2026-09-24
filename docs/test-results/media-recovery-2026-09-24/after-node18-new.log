@@ -1,0 +1,60 @@
+TAP version 13
+# Subtest: a catalogue failure after a partial import preserves a selectable asset and the original error
+ok 1 - a catalogue failure after a partial import preserves a selectable asset and the original error
+  ---
+  duration_ms: 25.695767
+  ...
+# Subtest: cancelling the second upload releases the editor even if catalogue refresh would never finish
+ok 2 - cancelling the second upload releases the editor even if catalogue refresh would never finish
+  ---
+  duration_ms: 16.929597
+  ...
+# Subtest: a failed structured insertion retains its uploaded asset for retry without changing the draft
+ok 3 - a failed structured insertion retains its uploaded asset for retry without changing the draft
+  ---
+  duration_ms: 13.885251
+  ...
+# Subtest: the stale list requested before importing cannot hide the recovered asset
+ok 4 - the stale list requested before importing cannot hide the recovered asset
+  ---
+  duration_ms: 12.279045
+  ...
+# Subtest: recovered assets are visible despite old search, type and pagination filters
+ok 5 - recovered assets are visible despite old search, type and pagination filters
+  ---
+  duration_ms: 26.249447
+  ...
+# Subtest: duplicate import responses refresh a cached missing asset once and retain unrelated missing assets
+ok 6 - duplicate import responses refresh a cached missing asset once and retain unrelated missing assets
+  ---
+  duration_ms: 15.140768
+  ...
+# Subtest: a failure before any successful import keeps existing filters and offers a normal retry
+ok 7 - a failure before any successful import keeps existing filters and offers a normal retry
+  ---
+  duration_ms: 10.748502
+  ...
+# Subtest: a partial drop import can recover without having opened or fetched the project media list
+ok 8 - a partial drop import can recover without having opened or fetched the project media list
+  ---
+  duration_ms: 10.618798
+  ...
+# Subtest: md: actual partial upload recovery, reuse, save, reopen and indexing preserve source and media bytes
+ok 9 - md: actual partial upload recovery, reuse, save, reopen and indexing preserve source and media bytes
+  ---
+  duration_ms: 705.061416
+  ...
+# Subtest: json: actual partial upload recovery, reuse, save, reopen and indexing preserve source and media bytes
+ok 10 - json: actual partial upload recovery, reuse, save, reopen and indexing preserve source and media bytes
+  ---
+  duration_ms: 676.719492
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1676.735343

@@ -1,0 +1,16 @@
+{
+  "revision": 57,
+  "sourceFiles": 166,
+  "javascriptModules": 146,
+  "localImports": 471,
+  "externalImports": 371,
+  "eventBindings": 98,
+  "testDeclarations": 366,
+  "nodeSourceReferences": 181,
+  "workflows": 50,
+  "workflowEdges": 173,
+  "moduleCycles": 1,
+  "htmlScripts": 1,
+  "localMarkdownLinks": 548,
+  "cssFingerprint": "4fc2936c3319426d9bde8a9c7144e76d848182258f94ca40b1c7c60f1a1bdfd7"
+}

@@ -1,0 +1,67 @@
+{
+  "fixtureRoot": "/tmp/viento-test-9wXaFf",
+  "pid": 2814075,
+  "base": "http://127.0.0.1:42741",
+  "upstream": "http://127.0.0.1:37347",
+  "sourcePath": "documents/预览取消.md",
+  "source": "# 预览取消验证\n\n正文保留。\n\n![预览图片.svg](asset:4a804498-5faf-438d-aa30-108fafb1a769)\n",
+  "asset": {
+    "id": "4a804498-5faf-438d-aa30-108fafb1a769",
+    "name": "预览图片.svg",
+    "kind": "image",
+    "size": 114,
+    "status": "available",
+    "src": "asset:4a804498-5faf-438d-aa30-108fafb1a769",
+    "url": "/asset-files/4a804498-5faf-438d-aa30-108fafb1a769"
+  },
+  "assetPath": "/tmp/viento-test-9wXaFf/assets/media/images/4a804498-5faf-438d-aa30-108fafb1a769.svg",
+  "assetSha256": "391735aac38b8412039feaf30cb64ab83040813d76abfad974d1a634d319b8fd",
+  "requestFault": "First two preview responses forward real server headers plus their first byte, holding the rest for up to 60 seconds; all other traffic goes to the actual service.",
+  "initialTimeoutRecoveryVerified": true,
+  "initialTabClosed": true,
+  "cancelProxyBase": "http://127.0.0.1:37047",
+  "cancelProxyPid": 2822320,
+  "activeCancellationVerified": true,
+  "cancellationDurations": [
+    {
+      "preview": 1,
+      "milliseconds": 1116
+    },
+    {
+      "preview": 2,
+      "milliseconds": 927
+    }
+  ],
+  "initialTimeoutDurations": [
+    {
+      "preview": 1,
+      "milliseconds": 14994
+    },
+    {
+      "preview": 2,
+      "milliseconds": 14996
+    }
+  ],
+  "freshPreviewVisible": true,
+  "dirtyDraftPreserved": true,
+  "savedAndReloaded": true,
+  "savedSourceSha256": "5f22696cbbda929bbccd32bc9548e6c79594092c5329718eb5d93f0198b2c898",
+  "assetBytesUnchanged": true,
+  "registryAssets": 1,
+  "retainedReferenceIds": [
+    "4a804498-5faf-438d-aa30-108fafb1a769"
+  ],
+  "workspaceVerified": true,
+  "tabsClosed": true,
+  "observations": [
+    "Initial manual browser steps were farther apart than the 15-second request deadline, so those first two close events only prove timeout recovery.",
+    "The second browser pass grouped input and save actions after 1.2-second debounce waits in one UI call. Both incomplete bodies closed in under three seconds, before the normal request deadline; the third preview completed."
+  ],
+  "limitations": [
+    "The local proxy held responses after actual parsing completed; cancelling the client read does not establish interruption of synchronous server parsing.",
+    "No native Tauri window or audio/video playback was rerun."
+  ],
+  "fixtureRemoved": true,
+  "serversStopped": true,
+  "cancellationDurationOrigin": "Elapsed from the proxy first-byte event to response close."
+}

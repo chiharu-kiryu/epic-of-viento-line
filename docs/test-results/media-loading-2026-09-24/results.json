@@ -1,0 +1,136 @@
+{
+  "date": "2026-09-24",
+  "version": "b.4.1",
+  "gitBase": "40923a0b76993b1b458f3c01312bcaba1408fa96",
+  "scope": "Per-resource manual retry and stale error clearing after image/audio/video load failures, preserving dirty drafts, stable references, other players and manual playback",
+  "workflows": [
+    "F13",
+    "F30",
+    "F31"
+  ],
+  "bugs": [
+    "N112"
+  ],
+  "retainedBugs": [
+    "N111"
+  ],
+  "before": {
+    "runtime": "Node v24.19.0",
+    "tests": 12,
+    "passed": 1,
+    "failed": 11,
+    "skipped": 0,
+    "log": "before.log",
+    "files": {
+      "web/modules/app-media-render.js": "fb089d2047dedbb4715695273f46b16207096efb80f8be6296c53cc53110937c",
+      "web/styles.css": "dbdfeb80085a63c814c9d65e762c0773acf839b912bcf5deda247a93581495f9"
+    },
+    "testFileSha256": "d019b915c86fa6d54e830d934ebfc9a9b8f1a3f3226c8a270a4c8cb242625c90",
+    "sourceState": "All final 12 cases ran before the production fix on the renderer matching b.4.1 HEAD and revision 56. N111 was already present and unchanged."
+  },
+  "fixtureSetup": {
+    "log": "fixture-initial.log",
+    "tests": 12,
+    "passed": 1,
+    "failed": 11,
+    "skipped": 0,
+    "reason": "Three HTTP cases initially referenced the obsolete web/data/documents.json path. Corrected to .viento/cache/indexes/documents.json and asserted successful rebuild, then reran all 12 pre-fix cases. Initial fixture failures are not used as bug evidence."
+  },
+  "newCases": {
+    "runtime": "Node v24.19.0",
+    "tests": 12,
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after-new.log",
+    "exitedNormally": true
+  },
+  "after": {
+    "runtime": "Node v24.19.0",
+    "tests": 88,
+    "passed": 88,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after.log",
+    "newCases": 12,
+    "exitedNormally": true
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 493,
+    "passed": 491,
+    "failed": 0,
+    "skipped": 2,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 140,
+    "apiContractPassed": true,
+    "versionValidationPassed": true,
+    "nativeArchiveBinaryConfigured": false,
+    "skipReason": "Native archive interoperability and registry agreement require VIENTO_TEST_ARCHIVE_BINARY; b.4.1 release native evidence retained."
+  },
+  "browser": {
+    "record": "browser.json",
+    "actualImageAudioVideoRecoveryVerified": true,
+    "dirtyDraftPreserved": true,
+    "saveReloadVerified": true,
+    "assetBytesAndReferencesVerified": true,
+    "observations": [
+      "During batch clicking, the third positional retry locator timed out because two successfully loaded resources had already hidden their buttons. A fresh accessibility snapshot identified the remaining audio retry button; clicking it completed recovery. This was automation locator drift, not a product failure."
+    ],
+    "fixtureRemoved": true,
+    "serverStopped": true,
+    "tabClosed": true
+  },
+  "commands": {
+    "before": "/home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test scripts/tests/media-loading.test.mjs",
+    "newCases": "/home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test scripts/tests/media-loading.test.mjs",
+    "after": "/home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test scripts/tests/media-loading.test.mjs scripts/tests/media-recovery.test.mjs scripts/tests/media-drop.test.mjs scripts/tests/media.test.mjs scripts/tests/editor-dialogs.test.mjs scripts/tests/structured-render.test.mjs scripts/tests/i18n.test.mjs",
+    "application": "env -u VIENTO_TEST_ARCHIVE_BINARY /home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node scripts/check-project.mjs --app-only"
+  },
+  "files": {
+    "scripts/tests/media-loading.test.mjs": "d019b915c86fa6d54e830d934ebfc9a9b8f1a3f3226c8a270a4c8cb242625c90",
+    "web/modules/app-media-render.js": "a8b3b1aff81deaf915de895ad45ca9c6e61b3e4abd54d3f42aebc7dc1ba42231",
+    "web/styles.css": "4fc2936c3319426d9bde8a9c7144e76d848182258f94ca40b1c7c60f1a1bdfd7"
+  },
+  "evidenceSha256": {
+    "fixture-initial.log": "8b8d9312f69b75b0cea23dc519485fb3c895e58a492bd508ca23bc907907e0fa",
+    "before.log": "b65c9b5418bd5141669ec91ce986c5e2d283a1b518481372752e0723ef09c98f",
+    "after-new.log": "972103b222d42e021bc269d748b8c7e7052b7fd5be2574f3e11107d1c7557920",
+    "after.log": "6dcc2d6d95ddc073a8ebe32c013ba5602c291db114559f959a2fd2e9c2e3b8fe",
+    "application.log": "bac8fcba8fcef0ac9004d0ffd42d834fd4b4ebda420f317e535877d5fc200c7e",
+    "browser.json": "1cd01c35d61cdab57dfd6cbd2d96d39300474a69d061c531b56dc333b26715c6"
+  },
+  "testEnvironment": "Real renderer in event-capable DOM. Actual editor and media controller combined for draft/selection/player/mode-exit checks. HTTP fixture tests use actual 404/404/200 responses with simulated DOM load events. Separate real browser smoke loads valid synthetic SVG/WAV/WebM, retries missing files through UI, saves and reloads.",
+  "limitations": [
+    "DOM load/error events are simulated; the HTTP MP4/WAV fixtures only establish route/byte preservation, not codec support.",
+    "Real browser verifies SVG natural dimensions and WAV/WebM loaded data with paused state, but no play/seek or output-device/audio checks were performed.",
+    "Offline resources were modeled by moving synthetic files; actual external-drive reconnection and Tauri native windows were not exercised.",
+    "Rust and the two native archive test groups were not rerun."
+  ],
+  "nativeArchiveModuleTestsRerun": false,
+  "fullTauriLibraryTestsRerun": false,
+  "nativeWindowTested": false,
+  "nativePlaybackTested": false,
+  "browserResourceLoadingTested": true,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "cleanup": {
+    "automatedFixtures": "Existing test fixture teardown hooks completed.",
+    "browserFixture": {
+      "root": "/tmp/viento-test-4l1AGG",
+      "removed": true,
+      "serverStopped": true,
+      "tabClosed": true
+    }
+  },
+  "functionNetwork": {
+    "revision": 57,
+    "sourceFingerprints": 166,
+    "nodeSources": 181,
+    "localImportStatements": 471,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true,
+    "cssFingerprintRecordedSeparately": true
+  }
+}

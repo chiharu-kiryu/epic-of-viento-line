@@ -1,0 +1,43 @@
+{
+  "fixtureRoot": "/tmp/viento-test-gWT5CR",
+  "pid": 2712841,
+  "base": "http://127.0.0.1:35129",
+  "source": "documents/恢复测试.json",
+  "files": [
+    "/tmp/viento-test-gWT5CR/test-input/立绘.png",
+    "/tmp/viento-test-gWT5CR/test-input/损坏.png"
+  ],
+  "assetId": "8c1e199a-869c-4fe5-afef-2d6b30200936",
+  "originalFileUnchangedBeforeSave": true,
+  "validFileImported": true,
+  "invalidFileRejected": true,
+  "partialFailureMessageVisible": true,
+  "searchAndTypeReset": true,
+  "importedChoiceVisibleAndEnabled": true,
+  "uiFileChooserTested": true,
+  "uiUploadAndPartialFailureTested": true,
+  "uiReuseSaveAndReloadTested": true,
+  "uiDisplayedRetainedReference": true,
+  "tabClosed": true,
+  "assetBytesUnchanged": true,
+  "assetSha256": "0a97501e18a664a7d7ee7a1aeea061759a8833e1dbe6b6259d4b7c7746a4506c",
+  "savedSourceSha256": "953392930c03e120f79f803a929d7dd579831c402d8317caf95411927ced163f",
+  "registryAssets": 1,
+  "referenceIds": [
+    "8c1e199a-869c-4fe5-afef-2d6b30200936"
+  ],
+  "uploadTempsClean": true,
+  "workspaceVerified": true,
+  "fixtureRemoved": true,
+  "observations": [
+    {
+      "issue": "Before the first reuse click the synthetic draft had gained the prefix 继续吧; its source was not determined.",
+      "behavior": "The server correctly rejected invalid JSON without modifying the saved document. The synthetic draft was restored through the editor UI, then the existing asset was reused, saved and reloaded successfully."
+    },
+    {
+      "issue": "Optional natural image dimension inspection through a Playwright role locator timed out.",
+      "behavior": "The accessibility tree still displayed the retained image reference after reload; byte equality and persisted reference were verified independently. Image decode dimensions are not claimed."
+    }
+  ],
+  "serverStopped": true
+}

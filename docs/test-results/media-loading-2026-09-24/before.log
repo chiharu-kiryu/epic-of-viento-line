@@ -1,0 +1,203 @@
+✖ media loading: image clears a stale error after successful resource loading (8.625621ms)
+✖ media loading: audio clears a stale error after successful resource loading (3.015315ms)
+✖ media loading: video clears a stale error after successful resource loading (3.148333ms)
+✖ media loading: image retries only the failed element without replacing controls or autoplay (2.790676ms)
+✖ media loading: audio retries only the failed element without replacing controls or autoplay (2.938913ms)
+✖ media loading: video retries only the failed element without replacing controls or autoplay (1.775829ms)
+✔ media loading: invalid or external references never create a retryable resource (7.129144ms)
+✖ media loading: retry and failure text follow the interface language while captions and sources stay authored (5.48995ms)
+✖ media loading: retry within the actual editor preserves dirty source, selection and other players through a mode exit (35.82276ms)
+✖ media loading: image recovers a temporarily missing registered file through its original HTTP URL (304.109609ms)
+✖ media loading: audio recovers a temporarily missing registered file through its original HTTP URL (266.076187ms)
+✖ media loading: video recovers a temporarily missing registered file through its original HTTP URL (257.342128ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 1
+ℹ fail 11
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 965.162394
+
+✖ failing tests:
+
+test at scripts/tests/media-loading.test.mjs:27:27
+✖ media loading: image clears a stale error after successful resource loading (8.625621ms)
+  AssertionError [ERR_ASSERTION]: success must clear the previous error
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-loading.test.mjs:32:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-loading.test.mjs:27:27
+✖ media loading: audio clears a stale error after successful resource loading (3.015315ms)
+  AssertionError [ERR_ASSERTION]: success must clear the previous error
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-loading.test.mjs:32:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-loading.test.mjs:27:27
+✖ media loading: video clears a stale error after successful resource loading (3.148333ms)
+  AssertionError [ERR_ASSERTION]: success must clear the previous error
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-loading.test.mjs:32:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-loading.test.mjs:37:27
+✖ media loading: image retries only the failed element without replacing controls or autoplay (2.790676ms)
+  AssertionError [ERR_ASSERTION]: a failed resource needs an explicit recovery action
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-loading.test.mjs:46:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-loading.test.mjs:37:27
+✖ media loading: audio retries only the failed element without replacing controls or autoplay (2.938913ms)
+  AssertionError [ERR_ASSERTION]: a failed resource needs an explicit recovery action
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-loading.test.mjs:46:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-loading.test.mjs:37:27
+✖ media loading: video retries only the failed element without replacing controls or autoplay (1.775829ms)
+  AssertionError [ERR_ASSERTION]: a failed resource needs an explicit recovery action
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-loading.test.mjs:46:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-loading.test.mjs:70:1
+✖ media loading: retry and failure text follow the interface language while captions and sources stay authored (5.48995ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(h.retry())
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-loading.test.mjs:74:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-loading.test.mjs:85:1
+✖ media loading: retry within the actual editor preserves dirty source, selection and other players through a mode exit (35.82276ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(retry)
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-loading.test.mjs:122:56)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-loading.test.mjs:137:27
+✖ media loading: image recovers a temporarily missing registered file through its original HTTP URL (304.109609ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(h.retry())
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-loading.test.mjs:169:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-loading.test.mjs:137:27
+✖ media loading: audio recovers a temporarily missing registered file through its original HTTP URL (266.076187ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(h.retry())
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-loading.test.mjs:169:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-loading.test.mjs:137:27
+✖ media loading: video recovers a temporarily missing registered file through its original HTTP URL (257.342128ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(h.retry())
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-loading.test.mjs:169:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

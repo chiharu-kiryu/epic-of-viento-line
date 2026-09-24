@@ -13,6 +13,7 @@ export function setupMediaEditor(adapter) {
   const preview = get('docMediaPreview'), surface = document.querySelector('.doc-editor-surface');
   let assets = [], limit = 60, lastInput = null, context = null, aborter = null;
   let previewTimer = null, previewGeneration = 0, previewSignature = '', listGeneration = 0;
+  let previewAborter = null;
   let lastPreviewRequestAt = 0, previewPath = '', previewType = '';
   const fileSize = (bytes) => bytes < 1024 * 1024 ? `${Math.ceil(bytes / 1024)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
   const status = (text, error = false) => { message.textContent = text; message.classList.toggle('is-error', error); };
@@ -41,6 +42,9 @@ export function setupMediaEditor(adapter) {
   function schedulePreview() {
     clearTimeout(previewTimer);
     const generation = ++previewGeneration;
+    // Stop obsolete reads before waiting for the next debounce or leaving edit.
+    // Preview cancellation is independent of an explicit media import/insert.
+    previewAborter?.abort(); previewAborter = null;
     if (!adapter.isEditable()) { preview.hidden = true; pausePreview(); return; }
     const current = capture();
     // A template can change its path or parser before the new source arrives.
@@ -51,11 +55,14 @@ export function setupMediaEditor(adapter) {
     if (adapter.isBusy()) return;
     if (!current || !/(?:asset:|\/asset-files\/|!?\[.*\]\(|\bsrc\b|媒体)/.test(current.content)) { showPreview([]); return; }
     previewTimer = setTimeout(async () => {
+      const request = new AbortController();
+      previewAborter = request;
       try {
         lastPreviewRequestAt = Date.now();
-        const result = await prepareDraftMedia(current.content, current.path, [], current.documentType);
+        const result = await prepareDraftMedia(current.content, current.path, [], current.documentType, request.signal);
         if (generation === previewGeneration && adapter.isEditable()) showPreview(result.media || []);
       } catch { /* Keep the last preview while a source is incomplete. */ }
+      finally { if (previewAborter === request) previewAborter = null; }
     }, Math.max(350, 1000 - (Date.now() - lastPreviewRequestAt)));
   }
   function renderList() {
@@ -161,7 +168,14 @@ export function setupMediaEditor(adapter) {
     } catch (error) {
       const text = `${error.name === 'AbortError' ? t('已取消导入。') : error.message}${imported.length ? t` 已导入的 ${imported.length} 份素材可从作品素材列表重新选择。` : ''}`;
       status(text, error.name !== 'AbortError'); adapter.status(text);
-      if (imported.length) { assets = (await loadMediaAssets().catch(() => ({ assets }))).assets; renderList(); }
+      if (imported.length) {
+        // Upload responses already confirm registration. Recovery must not wait
+        // for another catalogue request or hide these files behind old filters.
+        const recovered = new Map(imported.map((asset) => [asset.id, asset]));
+        assets = [...recovered.values(), ...assets.filter((asset) => !recovered.has(asset.id))];
+        search.value = ''; kind.value = ''; limit = 60;
+        renderList();
+      }
     } finally { aborter = null; setBusy(false); schedulePreview(); picker.value = ''; }
   }
   surface.addEventListener('focusin', (event) => { if (editableInput(event.target)) lastInput = event.target; });

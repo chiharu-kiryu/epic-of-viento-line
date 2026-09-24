@@ -2171,6 +2171,7 @@ pre {
 .doc-media audio { width: 100%; min-width: 0; height: 54px; background: transparent; }
 .doc-media figcaption, .doc-media a { color: #a8c5e8; font-size: 13px; overflow-wrap: anywhere; }
 .doc-media-status { color: #f1bf85; font-size: 13px; }
+.doc-media-retry { justify-self: start; }
 .doc-media-preview { padding: 16px; border: 1px solid #354e6a; border-radius: 10px; background: #0c192c; }
 .doc-media-preview > h3 { margin: 0 0 12px; font-size: 14px; color: #a8c5e8; }
 .doc-media-preview .doc-media-content { max-height: 320px; }

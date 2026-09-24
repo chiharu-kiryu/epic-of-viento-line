@@ -1,0 +1,105 @@
+{
+  "fixtureRoot": "/tmp/viento-test-4l1AGG",
+  "pid": 2766373,
+  "base": "http://127.0.0.1:42027",
+  "sourcePath": "documents/加载恢复.md",
+  "source": "# 加载恢复验证\n\n保留正文与引用。\n\n![测试图片.svg](asset:64ae7860-15bf-486a-b164-e02420768c56)\n\n!audio[测试音频.wav](asset:e99877c1-0dba-401d-90a4-da8755d71b11)\n\n!video[测试视频.webm](asset:1e5cfb99-3d07-4bff-9e5a-8595495edb48)\n",
+  "sourceSha256": "013c8f1cecaebe28459ca31472f27bcf1fd5548d38c2c53a4e55adebc37a1827",
+  "registrySha256": "3cd3a84d864cd01a20bf338c5fb4af19d4e1688922beedfb962e43c2a9bf72c5",
+  "assets": [
+    {
+      "id": "64ae7860-15bf-486a-b164-e02420768c56",
+      "name": "测试图片.svg",
+      "kind": "image",
+      "size": 114,
+      "status": "available",
+      "src": "asset:64ae7860-15bf-486a-b164-e02420768c56",
+      "url": "/asset-files/64ae7860-15bf-486a-b164-e02420768c56",
+      "sha256": "4be65987952ec064d2476620a0a6c7ea91aefdc6bfaeca6de6bb86d3b4c0f622",
+      "path": "/tmp/viento-test-4l1AGG/assets/media/images/64ae7860-15bf-486a-b164-e02420768c56.svg",
+      "offlinePath": "/tmp/viento-test-4l1AGG/assets/media/images/64ae7860-15bf-486a-b164-e02420768c56.svg.offline"
+    },
+    {
+      "id": "e99877c1-0dba-401d-90a4-da8755d71b11",
+      "name": "测试音频.wav",
+      "kind": "audio",
+      "size": 88278,
+      "status": "available",
+      "src": "asset:e99877c1-0dba-401d-90a4-da8755d71b11",
+      "url": "/asset-files/e99877c1-0dba-401d-90a4-da8755d71b11",
+      "sha256": "3a22af6115b00e3e8c01efb8cd045c081b22d1dde9600bcb6d5cbf818a39fb3a",
+      "path": "/tmp/viento-test-4l1AGG/assets/media/audio/e99877c1-0dba-401d-90a4-da8755d71b11.wav",
+      "offlinePath": "/tmp/viento-test-4l1AGG/assets/media/audio/e99877c1-0dba-401d-90a4-da8755d71b11.wav.offline"
+    },
+    {
+      "id": "1e5cfb99-3d07-4bff-9e5a-8595495edb48",
+      "name": "测试视频.webm",
+      "kind": "video",
+      "size": 1110,
+      "status": "available",
+      "src": "asset:1e5cfb99-3d07-4bff-9e5a-8595495edb48",
+      "url": "/asset-files/1e5cfb99-3d07-4bff-9e5a-8595495edb48",
+      "sha256": "95772a681e028866619e1997eec9190b52db3a115c65f12b91d631d3fb0affe0",
+      "path": "/tmp/viento-test-4l1AGG/assets/media/videos/1e5cfb99-3d07-4bff-9e5a-8595495edb48.webm",
+      "offlinePath": "/tmp/viento-test-4l1AGG/assets/media/videos/1e5cfb99-3d07-4bff-9e5a-8595495edb48.webm.offline"
+    }
+  ],
+  "missingErrorsVisibleFor": [
+    "image",
+    "audio",
+    "video"
+  ],
+  "offlineRetryPreservedErrors": true,
+  "dirtyDraftPrepared": true,
+  "diskSourceUnchangedBeforeRetry": true,
+  "realBrowserRecovery": [
+    {
+      "kind": "image",
+      "naturalWidth": 64,
+      "naturalHeight": 48,
+      "errorHidden": true,
+      "retryHidden": true
+    },
+    {
+      "kind": "audio",
+      "readyState": 4,
+      "duration": 1,
+      "paused": true,
+      "autoplay": false,
+      "error": null,
+      "errorHidden": true,
+      "retryHidden": true
+    },
+    {
+      "kind": "video",
+      "readyState": 4,
+      "duration": 1,
+      "paused": true,
+      "autoplay": false,
+      "error": null,
+      "errorHidden": true,
+      "retryHidden": true
+    }
+  ],
+  "dirtyDraftPreserved": true,
+  "savedAndReloaded": true,
+  "savedSourceSha256": "d87fbb57720abbb0bb9974c4c3bc8f77f157bd47fee01665dce287650c24a9a2",
+  "retainedReferenceIds": [
+    "64ae7860-15bf-486a-b164-e02420768c56",
+    "e99877c1-0dba-401d-90a4-da8755d71b11",
+    "1e5cfb99-3d07-4bff-9e5a-8595495edb48"
+  ],
+  "assetBytesUnchanged": true,
+  "registryAssets": 3,
+  "workspaceVerified": true,
+  "uploadTempsClean": true,
+  "tabClosed": true,
+  "observations": [
+    "During batch clicking, the third positional retry locator timed out because two successfully loaded resources had already hidden their buttons. A fresh accessibility snapshot identified the remaining audio retry button; clicking it completed recovery. This was automation locator drift, not a product failure."
+  ],
+  "limits": [
+    "Actual synthetic SVG/WAV/WebM loading was verified; playback, seeking, external-device reconnection and native Tauri were not exercised."
+  ],
+  "fixtureRemoved": true,
+  "serverStopped": true
+}

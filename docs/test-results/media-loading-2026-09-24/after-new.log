@@ -1,0 +1,20 @@
+✔ media loading: image clears a stale error after successful resource loading (7.821843ms)
+✔ media loading: audio clears a stale error after successful resource loading (2.273901ms)
+✔ media loading: video clears a stale error after successful resource loading (2.757315ms)
+✔ media loading: image retries only the failed element without replacing controls or autoplay (2.287156ms)
+✔ media loading: audio retries only the failed element without replacing controls or autoplay (2.753217ms)
+✔ media loading: video retries only the failed element without replacing controls or autoplay (1.485828ms)
+✔ media loading: invalid or external references never create a retryable resource (6.770608ms)
+✔ media loading: retry and failure text follow the interface language while captions and sources stay authored (2.490315ms)
+✔ media loading: retry within the actual editor preserves dirty source, selection and other players through a mode exit (36.814352ms)
+✔ media loading: image recovers a temporarily missing registered file through its original HTTP URL (302.969816ms)
+✔ media loading: audio recovers a temporarily missing registered file through its original HTTP URL (264.057662ms)
+✔ media loading: video recovers a temporarily missing registered file through its original HTTP URL (264.394975ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 960.383798

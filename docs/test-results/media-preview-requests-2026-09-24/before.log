@@ -1,0 +1,187 @@
+✖ preview requests: new input cancels the pending draft immediately and only the newest result is shown (45.331352ms)
+✖ preview requests: remove media cancels the old request without reviving its result (16.290504ms)
+✖ preview requests: exit editor cancels the old request without reviving its result (16.487543ms)
+✖ preview requests: change path cancels the old request without reviving its result (25.568816ms)
+✖ preview requests: change type cancels the old request without reviving its result (19.654243ms)
+✖ preview requests: start save cancels the old request without reviving its result (15.907766ms)
+✖ preview requests: a late cancelled completion cannot erase the newer cancellation owner (15.351693ms)
+✖ preview requests: cancellation and failed parsing preserve the last player, draft and selection until a valid retry (13.871697ms)
+✖ preview requests: cancelling a preview does not cancel structured reuse insertion (14.80629ms)
+✖ preview requests: cancelling a preview does not cancel structured upload insertion (15.724933ms)
+✔ preview requests: debounce still sends only the final draft without locking or changing it (17.923607ms)
+✖ preview requests: real HTTP cancellation closes a held pre-header connection and permits a fresh preview (3038.145376ms)
+✖ preview requests: real HTTP cancellation closes a held response body and permits a fresh preview (3020.184473ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 1
+ℹ fail 12
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6359.094061
+
+✖ failing tests:
+
+test at scripts/tests/media-preview-requests.test.mjs:63:1
+✖ preview requests: new input cancels the pending draft immediately and only the newest result is shown (45.331352ms)
+  AssertionError [ERR_ASSERTION]: preview requests must have their own cancellation signal
+      at assertCancelled (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:59:10)
+      at TestContext.<anonymous> (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:66:3)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-requests.test.mjs:76:99
+✖ preview requests: remove media cancels the old request without reviving its result (16.290504ms)
+  AssertionError [ERR_ASSERTION]: preview requests must have their own cancellation signal
+      at assertCancelled (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:59:10)
+      at TestContext.<anonymous> (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:83:3)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-requests.test.mjs:76:99
+✖ preview requests: exit editor cancels the old request without reviving its result (16.487543ms)
+  AssertionError [ERR_ASSERTION]: preview requests must have their own cancellation signal
+      at assertCancelled (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:59:10)
+      at TestContext.<anonymous> (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:83:3)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-requests.test.mjs:76:99
+✖ preview requests: change path cancels the old request without reviving its result (25.568816ms)
+  AssertionError [ERR_ASSERTION]: preview requests must have their own cancellation signal
+      at assertCancelled (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:59:10)
+      at TestContext.<anonymous> (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:83:3)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-requests.test.mjs:76:99
+✖ preview requests: change type cancels the old request without reviving its result (19.654243ms)
+  AssertionError [ERR_ASSERTION]: preview requests must have their own cancellation signal
+      at assertCancelled (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:59:10)
+      at TestContext.<anonymous> (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:83:3)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-requests.test.mjs:76:99
+✖ preview requests: start save cancels the old request without reviving its result (15.907766ms)
+  AssertionError [ERR_ASSERTION]: preview requests must have their own cancellation signal
+      at assertCancelled (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:59:10)
+      at TestContext.<anonymous> (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:83:3)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-requests.test.mjs:96:1
+✖ preview requests: a late cancelled completion cannot erase the newer cancellation owner (15.351693ms)
+  AssertionError [ERR_ASSERTION]: preview requests must have their own cancellation signal
+      at assertCancelled (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:59:10)
+      at TestContext.<anonymous> (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:100:3)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-requests.test.mjs:109:1
+✖ preview requests: cancellation and failed parsing preserve the last player, draft and selection until a valid retry (13.871697ms)
+  AssertionError [ERR_ASSERTION]: preview requests must have their own cancellation signal
+      at assertCancelled (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:59:10)
+      at TestContext.<anonymous> (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:114:52)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-requests.test.mjs:124:40
+✖ preview requests: cancelling a preview does not cancel structured reuse insertion (14.80629ms)
+  AssertionError [ERR_ASSERTION]: preview requests must have their own cancellation signal
+      at assertCancelled (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:59:10)
+      at TestContext.<anonymous> (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:131:3)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-requests.test.mjs:124:40
+✖ preview requests: cancelling a preview does not cancel structured upload insertion (15.724933ms)
+  AssertionError [ERR_ASSERTION]: preview requests must have their own cancellation signal
+      at assertCancelled (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:59:10)
+      at TestContext.<anonymous> (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:131:3)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-requests.test.mjs:160:38
+✖ preview requests: real HTTP cancellation closes a held pre-header connection and permits a fresh preview (3038.145376ms)
+  Error: obsolete connection did not close
+      at Timeout.<anonymous> (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:156:106)
+      at listOnTimeout (node:internal/timers:635:17)
+      at process.processTimers (node:internal/timers:571:7)
+
+test at scripts/tests/media-preview-requests.test.mjs:160:38
+✖ preview requests: real HTTP cancellation closes a held response body and permits a fresh preview (3020.184473ms)
+  Error: obsolete connection did not close
+      at Timeout.<anonymous> (file:///tmp/viento-preview-before-YEBndH/scripts/tests/media-preview-requests.test.mjs:156:106)
+      at listOnTimeout (node:internal/timers:635:17)
+      at process.processTimers (node:internal/timers:571:7)

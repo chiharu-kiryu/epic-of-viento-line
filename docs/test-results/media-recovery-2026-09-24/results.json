@@ -1,0 +1,143 @@
+{
+  "date": "2026-09-24",
+  "version": "b.4.1",
+  "gitBase": "40923a0b76993b1b458f3c01312bcaba1408fa96",
+  "scope": "Recover confirmed assets after partial upload failure/cancellation or failed insertion preparation without a catalogue dependency; clear stale filters and deduplicate stable IDs while preserving the source",
+  "workflows": [
+    "F28",
+    "F29"
+  ],
+  "bugs": [
+    "N111"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 10,
+    "passed": 1,
+    "failed": 9,
+    "skipped": 0,
+    "log": "before.log",
+    "files": {
+      "web/modules/app-media-editor.js": "1bf880a611bd105ab626684a252d4bc1e78d6c6a235759375213f8a75dd2b991"
+    },
+    "testFileSha256": "ae35b77f80bbefd7dff5f1a96ce6eae509aebdf5eb6ea816f885f47b89a75bfb",
+    "sourceState": "The final 10 cases ran on the unchanged b.4.1 media controller before the production fix; production hash matches HEAD and revision 55."
+  },
+  "initialFocused": {
+    "runtime": "Node v18.19.1",
+    "tests": 67,
+    "passed": 66,
+    "failed": 1,
+    "skipped": 0,
+    "log": "after-node18-interrupted.log",
+    "actualAssertionsPassed": 66,
+    "stoppedWorker": "scripts/tests/request-lifecycle.test.mjs",
+    "signal": "SIGTERM",
+    "elapsedSecondsApprox": 283,
+    "rootCauseUnconfirmed": true,
+    "note": "Assertions passed, but the worker did not exit. Only the task-owned test child was terminated, producing an additional failed file-level TAP result. This run is not counted as passing."
+  },
+  "newCases": {
+    "runtime": "Node v18.19.1",
+    "tests": 10,
+    "passed": 10,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after-node18-new.log",
+    "exitedNormally": true
+  },
+  "after": {
+    "runtime": "Node v24.19.0",
+    "tests": 66,
+    "passed": 66,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after.log",
+    "newCases": 10,
+    "exitedNormally": true
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 481,
+    "passed": 479,
+    "failed": 0,
+    "skipped": 2,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 139,
+    "apiContractPassed": true,
+    "versionValidationPassed": true,
+    "nativeArchiveBinaryConfigured": false,
+    "skipReason": "Native archive interoperability and registry agreement require VIENTO_TEST_ARCHIVE_BINARY; b.4.1 release native evidence retained."
+  },
+  "browser": {
+    "record": "browser.json",
+    "actualFileChooserAndPartialUploadVerified": true,
+    "reuseSaveReloadVerified": true,
+    "sourceAndAssetBytesVerified": true,
+    "observations": [
+      {
+        "issue": "Before the first reuse click the synthetic draft had gained the prefix 继续吧; its source was not determined.",
+        "behavior": "The server correctly rejected invalid JSON without modifying the saved document. The synthetic draft was restored through the editor UI, then the existing asset was reused, saved and reloaded successfully."
+      },
+      {
+        "issue": "Optional natural image dimension inspection through a Playwright role locator timed out.",
+        "behavior": "The accessibility tree still displayed the retained image reference after reload; byte equality and persisted reference were verified independently. Image decode dimensions are not claimed."
+      }
+    ],
+    "fixtureRemoved": true,
+    "serverStopped": true,
+    "tabClosed": true
+  },
+  "commands": {
+    "before": "/usr/bin/node --test scripts/tests/media-recovery.test.mjs",
+    "initialFocused": "/usr/bin/node --test scripts/tests/media-recovery.test.mjs scripts/tests/media-drop.test.mjs scripts/tests/media.test.mjs scripts/tests/editor-dialogs.test.mjs scripts/tests/request-lifecycle.test.mjs",
+    "newCases": "/usr/bin/node --test scripts/tests/media-recovery.test.mjs",
+    "after": "/home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test scripts/tests/media-recovery.test.mjs scripts/tests/media-drop.test.mjs scripts/tests/media.test.mjs scripts/tests/editor-dialogs.test.mjs scripts/tests/request-lifecycle.test.mjs",
+    "application": "env -u VIENTO_TEST_ARCHIVE_BINARY /home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node scripts/check-project.mjs --app-only"
+  },
+  "files": {
+    "scripts/tests/media-recovery.test.mjs": "ae35b77f80bbefd7dff5f1a96ce6eae509aebdf5eb6ea816f885f47b89a75bfb",
+    "web/modules/app-media-editor.js": "2173bd05d11bd968a38849e40ae3b6bdb9448a129ee76d432d9767396cb33518"
+  },
+  "evidenceSha256": {
+    "before.log": "8449697ad6232e69e4e2bf8f597aa64bd04686f97a01b671b7c68218e7e5989d",
+    "after.log": "618b52d1c42abcbce892a7e7c8a50f7402d42837c0f2eaf46bbaaa634b88bda3",
+    "after-node18-new.log": "c6edf62a4a643d7d3a2451b131c641939248d8c2f33099100a5874969d9a7c76",
+    "after-node18-interrupted.log": "0c2e27b6c75bdbcfc012c858ab34827cb06db10b87d8faabe19c8cff26a1949b",
+    "application.log": "e3a4c82ef494fd277ea1eb51a5a2d0c7138ef76ee1fe66f18da3f314d78ed7d0",
+    "browser.json": "62419c092220d8ea663f833f61a9cd90d1e407f4f18a5afa0559ab59e7726cf8"
+  },
+  "testEnvironment": "Actual media controller connected to the event-capable DOM and a thin editor adapter; controlled catalogue/cancel/late-response timing. Two cases use real HTTP uploads, structured insertion, source save/reopen, registry and index APIs. Actual browser file selection/upload/reuse/save/reload ran separately on one temporary JSON project.",
+  "limitations": [
+    "Network hangs, cancellation and delayed lists used controlled DOM/service responses, not browser network fault injection.",
+    "Before the first browser reuse, an unexplained 继续吧 prefix appeared in the synthetic draft. Invalid JSON was correctly rejected; after restoring the fixture through the editor, reuse/save/reload passed. The prefix origin remains unconfirmed.",
+    "Optional browser natural image dimensions lookup timed out. Reference retention and asset bytes passed; image decoding was not established.",
+    "The initial Node 18 focused run did not exit normally; bundled Node 24 rerun and isolated Node 18 new tests did. Underlying worker-lifecycle cause remains unconfirmed.",
+    "Rust, native windows, drag-and-drop and media playback were not rerun."
+  ],
+  "nativeArchiveModuleTestsRerun": false,
+  "fullTauriLibraryTestsRerun": false,
+  "nativeWindowTested": false,
+  "nativePlaybackTested": false,
+  "browserNativeDropTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "cleanup": {
+    "automatedFixtures": "Existing test fixture teardown hooks completed.",
+    "browserFixture": {
+      "root": "/tmp/viento-test-gWT5CR",
+      "removed": true,
+      "serverStopped": true,
+      "tabClosed": true
+    }
+  },
+  "functionNetwork": {
+    "revision": 56,
+    "sourceFingerprints": 165,
+    "nodeSources": 181,
+    "localImportStatements": 464,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}
