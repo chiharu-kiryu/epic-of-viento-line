@@ -5,18 +5,18 @@
     "version": "b.4.3",
     "date": "2026-09-24",
     "gitBase": "51d522cb919c20b15815b129bd62e859af9a97a0",
-    "sourceState": "b.4.3 发布工作树：收录第四十三至四十五轮 N114–N120，统一结构化草稿、素材说明与重复引用、顶层值和空容器展示；发布回归 586 项通过，尚未构建或替换安装包",
+    "sourceState": "b.4.3 工作树：第四十六轮重新构建当前 Linux Tauri 并完成旧 v2、通用 v3 和作品库三组原生窗口流程、实际音视频播放与跳转、功能图交互；未发现新产品缺陷，未更改应用代码或安装包",
     "method": "人工核对业务入口与关键调用；使用本机 Acorn 解析 ES 模块声明、静态字面量动态导入、显式事件绑定和路由表",
     "runtimeTrace": false,
     "verification": {
-      "sourceFingerprints": "170 selected code files matched the final audited worktree; 10 version/release files changed relative to revision 62. N114–N120 retained.",
+      "sourceFingerprints": "170 selected source files unchanged from revision 63; 327 isolated native build inputs and packaged runtime resources matched current b.4.3 source.",
       "references": "181 node source references, imports and document links checked; business routes and native commands unchanged",
       "graphIntegrity": "workflow edges and module SCCs recomputed",
       "pageScript": "JavaScript syntax checked; embedded snapshot matches JSON",
-      "browserPreview": "not executed: in-app browser URL policy rejected local HTML navigation",
-      "applicationRegression": "b.4.3 release, Node v24.19.0 with freshly built VIENTO_TEST_ARCHIVE_BINARY: app-only 586 tests, 586 passed, 0 failed, 0 skipped; version, 144 JavaScript syntax checks and API contract passed.",
-      "nativeRegression": "Fresh production archive module and official CLI: 13 passed, 0 failed, 1 ignored real-workspace case. All 61 resolved dependency versions/checksums match the project lock. Earlier full Tauri library result remains 22 passed and 1 ignored; source fingerprints reverified, full host not rebuilt.",
-      "nativeWindowInteraction": "Retained development-stage browser evidence, not repeated during release: Actual in-app browser tested synthetic root JSON list and empty-object documents. Reading, media preview and saved/reopened list retain image occurrences; both SVGs decoded as 64x48 in each state. False, zero, null, empty arrays and empty objects are visible. Exact source bytes, assets, registry, index and export plans independently verified. No Tauri or audio/video playback test.",
+      "browserPreview": "Passed in the in-app browser on loopback HTTP: four views, F30 search/group filtering, node inspection/upstream/downstream, module imports/cycle display, empty results, API row search, native/CLI directories and reload retaining selection. Direct file:// navigation was not retried.",
+      "applicationRegression": "b.4.3, actual bundled Node v24.20.0 with freshly built production archive CLI: 586 passed, 0 failed, 0 skipped; 144 JavaScript syntax files, version and API contract checks passed; process exited normally.",
+      "nativeRegression": "Fresh full Linux Tauri build: library 22 passed, 0 failed, 1 ignored real-full-size-workspace case; optimized glib regression 5 passed. Legacy v2 editor, generic v3 project and library workflows completed in separate Xvfb/session-bus/XDG environments.",
+      "nativeWindowInteraction": "Current b.4.3 debug executable and pinned Node v24.20.0: native editor, typed templates, source/block drafts, ownership, language/restart synchronization, GTK cancel/retry, both exports, byte-exact full restore and close/engine shutdown. WAV/MP3/Ogg/Opus/FLAC/M4A/AAC and WebM/MP4 decoded, advanced time, paused and sought. Audio was muted; no physical-device playback/disconnect claim.",
       "applicationTestsPassed": 586,
       "archiveInterop": "Enabled both previously skipped native archive groups using the freshly built official CLI: actual v2/v3 Node/Rust roundtrips, byte comparisons, registry contract rejection/recovery and temporary directory cleanup passed.",
       "nativeTestReport": "docs/NATIVE_WORKFLOW_TEST_b.2.8.1.md",
@@ -150,7 +150,12 @@
       "structuredValuesRegression": "Node v24.19.0: 10 new cases, 9 failures and 1 compatibility pass before fixing, all 10 passed after with unchanged tests. JSON/YAML/YML root lists and strings use generic rendering across reading, template preview, insertion, save/index and HTML/Markdown export plans; empty containers remain visible without source/layout mutation. Fences, media objects, false, zero, null and HTML text remain compatible.",
       "structuredValuesReport": "docs/STRUCTURED_VALUES_BUGFIX_b.4.2.md",
       "structuredValuesValidation": "docs/test-results/structured-values-2026-09-24/results.json",
-      "structuredValuesBrowser": "docs/test-results/structured-values-2026-09-24/browser.json"
+      "structuredValuesBrowser": "docs/test-results/structured-values-2026-09-24/browser.json",
+      "browserPreviewPrevious": "not executed: in-app browser URL policy rejected local HTML navigation",
+      "nativeWindowSummary": "b.4.3 Linux 原生窗口三组完整流程已通过，音视频解码、播放、暂停与跳转已实测；平台和真实设备边界见当前桌面实测报告。",
+      "nativeWindowReport": "docs/NATIVE_WORKFLOW_TEST_b.4.3.md",
+      "currentNativeValidation": "docs/test-results/native-current-2026-09-24/results.json",
+      "currentGraphBrowserValidation": "docs/test-results/native-current-2026-09-24/graph-browser.json"
     },
     "scope": "功能级有向业务步骤 + 文件级静态相对导入；不穷举运行时动态路径、第三方库内部或每次函数调用",
     "projectDataRead": false,
@@ -173,70 +178,18 @@
     "limitations": [
       "workflow-step 是业务步骤顺序，不能当作直接函数调用边。",
       "文件导入关系不代表调用次数、调用顺序、用户使用频率或性能。",
-      "测试声明包含参数化模板，声明数不等于执行数；本次发布 app-only 校验 586 通过、0 失败、0 跳过，Node 24 正常退出。三轮浏览器记录已复核；音视频引用的 HTTP 和 DOM 检查不代表真实播放。",
+      "测试声明包含参数化模板，声明数不等于执行数；本轮使用桌面内置 Node v24.20.0 完成 586 项应用回归，零失败、零跳过，并运行三组实际 Linux 桌面工作流。",
       "没有读取实际作品正文、素材内容、本机秘密或网络服务。",
-      "本次发布已设置 VIENTO_TEST_ARCHIVE_BINARY，重跑归档互通与原生登记契约；完整 Tauri 宿主和原生窗口未重跑，相关历史结果与源码指纹保留。",
+      "原生窗口、归档互通和优化后的 glib 已重跑；真实大体积作品迁移仍有 1 项忽略。Windows/macOS、实体扬声器和真实外置设备断连/重连未测试，调试构建不等于发行安装包验证。",
       "第三方 glib 仅将实际修复文件加入功能图源码清单；其余文件通过 vendor/glib-upstream.json 的原包指纹核验，不展开第三方模块调用图。"
     ],
-    "snapshotRevision": 63,
+    "snapshotRevision": 64,
     "repairLog": "docs/NETWORK_BUGFIX_b.2.8.1.md",
     "previousSnapshot": {
-      "revision": 62,
-      "commit": "03265ba0fbc3dcf8a59ceff9d25b390e3aed4c8b",
-      "sourceState": "b.4.2 工作树：保留 N114–N118，新增 N119–N120，顶层 JSON/YAML 值使用通用渲染，空对象/空列表在阅读与导出中明确显示；真实浏览器验证列表素材、值与保存重开，尚未提交或安装",
-      "changedSources": [],
-      "releaseFiles": [
-        {
-          "file": "VERSION",
-          "before": "b13dfbfb00d49b8046c87b82459274a606687d7c86764389c1107be8b1ac2e63",
-          "after": "c28c5f5fd6eab4c478503b0996986fd755c0df7b25919d52944c9a13db0ef56c"
-        },
-        {
-          "file": "package.json",
-          "before": "bddfdb1a1860934954b4a228756cd313572cd27be91e4421b9ee56579015103b",
-          "after": "675ab76892e264c4cf0c0e1eaa37a5b9da427ecee2348766851c4e042eecbc0f"
-        },
-        {
-          "file": "package-lock.json",
-          "before": "33e6c614d29e3c0692f0c3e0d8d76d0af24de72f706c0404b66f083ecf3c6f0d",
-          "after": "f29a948d5396cc60c8b8954434be13309a4bb87a136424c447c18fb3e290a4e2"
-        },
-        {
-          "file": "src-tauri/Cargo.toml",
-          "before": "affa757e40a772af319ba7edda05ced0cf422b97098deff9b03b15cc8421a1e9",
-          "after": "0010acd9aebb8096a77925ca0fffd7275120051634b44b4878567042a2f8b5f7"
-        },
-        {
-          "file": "src-tauri/Cargo.lock",
-          "before": "9917d503259aad24a679176dba47b99abe4f3021390f682d84d4104f8f1c6e56",
-          "after": "d3e211665055c9198536ada34f1c1f27035e49d1d18104c8b946b7c6a5fe5a70"
-        },
-        {
-          "file": "src-tauri/tauri.conf.json",
-          "before": "7c59f35a05695e7d183e96077819751eb16c26f74849cd0148dcde4685067f12",
-          "after": "3faa050b4264acdefbfd5148be430fcbcfe8972afa9bdd01bd78155524c82d23"
-        },
-        {
-          "file": "web/index.html",
-          "before": "8f0b8df0e65789b3d8ff019929e5927885175c6802a6d61f731f50b7cd8175d9",
-          "after": "7b12cdbe455ec9c2ee4113051e39968e4a9e35df69e52ace789b46ae14544563"
-        },
-        {
-          "file": "desktop/ui/index.html",
-          "before": "b749fb9d44044d538d10d298b4dd76875447bf780261a88d0e141ab78a63bdd8",
-          "after": "29b74a2fe55f36b635a959153593b859502acb41bd05e86c962a786fd81f23a1"
-        },
-        {
-          "file": "README.md",
-          "before": "f3be2d313bc3c2be9d5c9b2c3cae4b7d65f28e1d6254f5d49128d219a6752e37",
-          "after": "6dcf5847c55767a3509e7c1b1dac40366f97518e055bcfeb4d8fb4481c7e2307"
-        },
-        {
-          "file": "desktop/README.md",
-          "before": "8eb24d1c07a553baa431275a7e07766e3909b01ce8dd8b67a55adaf5b0208d1a",
-          "after": "02b0387be5b271374105e027b6f3698c75cfa4935de705e954c234837fa59288"
-        }
-      ]
+      "revision": 63,
+      "commit": "2bc3db43e8bdfd92f2be6995221efd0e22dfe8b4",
+      "sourceState": "b.4.3 发布工作树：收录第四十三至四十五轮 N114–N120，统一结构化草稿、素材说明与重复引用、顶层值和空容器展示；发布回归 586 项通过，尚未构建或替换安装包",
+      "changedSources": []
     },
     "repairHistory": [
       {
@@ -2376,6 +2329,64 @@
             "file": "web/modules/app-document-layout.js",
             "before": "6e77358cc5d5613c824f9692c6cfc5faabd6414a52d1f8776148e2dc015ce9c9",
             "after": "fd7e06d2f1f929f0474d3ab750db7fc94aae357efb28c64a630edba5b73d7af1"
+          }
+        ]
+      },
+      {
+        "fromRevision": 62,
+        "toRevision": 63,
+        "commit": "03265ba0fbc3dcf8a59ceff9d25b390e3aed4c8b",
+        "changedSources": [],
+        "releaseFiles": [
+          {
+            "file": "VERSION",
+            "before": "b13dfbfb00d49b8046c87b82459274a606687d7c86764389c1107be8b1ac2e63",
+            "after": "c28c5f5fd6eab4c478503b0996986fd755c0df7b25919d52944c9a13db0ef56c"
+          },
+          {
+            "file": "package.json",
+            "before": "bddfdb1a1860934954b4a228756cd313572cd27be91e4421b9ee56579015103b",
+            "after": "675ab76892e264c4cf0c0e1eaa37a5b9da427ecee2348766851c4e042eecbc0f"
+          },
+          {
+            "file": "package-lock.json",
+            "before": "33e6c614d29e3c0692f0c3e0d8d76d0af24de72f706c0404b66f083ecf3c6f0d",
+            "after": "f29a948d5396cc60c8b8954434be13309a4bb87a136424c447c18fb3e290a4e2"
+          },
+          {
+            "file": "src-tauri/Cargo.toml",
+            "before": "affa757e40a772af319ba7edda05ced0cf422b97098deff9b03b15cc8421a1e9",
+            "after": "0010acd9aebb8096a77925ca0fffd7275120051634b44b4878567042a2f8b5f7"
+          },
+          {
+            "file": "src-tauri/Cargo.lock",
+            "before": "9917d503259aad24a679176dba47b99abe4f3021390f682d84d4104f8f1c6e56",
+            "after": "d3e211665055c9198536ada34f1c1f27035e49d1d18104c8b946b7c6a5fe5a70"
+          },
+          {
+            "file": "src-tauri/tauri.conf.json",
+            "before": "7c59f35a05695e7d183e96077819751eb16c26f74849cd0148dcde4685067f12",
+            "after": "3faa050b4264acdefbfd5148be430fcbcfe8972afa9bdd01bd78155524c82d23"
+          },
+          {
+            "file": "web/index.html",
+            "before": "8f0b8df0e65789b3d8ff019929e5927885175c6802a6d61f731f50b7cd8175d9",
+            "after": "7b12cdbe455ec9c2ee4113051e39968e4a9e35df69e52ace789b46ae14544563"
+          },
+          {
+            "file": "desktop/ui/index.html",
+            "before": "b749fb9d44044d538d10d298b4dd76875447bf780261a88d0e141ab78a63bdd8",
+            "after": "29b74a2fe55f36b635a959153593b859502acb41bd05e86c962a786fd81f23a1"
+          },
+          {
+            "file": "README.md",
+            "before": "f3be2d313bc3c2be9d5c9b2c3cae4b7d65f28e1d6254f5d49128d219a6752e37",
+            "after": "6dcf5847c55767a3509e7c1b1dac40366f97518e055bcfeb4d8fb4481c7e2307"
+          },
+          {
+            "file": "desktop/README.md",
+            "before": "8eb24d1c07a553baa431275a7e07766e3909b01ce8dd8b67a55adaf5b0208d1a",
+            "after": "02b0387be5b271374105e027b6f3698c75cfa4935de705e954c234837fa59288"
           }
         ]
       }

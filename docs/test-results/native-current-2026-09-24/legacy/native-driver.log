@@ -1,0 +1,50 @@
+dbus-daemon[3188984]: [session uid=1000 pid=3188984] Activating service name='org.a11y.Bus' requested by ':1.0' (uid=1000 pid=3189002 comm="/tmp/viento-native-b43-r1gu7dsi/target/debug/vient" label="chatgpt (unconfined)")
+dbus-daemon[3188984]: [session uid=1000 pid=3188984] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[3188984]: [session uid=1000 pid=3188984] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.2' (uid=1000 pid=3189002 comm="/tmp/viento-native-b43-r1gu7dsi/target/debug/vient" label="chatgpt (unconfined)")
+dbus-daemon[3188984]: [session uid=1000 pid=3188984] Activating service name='org.freedesktop.portal.Documents' requested by ':1.3' (uid=1000 pid=3189018 comm="/usr/libexec/xdg-desktop-portal" label="chatgpt (unconfined)")
+dbus-daemon[3188984]: [session uid=1000 pid=3188984] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.4' (uid=1000 pid=3189024 comm="/usr/libexec/xdg-document-portal" label="chatgpt (unconfined)")
+dbus-daemon[3188984]: [session uid=1000 pid=3188984] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[3188984]: [session uid=1000 pid=3188984] Successfully activated service 'org.freedesktop.portal.Documents'
+Ignoring invalid max threads value 4294967295 > max (100000).
+dbus-daemon[3188984]: [session uid=1000 pid=3188984] Activating service name='org.freedesktop.impl.portal.desktop.gnome' requested by ':1.3' (uid=1000 pid=3189018 comm="/usr/libexec/xdg-desktop-portal" label="chatgpt (unconfined)")
+dbus-daemon[3188984]: [session uid=1000 pid=3188984] Successfully activated service 'org.freedesktop.impl.portal.desktop.gnome'
+dbus-daemon[3188984]: [session uid=1000 pid=3188984] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.3' (uid=1000 pid=3189018 comm="/usr/libexec/xdg-desktop-portal" label="chatgpt (unconfined)")
+dbus-daemon[3189013]: Activating service name='org.a11y.atspi.Registry' requested by ':1.1' (uid=1000 pid=3189064 comm="/usr/libexec/xdg-desktop-portal-gtk" label="chatgpt (unconfined)")
+dbus-daemon[3189013]: Successfully activated service 'org.a11y.atspi.Registry'
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
+dbus-daemon[3188984]: [session uid=1000 pid=3188984] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:3189018): xdg-desktop-portal-WARNING **: 17:57:49.058: Failed connect to PipeWire: Couldn't connect to PipeWire
+dbus-daemon[3188984]: [session uid=1000 pid=3188984] Activating service name='org.freedesktop.secrets' requested by ':1.3' (uid=1000 pid=3189018 comm="/usr/libexec/xdg-desktop-portal" label="chatgpt (unconfined)")
+** Message: 17:57:49.066: couldn't access control socket: /tmp/viento-native-e2e-z3tox4jh/runtime/keyring/control: No such file or directory
+discover_other_daemon: 0dbus-daemon[3188984]: [session uid=1000 pid=3188984] Successfully activated service 'org.freedesktop.secrets'
+dbus-daemon[3188984]: [session uid=1000 pid=3188984] Successfully activated service 'org.freedesktop.portal.Desktop'
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+libEGL warning: pci id for fd 19: 10de:28e1, driver (null)
+
+pci id for fd 20: 10de:28e1, driver (null)
+pci id for fd 21: 10de:28e1, driver (null)
+libEGL warning: egl: failed to create dri2 screen
+libEGL warning: DRI2: failed to create screen
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+libEGL warning: pci id for fd 19: 10de:28e1, driver (null)
+
+pci id for fd 20: 10de:28e1, driver (null)
+pci id for fd 21: 10de:28e1, driver (null)
+libEGL warning: egl: failed to create dri2 screen
+libEGL warning: DRI2: failed to create screen
+libEGL warning: pci id for fd 19: 10de:28e1, driver (null)
+
+pci id for fd 20: 10de:28e1, driver (null)
+pci id for fd 21: 10de:28e1, driver (null)
+libEGL warning: egl: failed to create dri2 screen
+libEGL warning: DRI2: failed to create screen
+libEGL warning: pci id for fd 19: 10de:28e1, driver (null)
+
+pci id for fd 20: 10de:28e1, driver (null)
+pci id for fd 21: 10de:28e1, driver (null)
+libEGL warning: egl: failed to create dri2 screen
+libEGL warning: DRI2: failed to create screen
+[ALSOFT] (EE) Failed to connect PipeWire event context (errno: 112)

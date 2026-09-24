@@ -1,0 +1,79 @@
+{
+  "date": "2026-09-24",
+  "browser": "Codex in-app browser",
+  "url": "http://127.0.0.1:45531/docs/function-network.html",
+  "initialRevision": 63,
+  "finalRevision": 64,
+  "version": "b.4.3",
+  "tabId": "4",
+  "tabClosed": true,
+  "scope": "Unmodified self-contained document served on loopback; current metadata and summary text reloaded after recording native results.",
+  "checks": [
+    {
+      "name": "Initial snapshot and four view modes",
+      "result": "passed",
+      "counts": {
+        "workflows": 50,
+        "nodes": 66,
+        "modules": 150,
+        "localImports": 499,
+        "businessOperations": 16
+      }
+    },
+    {
+      "name": "Group 素材 + search F30 selects one workflow",
+      "result": "passed"
+    },
+    {
+      "name": "Inspect media renderer and navigate to upstream/downstream node view",
+      "result": "passed"
+    },
+    {
+      "name": "Module search, 6 incoming / 4 outgoing imports and 3-module cycle explanation",
+      "result": "passed"
+    },
+    {
+      "name": "Unmatched search gives explicit zero-results message",
+      "result": "passed"
+    },
+    {
+      "name": "API search /api/assets filters 3 of 16 operations",
+      "result": "passed"
+    },
+    {
+      "name": "Native and workspace CLI lists show 11 and 7 operations",
+      "result": "passed"
+    },
+    {
+      "name": "Reload preserves native/CLI selection from fragment",
+      "result": "passed"
+    },
+    {
+      "name": "Revision 64 reload displays current native workflow summary and returns to F30",
+      "result": "passed"
+    },
+    {
+      "name": "Document fits current viewport without horizontal overflow",
+      "result": "passed",
+      "viewportWidth": 1265,
+      "pageWidth": 1265
+    }
+  ],
+  "consoleWarningsAndErrors": [],
+  "toolCorrections": [
+    {
+      "step": "Clear API search",
+      "observation": "fill with an empty string left the visible query unchanged; subsequent native-command lookup timed out.",
+      "resolution": "Inspected current state, cleared by Select All + Backspace and verified all four groups returned.",
+      "productDefect": false
+    },
+    {
+      "step": "Read heading after reload",
+      "observation": "The browser locator API does not support heading level options; a broad heading query matched three elements.",
+      "resolution": "Used the visible exact heading 原生命令 and verified the retained URL fragment.",
+      "productDefect": false
+    }
+  ],
+  "viewportOverrideApplied": false,
+  "realProjectAccessed": false
+}

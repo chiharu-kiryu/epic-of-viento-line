@@ -10,6 +10,29 @@ Viento Studio 是通用 OC 设计 IDE；此仓库包含编辑器、转换器和�
 
 原作品 **Epic of Viento Line** 是独立的 [官方示范项目](docs/examples/README.md)。其正文和素材仍保存在外部作品库；应用安装包不包含作品数据。
 
+## 首次运行
+
+准备 Node.js 24、Rust 稳定版与 [Tauri 系统依赖](https://v2.tauri.app/start/prerequisites/)，然后运行：
+
+```sh
+git clone --depth 1 https://github.com/chiharu-kiryu/epic-of-viento-line.git
+cd epic-of-viento-line
+npm ci
+npm run desktop:dev
+```
+
+在作品库首页选择 **新建作品库**，填写名称和保存位置即可开始。也可打开已有作品文件夹或导入 `.viento.zip`。第一次启动需要下载内置运行环境并编译桌面宿主。安装包构建、系统要求与数据迁移见 [桌面版说明](desktop/README.md)。
+
+只检查程序时运行 `npm run check -- --app-only`，测试会创建临时样例，不需要下载示范作品。`npm start` 等网页入口需要先创建或选择作品，详见下方说明。
+
+## 公开开发
+
+本仓库同时保留 Viento Studio 和原作品的完整 Git 历史，早期提交包含作品正文与素材。历史体积较大，上面的浅克隆只下载当前版本；需要研究完整历史时再运行 `git fetch --unshallow`。当前目录与应用安装包继续采用程序和作品分离的结构。
+
+欢迎通过 [Issues](https://github.com/chiharu-kiryu/epic-of-viento-line/issues) 反馈问题，通过 Pull Request 参与开发。开发与验证步骤见 [贡献指南](.github/CONTRIBUTING.md)，安全问题请使用 [私密报告入口](.github/SECURITY.md)。程序许可证见 [LICENSE](LICENSE)，第三方组件保留各自的许可声明。
+
+推送到 `main` 和提交 Pull Request 后会自动执行程序检查。三端安装包仍通过 **Build desktop installers** 工作流手动构建；不同平台的验证情况以测试报告为准。
+
 ## 仓库结构
 
 ```text

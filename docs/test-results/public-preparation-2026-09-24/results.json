@@ -1,0 +1,50 @@
+{
+  "date": "2026-09-24",
+  "version": "b.4.3",
+  "gitBase": "2bc3db43e8bdfd92f2be6995221efd0e22dfe8b4",
+  "scope": "Existing repository and full history, including historical works and assets",
+  "productionCodeChanged": false,
+  "versionChanged": false,
+  "realWorkspaceModified": false,
+  "scanner": {
+    "tool": "Gitleaks",
+    "version": "8.30.1",
+    "downloadSha256": "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb",
+    "historyRef": "main",
+    "historyCommitsReachable": 200,
+    "historyDiffCommitsScanned": 197,
+    "currentFindings": 18,
+    "historyFindings": 8,
+    "triage": "Every finding verified as a current or historical source file SHA-256",
+    "confirmedCredentials": 0,
+    "urlCredentialAndPrivateKeyMarkerFindings": 0,
+    "limits": "Text files and Git patch scanning; not a guarantee of absence of all sensitive data"
+  },
+  "application": {
+    "node": "v24.21.0",
+    "cleanDependencyInstall": true,
+    "command": "npm run check -- --app-only",
+    "tests": 538,
+    "passed": 536,
+    "failed": 0,
+    "skipped": 2,
+    "skipReason": "VIENTO_TEST_ARCHIVE_BINARY not provided; complete native coverage recorded separately",
+    "dependencyAuditVulnerabilities": 0
+  },
+  "nativeValidation": {
+    "report": "docs/NATIVE_WORKFLOW_TEST_b.4.3.md",
+    "unchangedBuildSources": 327
+  },
+  "workflow": {
+    "file": ".github/workflows/check.yml",
+    "yamlParsed": true,
+    "events": [
+      "push main",
+      "pull_request",
+      "workflow_dispatch"
+    ],
+    "contentsPermission": "read"
+  },
+  "applicationLogSha256": "83662f8924d4d615ef385bf36a70a06cf8704e2bc86ebb015e60cc756e559056",
+  "publicationState": "Prepared locally; remote visibility and CI verified separately after publication"
+}

@@ -1,0 +1,82 @@
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Activating service name='org.a11y.Bus' requested by ':1.0' (uid=1000 pid=3192625 comm="/tmp/viento-native-b43-r1gu7dsi/target/debug/vient" label="chatgpt (unconfined)")
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.2' (uid=1000 pid=3192625 comm="/tmp/viento-native-b43-r1gu7dsi/target/debug/vient" label="chatgpt (unconfined)")
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Activating service name='org.freedesktop.portal.Documents' requested by ':1.3' (uid=1000 pid=3192642 comm="/usr/libexec/xdg-desktop-portal" label="chatgpt (unconfined)")
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.4' (uid=1000 pid=3192658 comm="/usr/libexec/xdg-document-portal" label="chatgpt (unconfined)")
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Successfully activated service 'org.freedesktop.portal.Documents'
+Ignoring invalid max threads value 4294967295 > max (100000).
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Activating service name='org.freedesktop.impl.portal.desktop.gnome' requested by ':1.3' (uid=1000 pid=3192642 comm="/usr/libexec/xdg-desktop-portal" label="chatgpt (unconfined)")
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Successfully activated service 'org.freedesktop.impl.portal.desktop.gnome'
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.3' (uid=1000 pid=3192642 comm="/usr/libexec/xdg-desktop-portal" label="chatgpt (unconfined)")
+dbus-daemon[3192637]: Activating service name='org.a11y.atspi.Registry' requested by ':1.1' (uid=1000 pid=3192753 comm="/usr/libexec/xdg-desktop-portal-gtk" label="chatgpt (unconfined)")
+dbus-daemon[3192637]: Successfully activated service 'org.a11y.atspi.Registry'
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:3192642): xdg-desktop-portal-WARNING **: 17:59:12.115: Failed connect to PipeWire: Couldn't connect to PipeWire
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Activating service name='org.freedesktop.secrets' requested by ':1.3' (uid=1000 pid=3192642 comm="/usr/libexec/xdg-desktop-portal" label="chatgpt (unconfined)")
+** Message: 17:59:12.123: couldn't access control socket: /tmp/viento-native-library-dkc90gi8/runtime/keyring/control: No such file or directory
+discover_other_daemon: 0dbus-daemon[3192528]: [session uid=1000 pid=3192528] Successfully activated service 'org.freedesktop.secrets'
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Successfully activated service 'org.freedesktop.portal.Desktop'
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+libEGL warning: pci id for fd 19: 10de:28e1, driver (null)
+
+pci id for fd 20: 10de:28e1, driver (null)
+pci id for fd 21: 10de:28e1, driver (null)
+libEGL warning: egl: failed to create dri2 screen
+libEGL warning: DRI2: failed to create screen
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Activating service name='org.gtk.vfs.Daemon' requested by ':1.2' (uid=1000 pid=3192625 comm="/tmp/viento-native-b43-r1gu7dsi/target/debug/vient" label="chatgpt (unconfined)")
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Successfully activated service 'org.gtk.vfs.Daemon'
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.2' (uid=1000 pid=3192625 comm="/tmp/viento-native-b43-r1gu7dsi/target/debug/vient" label="chatgpt (unconfined)")
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.2' (uid=1000 pid=3192625 comm="/tmp/viento-native-b43-r1gu7dsi/target/debug/vient" label="chatgpt (unconfined)")
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.2' (uid=1000 pid=3192625 comm="/tmp/viento-native-b43-r1gu7dsi/target/debug/vient" label="chatgpt (unconfined)")
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.2' (uid=1000 pid=3192625 comm="/tmp/viento-native-b43-r1gu7dsi/target/debug/vient" label="chatgpt (unconfined)")
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Activating service name='org.gnome.OnlineAccounts' requested by ':1.18' (uid=1000 pid=3193235 comm="/usr/libexec/gvfs-goa-volume-monitor" label="chatgpt (unconfined)")
+goa-daemon-Message: 17:59:12.997: goa-daemon version 3.50.4 starting
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Activating service name='org.gnome.Identity' requested by ':1.19' (uid=1000 pid=3193241 comm="/usr/libexec/goa-daemon" label="chatgpt (unconfined)")
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Successfully activated service 'org.gnome.OnlineAccounts'
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.2' (uid=1000 pid=3192625 comm="/tmp/viento-native-b43-r1gu7dsi/target/debug/vient" label="chatgpt (unconfined)")
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Successfully activated service 'org.gnome.Identity'
+dbus-daemon[3192528]: [session uid=1000 pid=3192528] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+libEGL warning: pci id for fd 19: 10de:28e1, driver (null)
+
+pci id for fd 20: 10de:28e1, driver (null)
+pci id for fd 21: 10de:28e1, driver (null)
+libEGL warning: egl: failed to create dri2 screen
+libEGL warning: DRI2: failed to create screen
+libEGL warning: pci id for fd 19: 10de:28e1, driver (null)
+
+pci id for fd 20: 10de:28e1, driver (null)
+pci id for fd 21: 10de:28e1, driver (null)
+libEGL warning: egl: failed to create dri2 screen
+libEGL warning: DRI2: failed to create screen
+libEGL warning: pci id for fd 19: 10de:28e1, driver (null)
+
+pci id for fd 20: 10de:28e1, driver (null)
+pci id for fd 21: 10de:28e1, driver (null)
+libEGL warning: egl: failed to create dri2 screen
+libEGL warning: DRI2: failed to create screen
+libEGL warning: pci id for fd 19: 10de:28e1, driver (null)
+
+pci id for fd 20: 10de:28e1, driver (null)
+pci id for fd 21: 10de:28e1, driver (null)
+libEGL warning: egl: failed to create dri2 screen
+libEGL warning: DRI2: failed to create screen
+libEGL warning: pci id for fd 19: 10de:28e1, driver (null)
+
+pci id for fd 20: 10de:28e1, driver (null)
+pci id for fd 21: 10de:28e1, driver (null)
+libEGL warning: egl: failed to create dri2 screen
+libEGL warning: DRI2: failed to create screen
+libEGL warning: pci id for fd 19: 10de:28e1, driver (null)
+
+pci id for fd 20: 10de:28e1, driver (null)
+pci id for fd 21: 10de:28e1, driver (null)
+libEGL warning: egl: failed to create dri2 screen
+libEGL warning: DRI2: failed to create screen
