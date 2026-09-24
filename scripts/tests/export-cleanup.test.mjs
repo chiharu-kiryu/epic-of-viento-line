@@ -69,9 +69,11 @@ test('HTTP release can retry a failed removal without reviving the download or l
     import { once } from 'node:events';
     import { handleApiRequest } from './scripts/lib/doc-server-routes.mjs';
     const service = createExportService(root);
+    const downloadFinished = deferred();
     const server = createServer(async (request, response) => {
       const requestUrl = new URL(request.url, 'http://127.0.0.1');
       await handleApiRequest({ pathname: requestUrl.pathname, request, response, requestUrl, service: { exports: service } });
+      if (request.method === 'GET') downloadFinished.resolve();
     });
     server.listen(0, '127.0.0.1'); await once(server, 'listening');
     const base = 'http://127.0.0.1:' + server.address().port;
@@ -83,6 +85,9 @@ test('HTTP release can retry a failed removal without reviving the download or l
       const downloaded = await fetch(base + '/api/export?id=' + job.id);
       assert.equal(downloaded.status, 200);
       assert.deepEqual(Buffer.from(await downloaded.arrayBuffer()), expected);
+      // Client EOF may precede the server's file close and reader release.
+      // This case tests immediate deletion of an inactive download.
+      await downloadFinished.promise;
       failRemoval(path.dirname(file));
       const failed = await post({ action: 'release', id: job.id });
       assert.equal(failed.status, 500); await failed.json();

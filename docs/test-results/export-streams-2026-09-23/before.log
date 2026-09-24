@@ -1,0 +1,392 @@
+TAP version 13
+# Subtest: document cancellation during resolve waits for cleanup and cannot start a late reader
+not ok 1 - document cancellation during resolve waits for cleanup and cannot start a late reader
+  ---
+  duration_ms: 256.149138
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-streams.test.mjs:186:52'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: export must wait for the outstanding source operation before settling
+        at file:///tmp/viento-test-oxAbtL/[eval1]:122:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: true,
+      expected: false,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-oxAbtL/[eval1]:122:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: document cancellation during open waits for cleanup and cannot start a late reader
+not ok 2 - document cancellation during open waits for cleanup and cannot start a late reader
+  ---
+  duration_ms: 228.528961
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-streams.test.mjs:186:52'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: all source descriptors must be closed before the export settles
+        at file:///tmp/viento-test-m96lNg/[eval1]:121:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 1,
+      expected: 0,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-m96lNg/[eval1]:121:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: document cancellation during stat waits for cleanup and cannot start a late reader
+not ok 3 - document cancellation during stat waits for cleanup and cannot start a late reader
+  ---
+  duration_ms: 219.721544
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-streams.test.mjs:186:52'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: all source descriptors must be closed before the export settles
+        at file:///tmp/viento-test-22F9Q5/[eval1]:121:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 1,
+      expected: 0,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-22F9Q5/[eval1]:121:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: document cancellation during an active read waits for its descriptor to close
+not ok 4 - document cancellation during an active read waits for its descriptor to close
+  ---
+  duration_ms: 241.163301
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-streams.test.mjs:189:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: all source descriptors must be closed before the export settles
+        at file:///tmp/viento-test-3XIEPA/[eval1]:121:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 1,
+      expected: 0,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-3XIEPA/[eval1]:121:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: document success waits for an earlier input close before exposing the job
+not ok 5 - document success waits for an earlier input close before exposing the job
+  ---
+  duration_ms: 252.995169
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-streams.test.mjs:192:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: all source descriptors must be closed before the export settles
+        at file:///tmp/viento-test-snsXQ5/[eval1]:121:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 1,
+      expected: 0,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-snsXQ5/[eval1]:121:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: workspace cancellation during resolve waits for cleanup and cannot start a late reader
+not ok 6 - workspace cancellation during resolve waits for cleanup and cannot start a late reader
+  ---
+  duration_ms: 216.198167
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-streams.test.mjs:186:52'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: export must wait for the outstanding source operation before settling
+        at file:///tmp/viento-test-NgFIt7/[eval1]:122:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: true,
+      expected: false,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-NgFIt7/[eval1]:122:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: workspace cancellation during open waits for cleanup and cannot start a late reader
+not ok 7 - workspace cancellation during open waits for cleanup and cannot start a late reader
+  ---
+  duration_ms: 219.700074
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-streams.test.mjs:186:52'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: all source descriptors must be closed before the export settles
+        at file:///tmp/viento-test-N0r7sC/[eval1]:121:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 1,
+      expected: 0,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-N0r7sC/[eval1]:121:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: workspace cancellation during stat waits for cleanup and cannot start a late reader
+not ok 8 - workspace cancellation during stat waits for cleanup and cannot start a late reader
+  ---
+  duration_ms: 216.924496
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-streams.test.mjs:186:52'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: all source descriptors must be closed before the export settles
+        at file:///tmp/viento-test-eMvSCb/[eval1]:121:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 1,
+      expected: 0,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-eMvSCb/[eval1]:121:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: workspace cancellation during an active read waits for its descriptor to close
+not ok 9 - workspace cancellation during an active read waits for its descriptor to close
+  ---
+  duration_ms: 211.903248
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-streams.test.mjs:189:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: all source descriptors must be closed before the export settles
+        at file:///tmp/viento-test-7cyqLq/[eval1]:121:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 1,
+      expected: 0,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-7cyqLq/[eval1]:121:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: workspace success waits for an earlier input close before exposing the job
+not ok 10 - workspace success waits for an earlier input close before exposing the job
+  ---
+  duration_ms: 232.394798
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-streams.test.mjs:192:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: all source descriptors must be closed before the export settles
+        at file:///tmp/viento-test-NdJWJ9/[eval1]:121:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 1,
+      expected: 0,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-NdJWJ9/[eval1]:121:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: ZIP output failure during resolve stops pending inputs and preserves the original error
+not ok 11 - ZIP output failure during resolve stops pending inputs and preserves the original error
+  ---
+  duration_ms: 219.052363
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-streams.test.mjs:197:50'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: export must wait for the outstanding source operation before settling
+        at file:///tmp/viento-test-Q23QQx/[eval1]:122:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: true,
+      expected: false,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-Q23QQx/[eval1]:122:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: ZIP output failure during open stops pending inputs and preserves the original error
+not ok 12 - ZIP output failure during open stops pending inputs and preserves the original error
+  ---
+  duration_ms: 212.488123
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-streams.test.mjs:197:50'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: all source descriptors must be closed before the export settles
+        at file:///tmp/viento-test-espYRO/[eval1]:121:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 1,
+      expected: 0,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-espYRO/[eval1]:121:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: ZIP output failure during stat stops pending inputs and preserves the original error
+not ok 13 - ZIP output failure during stat stops pending inputs and preserves the original error
+  ---
+  duration_ms: 215.223976
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-streams.test.mjs:197:50'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: all source descriptors must be closed before the export settles
+        at file:///tmp/viento-test-55XmZf/[eval1]:121:14 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: 1,
+      expected: 0,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-55XmZf/[eval1]:121:14 {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: a source stat error still waits for close and leaves a complete export retry available
+ok 14 - a source stat error still waits for close and leaves a complete export retry available
+  ---
+  duration_ms: 293.929182
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 1
+# fail 13
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3369.333177

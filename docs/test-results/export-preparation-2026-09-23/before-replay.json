@@ -1,0 +1,17 @@
+{
+  "temporaryDirectory": "/tmp/viento-export-preparation-replay-E7BrkX",
+  "removed": true,
+  "exitCode": 1,
+  "statistics": {
+    "tests": 16,
+    "pass": 3,
+    "fail": 13,
+    "skipped": 0
+  },
+  "sourceSha256": {
+    "scripts/lib/export-package.mjs": "ca8e466c72d039fe47cff94130c6046aba24d25398e6b269762d9d29e3e46abf",
+    "scripts/lib/export-service.mjs": "4e915ba699c154cd47394bb898bcec6a64864029f2a2016d3e01bef8e5759be6",
+    "scripts/lib/workspace.mjs": "dd65d70c66969311a92351d9bada09bca89f8712f78a643aa1d72c8935a2e783"
+  },
+  "testFileSha256": "013b6b2d82266515ca1d4f8182afb5fd6e031d7db9d8e0fe3a0d916ddf8f540b"
+}

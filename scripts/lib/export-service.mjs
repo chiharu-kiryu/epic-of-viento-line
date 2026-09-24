@@ -60,6 +60,7 @@ export function createExportService(root, { ttlMs = 15 * 60 * 1000 } = {}) {
     }
   }
   async function create(options, signal) {
+    signal?.throwIfAborted();
     if (busy) throw exportError('正在准备另一份导出，请稍候', 409);
     busy = true;
     let directory, id;
@@ -68,11 +69,13 @@ export function createExportService(root, { ttlMs = 15 * 60 * 1000 } = {}) {
       // inactive downloads or revoked jobs can give their slot to the next
       // export, after their pending cleanup succeeds.
       for (const job of jobs.values()) {
+        signal?.throwIfAborted();
         if (jobs.size < 3) break;
         if (job.released || (job.downloaded && !job.readers)) await release(job.id);
       }
       if (jobs.size >= 3) throw exportError('请先下载或关闭已有导出，再继续', 409);
       const plan = await planExport(root, options, signal);
+      signal?.throwIfAborted();
       const cache = await resolveContainedPath(root, path.join(root, '.viento/cache/exports'), { allowMissing: true });
       await fs.mkdir(cache, { recursive: true, mode: 0o700 });
       await resolveContainedPath(root, cache);

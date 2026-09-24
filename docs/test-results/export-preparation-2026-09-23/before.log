@@ -1,0 +1,612 @@
+TAP version 13
+# Subtest: document preparation cancellation stops the remaining registry-tree work
+not ok 1 - document preparation cancellation stops the remaining registry-tree work
+  ---
+  duration_ms: 591.217022
+  location: 'file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/tests/export-preparation.test.mjs:153:59'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: stopped preparation must not keep scanning or reading authored files
+        at file:///tmp/viento-test-lZc24j/[eval1]:109:12 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: [
+        'readFile:metadata/assets/0eb97d3e-0408-437f-a48c-0e838ae5daf5.json',
+        'readFile:metadata/assets/472d2e6a-0644-4087-9700-360a645b12e8.json',
+        'readFile:metadata/assets/bac410ff-7a55-406d-9798-9befb52beacd.json',
+        'lstat:metadata/documents',
+        'readdir:metadata/documents',
+        'readFile:metadata/documents/7c3ff11a-80f8-4f75-9b88-351786e8d1f8.json',
+        'readFile:metadata/documents/ef0961ac-3c82-4102-b74e-3765f308e1d1.json'
+      ],
+      expected: [],
+      operator: 'deepStrictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-lZc24j/[eval1]:109:12 {
+    ChildProcess.<anonymous> (file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: document preparation cancellation stops the remaining registry-read work
+not ok 2 - document preparation cancellation stops the remaining registry-read work
+  ---
+  duration_ms: 581.300937
+  location: 'file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/tests/export-preparation.test.mjs:153:59'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: stopped preparation must not keep scanning or reading authored files
+        at file:///tmp/viento-test-CGuZyz/[eval1]:109:12 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: [
+        'readFile:metadata/assets/7397fd55-a61f-42c2-a8ff-c88f5092b3bb.json',
+        'readFile:metadata/assets/c0a3587a-1d92-47df-9a9f-73bc86922f33.json',
+        'lstat:metadata/documents',
+        'readdir:metadata/documents',
+        'readFile:metadata/documents/a3db6972-9427-4c20-bb63-a4e95a096ecd.json',
+        'readFile:metadata/documents/be4ec4ac-7c0c-4a3e-b4d0-18be8be38525.json'
+      ],
+      expected: [],
+      operator: 'deepStrictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-CGuZyz/[eval1]:109:12 {
+    ChildProcess.<anonymous> (file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: document final snapshot cancellation stops after the current file stat
+not ok 3 - document final snapshot cancellation stops after the current file stat
+  ---
+  duration_ms: 468.156048
+  location: 'file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/tests/export-preparation.test.mjs:156:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: stopped preparation must not keep scanning or reading authored files
+        at file:///tmp/viento-test-AQYUf8/[eval1]:109:12 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: [
+        'lstat:metadata',
+        'lstat:metadata/documents',
+        'lstat:metadata/documents/e9143bb4-6cc0-4dca-a262-6da42d69db29.json',
+        'stat:metadata/documents/e9143bb4-6cc0-4dca-a262-6da42d69db29.json',
+        'lstat:assets/a',
+        'lstat:assets/a/主题曲.wav',
+        'stat:assets/a/主题曲.wav',
+        'lstat:metadata',
+        'lstat:metadata/assets',
+        'lstat:metadata/assets/0e5ae1a2-d67c-4902-b1b4-f77324f801c4.json',
+        'stat:metadata/assets/0e5ae1a2-d67c-4902-b1b4-f77324f801c4.json',
+        'lstat:metadata',
+        'lstat:metadata/assets',
+        'readdir:metadata/assets',
+        'readFile:metadata/assets/0e5ae1a2-d67c-4902-b1b4-f77324f801c4.json',
+        'readFile:metadata/assets/25b40fe3-c851-4834-a842-6eb8b40e54d9.json',
+        'readFile:metadata/assets/43e6de49-4713-4627-be4f-d7966152d704.json',
+        'lstat:metadata/documents',
+        'readdir:metadata/documents',
+        'readFile:metadata/documents/0bfd07dc-e38e-408b-be9e-0571adf8f763.json',
+        'readFile:metadata/documents/e9143bb4-6cc0-4dca-a262-6da42d69db29.json'
+      ],
+      expected: [],
+      operator: 'deepStrictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-AQYUf8/[eval1]:109:12 {
+    ChildProcess.<anonymous> (file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: document output failure cancels its final registry scan without an external abort
+not ok 4 - document output failure cancels its final registry scan without an external abort
+  ---
+  duration_ms: 392.294567
+  location: 'file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/tests/export-preparation.test.mjs:159:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: stopped preparation must not keep scanning or reading authored files
+        at file:///tmp/viento-test-MvgeGf/[eval1]:109:12 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: [
+        'readFile:metadata/assets/78b41820-8352-46a0-a87d-858a87ab2820.json',
+        'readFile:metadata/assets/b412998e-3888-41f8-814e-aab2410a57b7.json',
+        'lstat:metadata/documents',
+        'readdir:metadata/documents',
+        'readFile:metadata/documents/8c1fb972-fb49-4417-8c5f-e3e8b7ed6e5f.json',
+        'readFile:metadata/documents/d233f1a0-f63f-4068-b41d-9400268b214c.json'
+      ],
+      expected: [],
+      operator: 'deepStrictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-MvgeGf/[eval1]:109:12 {
+    ChildProcess.<anonymous> (file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: workspace preparation cancellation stops the remaining registry-tree work
+not ok 5 - workspace preparation cancellation stops the remaining registry-tree work
+  ---
+  duration_ms: 333.416816
+  location: 'file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/tests/export-preparation.test.mjs:153:59'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: stopped preparation must not keep scanning or reading authored files
+        at file:///tmp/viento-test-sgCzId/[eval1]:109:12 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: [
+        'readFile:metadata/assets/4a7b310d-09b5-49b2-9b13-37b7bd3baee6.json',
+        'readFile:metadata/assets/52e6ec44-8da2-40d8-b34b-8bb64d18c2f9.json',
+        'readFile:metadata/assets/7691e4b7-394c-4ff6-9d6a-865596f86690.json',
+        'lstat:metadata/documents',
+        'readdir:metadata/documents',
+        'readFile:metadata/documents/6852e315-1ce9-4712-9802-1a5274ccfb95.json',
+        'readFile:metadata/documents/c244362d-e185-4d39-9cbc-a901bc01a64c.json',
+        'lstat:documents',
+        'lstat:documents',
+        'lstat:documents',
+        'readdir:documents'
+      ],
+      expected: [],
+      operator: 'deepStrictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-sgCzId/[eval1]:109:12 {
+    ChildProcess.<anonymous> (file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: workspace preparation cancellation stops the remaining registry-read work
+not ok 6 - workspace preparation cancellation stops the remaining registry-read work
+  ---
+  duration_ms: 280.549701
+  location: 'file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/tests/export-preparation.test.mjs:153:59'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: stopped preparation must not keep scanning or reading authored files
+        at file:///tmp/viento-test-smw7LD/[eval1]:109:12 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: [
+        'readFile:metadata/assets/36ba5145-c3e6-4cd5-97e4-a193108c104f.json',
+        'readFile:metadata/assets/b1e45d93-ae2a-408f-a925-05e6d92d0874.json',
+        'lstat:metadata/documents',
+        'readdir:metadata/documents',
+        'readFile:metadata/documents/0e42c8b4-41c7-44fa-9a7a-4a4125bfe8b0.json',
+        'readFile:metadata/documents/36d24fb3-6015-4050-a591-f715f40840f3.json',
+        'lstat:documents',
+        'lstat:documents',
+        'lstat:documents',
+        'readdir:documents'
+      ],
+      expected: [],
+      operator: 'deepStrictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-smw7LD/[eval1]:109:12 {
+    ChildProcess.<anonymous> (file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: workspace final snapshot cancellation stops after the current file stat
+not ok 7 - workspace final snapshot cancellation stops after the current file stat
+  ---
+  duration_ms: 329.399119
+  location: 'file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/tests/export-preparation.test.mjs:156:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: stopped preparation must not keep scanning or reading authored files
+        at file:///tmp/viento-test-oubN7o/[eval1]:109:12 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: [
+        'lstat:templates/character.md',
+        'stat:templates/character.md',
+        'lstat:metadata/assets',
+        'lstat:metadata/assets/9e7e94f8-0142-4404-a05b-39111f81f763.json',
+        'stat:metadata/assets/9e7e94f8-0142-4404-a05b-39111f81f763.json',
+        'lstat:metadata/assets',
+        'lstat:metadata/assets/ad33701a-ddc7-4592-927f-00bd79c476b6.json',
+        'stat:metadata/assets/ad33701a-ddc7-4592-927f-00bd79c476b6.json',
+        'lstat:metadata/assets',
+        'lstat:metadata/assets/e589d315-25db-4580-8d06-ebd7f50dfce4.json',
+        'stat:metadata/assets/e589d315-25db-4580-8d06-ebd7f50dfce4.json',
+        'lstat:metadata/documents',
+        'lstat:metadata/documents/094a7ca4-f3c3-4013-8681-e6f2280abd7e.json',
+        'stat:metadata/documents/094a7ca4-f3c3-4013-8681-e6f2280abd7e.json',
+        'lstat:metadata/documents',
+        'lstat:metadata/documents/86fe6cb2-6914-4173-9765-ab33e3ac6dc5.json',
+        'stat:metadata/documents/86fe6cb2-6914-4173-9765-ab33e3ac6dc5.json',
+        'lstat:assets/a',
+        'lstat:assets/a/主题曲.wav',
+        'stat:assets/a/主题曲.wav',
+        'lstat:assets/b',
+        'lstat:assets/b/场景.mp4',
+        'stat:assets/b/场景.mp4',
+        'lstat:assets/c',
+        'lstat:assets/c/立绘.png',
+        'stat:assets/c/立绘.png',
+        'lstat:workspace.json',
+        'stat:workspace.json',
+        'lstat:.viento/workspace.json',
+        'stat:.viento/workspace.json',
+        'lstat:documents',
+        'readdir:documents',
+        'lstat:templates',
+        'readdir:templates',
+        'lstat:metadata',
+        'readdir:metadata',
+        'lstat:metadata/assets',
+        'readdir:metadata/assets',
+        'lstat:metadata/documents',
+        'readdir:metadata/documents',
+        'lstat:assets',
+        'readdir:assets',
+        'lstat:assets/a',
+        'readdir:assets/a',
+        'lstat:assets/b',
+        'readdir:assets/b',
+        'lstat:assets/c',
+        'readdir:assets/c',
+        'lstat:metadata',
+        'lstat:metadata/assets',
+        'readdir:metadata/assets',
+        'readFile:metadata/assets/9e7e94f8-0142-4404-a05b-39111f81f763.json',
+        'readFile:metadata/assets/ad33701a-ddc7-4592-927f-00bd79c476b6.json',
+        'readFile:metadata/assets/e589d315-25db-4580-8d06-ebd7f50dfce4.json',
+        'lstat:metadata/documents',
+        'readdir:metadata/documents',
+        'readFile:metadata/documents/094a7ca4-f3c3-4013-8681-e6f2280abd7e.json',
+        'readFile:metadata/documents/86fe6cb2-6914-4173-9765-ab33e3ac6dc5.json'
+      ],
+      expected: [],
+      operator: 'deepStrictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-oubN7o/[eval1]:109:12 {
+    ChildProcess.<anonymous> (file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: workspace output failure cancels its final registry scan without an external abort
+not ok 8 - workspace output failure cancels its final registry scan without an external abort
+  ---
+  duration_ms: 327.559838
+  location: 'file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/tests/export-preparation.test.mjs:159:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: stopped preparation must not keep scanning or reading authored files
+        at file:///tmp/viento-test-uf1uE1/[eval1]:109:12 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: [
+        'readFile:metadata/assets/c02ede06-785b-4729-b609-8dde21c79b4a.json',
+        'readFile:metadata/assets/cedf9cc4-5ee0-4b4b-a9d0-fd71bd9084ec.json',
+        'lstat:metadata/documents',
+        'readdir:metadata/documents',
+        'readFile:metadata/documents/48b0a05c-f2a7-47a6-9065-1e1a3b55c4d4.json',
+        'readFile:metadata/documents/a4b683e7-e1fd-448e-b5f9-2b8ad91cde4c.json'
+      ],
+      expected: [],
+      operator: 'deepStrictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-uf1uE1/[eval1]:109:12 {
+    ChildProcess.<anonymous> (file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: cancelled source preparation preserves cancellation for valid returned bytes
+ok 9 - cancelled source preparation preserves cancellation for valid returned bytes
+  ---
+  duration_ms: 313.263566
+  ...
+# Subtest: cancelled source preparation preserves cancellation for malformed returned bytes
+not ok 10 - cancelled source preparation preserves cancellation for malformed returned bytes
+  ---
+  duration_ms: 275.469833
+  location: 'file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/tests/export-preparation.test.mjs:164:38'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: cancellation or the first write error must survive late source/registry data
+        at file:///tmp/viento-test-tmWJhx/[eval1]:108:12 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: Error: 正文解析失败，请修正格式后导出：documents/角色.json
+          at exportError (file:///tmp/viento-test-tmWJhx/scripts/lib/export-package.mjs:23:73)
+          at planExport (file:///tmp/viento-test-tmWJhx/scripts/lib/export-package.mjs:165:36)
+          at async Object.create (file:///tmp/viento-test-tmWJhx/scripts/lib/export-service.mjs:75:20) {
+        statusCode: 400,
+        errorCode: 'export_failed'
+      },
+      expected: Error: stop export preparation
+          at file:///tmp/viento-test-tmWJhx/[eval1]:42:68 {
+        code: 'EIO'
+      },
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-tmWJhx/[eval1]:108:12 {
+    ChildProcess.<anonymous> (file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: workspace cancellation stops recursive asset enumeration before scanning more folders
+not ok 11 - workspace cancellation stops recursive asset enumeration before scanning more folders
+  ---
+  duration_ms: 272.899492
+  location: 'file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/tests/export-preparation.test.mjs:168:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: stopped preparation must not keep scanning or reading authored files
+        at file:///tmp/viento-test-gQUXcY/[eval1]:109:12 {
+      generatedMessage: false,
+      code: 'ERR_ASSERTION',
+      actual: [
+        'lstat:assets/a',
+        'readdir:assets/a',
+        'lstat:assets/b',
+        'readdir:assets/b',
+        'lstat:assets/c',
+        'readdir:assets/c'
+      ],
+      expected: [],
+      operator: 'deepStrictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-gQUXcY/[eval1]:109:12 {
+    ChildProcess.<anonymous> (file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: already cancelled planning performs no metadata reads
+not ok 12 - already cancelled planning performs no metadata reads
+  ---
+  duration_ms: 282.131698
+  location: 'file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/tests/export-preparation.test.mjs:172:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + [
+    +   'lstat:metadata',
+    +   'lstat:metadata/assets',
+    +   'readdir:metadata/assets',
+    +   'readFile:metadata/assets/0fc3af80-5f9c-4ed8-bd85-14c99fcab43b.json',
+    +   'readFile:metadata/assets/5609c8c8-a7bb-47dd-ae27-6bd6c697b239.json',
+    +   'readFile:metadata/assets/bfd5647c-7a7d-4199-b451-6dfa612ba732.json',
+    +   'lstat:metadata/documents',
+    +   'readdir:metadata/documents',
+    +   'readFile:metadata/documents/d1d4dc35-b3cc-4424-9916-59282b2ce1d6.json',
+    +   'readFile:metadata/documents/f36d49a7-dc32-46a1-9727-3be7d8cfbe16.json',
+    +   'lstat:documents',
+    +   'lstat:documents',
+    +   'lstat:documents',
+    +   'readdir:documents'
+    + ]
+    - []
+        at file:///tmp/viento-test-tyTqZm/[eval1]:98:30 {
+      generatedMessage: true,
+      code: 'ERR_ASSERTION',
+      actual: [
+        'lstat:metadata',
+        'lstat:metadata/assets',
+        'readdir:metadata/assets',
+        'readFile:metadata/assets/0fc3af80-5f9c-4ed8-bd85-14c99fcab43b.json',
+        'readFile:metadata/assets/5609c8c8-a7bb-47dd-ae27-6bd6c697b239.json',
+        'readFile:metadata/assets/bfd5647c-7a7d-4199-b451-6dfa612ba732.json',
+        'lstat:metadata/documents',
+        'readdir:metadata/documents',
+        'readFile:metadata/documents/d1d4dc35-b3cc-4424-9916-59282b2ce1d6.json',
+        'readFile:metadata/documents/f36d49a7-dc32-46a1-9727-3be7d8cfbe16.json',
+        'lstat:documents',
+        'lstat:documents',
+        'lstat:documents',
+        'readdir:documents'
+      ],
+      expected: [],
+      operator: 'deepStrictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-tyTqZm/[eval1]:98:30 {
+    ChildProcess.<anonymous> (file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: an already cancelled creation preserves all three existing completed jobs
+not ok 13 - an already cancelled creation preserves all three existing completed jobs
+  ---
+  duration_ms: 327.960392
+  location: 'file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/tests/export-preparation.test.mjs:180:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. file:///tmp/viento-test-UMAC28/scripts/lib/export-package.mjs:23
+    export const exportError = (message, statusCode = 400) => Object.assign(new Error(message), { statusCode, errorCode: 'export_failed' });
+                                                                            ^
+    
+    Error: 导出文件已过期，请重新导出
+        at exportError (file:///tmp/viento-test-UMAC28/scripts/lib/export-package.mjs:23:73)
+        at Object.get (file:///tmp/viento-test-UMAC28/scripts/lib/export-service.mjs:45:37)
+        at file:///tmp/viento-test-UMAC28/[eval1]:105:73 {
+      statusCode: 410,
+      errorCode: 'export_failed'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    exportError (file:///tmp/viento-test-UMAC28/scripts/lib/export-package.mjs:23:73)
+    Object.get (file:///tmp/viento-test-UMAC28/scripts/lib/export-service.mjs:45:37)
+    file:///tmp/viento-test-UMAC28/[eval1]:105:73 {
+    ChildProcess.<anonymous> (file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+# Subtest: uncancelled malformed metadata is still rejected and can be repaired for export
+ok 14 - uncancelled malformed metadata is still rejected and can be repaired for export
+  ---
+  duration_ms: 284.472823
+  ...
+# Subtest: uncancelled malformed source is still rejected and can be repaired for export
+ok 15 - uncancelled malformed source is still rejected and can be repaired for export
+  ---
+  duration_ms: 284.431091
+  ...
+# Subtest: HTTP disconnect during registry preparation stops scanning and permits a complete retry download
+not ok 16 - HTTP disconnect during registry preparation stops scanning and permits a complete retry download
+  ---
+  duration_ms: 307.385396
+  location: 'file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/tests/export-preparation.test.mjs:210:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + [
+    +   'readFile:metadata/assets/0851db92-0de4-429e-bc5b-6eb7f31fa738.json',
+    +   'readFile:metadata/assets/fae22ccf-43f2-4109-ac9b-1d35442cfa99.json',
+    +   'lstat:metadata/documents',
+    +   'readdir:metadata/documents',
+    +   'readFile:metadata/documents/31238271-4a9b-47a7-8e2a-ce8ba0dbdb42.json',
+    +   'readFile:metadata/documents/910347c7-8734-4482-9e03-d23d2bdc9c88.json',
+    +   'lstat:documents',
+    +   'lstat:documents',
+    +   'lstat:documents',
+    +   'readdir:documents'
+    + ]
+    - []
+        at file:///tmp/viento-test-UGxEli/[eval1]:115:14 {
+      generatedMessage: true,
+      code: 'ERR_ASSERTION',
+      actual: [
+        'readFile:metadata/assets/0851db92-0de4-429e-bc5b-6eb7f31fa738.json',
+        'readFile:metadata/assets/fae22ccf-43f2-4109-ac9b-1d35442cfa99.json',
+        'lstat:metadata/documents',
+        'readdir:metadata/documents',
+        'readFile:metadata/documents/31238271-4a9b-47a7-8e2a-ce8ba0dbdb42.json',
+        'readFile:metadata/documents/910347c7-8734-4482-9e03-d23d2bdc9c88.json',
+        'lstat:documents',
+        'lstat:documents',
+        'lstat:documents',
+        'readdir:documents'
+      ],
+      expected: [],
+      operator: 'deepStrictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-UGxEli/[eval1]:115:14 {
+    ChildProcess.<anonymous> (file:///tmp/viento-export-preparation-replay-E7BrkX/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 3
+# fail 13
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5835.480782

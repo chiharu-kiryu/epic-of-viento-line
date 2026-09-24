@@ -1,0 +1,282 @@
+TAP version 13
+# Subtest: v2 export rejects a newly appearing assets and retries with its exact bytes
+not ok 1 - v2 export rejects a newly appearing assets and retries with its exact bytes
+  ---
+  duration_ms: 27.284045
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:80:5'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    statusCode: 409
+    errorCode: 'export_failed'
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:91:7)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async startSubtest (node:internal/test_runner/harness:214:3)
+  ...
+# Subtest: v2 export rejects a newly appearing templates and retries with its exact bytes
+not ok 2 - v2 export rejects a newly appearing templates and retries with its exact bytes
+  ---
+  duration_ms: 8.749059
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:80:5'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    statusCode: 409
+    errorCode: 'export_failed'
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:91:7)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: v2 export rejects a newly appearing metadata and retries with its exact bytes
+not ok 3 - v2 export rejects a newly appearing metadata and retries with its exact bytes
+  ---
+  duration_ms: 8.0401
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:80:5'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    statusCode: 409
+    errorCode: 'export_failed'
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:91:7)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: v2 export rejects a newly appearing guard and retries with its exact bytes
+not ok 4 - v2 export rejects a newly appearing guard and retries with its exact bytes
+  ---
+  duration_ms: 10.448267
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:80:5'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    statusCode: 409
+    errorCode: 'export_failed'
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:91:7)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: v2 export rejects a newly appearing public manifest and retries with its exact bytes
+not ok 5 - v2 export rejects a newly appearing public manifest and retries with its exact bytes
+  ---
+  duration_ms: 8.755183
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:80:5'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    statusCode: 409
+    errorCode: 'export_failed'
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:91:7)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: v2 export still accepts unchanged missing optional directories and guards
+ok 6 - v2 export still accepts unchanged missing optional directories and guards
+  ---
+  duration_ms: 10.239398
+  ...
+# Subtest: v3 export rejects a newly appearing assets and retries with its exact bytes
+not ok 7 - v3 export rejects a newly appearing assets and retries with its exact bytes
+  ---
+  duration_ms: 6.163451
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:80:5'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    statusCode: 409
+    errorCode: 'export_failed'
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:91:7)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: v3 export rejects a newly appearing templates and retries with its exact bytes
+not ok 8 - v3 export rejects a newly appearing templates and retries with its exact bytes
+  ---
+  duration_ms: 6.131514
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:80:5'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    statusCode: 409
+    errorCode: 'export_failed'
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:91:7)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: v3 export rejects a newly appearing metadata and retries with its exact bytes
+not ok 9 - v3 export rejects a newly appearing metadata and retries with its exact bytes
+  ---
+  duration_ms: 7.294275
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:80:5'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    statusCode: 409
+    errorCode: 'export_failed'
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:91:7)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: v3 export rejects a newly appearing guard and retries with its exact bytes
+not ok 10 - v3 export rejects a newly appearing guard and retries with its exact bytes
+  ---
+  duration_ms: 5.555324
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:80:5'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    statusCode: 409
+    errorCode: 'export_failed'
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:91:7)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: v3 export rejects a newly appearing public manifest and retries with its exact bytes
+not ok 11 - v3 export rejects a newly appearing public manifest and retries with its exact bytes
+  ---
+  duration_ms: 5.520811
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:80:5'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    statusCode: 409
+    errorCode: 'export_failed'
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:91:7)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: v3 export still accepts unchanged missing optional directories and guards
+ok 12 - v3 export still accepts unchanged missing optional directories and guards
+  ---
+  duration_ms: 7.355283
+  ...
+# Subtest: legacy export can synthesize a manifest without writing one into the project
+ok 13 - legacy export can synthesize a manifest without writing one into the project
+  ---
+  duration_ms: 4.602694
+  ...
+# Subtest: document sharing ignores unrelated new directories and preserves the selected source
+ok 14 - document sharing ignores unrelated new directories and preserves the selected source
+  ---
+  duration_ms: 13.51241
+  ...
+# Subtest: workspace snapshots exclude ordinary cache activity and non-project root files
+ok 15 - workspace snapshots exclude ordinary cache activity and non-project root files
+  ---
+  duration_ms: 7.016121
+  ...
+# Subtest: new files inside an already existing empty asset folder remain protected
+ok 16 - new files inside an already existing empty asset folder remain protected
+  ---
+  duration_ms: 11.040601
+  ...
+# Subtest: a dangling link replacing an absent asset root is detected without following it
+not ok 17 - a dangling link replacing an absent asset root is detected without following it
+  ---
+  duration_ms: 4.650264
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:153:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    statusCode: 409
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:158:3)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: HTTP export rejects late first media import, cleans its staging job and downloads a complete retry
+not ok 18 - HTTP export rejects late first media import, cleans its staging job and downloads a complete retry
+  ---
+  duration_ms: 334.328451
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export-snapshot.test.mjs:165:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    /usr/bin/node failed with exit code 1. node:internal/process/esm_loader:40
+          internalBinding('errors').triggerUncaughtException(
+                                    ^
+    
+    AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+    
+    200 !== 409
+    
+        at file:///tmp/viento-test-oWuoI5/[eval1]:64:14
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+      generatedMessage: true,
+      code: 'ERR_ASSERTION',
+      actual: 200,
+      expected: 409,
+      operator: 'strictEqual'
+    }
+    
+    Node.js v18.19.1
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///tmp/viento-test-oWuoI5/[eval1]:64:14
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+    ChildProcess.emit (node:events:517:28)
+    maybeClose (node:internal/child_process:1098:16)
+    ChildProcess._handle.onexit (node:internal/child_process:303:5)
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 6
+# fail 12
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 670.424233

@@ -1,0 +1,96 @@
+{
+  "date": "2026-09-24",
+  "version": "b.3.9",
+  "gitBase": "a55ddc0b42783ae6448a8f2540f4f14da84aba18",
+  "scope": "Local project disk cleanup and no-store HTTP policy for workspace assets",
+  "deleted": {
+    "WebKit response cache": {
+      "targets": 1,
+      "allocatedBytes": 555782144
+    },
+    "inactive AppImage packaging-tool extraction": {
+      "targets": 1,
+      "allocatedBytes": 41635840
+    },
+    "rebuildable generated schema": {
+      "targets": 1,
+      "allocatedBytes": 380928
+    },
+    "old build/test log": {
+      "targets": 50,
+      "allocatedBytes": 466944
+    }
+  },
+  "git": {
+    "gitObjectsPreserved": 17814,
+    "gitRefsUnchanged": true,
+    "gitReflogsUnchanged": true,
+    "gitFsckPassed": true,
+    "gitHeadUnchanged": true,
+    "protectedFilesUnchanged": 5005,
+    "gitAllocatedBefore": 2847436800,
+    "gitAllocatedAfter": 2791604224,
+    "gitBytesReclaimed": 55832576,
+    "deletedBytes": 598265856,
+    "repackCommand": "git repack -a -d --cruft --threads=2 --window-memory=128m --window=50",
+    "grossReclaimedBytes": 654098432
+  },
+  "localAudit": "/home/chiharukiryu/.local/share/io.viento.studio/audits/disk-optimization-2026-09-24",
+  "tests": {
+    "before": {
+      "tests": 12,
+      "pass": 0,
+      "fail": 2,
+      "skipped": 10
+    },
+    "focused": {
+      "tests": 49,
+      "pass": 49,
+      "fail": 0,
+      "skipped": 0
+    },
+    "application": {
+      "tests": 442,
+      "pass": 440,
+      "fail": 0,
+      "skipped": 2
+    },
+    "javascriptSyntaxFiles": 135,
+    "apiContractPassed": true,
+    "nativeArchiveBinaryConfigured": false,
+    "skipReason": "Two native archive test groups require VIENTO_TEST_ARCHIVE_BINARY; Rust was not changed or rebuilt."
+  },
+  "sourceSha256": {
+    "scripts/lib/doc-server-static-routes.mjs": "6d618a5909da6057e3dda5198471f6acf9d61ed879d0496a2170b283283b9c26",
+    "scripts/tests/doc-api.test.mjs": "b0771064f67fe681decd14abd4de299cb87a94ca54090231a599217f2cd35ea9"
+  },
+  "productionSourceBefore": "0177eb63412dbcee112e99fa3813c3db2d0f4fed8a939c98b179e5192d235743",
+  "liveWorkspaceChanged": false,
+  "workspaceCacheCleared": false,
+  "backupRemovedOrRecompressed": false,
+  "gitHistoryRewritten": false,
+  "gitObjectsExpired": false,
+  "installedApplicationUpdated": false,
+  "installedVersion": "b.2.8.1",
+  "committed": false,
+  "functionNetworkRevision": 50,
+  "finalWorktreeVerification": {
+    "unchangedExistingFiles": 608,
+    "intentionalChanges": [
+      "docs/FUNCTION_NETWORK.md",
+      "docs/LOCAL_DATA_STORAGE.md",
+      "docs/function-network.html",
+      "docs/function-network.json",
+      "scripts/lib/doc-server-static-routes.mjs",
+      "scripts/tests/doc-api.test.mjs"
+    ],
+    "priorUncommittedFixesPreserved": true
+  },
+  "netReclaimedBytesAtVerification": 654073856,
+  "allocatedAfter": {
+    "/home/chiharukiryu/cdev/epic-of-viento-line": 2971971584,
+    "/home/chiharukiryu/.local/share/io.viento.studio": 6376083456,
+    "/home/chiharukiryu/.local/opt/viento-studio": 124116992,
+    "/home/chiharukiryu/.cache/io.viento.studio": 8192
+  }
+}

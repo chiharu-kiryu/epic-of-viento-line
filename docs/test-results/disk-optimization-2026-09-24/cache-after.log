@@ -1,0 +1,255 @@
+TAP version 13
+# Subtest: build cleanup preserves source, releases and every workspace state file
+ok 1 - build cleanup preserves source, releases and every workspace state file
+  ---
+  duration_ms: 58.078862
+  ...
+# Subtest: build cleanup does not follow symlinks into other data
+ok 2 - build cleanup does not follow symlinks into other data
+  ---
+  duration_ms: 8.468643
+  ...
+# Subtest: build cleanup refuses a configured workspace or asset store inside generated directories
+ok 3 - build cleanup refuses a configured workspace or asset store inside generated directories
+  ---
+  duration_ms: 14.137496
+  ...
+# Subtest: capability discovery includes the live project configuration and preview routes
+ok 4 - capability discovery includes the live project configuration and preview routes
+  ---
+  duration_ms: 430.71732
+  ...
+# Subtest: browser module graph is served as JavaScript; server-only modules stay private
+ok 5 - browser module graph is served as JavaScript; server-only modules stay private
+  ---
+  duration_ms: 420.107708
+  ...
+# Subtest: same-version concurrent edits accept one writer, including source-path aliases
+ok 6 - same-version concurrent edits accept one writer, including source-path aliases
+  ---
+  duration_ms: 1206.946947
+  ...
+# Subtest: concurrent creation is exclusive and a rejected write does not block subsequent saves
+ok 7 - concurrent creation is exclusive and a rejected write does not block subsequent saves
+  ---
+  duration_ms: 806.913533
+  ...
+# Subtest: preserving the modification time cannot hide an external edit from the save conflict check
+ok 8 - preserving the modification time cannot hide an external edit from the save conflict check
+  ---
+  duration_ms: 826.835528
+  ...
+# Subtest: atomic saves preserve permissions and advance modification times on coarse clocks
+ok 9 - atomic saves preserve permissions and advance modification times on coarse clocks
+  ---
+  duration_ms: 181.450699
+  ...
+# Subtest: static resources do not consume the API rate limit or leak active request counts
+ok 10 - static resources do not consume the API rate limit or leak active request counts
+  ---
+  duration_ms: 636.463026
+  ...
+# Subtest: mutable workspace files revalidate and If-None-Match takes precedence over dates
+ok 11 - mutable workspace files revalidate and If-None-Match takes precedence over dates
+  ---
+  duration_ms: 759.943153
+  ...
+# Subtest: media responses identify their format and support bounded seeking without downloading the whole file
+ok 12 - media responses identify their format and support bounded seeking without downloading the whole file
+  ---
+  duration_ms: 746.193831
+  ...
+# Subtest: local media avoids persistent HTTP copies with internal storage
+ok 13 - local media avoids persistent HTTP copies with internal storage
+  ---
+  duration_ms: 915.966799
+  ...
+# Subtest: local media avoids persistent HTTP copies with external storage
+ok 14 - local media avoids persistent HTTP copies with external storage
+  ---
+  duration_ms: 1215.364651
+  ...
+# Subtest: an unreadable asset cannot terminate the editing service
+ok 15 - an unreadable asset cannot terminate the editing service
+  ---
+  duration_ms: 584.961938
+  ...
+# Subtest: inline images and videos parse at the start, in prose and fields, but never inside code
+ok 16 - inline images and videos parse at the start, in prose and fields, but never inside code
+  ---
+  duration_ms: 8.623899
+  ...
+# Subtest: media URLs reject executable, remote and escaping sources while preserving local encoded names
+ok 17 - media URLs reject executable, remote and escaping sources while preserving local encoded names
+  ---
+  duration_ms: 0.950164
+  ...
+# Subtest: stable media URL forms normalize UUID casing to the registered identity
+ok 18 - stable media URL forms normalize UUID casing to the registered identity
+  ---
+  duration_ms: 0.19759
+  ...
+# Subtest: audio references render in prose, custom fields and structured media without autoplay or source loss
+ok 19 - audio references render in prose, custom fields and structured media without autoplay or source loss
+  ---
+  duration_ms: 10.021549
+  ...
+# Subtest: JSON and YAML insertion preserves existing source bytes, comments and structured values
+ok 20 - JSON and YAML insertion preserves existing source bytes, comments and structured values
+  ---
+  duration_ms: 24.752628
+  ...
+# Subtest: media insertion keeps indented YAML maps valid, including BOM, comments and existing lists
+ok 21 - media insertion keeps indented YAML maps valid, including BOM, comments and existing lists
+  ---
+  duration_ms: 18.486224
+  ...
+# Subtest: media insertion preserves an existing YAML flow list: indented map with BOM/CRLF
+ok 22 - media insertion preserves an existing YAML flow list: indented map with BOM/CRLF
+  ---
+  duration_ms: 4.795052
+  ...
+# Subtest: media insertion preserves an existing YAML flow list: indented flow map
+ok 23 - media insertion preserves an existing YAML flow list: indented flow map
+  ---
+  duration_ms: 3.926594
+  ...
+# Subtest: media insertion preserves an existing YAML flow list: list on a separate indented line
+ok 24 - media insertion preserves an existing YAML flow list: list on a separate indented line
+  ---
+  duration_ms: 3.172456
+  ...
+# Subtest: media insertion accepts an empty YAML document: document end and BOM/CRLF
+ok 25 - media insertion accepts an empty YAML document: document end and BOM/CRLF
+  ---
+  duration_ms: 2.643024
+  ...
+# Subtest: media insertion accepts an empty YAML document: YAML directive
+ok 26 - media insertion accepts an empty YAML document: YAML directive
+  ---
+  duration_ms: 1.744754
+  ...
+# Subtest: media insertion accepts an empty YAML document: start marker without a final newline
+ok 27 - media insertion accepts an empty YAML document: start marker without a final newline
+  ---
+  duration_ms: 0.970285
+  ...
+# Subtest: reused media survives consecutive structured insertion, save, reopen, index and both export formats
+ok 28 - reused media survives consecutive structured insertion, save, reopen, index and both export formats
+  ---
+  duration_ms: 4072.747557
+  ...
+# Subtest: preview tolerates cyclic YAML aliases and interrupted imports leave no partial files
+ok 29 - preview tolerates cyclic YAML aliases and interrupted imports leave no partial files
+  ---
+  duration_ms: 232.110501
+  ...
+# Subtest: concurrent imports reuse identical bytes, keep names independent of paths and clean rejected uploads
+ok 30 - concurrent imports reuse identical bytes, keep names independent of paths and clean rejected uploads
+  ---
+  duration_ms: 329.794354
+  ...
+# Subtest: audio imports share registry formats, reuse existing audio and reject mislabeled or oversized files
+ok 31 - audio imports share registry formats, reuse existing audio and reject mislabeled or oversized files
+  ---
+  duration_ms: 855.725022
+  ...
+# Subtest: imports respect an external asset store and reject linked destination directories
+ok 32 - imports respect an external asset store and reject linked destination directories
+  ---
+  duration_ms: 528.421849
+  ...
+# Subtest: image: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+ok 33 - image: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+  ---
+  duration_ms: 2813.553684
+  ...
+# Subtest: audio: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+ok 34 - audio: authenticated upload, structured insertion, save, rebuild and relocation keep working asset IDs
+  ---
+  duration_ms: 1865.590044
+  ...
+# Subtest: media import locks editing navigation without discarding the source draft
+ok 35 - media import locks editing navigation without discarding the source draft
+  ---
+  duration_ms: 25.736052
+  ...
+# Subtest: draft preview requests cannot consume the allowance for document reads and writes
+ok 36 - draft preview requests cannot consume the allowance for document reads and writes
+  ---
+  duration_ms: 252.684399
+  ...
+# Subtest: registration preserves raw bytes and stable IDs; indexing never accepts changed content as the original
+ok 37 - registration preserves raw bytes and stable IDs; indexing never accepts changed content as the original
+  ---
+  duration_ms: 96.583946
+  ...
+# Subtest: separate application/workspace roots support editing, external media, offline metadata and legacy/ID URLs
+ok 38 - separate application/workspace roots support editing, external media, offline metadata and legacy/ID URLs
+  ---
+  duration_ms: 3161.594498
+  ...
+# Subtest: reference indexes include image, video and audio paths in every source format, including renamed aliases
+ok 39 - reference indexes include image, video and audio paths in every source format, including renamed aliases
+  ---
+  duration_ms: 1258.489535
+  ...
+# Subtest: reference indexes exclude fenced code examples while retaining bare IDs and explicit attachments
+ok 40 - reference indexes exclude fenced code examples while retaining bare IDs and explicit attachments
+  ---
+  duration_ms: 1051.350909
+  ...
+# Subtest: v1 registration retains workspace identity and the old manifest; unsupported versions do not mutate sources
+ok 41 - v1 registration retains workspace identity and the old manifest; unsupported versions do not mutate sources
+  ---
+  duration_ms: 123.135398
+  ...
+# Subtest: ambiguous registry identities and unsafe paths fail before replacing existing metadata
+ok 42 - ambiguous registry identities and unsafe paths fail before replacing existing metadata
+  ---
+  duration_ms: 95.957537
+  ...
+# Subtest: registration refuses symlinked metadata directories without writing outside the workspace
+ok 43 - registration refuses symlinked metadata directories without writing outside the workspace
+  ---
+  duration_ms: 4.277183
+  ...
+# Subtest: read-only preview serves a separate workspace and refuses write requests
+ok 44 - read-only preview serves a separate workspace and refuses write requests
+  ---
+  duration_ms: 1401.817765
+  ...
+# Subtest: registration keeps a live lock and recovers a lock whose owner no longer exists
+ok 45 - registration keeps a live lock and recovers a lock whose owner no longer exists
+  ---
+  duration_ms: 89.780087
+  ...
+# Subtest: reusing a renamed asset alias cannot write a conflicting registry
+ok 46 - reusing a renamed asset alias cannot write a conflicting registry
+  ---
+  duration_ms: 59.315115
+  ...
+# Subtest: automatic workspace names and manifests stay compatible with the native importer
+ok 47 - automatic workspace names and manifests stay compatible with the native importer
+  ---
+  duration_ms: 37.792926
+  ...
+# Subtest: image references support any asset folder and encoded filenames
+ok 48 - image references support any asset folder and encoded filenames
+  ---
+  duration_ms: 935.953496
+  ...
+# Subtest: custom standardization output cannot prune application files or an external asset store
+ok 49 - custom standardization output cannot prune application files or an external asset store
+  ---
+  duration_ms: 1060.400639
+  ...
+1..49
+# tests 49
+# suites 0
+# pass 49
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 11325.046252

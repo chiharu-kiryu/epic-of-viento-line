@@ -1,0 +1,100 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.9",
+  "gitBase": "a55ddc0b42783ae6448a8f2540f4f14da84aba18",
+  "scope": "Propagate cancellation through export planning, registry/directory/source reads and final validation, stop on internal output failure, preserve existing jobs for pre-cancelled requests, and synchronize HTTP cleanup tests with server download completion",
+  "workflows": [
+    "F32",
+    "F33",
+    "F35"
+  ],
+  "bugs": [
+    "N106"
+  ],
+  "retainedBugs": [
+    "N104",
+    "N105"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 16,
+    "passed": 3,
+    "failed": 13,
+    "skipped": 0,
+    "log": "before.log",
+    "sourceState": "Final regression test replayed against the preceding N104–N105 worktree in an isolated temporary copy. All three restored production hashes match function network revision 48; current worktree preserved.",
+    "files": {
+      "scripts/lib/export-package.mjs": "ca8e466c72d039fe47cff94130c6046aba24d25398e6b269762d9d29e3e46abf",
+      "scripts/lib/export-service.mjs": "4e915ba699c154cd47394bb898bcec6a64864029f2a2016d3e01bef8e5759be6",
+      "scripts/lib/workspace.mjs": "dd65d70c66969311a92351d9bada09bca89f8712f78a643aa1d72c8935a2e783"
+    },
+    "testFileSha256": "013b6b2d82266515ca1d4f8182afb5fd6e031d7db9d8e0fe3a0d916ddf8f540b",
+    "replay": "before-replay.json",
+    "reproduction": "Preparation/final checks kept issuing authored-data reads after cancellation or output failure, late malformed source replaced cancellation, and pre-cancelled creation removed an existing completed job. Thirteen regressions failed; valid late source plus ordinary malformed source/registry repair cases passed."
+  },
+  "initialFocusedRun": {
+    "runtime": "Node v18.19.1",
+    "tests": 134,
+    "passed": 132,
+    "failed": 1,
+    "skipped": 1,
+    "log": "after-initial.log",
+    "failure": "The existing HTTP cleanup test expected 500 for inactive-job deletion, but received the intended 200 while the server still retained an active reader after client EOF.",
+    "resolution": "Wait for the actual server request handler to finish before injecting inactive-job removal failure. The same completion barrier protects the new HTTP retry test."
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 134,
+    "passed": 133,
+    "failed": 0,
+    "skipped": 1,
+    "log": "after.log",
+    "newCases": 16
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 440,
+    "passed": 438,
+    "failed": 0,
+    "skipped": 2,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 135,
+    "apiContractPassed": true,
+    "versionValidationPassed": true,
+    "nativeArchiveBinaryConfigured": false,
+    "skipReason": "Node-driven native archive interop and registry-agreement groups require VIENTO_TEST_ARCHIVE_BINARY; b.3.9 release evidence remains. No Rust sources or registry validation rules changed."
+  },
+  "commands": {
+    "before": "/usr/bin/node --test scripts/tests/export-preparation.test.mjs (isolated preceding-worktree replay)",
+    "after": "/usr/bin/node --test scripts/tests/export-preparation.test.mjs scripts/tests/export-streams.test.mjs scripts/tests/export-snapshot.test.mjs scripts/tests/export-cancellation.test.mjs scripts/tests/export-cleanup.test.mjs scripts/tests/export.test.mjs scripts/tests/editor-dialogs.test.mjs scripts/tests/workspace-layout.test.mjs scripts/tests/asset-binding.test.mjs",
+    "application": "env -u VIENTO_TEST_ARCHIVE_BINARY /home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node scripts/check-project.mjs --app-only"
+  },
+  "files": {
+    "scripts/lib/export-package.mjs": "191b9b956b3303e400ec29f4f05a10107b5a4b3049625054b7df72511875c8a6",
+    "scripts/lib/export-service.mjs": "d0329596700e5f650a4d1010532ae3d0252c012041829413227acea6e5271f14",
+    "scripts/lib/workspace.mjs": "f1fc0a0a26cadd093cf52854010fb4f0bc7ad1cada45b96dd140aa69cabd1b65",
+    "scripts/tests/export-cleanup.test.mjs": "7f9553c65c3b8cd34a5668febb422aba8e3200886c0bfc9d332140911af11a7d",
+    "scripts/tests/export-preparation.test.mjs": "013b6b2d82266515ca1d4f8182afb5fd6e031d7db9d8e0fe3a0d916ddf8f540b"
+  },
+  "testEnvironment": "Isolated real filesystem/registry/parser/ZIP operations on synthetic projects, pausing selected operation completions and counting any later authored-data I/O after stop. Actual HTTP disconnect, retry download and release; independent ZIP decoding verifies sizes, hashes and exact BOM/CRLF source/templates, metadata and image/video/audio fixture bytes. Ordinary malformed data is rejected and repairable.",
+  "nativeArchiveModuleTestsRerun": false,
+  "fullTauriLibraryTestsRerun": false,
+  "nativeWindowTested": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "temporaryFixtureProjectsRemoved": true,
+  "cleanup": {
+    "temporaryReplay": "/tmp/viento-export-preparation-replay-E7BrkX",
+    "removed": true
+  },
+  "functionNetwork": {
+    "revision": 49,
+    "sourceFingerprints": 161,
+    "nodeSources": 181,
+    "localImportStatements": 439,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

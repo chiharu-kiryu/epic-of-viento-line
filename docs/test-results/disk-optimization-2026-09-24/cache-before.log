@@ -1,0 +1,96 @@
+TAP version 13
+# Subtest: capability discovery includes the live project configuration and preview routes
+ok 1 - capability discovery includes the live project configuration and preview routes # SKIP test name does not match pattern
+  ---
+  duration_ms: 1.282211
+  ...
+# Subtest: browser module graph is served as JavaScript; server-only modules stay private
+ok 2 - browser module graph is served as JavaScript; server-only modules stay private # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.073862
+  ...
+# Subtest: same-version concurrent edits accept one writer, including source-path aliases
+ok 3 - same-version concurrent edits accept one writer, including source-path aliases # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.064888
+  ...
+# Subtest: concurrent creation is exclusive and a rejected write does not block subsequent saves
+ok 4 - concurrent creation is exclusive and a rejected write does not block subsequent saves # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.071268
+  ...
+# Subtest: preserving the modification time cannot hide an external edit from the save conflict check
+ok 5 - preserving the modification time cannot hide an external edit from the save conflict check # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.065176
+  ...
+# Subtest: atomic saves preserve permissions and advance modification times on coarse clocks
+ok 6 - atomic saves preserve permissions and advance modification times on coarse clocks # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.059233
+  ...
+# Subtest: static resources do not consume the API rate limit or leak active request counts
+ok 7 - static resources do not consume the API rate limit or leak active request counts # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.06122
+  ...
+# Subtest: mutable workspace files revalidate and If-None-Match takes precedence over dates
+ok 8 - mutable workspace files revalidate and If-None-Match takes precedence over dates # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.067849
+  ...
+# Subtest: media responses identify their format and support bounded seeking without downloading the whole file
+ok 9 - media responses identify their format and support bounded seeking without downloading the whole file # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.153071
+  ...
+# Subtest: local media avoids persistent HTTP copies with internal storage
+not ok 10 - local media avoids persistent HTTP copies with internal storage
+  ---
+  duration_ms: 317.349224
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/doc-api.test.mjs:195:1'
+  failureType: 'testCodeFailure'
+  error: '/assets/audio.wav'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: 'no-cache, must-revalidate'
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/doc-api.test.mjs:209:14)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: local media avoids persistent HTTP copies with external storage
+not ok 11 - local media avoids persistent HTTP copies with external storage
+  ---
+  duration_ms: 267.746778
+  location: 'file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/doc-api.test.mjs:195:1'
+  failureType: 'testCodeFailure'
+  error: '/assets/audio.wav'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: 'no-cache, must-revalidate'
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/doc-api.test.mjs:209:14)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:632:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:374:7)
+  ...
+# Subtest: an unreadable asset cannot terminate the editing service
+ok 12 - an unreadable asset cannot terminate the editing service # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.133689
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 0
+# fail 2
+# cancelled 0
+# skipped 10
+# todo 0
+# duration_ms 731.724368

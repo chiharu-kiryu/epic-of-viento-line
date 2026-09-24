@@ -1,0 +1,85 @@
+{
+  "date": "2026-09-24",
+  "version": "b.4.0",
+  "buildVersion": "0.4.0",
+  "gitBase": "a55ddc0b42783ae6448a8f2540f4f14da84aba18",
+  "bugs": [
+    "N104",
+    "N105",
+    "N106"
+  ],
+  "additionalChanges": [
+    "Local asset HTTP no-store policy; documented local disk cleanup and byte-preservation audit"
+  ],
+  "newExecutionCases": 50,
+  "application": {
+    "runtime": "Node v24.19.0 with VIENTO_TEST_ARCHIVE_BINARY configured",
+    "tests": 490,
+    "passed": 490,
+    "failed": 0,
+    "skipped": 0,
+    "javascriptSyntaxFiles": 135,
+    "apiContractPassed": true,
+    "log": "application.log"
+  },
+  "native": {
+    "scope": "Production workspace.rs archive module with project-defaults.json and unchanged official CLI; prior full Tauri library evidence retained with matching hashes",
+    "tests": 14,
+    "passed": 13,
+    "failed": 0,
+    "ignored": 1,
+    "ignoredReason": "Existing real full-size migration test requires VIENTO_TEST_SOURCE_ROOT; daily works untouched",
+    "log": "native.log",
+    "buildEvidence": "native-build.json",
+    "resolvedDependenciesVerified": 61
+  },
+  "retainedTauriLibrary": {
+    "versionAtTest": "b.3.8 worktree before the b.3.9 release",
+    "passed": 22,
+    "failed": 0,
+    "ignored": 1,
+    "sourceFingerprintsMatch": true,
+    "evidence": "docs/test-results/export-bridge-2026-09-23/native-build.json"
+  },
+  "cargoMetadata": "offline locked; application 0.4.0 and a single glib 0.18.5 from src-tauri/vendor/glib",
+  "cargoMetadataEvidence": "cargo.json",
+  "nextVersion": "b.4.1",
+  "functionNetworkRevision": 51,
+  "files": {
+    "VERSION": "24db18fc7253c624e44df687133e75d86603fda5620a666ab2ac3acb49f0db30",
+    "package.json": "280964ce1c97c478ee00de29f046027d5c6b8448bb0ea2b7fd28674232064937",
+    "package-lock.json": "717528103ed98b7862da7ca7b7076b4d94e700e496e14944da32bb3a43ed9347",
+    "src-tauri/Cargo.toml": "d6f5d07887df30afeaefb7f8ecb3b587821bc91e9d688dde8fbbceb42ad9d30c",
+    "src-tauri/Cargo.lock": "94e5b1ffdd03134212c305d82fa2da218596a7c0d57aae2e2b103ec78a4c4e21",
+    "src-tauri/tauri.conf.json": "7ec6990bebf11b3fbc59ff2f533543162ad1c535b462987ff0790bb54812cb69",
+    "web/index.html": "e3784d58bb5b28efb9cde8617072aa7229590ba8db303da7d475902b9db2631b",
+    "desktop/ui/index.html": "02575def9e6b12b0ae42b35b3d701ed1a507044c23cadc16685611e8dfe5a3d2",
+    "README.md": "dd1f2293c1e3fa546e4077f02d9667498862489ba0d9315ce63a948932ca4d9d",
+    "desktop/README.md": "69f143e085f5a404fe233b7ab1a30c83decb0a38427d15235f9f5db312370cce",
+    "scripts/lib/export-package.mjs": "191b9b956b3303e400ec29f4f05a10107b5a4b3049625054b7df72511875c8a6",
+    "scripts/lib/export-service.mjs": "d0329596700e5f650a4d1010532ae3d0252c012041829413227acea6e5271f14",
+    "scripts/lib/workspace.mjs": "f1fc0a0a26cadd093cf52854010fb4f0bc7ad1cada45b96dd140aa69cabd1b65",
+    "scripts/tests/export-cleanup.test.mjs": "7f9553c65c3b8cd34a5668febb422aba8e3200886c0bfc9d332140911af11a7d",
+    "scripts/tests/export-preparation.test.mjs": "013b6b2d82266515ca1d4f8182afb5fd6e031d7db9d8e0fe3a0d916ddf8f540b",
+    "scripts/lib/doc-server-static-routes.mjs": "6d618a5909da6057e3dda5198471f6acf9d61ed879d0496a2170b283283b9c26",
+    "scripts/tests/doc-api.test.mjs": "b0771064f67fe681decd14abd4de299cb87a94ca54090231a599217f2cd35ea9",
+    "scripts/tests/export-snapshot.test.mjs": "85dbea3e055b44c92fd84cf50882692ccabeb672b0b3b6764edb3aa5b629d2ff",
+    "scripts/tests/export-streams.test.mjs": "be0d79dc2fab1565e031ec94f27a5a38cdbbd90589fed9d3c4a275630c759dc5"
+  },
+  "nativeArchiveTestsRerun": true,
+  "fullTauriLibraryTestsRerun": false,
+  "nativeWindowTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "functionNetworkValidation": "network.json",
+  "temporaryNativeBuildRemoved": true,
+  "sourceArchive": {
+    "filesVerified": 629,
+    "allArchivedBytesMatchSource": true,
+    "fileModesVerified": true,
+    "vendoredGlibFilesVerified": 121,
+    "unpackedCargoMetadataVerified": true,
+    "unpackedSourceFingerprintsVerified": 161,
+    "temporaryFilesRemoved": true
+  }
+}

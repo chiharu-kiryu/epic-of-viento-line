@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fixture, serve, request, write } from './helpers.mjs';
 import { writeDocumentAtomically } from '../lib/doc-file-store.mjs';
 import { API_PATHS } from '../lib/doc-api-contract.mjs';
+import { readRegistry, registerWorkspace } from '../lib/workspace.mjs';
 
 test('capability discovery includes the live project configuration and preview routes', async (t) => {
   const root = await fixture(t);
@@ -188,6 +189,42 @@ test('media responses identify their format and support bounded seeking without 
   assert.equal(head.status, 200);
   assert.equal(head.headers.get('content-length'), '10');
   assert.equal(await head.text(), '');
+});
+
+for (const external of [false, true])
+test(`local media avoids persistent HTTP copies with ${external ? 'external' : 'internal'} storage`, async (t) => {
+  const root = await fixture(t);
+  const store = external ? path.join(await fixture(t), 'assets') : path.join(root, 'assets');
+  if (external) await write(root, '.viento/local.json', JSON.stringify({ version: 1, assetStores: { main: store } }));
+  const content = Buffer.from('0123456789');
+  for (const name of ['图片 #1.png', 'video.mp4', 'audio.wav']) await write(store, name, content);
+  await registerWorkspace(root);
+  const { assets } = await readRegistry(root);
+  assert.equal(assets.length, 3);
+  const base = await serve(t, root);
+  for (const asset of assets) {
+    for (const url of [`/assets/${encodeURIComponent(asset.location.path)}`, `/asset-files/${asset.id}`]) {
+      const first = await fetch(base + url);
+      assert.equal(first.status, 200);
+      assert.match(first.headers.get('cache-control'), /(?:^|,\s*)no-store(?:,|$)/, url);
+      assert.deepEqual(Buffer.from(await first.arrayBuffer()), content);
+      for (const [options, status, expected] of [
+        [{ method: 'HEAD' }, 200, ''],
+        [{ headers: { Range: 'bytes=2-5' } }, 206, '2345'],
+        [{ headers: { 'If-None-Match': first.headers.get('etag') } }, 304, ''],
+        [{ headers: { Range: 'bytes=99-' } }, 416, ''],
+      ]) {
+        const response = await fetch(base + url, options);
+        assert.equal(response.status, status, url);
+        assert.match(response.headers.get('cache-control'), /(?:^|,\s*)no-store(?:,|$)/, url);
+        assert.equal(await response.text(), expected);
+      }
+      assert.deepEqual(await fs.readFile(path.join(store, asset.location.path)), content);
+    }
+  }
+  const script = await fetch(base + '/web/app.js');
+  assert.equal(script.headers.get('cache-control'), 'no-cache, must-revalidate');
+  await script.arrayBuffer();
 });
 
 test('an unreadable asset cannot terminate the editing service', { skip: process.platform === 'win32' || process.getuid?.() === 0 }, async (t) => {

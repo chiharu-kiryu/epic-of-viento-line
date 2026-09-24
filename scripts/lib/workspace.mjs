@@ -131,12 +131,17 @@ export function assertPortableFileTree(files) {
   }
 }
 
-export async function walkFiles(root) {
+export async function walkFiles(root, { signal } = {}) {
   const result = [];
   async function visit(dir, prefix = '') {
+    signal?.throwIfAborted();
     const stat = await fsp.lstat(dir);
+    signal?.throwIfAborted();
     if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error(`请使用实际文件夹：${dir}`);
-    for (const item of await fsp.readdir(dir, { withFileTypes: true })) {
+    const items = await fsp.readdir(dir, { withFileTypes: true });
+    signal?.throwIfAborted();
+    for (const item of items) {
+      signal?.throwIfAborted();
       if (item.name === '.DS_Store' || item.name.startsWith('._') || item.name === 'Thumbs.db') continue;
       const relative = prefix + item.name;
       if (!portablePath(relative)) throw new Error(`文件名无法跨系统迁移：${relative}`);
@@ -145,9 +150,12 @@ export async function walkFiles(root) {
       else throw new Error(`不支持的链接或文件类型：${relative}`);
     }
   }
-  await visit(root);
-  assertPortableFileTree(result);
-  return result.sort();
+  try {
+    await visit(root);
+    signal?.throwIfAborted();
+    assertPortableFileTree(result);
+    return result.sort();
+  } catch (error) { signal?.throwIfAborted(); throw error; }
 }
 
 export async function fingerprint(file) {
@@ -159,47 +167,55 @@ export async function fingerprint(file) {
   return { size: before.size, sha256: hash.digest('hex') };
 }
 
-export async function readRegistry(root) {
-  const documentsRoot = workspacePaths(readWorkspace(root)).documents;
-  const metadata = path.join(root, 'metadata');
-  if (fs.existsSync(metadata) && (await fsp.lstat(metadata)).isSymbolicLink()) throw new Error('元数据目录不能是链接');
-  const assets = [], documents = [];
-  const ids = new Set(), locations = new Set(), sources = new Set(), aliases = new Set();
-  for (const [kind, records] of [['assets', assets], ['documents', documents]]) {
-    const folder = path.join(root, 'metadata', kind);
-    if (!fs.existsSync(folder)) continue;
-    for (const file of await walkFiles(folder)) {
-      if (!file.endsWith('.json')) throw new Error(`登记目录只能包含 JSON：${kind}/${file}`);
-      const record = JSON.parse(await fsp.readFile(path.join(folder, file), 'utf8'));
-      if (!UUID.test(record.id) || file !== `${record.id}.json` || ids.has(record.id) || record.version !== 1) throw new Error(`无效或重复的登记身份：${kind}/${file}`);
-      ids.add(record.id);
-      if (kind === 'assets') {
-        const location = record.location;
-        if (record.format !== 'viento-asset' || typeof record.name !== 'string'
-          || !['image', 'video', 'audio', 'font', 'text', 'other'].includes(record.kind)
-          || location?.store !== 'main' || !portablePath(location.path)
-          || !Array.isArray(record.tags) || record.tags.some((tag) => typeof tag !== 'string')
-          || (record.content !== null && (!Number.isSafeInteger(record.content?.size) || record.content.size < 0 || !/^[a-f0-9]{64}$/.test(record.content?.sha256)))
-          || !Array.isArray(record.legacyPaths) || record.legacyPaths.some((p) => !portablePath(p) || !p.startsWith('assets/'))) throw new Error(`无效的素材登记：${file}`);
-        const key = location.path.normalize('NFC').toLowerCase();
-        if (locations.has(key)) throw new Error(`素材位置登记重复：${location.path}`);
-        locations.add(key);
-        for (const alias of new Set([`assets/${location.path}`, ...record.legacyPaths].map(portableKey))) {
-          if (aliases.has(alias)) throw new Error(`素材旧路径冲突：${alias}`);
-          aliases.add(alias);
+export async function readRegistry(root, { signal } = {}) {
+  signal?.throwIfAborted();
+  try {
+    const documentsRoot = workspacePaths(readWorkspace(root)).documents;
+    const metadata = path.join(root, 'metadata');
+    if (fs.existsSync(metadata) && (await fsp.lstat(metadata)).isSymbolicLink()) throw new Error('元数据目录不能是链接');
+    signal?.throwIfAborted();
+    const assets = [], documents = [];
+    const ids = new Set(), locations = new Set(), sources = new Set(), aliases = new Set();
+    for (const [kind, records] of [['assets', assets], ['documents', documents]]) {
+      signal?.throwIfAborted();
+      const folder = path.join(root, 'metadata', kind);
+      if (!fs.existsSync(folder)) continue;
+      for (const file of await walkFiles(folder, { signal })) {
+        signal?.throwIfAborted();
+        if (!file.endsWith('.json')) throw new Error(`登记目录只能包含 JSON：${kind}/${file}`);
+        const raw = await fsp.readFile(path.join(folder, file), { encoding: 'utf8', signal });
+        signal?.throwIfAborted();
+        const record = JSON.parse(raw);
+        if (!UUID.test(record.id) || file !== `${record.id}.json` || ids.has(record.id) || record.version !== 1) throw new Error(`无效或重复的登记身份：${kind}/${file}`);
+        ids.add(record.id);
+        if (kind === 'assets') {
+          const location = record.location;
+          if (record.format !== 'viento-asset' || typeof record.name !== 'string'
+            || !['image', 'video', 'audio', 'font', 'text', 'other'].includes(record.kind)
+            || location?.store !== 'main' || !portablePath(location.path)
+            || !Array.isArray(record.tags) || record.tags.some((tag) => typeof tag !== 'string')
+            || (record.content !== null && (!Number.isSafeInteger(record.content?.size) || record.content.size < 0 || !/^[a-f0-9]{64}$/.test(record.content?.sha256)))
+            || !Array.isArray(record.legacyPaths) || record.legacyPaths.some((p) => !portablePath(p) || !p.startsWith('assets/'))) throw new Error(`无效的素材登记：${file}`);
+          const key = location.path.normalize('NFC').toLowerCase();
+          if (locations.has(key)) throw new Error(`素材位置登记重复：${location.path}`);
+          locations.add(key);
+          for (const alias of new Set([`assets/${location.path}`, ...record.legacyPaths].map(portableKey))) {
+            if (aliases.has(alias)) throw new Error(`素材旧路径冲突：${alias}`);
+            aliases.add(alias);
+          }
+        } else {
+          if (record.format !== 'viento-document' || !portablePath(record.sourcePath) || !record.sourcePath.startsWith(`${documentsRoot}/`)
+            || !Array.isArray(record.assetBindings) || record.assetBindings.some((link) => !UUID.test(link.assetId) || typeof link.role !== 'string')) throw new Error(`无效的文档登记：${file}`);
+          const key = record.sourcePath.normalize('NFC').toLowerCase();
+          if (sources.has(key)) throw new Error(`文档位置登记重复：${record.sourcePath}`);
+          sources.add(key);
         }
-      } else {
-        if (record.format !== 'viento-document' || !portablePath(record.sourcePath) || !record.sourcePath.startsWith(`${documentsRoot}/`)
-          || !Array.isArray(record.assetBindings) || record.assetBindings.some((link) => !UUID.test(link.assetId) || typeof link.role !== 'string')) throw new Error(`无效的文档登记：${file}`);
-        const key = record.sourcePath.normalize('NFC').toLowerCase();
-        if (sources.has(key)) throw new Error(`文档位置登记重复：${record.sourcePath}`);
-        sources.add(key);
+        records.push(record);
       }
-      records.push(record);
     }
-  }
-  validateDocumentModels(documents);
-  return { assets, documents };
+    validateDocumentModels(documents);
+    return { assets, documents };
+  } catch (error) { signal?.throwIfAborted(); throw error; }
 }
 
 function mediaKind(file) {

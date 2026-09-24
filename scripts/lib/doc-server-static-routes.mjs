@@ -156,6 +156,11 @@ async function handleProjectFileRequest({ response, pathname, projectRoot, reque
       return true;
     }
 
+    // Originals already live on disk. A WebView's per-origin HTTP cache would
+    // duplicate large media again whenever the local server changes ports.
+    if (decodedPath.startsWith('/assets/') || decodedPath.startsWith('/asset-files/')) {
+      response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    }
     await sendFile(candidatePath, response, request, stat);
     return true;
   } catch {

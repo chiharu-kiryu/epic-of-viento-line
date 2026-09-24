@@ -1,0 +1,75 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.9",
+  "gitBase": "a55ddc0b42783ae6448a8f2540f4f14da84aba18",
+  "scope": "Complete-project export snapshots must detect newly appearing optional roots and manifests, reject publication, clean staging and preserve exact bytes on retry",
+  "workflows": [
+    "F33",
+    "F35"
+  ],
+  "bugs": [
+    "N104"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 18,
+    "passed": 6,
+    "failed": 12,
+    "skipped": 0,
+    "log": "before.log",
+    "sourceState": "Final regression test file ran against unchanged b.3.9 production source before the fix; initial worktree was clean at a55ddc0",
+    "files": {
+      "scripts/lib/export-package.mjs": "f0cbb51eec619763d035800c328153dac03ca92f4fedfac9278e4afb8270280f"
+    },
+    "testFileSha256": "85dbea3e055b44c92fd84cf50882692ccabeb672b0b3b6764edb3aa5b629d2ff",
+    "reproduction": "Ten v2/v3 late-addition cases and a dangling-link case falsely succeeded instead of rejecting; actual HTTP returned 200 instead of 409 after a first media import. Six compatibility cases passed."
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 78,
+    "passed": 77,
+    "failed": 0,
+    "skipped": 1,
+    "log": "after.log",
+    "newCases": 18
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 410,
+    "passed": 408,
+    "failed": 0,
+    "skipped": 2,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 133,
+    "apiContractPassed": true,
+    "versionValidationPassed": true,
+    "nativeArchiveBinaryConfigured": false,
+    "skipReason": "Node-driven native archive interop and registry-agreement groups require VIENTO_TEST_ARCHIVE_BINARY; b.3.9 release evidence remains. No Rust sources changed."
+  },
+  "commands": {
+    "before": "/usr/bin/node --test scripts/tests/export-snapshot.test.mjs",
+    "after": "/usr/bin/node --test scripts/tests/export-snapshot.test.mjs scripts/tests/export.test.mjs scripts/tests/export-cleanup.test.mjs scripts/tests/export-cancellation.test.mjs scripts/tests/editor-dialogs.test.mjs",
+    "application": "env -u VIENTO_TEST_ARCHIVE_BINARY /home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node scripts/check-project.mjs --app-only"
+  },
+  "files": {
+    "scripts/lib/export-package.mjs": "1172c3bd3eaf8fd37cb77f72c386ca2a293de488f67a2c96a416b37b7feabc9c",
+    "scripts/tests/export-snapshot.test.mjs": "85dbea3e055b44c92fd84cf50882692ccabeb672b0b3b6764edb3aa5b629d2ff"
+  },
+  "testEnvironment": "Actual export planner and streaming ZIP writer on synthetic v2/v3 and legacy projects. Actual loopback HTTP exports inject a first media import only after planning, at staging-directory creation in an isolated process. Successful ZIPs verify inventory, sizes, SHA-256 and exact authored bytes including BOM/CRLF and binary media. Tests retain document sharing and cache/excluded-root behavior.",
+  "nativeArchiveModuleTestsRerun": false,
+  "fullTauriLibraryTestsRerun": false,
+  "nativeWindowTested": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "temporaryFixtureProjectsRemoved": true,
+  "functionNetwork": {
+    "revision": 47,
+    "sourceFingerprints": 159,
+    "nodeSources": 181,
+    "localImportStatements": 431,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "date": "2026-09-23",
+  "version": "b.3.9",
+  "gitBase": "a55ddc0b42783ae6448a8f2540f4f14da84aba18",
+  "scope": "Track pending ZIP input operations and actual file stream close, stop late readers after cancellation or output failure, await cleanup before success/failure publication and preserve the first error",
+  "workflows": [
+    "F32",
+    "F33",
+    "F35"
+  ],
+  "bugs": [
+    "N105"
+  ],
+  "retainedBugs": [
+    "N104"
+  ],
+  "before": {
+    "runtime": "Node v18.19.1",
+    "tests": 14,
+    "passed": 1,
+    "failed": 13,
+    "skipped": 0,
+    "log": "before.log",
+    "sourceState": "Final regression test ran against the preceding N104 worktree source before this fix; its original hash matches function network revision 47. The N104 repair was retained.",
+    "files": {
+      "scripts/lib/export-package.mjs": "1172c3bd3eaf8fd37cb77f72c386ca2a293de488f67a2c96a416b37b7feabc9c"
+    },
+    "testFileSha256": "be0d79dc2fab1565e031ec94f27a5a38cdbbd90589fed9d3c4a275630c759dc5",
+    "reproduction": "Nine cancellation/output-failure probes at resolve/open/stat and two active-read cancellations exposed premature settlement or open source descriptors; two successful exports also published before earlier input close. One stat-error/close compatibility case passed."
+  },
+  "after": {
+    "runtime": "Node v18.19.1",
+    "tests": 92,
+    "passed": 91,
+    "failed": 0,
+    "skipped": 1,
+    "log": "after.log",
+    "newCases": 14
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 424,
+    "passed": 422,
+    "failed": 0,
+    "skipped": 2,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 134,
+    "apiContractPassed": true,
+    "versionValidationPassed": true,
+    "nativeArchiveBinaryConfigured": false,
+    "skipReason": "Node-driven native archive interop and registry-agreement groups require VIENTO_TEST_ARCHIVE_BINARY; b.3.9 release evidence remains. No Rust sources changed."
+  },
+  "commands": {
+    "before": "/usr/bin/node --test scripts/tests/export-streams.test.mjs",
+    "after": "/usr/bin/node --test scripts/tests/export-streams.test.mjs scripts/tests/export-snapshot.test.mjs scripts/tests/export-cancellation.test.mjs scripts/tests/export-cleanup.test.mjs scripts/tests/export.test.mjs scripts/tests/editor-dialogs.test.mjs",
+    "application": "env -u VIENTO_TEST_ARCHIVE_BINARY /home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node scripts/check-project.mjs --app-only"
+  },
+  "files": {
+    "scripts/lib/export-package.mjs": "ca8e466c72d039fe47cff94130c6046aba24d25398e6b269762d9d29e3e46abf",
+    "scripts/tests/export-streams.test.mjs": "be0d79dc2fab1565e031ec94f27a5a38cdbbd90589fed9d3c4a275630c759dc5"
+  },
+  "testEnvironment": "Real source file handles, streams and ZIP writer in isolated temporary projects. Each probe pauses one actual resolve/open/stat/read/close completion, or injects an output stream failure. Checks descriptor closure at operation settlement, no late reads, original error, staging cleanup and byte-exact successful/retry packages including BOM/CRLF source/templates, registry and 2 MiB binary media. Not a Windows locking or physical disk failure test.",
+  "nativeArchiveModuleTestsRerun": false,
+  "fullTauriLibraryTestsRerun": false,
+  "nativeWindowTested": false,
+  "nativePlaybackTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "temporaryFixtureProjectsRemoved": true,
+  "functionNetwork": {
+    "revision": 48,
+    "sourceFingerprints": 160,
+    "nodeSources": 181,
+    "localImportStatements": 435,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}

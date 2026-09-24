@@ -1,0 +1,34 @@
+{
+  "revision": 51,
+  "sourceFiles": 161,
+  "javascriptModules": 141,
+  "localImports": 440,
+  "externalImports": 344,
+  "eventBindings": 96,
+  "testDeclarations": 329,
+  "nodeSourceReferences": 181,
+  "workflowEdges": 173,
+  "moduleCycles": 1,
+  "htmlScripts": 1,
+  "localMarkdownLinks": 488,
+  "releaseFiles": 10,
+  "applicationTests": {
+    "tests": 490,
+    "pass": 490,
+    "fail": 0,
+    "skipped": 0
+  },
+  "applicationPassed": 490,
+  "archiveModulePassed": 13,
+  "archiveModuleIgnored": 1,
+  "sourceArchivePending": false,
+  "sourceArchiveVerified": {
+    "filesVerified": 629,
+    "allArchivedBytesMatchSource": true,
+    "fileModesVerified": true,
+    "vendoredGlibFilesVerified": 121,
+    "unpackedCargoMetadataVerified": true,
+    "unpackedSourceFingerprintsVerified": 161,
+    "temporaryFilesRemoved": true
+  }
+}
