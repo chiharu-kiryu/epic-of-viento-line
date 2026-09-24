@@ -1,0 +1,18 @@
+✔ structured values: json root lists render media through template preview, insert, save, index and export (475.632365ms)
+✔ structured values: yaml root lists render media through template preview, insert, save, index and export (449.012376ms)
+✔ structured values: yml root lists render media through template preview, insert, save, index and export (453.100281ms)
+✔ structured values: json root strings render inline media as nested strings do (140.63302ms)
+✔ structured values: yaml root strings render inline media as nested strings do (144.586129ms)
+✔ structured values: yml root strings render inline media as nested strings do (149.422408ms)
+✔ structured values: json empty containers remain visible at root, in fields and inside lists in reading and both exports (1.085761ms)
+✔ structured values: yaml empty containers remain visible at root, in fields and inside lists in reading and both exports (1.244866ms)
+✔ structured values: yml empty containers remain visible at root, in fields and inside lists in reading and both exports (0.982767ms)
+✔ structured values: ordinary false, zero, null, media objects and fenced code retain meaning without executing source HTML (1.581027ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1905.084092

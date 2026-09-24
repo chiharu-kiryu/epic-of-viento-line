@@ -1,0 +1,115 @@
+{
+  "root": "/tmp/viento-test-s11gC1",
+  "sourcePath": "documents/values/列表验证.json",
+  "emptyPath": "documents/values/空对象.json",
+  "base": "http://127.0.0.1:36941",
+  "launcherPid": 3114203,
+  "startedAt": "2026-09-24T09:26:12.797Z",
+  "assetSha256": "710b2359b35544cc83a68d41cb58cf24a71270d3a422c20546138a08dd6d13da",
+  "browser": "Codex IAB",
+  "tabId": "3",
+  "tabClosed": true,
+  "actions": [
+    "Read root empty object",
+    "Select root list and verify ordered typed values and loaded media",
+    "Enter editor and verify same two preview images",
+    "Edit a nested field and save",
+    "Return to reading",
+    "Reload then select the saved list again",
+    "Verify saved text, empty values and loaded media",
+    "Close tab"
+  ],
+  "measurements": {
+    "reading": [
+      {
+        "alt": "列表插图",
+        "complete": true,
+        "width": 64,
+        "height": 48
+      },
+      {
+        "alt": "行内插图",
+        "complete": true,
+        "width": 64,
+        "height": 48
+      }
+    ],
+    "editingPreview": [
+      {
+        "alt": "列表插图",
+        "complete": true,
+        "width": 64,
+        "height": 48
+      },
+      {
+        "alt": "行内插图",
+        "complete": true,
+        "width": 64,
+        "height": 48
+      }
+    ],
+    "reopened": [
+      {
+        "alt": "列表插图",
+        "complete": true,
+        "width": 64,
+        "height": 48
+      },
+      {
+        "alt": "行内插图",
+        "complete": true,
+        "width": 64,
+        "height": 48
+      }
+    ]
+  },
+  "visibleValues": [
+    "0",
+    "false",
+    "null",
+    "{}",
+    "[]"
+  ],
+  "rootEmptyObjectVisible": true,
+  "independentVerification": {
+    "sourceExact": true,
+    "emptySourceUnchanged": true,
+    "bomAndCrlfPreserved": true,
+    "assetSha256": "710b2359b35544cc83a68d41cb58cf24a71270d3a422c20546138a08dd6d13da",
+    "registryDocuments": 2,
+    "registryAssets": 1,
+    "indexUniqueAssetRefs": 1,
+    "workspaceValid": true,
+    "exportChecks": [
+      {
+        "format": "html",
+        "sourcePath": "documents/values/列表验证.json",
+        "assetCount": 1,
+        "verified": true
+      },
+      {
+        "format": "html",
+        "sourcePath": "documents/values/空对象.json",
+        "assetCount": 0,
+        "verified": true
+      },
+      {
+        "format": "markdown",
+        "sourcePath": "documents/values/列表验证.json",
+        "assetCount": 1,
+        "verified": true
+      },
+      {
+        "format": "markdown",
+        "sourcePath": "documents/values/空对象.json",
+        "assetCount": 0,
+        "verified": true
+      }
+    ]
+  },
+  "limitations": [
+    "Browser checks use JSON/SVG. YAML/YML and audio/video references use HTTP/DOM regressions; no playback or native Tauri claims.",
+    "Exports are checked through production plans, bytes and snapshot validation; no new ZIP download in this round."
+  ],
+  "verifiedAt": "2026-09-24T09:27:56.857Z"
+}

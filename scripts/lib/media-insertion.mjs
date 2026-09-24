@@ -67,18 +67,28 @@ export function insertStructuredMedia(source, extension, media) {
   return output;
 }
 
-function collectMedia(value, result = [], visited = new WeakSet()) {
+function collectMedia(value, result = [], ancestors = new WeakSet()) {
   if (result.length >= 100) return result;
-  if (value && typeof value === 'object') {
-    if (visited.has(value)) return result;
-    visited.add(value);
+  const object = value && typeof value === 'object';
+  if (object) {
+    if (ancestors.has(value)) return result;
+    ancestors.add(value);
   }
-  if (isMediaValue(value)) result.push({ type: value.type, src: value.src, caption: typeof value.caption === 'string' ? value.caption : '' });
-  else if (typeof value === 'string') result.push(...splitMediaText(value).filter(isMediaValue));
-  else if (Array.isArray(value)) value.forEach((child) => collectMedia(child, result, visited));
-  else if (value && typeof value === 'object' && value.type !== 'code') {
-    for (const child of Object.values(value)) collectMedia(child, result, visited);
+  // Match the description fallback used by the document and media renderer.
+  if (isMediaValue(value)) result.push({ type: value.type, src: value.src, caption: String(value.caption || value.alt || '') });
+  else if (typeof value === 'string') {
+    for (const part of splitMediaText(value)) {
+      if (isMediaValue(part)) result.push(part);
+      if (result.length >= 100) break;
+    }
+  } else if (object) {
+    for (const child of Object.values(value)) {
+      collectMedia(child, result, ancestors);
+      if (result.length >= 100) break;
+    }
   }
+  // Skip recursion edges, but keep every occurrence of a reused YAML alias.
+  if (object) ancestors.delete(value);
   return result;
 }
 
@@ -99,5 +109,10 @@ export async function prepareMediaInsertion(root, { content, sourcePath, assetId
   const record = registry.documents.find((record) => record.sourcePath === sourcePath);
   const descriptor = resolveDocumentDefinition(readWorkspace(root), sourcePath, record || (documentType ? { documentType } : {}));
   const parsed = parseSourceContent(updated, sourcePath, descriptor);
-  return { content: updated, media: collectMedia(parsed.blocks).slice(0, 100) };
+  // Invalid structured input is not a successful preview with no media.
+  // Let the editor retain its last valid preview until the draft parses again.
+  if (parsed.parseError) throw invalid(extension === '.json'
+    ? '请先修正 JSON 语法，再插入素材。' : '请先修正 YAML 语法，再插入素材。');
+  // Only parser code blocks are examples; nested `type` fields are user data.
+  return { content: updated, media: collectMedia(parsed.blocks.filter((block) => block.type !== 'code')) };
 }

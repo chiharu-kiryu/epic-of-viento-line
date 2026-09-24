@@ -1,0 +1,19 @@
+✔ preview parsing: json HTTP distinguishes an incomplete draft from a valid empty media result (195.644017ms)
+✔ preview parsing: yaml HTTP distinguishes an incomplete draft from a valid empty media result (163.64571ms)
+✔ preview parsing: yml HTTP distinguishes an incomplete draft from a valid empty media result (161.144048ms)
+✔ preview parsing: json keeps existing players and dirty text through real parser failures, repair, save and reload (341.167002ms)
+✔ preview parsing: yaml keeps existing players and dirty text through real parser failures, repair, save and reload (328.548582ms)
+✔ preview parsing: yml keeps existing players and dirty text through real parser failures, repair, save and reload (326.972828ms)
+✔ preview parsing: json escaped property names preview through the actual parser without literal media hints (158.804427ms)
+✔ preview parsing: yaml escaped property names preview through the actual parser without literal media hints (171.656285ms)
+✔ preview parsing: yml escaped property names preview through the actual parser without literal media hints (178.107818ms)
+✔ preview parsing: an initially invalid structured draft remains editable and recovers after correcting its syntax (153.556204ms)
+✔ preview parsing: plain text stays local and fenced examples never become draft players (139.52339ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2388.321776

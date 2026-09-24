@@ -53,7 +53,10 @@ export function setupMediaEditor(adapter) {
       previewPath = current?.path; previewType = current?.documentType; showPreview([]);
     }
     if (adapter.isBusy()) return;
-    if (!current || !/(?:asset:|\/asset-files\/|!?\[.*\]\(|\bsrc\b|媒体)/.test(current.content)) { showPreview([]); return; }
+    // Structured keys can be escaped, and incomplete syntax may hide every
+    // literal hint. Only the parser can distinguish that from removing media.
+    const structured = /\.(json|ya?ml)$/i.test(current?.path || '');
+    if (!current || (!structured && !/(?:asset:|\/asset-files\/|!?\[.*\]\(|\bsrc\b|媒体)/.test(current.content))) { showPreview([]); return; }
     previewTimer = setTimeout(async () => {
       const request = new AbortController();
       previewAborter = request;

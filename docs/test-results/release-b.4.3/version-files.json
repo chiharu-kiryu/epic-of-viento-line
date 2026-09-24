@@ -1,0 +1,52 @@
+[
+  {
+    "file": "VERSION",
+    "before": "b13dfbfb00d49b8046c87b82459274a606687d7c86764389c1107be8b1ac2e63",
+    "after": "c28c5f5fd6eab4c478503b0996986fd755c0df7b25919d52944c9a13db0ef56c"
+  },
+  {
+    "file": "package.json",
+    "before": "bddfdb1a1860934954b4a228756cd313572cd27be91e4421b9ee56579015103b",
+    "after": "675ab76892e264c4cf0c0e1eaa37a5b9da427ecee2348766851c4e042eecbc0f"
+  },
+  {
+    "file": "package-lock.json",
+    "before": "33e6c614d29e3c0692f0c3e0d8d76d0af24de72f706c0404b66f083ecf3c6f0d",
+    "after": "f29a948d5396cc60c8b8954434be13309a4bb87a136424c447c18fb3e290a4e2"
+  },
+  {
+    "file": "src-tauri/Cargo.toml",
+    "before": "affa757e40a772af319ba7edda05ced0cf422b97098deff9b03b15cc8421a1e9",
+    "after": "0010acd9aebb8096a77925ca0fffd7275120051634b44b4878567042a2f8b5f7"
+  },
+  {
+    "file": "src-tauri/Cargo.lock",
+    "before": "9917d503259aad24a679176dba47b99abe4f3021390f682d84d4104f8f1c6e56",
+    "after": "d3e211665055c9198536ada34f1c1f27035e49d1d18104c8b946b7c6a5fe5a70"
+  },
+  {
+    "file": "src-tauri/tauri.conf.json",
+    "before": "7c59f35a05695e7d183e96077819751eb16c26f74849cd0148dcde4685067f12",
+    "after": "3faa050b4264acdefbfd5148be430fcbcfe8972afa9bdd01bd78155524c82d23"
+  },
+  {
+    "file": "web/index.html",
+    "before": "8f0b8df0e65789b3d8ff019929e5927885175c6802a6d61f731f50b7cd8175d9",
+    "after": "7b12cdbe455ec9c2ee4113051e39968e4a9e35df69e52ace789b46ae14544563"
+  },
+  {
+    "file": "desktop/ui/index.html",
+    "before": "b749fb9d44044d538d10d298b4dd76875447bf780261a88d0e141ab78a63bdd8",
+    "after": "29b74a2fe55f36b635a959153593b859502acb41bd05e86c962a786fd81f23a1"
+  },
+  {
+    "file": "README.md",
+    "before": "f3be2d313bc3c2be9d5c9b2c3cae4b7d65f28e1d6254f5d49128d219a6752e37",
+    "after": "6dcf5847c55767a3509e7c1b1dac40366f97518e055bcfeb4d8fb4481c7e2307"
+  },
+  {
+    "file": "desktop/README.md",
+    "before": "8eb24d1c07a553baa431275a7e07766e3909b01ce8dd8b67a55adaf5b0208d1a",
+    "after": "02b0387be5b271374105e027b6f3698c75cfa4935de705e954c234837fa59288"
+  }
+]

@@ -1,0 +1,56 @@
+{
+  "retainedAuditEvidence": [
+    {
+      "bugs": [
+        "N114",
+        "N115"
+      ],
+      "newExecutionCases": 11,
+      "report": "docs/test-results/media-preview-parsing-2026-09-24/results.json",
+      "reportSha256": "e6a6e79eb5753c644ae5f18f7c60c3de7dda32afb7962ffda1c086e7c00921ee",
+      "browser": "docs/test-results/media-preview-parsing-2026-09-24/browser.json",
+      "evidenceHashesVerified": true,
+      "browserRepeatedDuringRelease": false
+    },
+    {
+      "bugs": [
+        "N116",
+        "N117",
+        "N118"
+      ],
+      "newExecutionCases": 11,
+      "report": "docs/test-results/media-preview-content-2026-09-24/results.json",
+      "reportSha256": "634b92eae99375082da74c54eea3a9758750f3c7eb19cb034cbabedd0281b313",
+      "browser": "docs/test-results/media-preview-content-2026-09-24/browser.json",
+      "evidenceHashesVerified": true,
+      "browserRepeatedDuringRelease": false
+    },
+    {
+      "bugs": [
+        "N119",
+        "N120"
+      ],
+      "newExecutionCases": 10,
+      "report": "docs/test-results/structured-values-2026-09-24/results.json",
+      "reportSha256": "0a417f03da48eae70be7917d4099a7c9b28cafcbd2bef0d9017c11f8ee056427",
+      "browser": "docs/test-results/structured-values-2026-09-24/browser.json",
+      "evidenceHashesVerified": true,
+      "browserRepeatedDuringRelease": false
+    }
+  ],
+  "sourceContinuityVerified": {
+    "N114AfterMatchesN116Before": true,
+    "finalAuditSourcesMatchWorktree": true
+  },
+  "currentSourceSha256": {
+    "scripts/lib/media-insertion.mjs": "c146c6510a1e7b1bb9204a568da053d61c542d244ef68b99e66451b8892165e8",
+    "scripts/tests/media-preview-content.test.mjs": "78a4b9dc4ca029b55b75ff8fddfde1abfb39bbb5a849dd22cbcc1c08745b7242",
+    "web/modules/app-media-editor.js": "2cb745f2b43f7949c8989b64b371d262291d4b3da2874035934826d20339c1be",
+    "scripts/tests/media-preview-parsing.test.mjs": "12e3f7d50116e5fe8aeb91337d9471eabd01dc0f668392651dcf925cc92d9261",
+    "web/modules/app-document-layout.js": "fd7e06d2f1f929f0474d3ab750db7fc94aae357efb28c64a630edba5b73d7af1",
+    "scripts/standardize-docs/layout.mjs": "a0e0a54a79ef3a10471870069748d3b3afb75c66a8ab01aa77da09502cec0a2c",
+    "scripts/lib/export-render.mjs": "75d910c001526d947a829ef0cbab517c0e1c7b025e6ccbf4fec645b34a631eff",
+    "scripts/tests/structured-values.test.mjs": "4ff34db914c529e0398fe6cbd5909f0a8ecfea1443737073b6485960ffba7ff9"
+  },
+  "newExecutionCases": 32
+}

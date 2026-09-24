@@ -1,0 +1,11 @@
+{
+  "node": "v24.19.0",
+  "startedAt": "2026-09-24T09:05:49.350Z",
+  "sourceFiles": {
+    "scripts/lib/media-insertion.mjs": "641de5186d4f6178f7dac54837271b12d3c5b5e1f6230bf21d8c688d92713f2d",
+    "scripts/tests/media-preview-content.test.mjs": "78a4b9dc4ca029b55b75ff8fddfde1abfb39bbb5a849dd22cbcc1c08745b7242"
+  },
+  "exitCode": 1,
+  "signal": null,
+  "finishedAt": "2026-09-24T09:05:51.144Z"
+}

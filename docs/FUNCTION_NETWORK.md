@@ -1,6 +1,6 @@
 # Viento Studio 功能链路网络
 
-此页枚举 **2026-09-24、b.4.2 发布工作树**的实际功能入口、业务步骤、接口和数据落点，包含[按图排查的四十二轮修复](NETWORK_BUGFIX_b.2.8.1.md)。此为修订 59，收录 N111–N113 的部分素材导入恢复、资源读取重试及失效预览取消。JSON 保留此前源码与发布验证证据；本次发布前 Git 基线为 `40923a0b`，最初基线为 `51d522cb919c20b15815b129bd62e859af9a97a0`。
+此页枚举 **2026-09-24、b.4.3 发布工作树**的实际功能入口、业务步骤、接口和数据落点，包含[按图排查的四十五轮修复](NETWORK_BUGFIX_b.2.8.1.md)。此为修订 63，收录 N114–N120 并同步[发布验证](RELEASE_b.4.3.md)。JSON 保留此前源码与发布验证证据；本次发布前 Git 基线为 `03265ba0`。最初基线为 `51d522cb919c20b15815b129bd62e859af9a97a0`。
 
 - [离线交互浏览器](function-network.html)：筛选业务链路，点击节点查看上下游，查询真实模块导入及接口。下载后双击即可使用，不访问外网。
 - [机器可读快照](function-network.json)：完整节点、边、源码引用、模块导入、事件绑定、路由、命令和扫描文件指纹。
@@ -13,9 +13,9 @@
 | 已枚举业务链路 | 50 |
 | 功能及数据节点 | 66 |
 | 业务步骤连接（去重） | 173 |
-| 扫描代码文件（JS / MJS / Rust / Python / Shell） | 167 |
-| 其中 JavaScript 模块 | 147 |
-| 本地模块导入语句 | 475 |
+| 扫描代码文件（JS / MJS / Rust / Python / Shell） | 170 |
+| 其中 JavaScript 模块 | 150 |
+| 本地模块导入语句 | 499 |
 | 字面量事件名的显式事件绑定 | 98 |
 | 业务 HTTP 路径 / 方法组合 | 11 / 16 |
 | 桌面桥路径 / 方法组合 | 5 / 6 |
@@ -24,7 +24,7 @@
 
 业务图的箭头表示请求、数据传递或处理步骤；同一节点可以再次出现，且分支可能在文字中展开。**它不是逐函数调用图**。JSON 的 `moduleImports` 才是代码中实际声明的本地导入；它也不能表示调用次数或性能。桌面归档示例 CLI 另有 4 个操作，不计入 7 个作品维护命令。
 
-网络从代码静态梳理，不是运行时追踪。本版应用检查 **554 项全过，零失败、零跳过**，两组原生归档检查已使用重新编译的官方 CLI 执行；生产归档模块 13 通过、1 项真实大体积迁移忽略。[发布完整记录](test-results/release-b.4.2/results.json)区分本轮应用/归档验证、开发阶段真实浏览器实测及保留的完整 Tauri 库证据。每条链路的“已有验证入口”不代表所有运行状态均已覆盖。测试仅使用临时作品，日常正文、素材和备份未读写。
+网络从代码静态梳理，不是运行时追踪。本次发布 app-only 检查共 586 项，全部通过、零失败、零跳过，已启用实际原生归档程序。[发布验证记录](test-results/release-b.4.3/results.json)区分本轮重跑结果和三轮开发阶段的真实浏览器验证；历史报告继续保留。每条链路的“已有验证入口”不代表所有运行状态均已覆盖。测试仅使用临时作品，日常正文、素材和备份未读写。
 
 ## 2. 总体网络
 
@@ -375,9 +375,9 @@ Rust 写入前固定文件快照与素材根，流式打包并核对正文/素�
 
 [编辑器状态与导航](#node-editor) → [通用布局与内容渲染](#node-render) → [图片、视频与音频控件](#node-media_render) → [受限文件与素材服务](#node-static) → [素材原文件](#node-assets)
 
-优先展示通用 layout 的标题、字段、正文、表格和媒体。 缺少通用 layout 时有 legacy_ui 回退；旧展示路径重名时按文档 ID 或源路径区分，归属链接随之更新。 封面、图库、列表和旧技能图统一编码原始文件名，支持 #、% 与连续点；缺图按候选顺序回退到名称头像，通用类型无需旧英雄占位路径。 媒体读取失败时提供单个资源的重试入口；图片或音视频成功加载后清除旧错误及按钮，失败重试不影响其他控件。
+优先展示通用 layout 的标题、字段、正文、表格和媒体。 缺少通用 layout 时有 legacy_ui 回退；旧展示路径重名时按文档 ID 或源路径区分，归属链接随之更新。 封面、图库、列表和旧技能图统一编码原始文件名，支持 #、% 与连续点；缺图按候选顺序回退到名称头像，通用类型无需旧英雄占位路径。 媒体读取失败时提供单个资源的重试入口；图片或音视频成功加载后清除旧错误及按钮，失败重试不影响其他控件。 JSON/YAML 顶层列表和字符串与嵌套字段共用值渲染，媒体按出现顺序显示；空对象和空列表明确显示为 {}、[]，零值、false 和 null 保留。
 
-已有验证入口：[scripts/tests/structured-render.test.mjs](../scripts/tests/structured-render.test.mjs)、[scripts/tests/media.test.mjs](../scripts/tests/media.test.mjs)、[scripts/tests/image-display.test.mjs](../scripts/tests/image-display.test.mjs)、[scripts/tests/media-loading.test.mjs](../scripts/tests/media-loading.test.mjs)。
+已有验证入口：[scripts/tests/structured-render.test.mjs](../scripts/tests/structured-render.test.mjs)、[scripts/tests/media.test.mjs](../scripts/tests/media.test.mjs)、[scripts/tests/image-display.test.mjs](../scripts/tests/image-display.test.mjs)、[scripts/tests/media-loading.test.mjs](../scripts/tests/media-loading.test.mjs)、[scripts/tests/media-preview-content.test.mjs](../scripts/tests/media-preview-content.test.mjs)、[scripts/tests/structured-values.test.mjs](../scripts/tests/structured-values.test.mjs)。
 
 <a id="f14"></a>
 
@@ -439,7 +439,7 @@ part-of 元数据生成 owners/ownedDocuments，导航到实际子文档编辑�
 
 校验 expectedVersion 与当前正文内容指纹，原子保存原文，失效服务缓存，再重建和重新载入。 保留文件时间的外部修改也会触发冲突；旧时间戳普通请求需重新读取。源文件保存和重建是两个阶段；重建或索引读取失败时明确报错，已保存正文继续可编辑并允许重试。 独立短临时文件名避免合法长名称在保存时超限。 保存过程中媒体未改变时保留现有播放器及源文件 BOM、换行和引用。 HTTP 401/403 正常报告权限或令牌问题；失败保留原版本和源码/区块草稿，修改后重试仍执行版本校验。 重新编辑并保存后，迟到的旧读取不能回退窗口内正文缓存与版本。 刷新目录不会把同一条目标识上的旧草稿改绑到另一源文件；保存与刷新并行时仍保留成功保存的正文和版本。 保存后的内容不再匹配搜索时仍保留重建后的编辑会话、输入模式、完整正文与当前版本。 语言切换期间保持保存锁定，实际禁用状态与辅助技术提示一致；完成后解锁，重复保存与模式切换仍受拦截。 开始保存会立即取消仍在读取的旧素材预览，保存与重建完成后按当前草稿安排新预览；请求取消不改写保存内容或重建已有播放器。
 
-已有验证入口：[scripts/tests/doc-api.test.mjs](../scripts/tests/doc-api.test.mjs)、[scripts/tests/editor-runtime.test.mjs](../scripts/tests/editor-runtime.test.mjs)、[scripts/tests/call-paths.test.mjs](../scripts/tests/call-paths.test.mjs)、[scripts/tests/creation-workflow.test.mjs](../scripts/tests/creation-workflow.test.mjs)、[scripts/tests/editor-dialogs.test.mjs](../scripts/tests/editor-dialogs.test.mjs)、[scripts/tests/editor-index-refresh.test.mjs](../scripts/tests/editor-index-refresh.test.mjs)、[scripts/tests/editor-filtering.test.mjs](../scripts/tests/editor-filtering.test.mjs)、[scripts/tests/editor-language.test.mjs](../scripts/tests/editor-language.test.mjs)、[scripts/tests/media-preview-requests.test.mjs](../scripts/tests/media-preview-requests.test.mjs)。
+已有验证入口：[scripts/tests/doc-api.test.mjs](../scripts/tests/doc-api.test.mjs)、[scripts/tests/editor-runtime.test.mjs](../scripts/tests/editor-runtime.test.mjs)、[scripts/tests/call-paths.test.mjs](../scripts/tests/call-paths.test.mjs)、[scripts/tests/creation-workflow.test.mjs](../scripts/tests/creation-workflow.test.mjs)、[scripts/tests/editor-dialogs.test.mjs](../scripts/tests/editor-dialogs.test.mjs)、[scripts/tests/editor-index-refresh.test.mjs](../scripts/tests/editor-index-refresh.test.mjs)、[scripts/tests/editor-filtering.test.mjs](../scripts/tests/editor-filtering.test.mjs)、[scripts/tests/editor-language.test.mjs](../scripts/tests/editor-language.test.mjs)、[scripts/tests/media-preview-requests.test.mjs](../scripts/tests/media-preview-requests.test.mjs)、[scripts/tests/media-preview-parsing.test.mjs](../scripts/tests/media-preview-parsing.test.mjs)、[scripts/tests/media-preview-content.test.mjs](../scripts/tests/media-preview-content.test.mjs)、[scripts/tests/structured-values.test.mjs](../scripts/tests/structured-values.test.mjs)。
 
 <a id="f19"></a>
 
@@ -475,7 +475,7 @@ part-of 元数据生成 owners/ownedDocuments，导航到实际子文档编辑�
 
 检测内容及新建路径差异，保留或明确丢弃草稿。 浏览器 beforeunload 和桌面关闭链路也查看脏状态；不提供磁盘自动草稿恢复。 空项目首份草稿也执行退出清理；取消确认保留草稿，确认退出则暂停音视频、隐藏预览并失效旧响应。 迟到模板请求不能污染缓存、误报当前错误，或重置新草稿的光标、滚动及未保存状态。 选择文档的后台原文读取也服从退出状态，迟到响应不能重新填回已清空的编辑区。 目录刷新保留源码/区块草稿的未保存状态；明确放弃后只恢复最后读取或保存的正文，不把草稿写入原文缓存。 搜索和分类变化不触发放弃草稿确认；明确点击另一份文档仍按原规则询问和切换。 退出编辑、移除素材或更换草稿路径/类型时，同时停止过期的预览读取，不必等待响应或超时；迟到清理不能取消新请求。
 
-已有验证入口：[scripts/tests/editor-runtime.test.mjs](../scripts/tests/editor-runtime.test.mjs)、[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py)、[scripts/tests/editor-dialogs.test.mjs](../scripts/tests/editor-dialogs.test.mjs)、[scripts/tests/editor-index-refresh.test.mjs](../scripts/tests/editor-index-refresh.test.mjs)、[scripts/tests/editor-filtering.test.mjs](../scripts/tests/editor-filtering.test.mjs)、[scripts/tests/media-preview-requests.test.mjs](../scripts/tests/media-preview-requests.test.mjs)。
+已有验证入口：[scripts/tests/editor-runtime.test.mjs](../scripts/tests/editor-runtime.test.mjs)、[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py)、[scripts/tests/editor-dialogs.test.mjs](../scripts/tests/editor-dialogs.test.mjs)、[scripts/tests/editor-index-refresh.test.mjs](../scripts/tests/editor-index-refresh.test.mjs)、[scripts/tests/editor-filtering.test.mjs](../scripts/tests/editor-filtering.test.mjs)、[scripts/tests/media-preview-requests.test.mjs](../scripts/tests/media-preview-requests.test.mjs)、[scripts/tests/media-preview-parsing.test.mjs](../scripts/tests/media-preview-parsing.test.mjs)。
 
 <a id="f22"></a>
 
@@ -511,9 +511,9 @@ part-of 元数据生成 owners/ownedDocuments，导航到实际子文档编辑�
 
 [项目类型与模板窗口](#node-project_ui) → [浏览器请求层](#node-request) → [业务接口分发](#node-router) → [项目配置与模板服务](#node-project_service) → [共享文档解析器](#node-parser) → [共享布局生成器](#node-layout) → [通用布局与内容渲染](#node-render)
 
-使用与文档相同的解析器和布局生成器展示当前表单内容，同时按新建路径规则校验默认目录。 只读预览；保留原始模板的换行格式和 BOM，格式或默认目录错误保留表单并显示错误。
+使用与文档相同的解析器和布局生成器展示当前表单内容，同时按新建路径规则校验默认目录。 只读预览；保留原始模板的换行格式和 BOM，格式或默认目录错误保留表单并显示错误。 顶层列表、标量与空容器沿用正文的通用渲染；真实 HTTP 预览与保存重建后的布局保持一致。
 
-已有验证入口：[scripts/tests/project-engine.test.mjs](../scripts/tests/project-engine.test.mjs)、[scripts/tests/editor-dialogs.test.mjs](../scripts/tests/editor-dialogs.test.mjs)。
+已有验证入口：[scripts/tests/project-engine.test.mjs](../scripts/tests/project-engine.test.mjs)、[scripts/tests/editor-dialogs.test.mjs](../scripts/tests/editor-dialogs.test.mjs)、[scripts/tests/structured-values.test.mjs](../scripts/tests/structured-values.test.mjs)。
 
 <a id="f25"></a>
 
@@ -573,9 +573,9 @@ revision、默认目录及新增标识校验 → 保留模板源格式 → 写�
 
 [素材选择与草稿预览](#node-media_ui) → [共享媒体引用格式](#node-media_format) → [结构化素材插入与预览](#node-media_insert) → [项目类型解析契约](#node-types) → [共享文档解析器](#node-parser) → [源码与区块草稿](#node-draft) → [当前窗口草稿与状态](#node-memory)
 
-文本在光标写 ![] / !video[] / !audio[]；JSON/YAML 走源范围插入。 结构化插入保留缩进、BOM、注释、格式和值，支持缩进的行内列表及带指令/标记的空 YAML；显式数值、标签和锚点不覆盖。响应返回后重新核对取消状态和草稿，仍需保存正文。 素材窗口快速重开时，旧关闭事件不清除新目标或使新列表请求失效。实际编辑器与 HTTP 服务联合验证三类素材插入目标段、保存、重开和引用索引，保留其他段、BOM、CRLF 及素材字节。 部分导入或结构化插入准备失败时保持原草稿，允许重新选择已入库素材而无需再次上传。真实浏览器验证文件选择器、部分失败后复用、保存及重载；HTTP 回归核对唯一登记、原始字节和索引引用。
+文本在光标写 ![] / !video[] / !audio[]；JSON/YAML 走源范围插入。 结构化插入保留缩进、BOM、注释、格式和值，支持缩进的行内列表及带指令/标记的空 YAML；显式数值、标签和锚点不覆盖。响应返回后重新核对取消状态和草稿，仍需保存正文。 素材窗口快速重开时，旧关闭事件不清除新目标或使新列表请求失效。实际编辑器与 HTTP 服务联合验证三类素材插入目标段、保存、重开和引用索引，保留其他段、BOM、CRLF 及素材字节。 部分导入或结构化插入准备失败时保持原草稿，允许重新选择已入库素材而无需再次上传。真实浏览器验证文件选择器、部分失败后复用、保存及重载；HTTP 回归核对唯一登记、原始字节和索引引用。 素材预览沿用同一通用解析器；JSON/YAML 解析失败返回格式错误，不作为成功的空素材结果。 插入后的预览保留嵌套字段和别名复用中的现有素材，用户 type: code 字段不作为代码示例过滤。
 
-已有验证入口：[scripts/tests/media.test.mjs](../scripts/tests/media.test.mjs)、[scripts/tests/editor-dialogs.test.mjs](../scripts/tests/editor-dialogs.test.mjs)、[scripts/tests/media-drop.test.mjs](../scripts/tests/media-drop.test.mjs)、[scripts/tests/media-recovery.test.mjs](../scripts/tests/media-recovery.test.mjs)。
+已有验证入口：[scripts/tests/media.test.mjs](../scripts/tests/media.test.mjs)、[scripts/tests/editor-dialogs.test.mjs](../scripts/tests/editor-dialogs.test.mjs)、[scripts/tests/media-drop.test.mjs](../scripts/tests/media-drop.test.mjs)、[scripts/tests/media-recovery.test.mjs](../scripts/tests/media-recovery.test.mjs)、[scripts/tests/media-preview-parsing.test.mjs](../scripts/tests/media-preview-parsing.test.mjs)、[scripts/tests/media-preview-content.test.mjs](../scripts/tests/media-preview-content.test.mjs)、[scripts/tests/structured-values.test.mjs](../scripts/tests/structured-values.test.mjs)。
 
 <a id="f30"></a>
 
@@ -585,9 +585,9 @@ revision、默认目录及新增标识校验 → 保留模板源格式 → 写�
 
 [当前窗口草稿与状态](#node-memory) → [素材选择与草稿预览](#node-media_ui) → [浏览器请求层](#node-request) → [业务接口分发](#node-router) → [结构化素材插入与预览](#node-media_insert) → [共享文档解析器](#node-parser) → [素材选择与草稿预览](#node-media_ui) → [图片、视频与音频控件](#node-media_render) → [受限文件与素材服务](#node-static) → [素材原文件](#node-assets)
 
-只从当前草稿提取媒体；本地 URL 提供图片或原生音视频播放与下载。 不自动播放；音频用 auto 预加载修复 Ogg 时长/跳转；离开/替换草稿预览会暂停播放器。 原文加载后自动刷新；忙碌期间也核对路径和类型，旧响应不覆盖当前预览；未变的媒体在源码/区块切换和保存时不重建。 手动修改新建路径也通知预览，按当前扩展名和类型重新解析，并使旧路径的响应失效。 保存自动补上的后缀也同步到预览上下文；创建被拒后仍按最终路径解析。 本地素材响应声明 no-store，避免网页响应缓存重复存放图片、音频和视频；继续支持分段请求，原文件不变。 失败素材可在原控件内重新加载，不改写脏草稿、光标或其他播放器；禁止自动循环重试和自动播放。真实浏览器验证 SVG/WAV/WebM 恢复、错误清除、保存及重载。 每次预览读取有独立取消信号；新输入先停止旧请求，再等待防抖。上传和结构化插入的取消互相隔离，临时失败保留已有播放器及草稿。实际 HTTP 和浏览器故障代理验证未完成响应关闭与后续恢复。
+只从当前草稿提取媒体；本地 URL 提供图片或原生音视频播放与下载。 不自动播放；音频用 auto 预加载修复 Ogg 时长/跳转；离开/替换草稿预览会暂停播放器。 原文加载后自动刷新；忙碌期间也核对路径和类型，旧响应不覆盖当前预览；未变的媒体在源码/区块切换和保存时不重建。 手动修改新建路径也通知预览，按当前扩展名和类型重新解析，并使旧路径的响应失效。 保存自动补上的后缀也同步到预览上下文；创建被拒后仍按最终路径解析。 本地素材响应声明 no-store，避免网页响应缓存重复存放图片、音频和视频；继续支持分段请求，原文件不变。 失败素材可在原控件内重新加载，不改写脏草稿、光标或其他播放器；禁止自动循环重试和自动播放。真实浏览器验证 SVG/WAV/WebM 恢复、错误清除、保存及重载。 每次预览读取有独立取消信号；新输入先停止旧请求，再等待防抖。上传和结构化插入的取消互相隔离，临时失败保留已有播放器及草稿。实际 HTTP 和浏览器故障代理验证未完成响应关闭与后续恢复。 JSON/YAML/YML 不依赖原文关键字猜测：转义字段名正常解析，无效语法保留已有预览，合法删除引用才清空。真实 HTTP 和浏览器覆盖失败、修正、保存及重载。 有效说明按 caption → alt 与正文一致；嵌套自定义字段正常提取，仅过滤解析器代码块。YAML 别名按出现次数及顺序预览，只跳过递归环，最多显示前 100 项。真实浏览器验证嵌套别名的三处 SVG、说明修改及保存重载。
 
-已有验证入口：[scripts/tests/media.test.mjs](../scripts/tests/media.test.mjs)、[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py)、[scripts/tests/editor-dialogs.test.mjs](../scripts/tests/editor-dialogs.test.mjs)、[scripts/tests/doc-api.test.mjs](../scripts/tests/doc-api.test.mjs)、[scripts/tests/media-loading.test.mjs](../scripts/tests/media-loading.test.mjs)、[scripts/tests/media-preview-requests.test.mjs](../scripts/tests/media-preview-requests.test.mjs)。
+已有验证入口：[scripts/tests/media.test.mjs](../scripts/tests/media.test.mjs)、[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py)、[scripts/tests/editor-dialogs.test.mjs](../scripts/tests/editor-dialogs.test.mjs)、[scripts/tests/doc-api.test.mjs](../scripts/tests/doc-api.test.mjs)、[scripts/tests/media-loading.test.mjs](../scripts/tests/media-loading.test.mjs)、[scripts/tests/media-preview-requests.test.mjs](../scripts/tests/media-preview-requests.test.mjs)、[scripts/tests/media-preview-parsing.test.mjs](../scripts/tests/media-preview-parsing.test.mjs)、[scripts/tests/media-preview-content.test.mjs](../scripts/tests/media-preview-content.test.mjs)、[scripts/tests/structured-values.test.mjs](../scripts/tests/structured-values.test.mjs)。
 
 <a id="f31"></a>
 
@@ -611,9 +611,9 @@ revision、默认目录及新增标识校验 → 保留模板源格式 → 写�
 
 [编辑器导出窗口](#node-export_ui) → [浏览器请求层](#node-request) → [业务接口分发](#node-router) → [导出任务生命周期](#node-export_jobs) → [Node 导出规划与 ZIP](#node-export_pack) → [项目类型解析契约](#node-types) → [共享文档解析器](#node-parser) → [共享布局生成器](#node-layout) → [离线阅读格式](#node-export_render) → [导出暂存包](#node-export_cache) → [文档分享包](#node-share)
 
-从已保存原文重新解析，递归携带附属文档、嵌入媒体、裸 ID、旧图片路径及附件素材；保留元数据、原始 sources 和故事章节层级，百分号名称与旧别名按索引规则解析。 不是完整项目恢复包；不把无关素材全部带入；未保存/新建草稿不能导出。 保存或重建忙碌时暂缓打开导出。 包内源路径按每层目录检查大小写/Unicode 及文件目录冲突。 未嵌入的引用列为关联素材，每篇文档按素材身份去重；未知 ID 或缺失文件失败后可修复重试。代码围栏与 YAML 注释仍排除。 ZIP 完成后的最后一次异步读取结束后，再检查取消状态才登记任务；取消的分享包立即清理，原文与素材保持不变。 取消或生成失败后若目录无法立即删除，保留已撤销的清理记录和名额，自动重试且不覆盖原来的取消/失败原因。 ZIP 写入使用统一停止状态，取消或写入失败后不接纳迟到的文件打开结果；已经开始的输入操作和实际关闭完成后才结束。 准备阶段将取消传入登记读取、目录扫描和正文读取；异步操作返回后先检查停止状态，迟到的坏正文不覆盖取消原因。 分享包通过多个成功分段收齐后，可在下一次导出时回收空闲任务；逐字节拼接和 ZIP 清单已回归核对。
+从已保存原文重新解析，递归携带附属文档、嵌入媒体、裸 ID、旧图片路径及附件素材；保留元数据、原始 sources 和故事章节层级，百分号名称与旧别名按索引规则解析。 不是完整项目恢复包；不把无关素材全部带入；未保存/新建草稿不能导出。 保存或重建忙碌时暂缓打开导出。 包内源路径按每层目录检查大小写/Unicode 及文件目录冲突。 未嵌入的引用列为关联素材，每篇文档按素材身份去重；未知 ID 或缺失文件失败后可修复重试。代码围栏与 YAML 注释仍排除。 ZIP 完成后的最后一次异步读取结束后，再检查取消状态才登记任务；取消的分享包立即清理，原文与素材保持不变。 取消或生成失败后若目录无法立即删除，保留已撤销的清理记录和名额，自动重试且不覆盖原来的取消/失败原因。 ZIP 写入使用统一停止状态，取消或写入失败后不接纳迟到的文件打开结果；已经开始的输入操作和实际关闭完成后才结束。 准备阶段将取消传入登记读取、目录扫描和正文读取；异步操作返回后先检查停止状态，迟到的坏正文不覆盖取消原因。 分享包通过多个成功分段收齐后，可在下一次导出时回收空闲任务；逐字节拼接和 ZIP 清单已回归核对。 嵌套媒体、alt 说明和别名复用与预览逐次对照；阅读内容保留重复出现，包内素材按身份去重，源文件和快照保持完整。 顶层及嵌套空对象、空列表明确保留为 {}、[]；Markdown 按正文规则转义，原始 sources 不改写。
 
-已有验证入口：[scripts/tests/export.test.mjs](../scripts/tests/export.test.mjs)、[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py)、[scripts/tests/editor-dialogs.test.mjs](../scripts/tests/editor-dialogs.test.mjs)、[desktop/tests/native_export_workflow.py](../desktop/tests/native_export_workflow.py)、[scripts/tests/media.test.mjs](../scripts/tests/media.test.mjs)、[scripts/tests/export-cancellation.test.mjs](../scripts/tests/export-cancellation.test.mjs)、[scripts/tests/export-cleanup.test.mjs](../scripts/tests/export-cleanup.test.mjs)、[scripts/tests/export-streams.test.mjs](../scripts/tests/export-streams.test.mjs)、[scripts/tests/export-preparation.test.mjs](../scripts/tests/export-preparation.test.mjs)、[scripts/tests/export-downloads.test.mjs](../scripts/tests/export-downloads.test.mjs)。
+已有验证入口：[scripts/tests/export.test.mjs](../scripts/tests/export.test.mjs)、[desktop/tests/native-smoke.py](../desktop/tests/native-smoke.py)、[scripts/tests/editor-dialogs.test.mjs](../scripts/tests/editor-dialogs.test.mjs)、[desktop/tests/native_export_workflow.py](../desktop/tests/native_export_workflow.py)、[scripts/tests/media.test.mjs](../scripts/tests/media.test.mjs)、[scripts/tests/export-cancellation.test.mjs](../scripts/tests/export-cancellation.test.mjs)、[scripts/tests/export-cleanup.test.mjs](../scripts/tests/export-cleanup.test.mjs)、[scripts/tests/export-streams.test.mjs](../scripts/tests/export-streams.test.mjs)、[scripts/tests/export-preparation.test.mjs](../scripts/tests/export-preparation.test.mjs)、[scripts/tests/export-downloads.test.mjs](../scripts/tests/export-downloads.test.mjs)、[scripts/tests/media-preview-content.test.mjs](../scripts/tests/media-preview-content.test.mjs)、[scripts/tests/structured-values.test.mjs](../scripts/tests/structured-values.test.mjs)。
 
 <a id="f33"></a>
 
@@ -809,7 +809,7 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 
 [桌面与源码打包](#node-packaging) → [语言与设置](#node-language_ui) → [应用安装包](#node-app_bundle) → [应用源码归档](#node-source_archive)
 
-准备内置 Node 和运行资源，同步桌面语言字典，按发布版本生成平台包和可重建源码归档。 不携带具体作品数据；CI 手动构建 Linux/Windows/macOS 构件，不自动发布或安装。glib 使用本地修复副本，源码归档保留 vendor，Linux 测试启用优化。
+准备内置 Node 和运行资源，同步桌面语言字典，按发布版本生成平台包和可重建源码归档。 不携带具体作品数据；CI 手动构建 Linux/Windows/macOS 构件，不自动发布或安装。 glib 使用本地安全修复副本，源码归档必须包含 vendor；Linux 桌面回归对 glib 启用优化。
 
 已有验证入口：[scripts/tests/version.test.mjs](../scripts/tests/version.test.mjs)、[scripts/tests/build-cleanup.test.mjs](../scripts/tests/build-cleanup.test.mjs)、[src-tauri/tests/glib_variant_iter.rs](../src-tauri/tests/glib_variant_iter.rs)。
 
@@ -847,11 +847,11 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 | <a id="node-editor"></a>编辑器状态与导航 `editor` | 浏览、搜索、选择、读写、新建和未保存草稿的主协调器。 | [initApp](../web/modules/app-runtime.js#L4991)<br>[web/modules/app-state.js](../web/modules/app-state.js#L1)<br>[handleSaveConflict](../web/modules/app-runtime.js#L1659)<br>[enterEditMode](../web/modules/app-runtime.js#L3541)<br>[setMode](../web/modules/app-runtime.js#L1812)<br>[resetDocEditorState](../web/modules/app-runtime.js#L2680)<br>[loadCreateTypeTemplate](../web/modules/app-runtime.js#L2100)<br>[setCreateTypeState](../web/modules/app-runtime.js#L2159)<br>[updateCreatePathValidation](../web/modules/app-runtime.js#L2277)<br>[saveNewDoc](../web/modules/app-runtime.js#L3613)<br>[saveExistingDoc](../web/modules/app-runtime.js#L3713)<br>[syncDocEditorSource](../web/modules/app-runtime.js#L3963)<br>[selectDoc](../web/modules/app-runtime.js#L4680)<br>[loadData](../web/modules/app-runtime.js#L4859)<br>[renderFilteredDocs](../web/modules/app-runtime.js#L4569)<br>[renderIndexLoadView](../web/modules/app-runtime.js#L882)<br>[syncModeButtons](../web/modules/app-runtime.js#L1485)<br>[createDocButton](../web/modules/app-helpers.js#L1289) |
 | <a id="node-draft"></a>源码与区块草稿 `draft` | 从当前源码切分区块并按修改片段还原；保留 BOM、换行和未修改文本。 | [createBlockDraft](../web/modules/app-editor-draft.js#L29)<br>[serializeSourceDraft](../web/modules/app-editor-draft.js#L4)<br>[setEditInputMode](../web/modules/app-runtime.js#L2568) |
 | <a id="node-project_ui"></a>项目类型与模板窗口 `project_ui` | 定义类型、规则、模板和字段分组，预览、保存、取消新增及返回编辑器。 | [setupProjectSettings](../web/modules/app-project-settings.js#L6)<br>[cancelChanges](../web/modules/app-project-settings.js#L119) |
-| <a id="node-media_ui"></a>素材选择与草稿预览 `media_ui` | 筛选、导入、复用、粘贴、拖入图片/视频/音频；维护异步草稿预览。 拖放优先使用目标文本框；快速重开不受旧关闭事件影响。 部分导入失败后立即展示已登记素材，解除忙碌并允许复用。 失效预览读取即时取消，独立于主动素材导入和插入。 | [setupMediaEditor](../web/modules/app-media-editor.js#L6)<br>[schedulePreview](../web/modules/app-media-editor.js#L42) |
+| <a id="node-media_ui"></a>素材选择与草稿预览 `media_ui` | 筛选、导入、复用、粘贴、拖入图片/视频/音频；维护异步草稿预览。 拖放优先使用目标文本框；快速重开不受旧关闭事件影响。 部分导入失败后立即展示已登记素材，解除忙碌并允许复用。 失效预览读取即时取消，独立于主动素材导入和插入。 结构化草稿交给通用解析器，转义字段名不漏判，错误期间保留有效预览。 | [setupMediaEditor](../web/modules/app-media-editor.js#L6)<br>[schedulePreview](../web/modules/app-media-editor.js#L42) |
 | <a id="node-export_ui"></a>编辑器导出窗口 `export_ui` | 选择文档分享或整库迁移，准备导出、保存、取消与释放临时包。 原生保存按独立请求标识匹配回执，断线重试隔离旧结果。 浏览器下载按钮先核对可用性；过期恢复生成，网络错误保留重试，关闭后的旧结果不再下载。 | [setupExport](../web/modules/app-export.js#L12)<br>[exportAvailability](../web/modules/app-export.js#L5)<br>[nativeSave](../web/modules/app-export.js#L53)<br>[saveNative](../web/modules/app-export.js#L76) |
 | <a id="node-language_ui"></a>语言与设置 `language_ui` | 中文/English 字典与设置同步；先订阅后读取，保留新通知；只翻译界面，保留创作内容。 | [applyLanguage](../web/i18n/index.js#L38)<br>[setupSettings](../web/i18n/settings.js#L5)<br>[refreshLanguageUi](../web/modules/app-runtime.js#L747) |
 | <a id="node-request"></a>浏览器请求层 `request` | 统一索引、源文档、模板、素材、项目与导出请求，处理超时和错误。 模板路径逐段编码，文本读取保留 UTF-8 BOM。 | [web/modules/app-doc-service.js](../web/modules/app-doc-service.js#L1)<br>[web/modules/app-services.js](../web/modules/app-services.js#L1)<br>[loadTemplateContent](../web/modules/app-doc-service.js#L337)<br>[fetchTextApiRequest](../web/modules/app-services.js#L227) |
-| <a id="node-render"></a>通用布局与内容渲染 `render` | 消费 viento-layout-v1、字段与内容块，数组/对象/0/false/null 保持类型。 封面与旧技能卡片使用同一图片回退链。 | [renderDocumentLayout](../web/modules/app-document-layout.js#L58)<br>[renderStructuredBlocks](../web/modules/app-structured.js#L18)<br>[buildCommonCards](../web/modules/app-render.js#L706)<br>[renderHeroBanner](../web/modules/app-render.js#L621)<br>[buildHeroSkillCards](../web/modules/app-runtime.js#L3024) |
+| <a id="node-render"></a>通用布局与内容渲染 `render` | 消费 viento-layout-v1、字段与内容块，数组/对象/0/false/null 保持类型。 封面与旧技能卡片使用同一图片回退链。 顶层结构化值与嵌套字段统一渲染，列表内媒体正常展示，空对象/空列表明确可见。 | [renderDocumentLayout](../web/modules/app-document-layout.js#L60)<br>[renderStructuredBlocks](../web/modules/app-structured.js#L18)<br>[buildCommonCards](../web/modules/app-render.js#L706)<br>[renderHeroBanner](../web/modules/app-render.js#L621)<br>[buildHeroSkillCards](../web/modules/app-runtime.js#L3024) |
 | <a id="node-media_render"></a>图片、视频与音频控件 `media_render` | 解析本地素材 URL，呈现图片或原生播放器、字幕说明和下载链接。 展示索引中的本地图片文件名逐段编码，合法的连续点名称可用；候选耗尽后显示名称头像。 失败时可单独重试当前素材，成功加载后清除错误，不自动播放。 | [renderMedia](../web/modules/app-media-render.js#L4)<br>[renderMediaText](../web/modules/app-media-render.js#L75)<br>[resolveImageUrl](../web/modules/app-helpers.js#L589)<br>[applyImageFallbackChain](../web/modules/app-helpers.js#L655)<br>[renderGallery](../web/modules/app-runtime.js#L3212) |
 
 ### 兼容
@@ -886,7 +886,7 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 | <a id="node-create_doc"></a>新文档身份登记 `create_doc` | 新建时先登记所选类型与 UUID，再发布源文件；失败只回滚本次新登记。 | [createRegisteredDocument](../scripts/lib/project-documents.mjs#L41) |
 | <a id="node-project_service"></a>项目配置与模板服务 `project_service` | 校验新增标识、默认目录和 revision，先写模板再切换清单，防止重复新增和过时覆盖。 版本标记与响应使用同一份清单，防止并发读取混用新旧配置。 | [readProjectConfiguration](../scripts/lib/project-service.mjs#L46)<br>[previewProjectTemplate](../scripts/lib/project-service.mjs#L35)<br>[saveProjectTemplate](../scripts/lib/project-service.mjs#L79) |
 | <a id="node-media_service"></a>素材导入与清单 `media_service` | 扩展名/内容特征与体积校验、流式上传、哈希去重、稳定 ID 登记；持锁提交时核对素材根未改变。 | [importMediaAsset](../scripts/lib/media-assets.mjs#L53)<br>[listMediaAssets](../scripts/lib/media-assets.mjs#L38) |
-| <a id="node-media_insert"></a>结构化素材插入与预览 `media_insert` | JSON/YAML 按源范围插入媒体，保留行内列表的缩进及空文档标记；预览从当前草稿解析媒体。 | [insertStructuredMedia](../scripts/lib/media-insertion.mjs#L12)<br>[prepareMediaInsertion](../scripts/lib/media-insertion.mjs#L85) |
+| <a id="node-media_insert"></a>结构化素材插入与预览 `media_insert` | JSON/YAML 按源范围插入媒体，保留行内列表的缩进及空文档标记；预览从当前草稿解析媒体。 解析失败返回格式错误，与合法的空素材列表区分。 按正文规则保留 caption/alt 说明；仅排除解析器代码块，嵌套字段与 YAML 复用按出现顺序提取，循环路径跳过且最多 100 项。 | [insertStructuredMedia](../scripts/lib/media-insertion.mjs#L12)<br>[prepareMediaInsertion](../scripts/lib/media-insertion.mjs#L95) |
 | <a id="node-export_jobs"></a>导出任务生命周期 `export_jobs` | 串行生成，最多 3 个任务；额度满时回收已完整下载且空闲的旧任务，下载期间暂停过期和文件清理。登记前核对取消；取消/失败任务先撤销访问，清理成功后才释放名额，清理异常自动重试，并发释放共享结果。 已取消请求在回收名额和准备前退出，保留旧的已完成导出包。 分段响应按任务合并成功字节范围，全部收齐后可回收空闲任务；重叠不重复计数，缺段和中断仍保留重试。 | [createExportService](../scripts/lib/export-service.mjs#L31)<br>[create](../scripts/lib/export-service.mjs#L85)<br>[release](../scripts/lib/export-service.mjs#L39)<br>[download](../scripts/lib/export-service.mjs#L71) |
 | <a id="node-export_pack"></a>Node 导出规划与 ZIP `export_pack` | 分享携带嵌入、裸 ID、旧图片路径和附件引用；与索引共用提取规则，校验路径、登记指纹及源快照，缺失内容拒绝成功。整库打包保持原格式。 完整包同时复查原本缺失的目录和清单，防止首次新增内容被遗漏。 统一停止状态阻止迟到输入，等待在途操作与实际文件关闭后结束，保留首次错误。 准备与最终复查贯穿取消，停止剩余目录、登记及正文读取；迟到正文保留取消结果。 | [planExport](../scripts/lib/export-package.mjs#L37)<br>[writeExportZip](../scripts/lib/export-package.mjs#L221)<br>[validateSnapshot](../scripts/lib/export-package.mjs#L83) |
 | <a id="node-rebuild"></a>标准化与索引重建编排 `rebuild` | 先运行标准化子脚本，再构建文档/素材/引用索引；支持指定源范围。 | [rebuildIndex](../scripts/lib/rebuild-workflow.mjs#L70) |
@@ -898,14 +898,14 @@ Node 生成与 Rust 导入兼容的 viento-archive，包含全部作品文件与
 
 | 节点 | 职责 | 代码依据 |
 | --- | --- | --- |
-| <a id="node-export_render"></a>离线阅读格式 `export_render` | 共享布局生成 HTML 或 Markdown，保留故事层级和包内素材路径；每篇文档的关联素材按身份去重，原文与附件角色保持完整。 | [renderExport](../scripts/lib/export-render.mjs#L9) |
+| <a id="node-export_render"></a>离线阅读格式 `export_render` | 共享布局生成 HTML 或 Markdown，保留故事层级和包内素材路径；每篇文档的关联素材按身份去重，原文与附件角色保持完整。 空对象和空列表在两种格式中保留明确表示，媒体与类型值继续按原结构展示。 | [renderExport](../scripts/lib/export-render.mjs#L9) |
 | <a id="node-paths"></a>程序、作品与缓存路径 `paths` | 程序资源与作品分离，解析配置选择、v2/v3 目录与外置素材。 | [scripts/lib/paths.mjs](../scripts/lib/paths.mjs#L1)<br>[resolveWorkspaceRoot](../scripts/lib/app-storage.mjs#L49) |
 | <a id="node-types"></a>项目类型解析契约 `types` | 稳定 documentType 对应项目模板、解析规则和字段分组；已有登记优先于目录猜测。 | [resolveDocumentDefinition](../scripts/lib/project-layout.mjs#L72)<br>[validateProjectTypes](../scripts/lib/project-layout.mjs#L37) |
 | <a id="node-registry"></a>文档与素材登记 `registry` | 读取身份登记，增量添加新对象，维护内容指纹、唯一性、共享登记锁和素材索引；核验登记文件及路径。 归属迁移复用登记锁和路径检查，写入独立恢复日志。 | [registerWorkspace](../scripts/lib/workspace.mjs#L284)<br>[readRegistry](../scripts/lib/workspace.mjs#L170)<br>[resolveAssetRequest](../scripts/lib/workspace.mjs#L66)<br>[assertPortableFileTree](../scripts/lib/workspace.mjs#L119)<br>[withRegistryLock](../scripts/lib/workspace.mjs#L253)<br>[verifyWorkspace](../scripts/lib/workspace.mjs#L360)<br>[updateDocumentModels](../scripts/lib/workspace.mjs#L392) |
 | <a id="node-hierarchy"></a>文档归属关系 `hierarchy` | 验证 part-of 关系并构建 owners/ownedDocuments；独立故事仍是独立文档。 明确映射只更新指定文档的归属，保留其他关系与仍有效的备注。 | [validateDocumentModels](../scripts/lib/document-model.mjs#L23)<br>[attachDocumentHierarchy](../scripts/lib/document-model.mjs#L99)<br>[planLegacyDocumentModels](../scripts/lib/document-model.mjs#L55) |
 | <a id="node-standardize"></a>原文标准化 `standardize` | 正文根内扫描 → 项目定义 → 通用解析 → 标准对象；以相对源路径哈希定位缓存，按源范围更新、迁移和清理。 | [scripts/standardize-docs.mjs](../scripts/standardize-docs.mjs#L1)<br>[buildStandardCatalog](../scripts/standardize-docs/catalog.mjs#L18)<br>[scripts/standardize-docs/sources.mjs](../scripts/standardize-docs/sources.mjs#L1)<br>[buildStandardOutputPath](../scripts/lib/standard-cache.mjs#L9) |
 | <a id="node-parser"></a>共享文档解析器 `parser` | 按扩展名解析文本/Markdown、JSON、YAML，保留字段类型、正文、代码、表格及错误原文。 | [parseSourceContent](../scripts/standardize-docs/doc-factory.mjs#L10)<br>[scripts/standardize-docs/parser.mjs](../scripts/standardize-docs/parser.mjs#L1) |
-| <a id="node-layout"></a>共享布局生成器 `layout` | 由标题、分区、字段和块生成 viento-layout-v1；按项目 fieldGroups 调整展示分组。 | [buildDocumentLayout](../scripts/standardize-docs/layout.mjs#L7)<br>[scripts/lib/document-values.mjs](../scripts/lib/document-values.mjs#L1) |
+| <a id="node-layout"></a>共享布局生成器 `layout` | 由标题、分区、字段和块生成 viento-layout-v1；按项目 fieldGroups 调整展示分组。 顶层空对象保留为值块，不因字段展开而丢失。 | [buildDocumentLayout](../scripts/standardize-docs/layout.mjs#L7)<br>[scripts/lib/document-values.mjs](../scripts/lib/document-values.mjs#L1) |
 | <a id="node-index"></a>文档/素材/引用索引 `index` | 兼容镜像目录与新 .entries 缓存，生成文档、素材和引用索引，附加归属导航及未解析引用，共用 generation。 | [scripts/build-static-doc-site.mjs](../scripts/build-static-doc-site.mjs#L1)<br>[buildStandardIndex](../scripts/lib/static-index.mjs#L526)<br>[buildRegistryIndexes](../scripts/lib/workspace.mjs#L444)<br>[collectStandardPaths](../scripts/lib/standard-cache.mjs#L16) |
 | <a id="node-media_format"></a>共享媒体引用格式 `media_format` | image/video/audio、扩展名和稳定 URL 语法由前后端共用；从解析后的文档值提取引用，跳过代码块。 | [scripts/lib/media-format.mjs](../scripts/lib/media-format.mjs#L1)<br>[collectDocumentMedia](../scripts/lib/media-format.mjs#L51) |
 
@@ -1080,16 +1080,16 @@ JSON 保留逐条本地 ESM 导入语句、命名导入和行号；同一对文�
 
 | 模块 | 直接导入方数量 |
 | --- | ---: |
-| [scripts/lib/workspace.mjs](../scripts/lib/workspace.mjs) | 40 |
+| [scripts/lib/workspace.mjs](../scripts/lib/workspace.mjs) | 43 |
+| [scripts/tests/helpers.mjs](../scripts/tests/helpers.mjs) | 35 |
 | [scripts/lib/paths.mjs](../scripts/lib/paths.mjs) | 33 |
 | [scripts/lib/project-layout.mjs](../scripts/lib/project-layout.mjs) | 33 |
-| [scripts/tests/helpers.mjs](../scripts/tests/helpers.mjs) | 32 |
-| [scripts/tests/editor-harness.mjs](../scripts/tests/editor-harness.mjs) | 21 |
+| [scripts/tests/editor-harness.mjs](../scripts/tests/editor-harness.mjs) | 24 |
 | [scripts/lib/doc-api-contract.mjs](../scripts/lib/doc-api-contract.mjs) | 20 |
+| [scripts/lib/media-format.mjs](../scripts/lib/media-format.mjs) | 20 |
 | [web/i18n/index.js](../web/i18n/index.js) | 20 |
-| [scripts/lib/media-format.mjs](../scripts/lib/media-format.mjs) | 18 |
 | [scripts/lib/process.mjs](../scripts/lib/process.mjs) | 18 |
-| [scripts/standardize-docs/doc-factory.mjs](../scripts/standardize-docs/doc-factory.mjs) | 13 |
+| [scripts/standardize-docs/doc-factory.mjs](../scripts/standardize-docs/doc-factory.mjs) | 15 |
 
 当前本地导入图有一个包含多个文件的强连通组：`app-document-layout.js`、`app-render.js`、`app-structured.js`。它们互相依赖；这是需要留意的渲染层耦合，不能仅凭循环导入就认定运行时有 bug。
 
@@ -1104,7 +1104,7 @@ JSON 保留逐条本地 ESM 导入语句、命名导入和行号；同一对文�
 - 本次未找到面向用户的正文重命名/删除工作流、持久化自动草稿恢复或导入后未引用素材自动清理入口。
 - 音视频在正文中通过嵌入引用播放；仅增加元数据绑定不保证当前编辑器自动出现播放器。
 
-上述职责区别和兼容边界继续保留；已修复的具体缺陷按 N01–N113 记在[连续修复记录](NETWORK_BUGFIX_b.2.8.1.md)。
+上述职责区别和兼容边界继续保留；已修复的具体缺陷按 N01–N120 记在[连续修复记录](NETWORK_BUGFIX_b.2.8.1.md)。
 
 ## 10. 快照结构与后续更新
 
@@ -1112,6 +1112,6 @@ JSON 保留逐条本地 ESM 导入语句、命名导入和行号；同一对文�
 
 本次使用本机 Acorn 解析 ESM 声明、字面量动态导入、显式事件绑定及路由对象，再人工核对关键业务调用与文件读写。模块统计不包含 HTML/CSS 的资源链接、Rust 的 crate 内部依赖、计算出的动态导入或内联属性事件；Python、Rust 和 shell 记录源码指纹及人工确认的入口。已有测试声明可能来自参数化模板，不能用声明数量推断实际测试用例数。
 
-修订 59 保留 167 份代码指纹、181 处节点源码引用、475 条本地导入及 373 个测试声明；本次发布没有新增业务节点或模块导入，CSS 指纹和 10 份版本文件的变更另行记录。四十二轮修复与历史发布证据保留，交互页内嵌数据与 JSON 一致。b.4.2 全量 554 项通过，Node 24 正常退出；实际 Node/Rust 归档互通与登记契约全部执行。开发阶段真实浏览器记录涵盖部分上传恢复、三类素材读取重试及输入/保存时取消旧预览，发布阶段核对记录和指纹，未重复浏览器操作。详见[发布说明](RELEASE_b.4.2.md)。取消读取不等于中断服务端同步解析；本轮未重跑完整 Tauri 宿主、原生窗口或音视频播放，功能图页面本身的浏览器交互实测仍未完成。
+修订 63 保留 170 份代码指纹、181 处节点源码引用、499 条本地导入及 388 个测试声明，并登记 10 份发布文件的版本变更。四十五轮修复和历史发布证据保留，交互页内嵌数据与 JSON 一致。本次收录 32 个新增场景，发布全量 586 项通过；生产归档模块 13 通过、1 项真实大体积迁移忽略。三轮浏览器记录和源码连续性已复核，详见[发布记录](RELEASE_b.4.3.md)及[最新排查报告](STRUCTURED_VALUES_BUGFIX_b.4.2.md)。本轮未重跑完整 Tauri 宿主、音视频播放及原生窗口；功能图页面本身的浏览器交互实测仍未完成。
 
 此文件组是版本快照，不会随应用自动更新。下次更新时：先按 `sourceInventory.sha256` 确认变更范围；重新检查路由表、原生命令注册及本地导入；沿受影响的业务链核对读写和失败分支；保留稳定节点 ID / F 编号，再同步 JSON、本文、HTML 和总图。增加日期或版本，并明确实际运行了哪些验证。交互页内嵌快照供离线打开，无需启动作品服务。

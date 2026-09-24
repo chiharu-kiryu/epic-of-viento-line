@@ -35,11 +35,13 @@ export function renderExport(documents, format, resolveMedia) {
       return html ? `<dl>${fields.join('')}</dl>` : fields.join('\n\n');
     }
     if (Array.isArray(entry)) {
+      if (!entry.length) return text('[]');
       const items = entry.map((item) => value(item, depth + 1));
       return html ? `<ol>${items.map((item) => `<li>${item}</li>`).join('')}</ol>`
         : items.map((item, index) => `${index + 1}. ${item.replace(/\n/g, '\n   ')}`).join('\n');
     }
     if (entry && typeof entry === 'object') {
+      if (!Object.keys(entry).length) return text('{}');
       const fields = Object.entries(entry).map(([key, item]) => field(key, item, depth + 1));
       return html ? `<dl>${fields.join('')}</dl>` : fields.join('\n\n');
     }

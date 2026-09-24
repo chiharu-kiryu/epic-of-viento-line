@@ -1,0 +1,236 @@
+✖ structured values: json root lists render media through template preview, insert, save, index and export (316.065118ms)
+✖ structured values: yaml root lists render media through template preview, insert, save, index and export (289.077455ms)
+✖ structured values: yml root lists render media through template preview, insert, save, index and export (274.359931ms)
+✖ structured values: json root strings render inline media as nested strings do (126.561323ms)
+✖ structured values: yaml root strings render inline media as nested strings do (125.875148ms)
+✖ structured values: yml root strings render inline media as nested strings do (131.069412ms)
+✖ structured values: json empty containers remain visible at root, in fields and inside lists in reading and both exports (0.883556ms)
+✖ structured values: yaml empty containers remain visible at root, in fields and inside lists in reading and both exports (1.477785ms)
+✖ structured values: yml empty containers remain visible at root, in fields and inside lists in reading and both exports (0.688378ms)
+✔ structured values: ordinary false, zero, null, media objects and fenced code retain meaning without executing source HTML (1.823793ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 1
+ℹ fail 9
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1358.379867
+
+✖ failing tests:
+
+test at scripts/tests/structured-values.test.mjs:69:37
+✖ structured values: json root lists render media through template preview, insert, save, index and export (316.065118ms)
+  AssertionError [ERR_ASSERTION]: saved root lists must render the same media as their draft and export
+  + actual - expected
+  
+  + []
+  - [
+  -   '列表立绘',
+  -   '列表声音',
+  -   '列表片段'
+  - ]
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/structured-values.test.mjs:76:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ '列表立绘', '列表声音', '列表片段' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/structured-values.test.mjs:69:37
+✖ structured values: yaml root lists render media through template preview, insert, save, index and export (289.077455ms)
+  AssertionError [ERR_ASSERTION]: saved root lists must render the same media as their draft and export
+  + actual - expected
+  
+  + []
+  - [
+  -   '列表立绘',
+  -   '列表声音',
+  -   '列表片段'
+  - ]
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/structured-values.test.mjs:76:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ '列表立绘', '列表声音', '列表片段' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/structured-values.test.mjs:69:37
+✖ structured values: yml root lists render media through template preview, insert, save, index and export (274.359931ms)
+  AssertionError [ERR_ASSERTION]: saved root lists must render the same media as their draft and export
+  + actual - expected
+  
+  + []
+  - [
+  -   '列表立绘',
+  -   '列表声音',
+  -   '列表片段'
+  - ]
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/structured-values.test.mjs:76:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ '列表立绘', '列表声音', '列表片段' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/structured-values.test.mjs:96:37
+✖ structured values: json root strings render inline media as nested strings do (126.561323ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   '列表立绘',
+  -   '列表声音',
+  -   '列表片段'
+  - ]
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/structured-values.test.mjs:100:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ '列表立绘', '列表声音', '列表片段' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/structured-values.test.mjs:96:37
+✖ structured values: yaml root strings render inline media as nested strings do (125.875148ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   '列表立绘',
+  -   '列表声音',
+  -   '列表片段'
+  - ]
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/structured-values.test.mjs:100:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ '列表立绘', '列表声音', '列表片段' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/structured-values.test.mjs:96:37
+✖ structured values: yml root strings render inline media as nested strings do (131.069412ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   '列表立绘',
+  -   '列表声音',
+  -   '列表片段'
+  - ]
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/structured-values.test.mjs:100:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ '列表立绘', '列表声音', '列表片段' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/structured-values.test.mjs:111:37
+✖ structured values: json empty containers remain visible at root, in fields and inside lists in reading and both exports (0.883556ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   '{}'
+  - ]
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/structured-values.test.mjs:116:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ '{}' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/structured-values.test.mjs:111:37
+✖ structured values: yaml empty containers remain visible at root, in fields and inside lists in reading and both exports (1.477785ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   '{}'
+  - ]
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/structured-values.test.mjs:116:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ '{}' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/structured-values.test.mjs:111:37
+✖ structured values: yml empty containers remain visible at root, in fields and inside lists in reading and both exports (0.688378ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   '{}'
+  - ]
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/structured-values.test.mjs:116:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ '{}' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

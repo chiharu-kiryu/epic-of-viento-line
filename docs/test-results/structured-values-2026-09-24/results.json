@@ -1,0 +1,102 @@
+{
+  "date": "2026-09-24",
+  "version": "b.4.2",
+  "round": 45,
+  "findings": [
+    "N119",
+    "N120"
+  ],
+  "priorFindingsRetained": [
+    "N114",
+    "N115",
+    "N116",
+    "N117",
+    "N118"
+  ],
+  "gitBase": "03265ba0fbc3dcf8a59ceff9d25b390e3aed4c8b",
+  "node": "v24.19.0",
+  "commands": {
+    "newTests": "/home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test scripts/tests/structured-values.test.mjs",
+    "application": "env -u VIENTO_TEST_ARCHIVE_BINARY /home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node scripts/check-project.mjs --app-only"
+  },
+  "before": {
+    "node": "v24.19.0",
+    "startedAt": "2026-09-24T09:24:55.985Z",
+    "finishedAt": "2026-09-24T09:24:57.378Z",
+    "sourceFiles": {
+      "web/modules/app-document-layout.js": "6e77358cc5d5613c824f9692c6cfc5faabd6414a52d1f8776148e2dc015ce9c9",
+      "scripts/standardize-docs/layout.mjs": "092de495ca8ebaae65b3ea51e5bfbfce15e1c55c9235bd70a63c1e6dd2b44327",
+      "scripts/lib/export-render.mjs": "55cf439f71ad851653e497654aa33771185fb829c48945b93341083ed87c1475",
+      "scripts/tests/structured-values.test.mjs": "4ff34db914c529e0398fe6cbd5909f0a8ecfea1443737073b6485960ffba7ff9"
+    },
+    "exitCode": 1,
+    "signal": null,
+    "tests": 10,
+    "pass": 1,
+    "fail": 9,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "productionBaseline": "Prior N114–N118 worktree"
+  },
+  "after": {
+    "tests": 10,
+    "pass": 10,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "exitCode": 0,
+    "staticTestDeclarations": 4
+  },
+  "application": {
+    "tests": 538,
+    "pass": 536,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 2,
+    "todo": 0,
+    "exitCode": 0,
+    "syntaxFiles": 144,
+    "versionConsistency": true,
+    "apiContract": true,
+    "nativeArchiveBinaryConfigured": false
+  },
+  "sourceFiles": {
+    "web/modules/app-document-layout.js": "fd7e06d2f1f929f0474d3ab750db7fc94aae357efb28c64a630edba5b73d7af1",
+    "scripts/standardize-docs/layout.mjs": "a0e0a54a79ef3a10471870069748d3b3afb75c66a8ab01aa77da09502cec0a2c",
+    "scripts/lib/export-render.mjs": "75d910c001526d947a829ef0cbab517c0e1c7b025e6ccbf4fec645b34a631eff",
+    "scripts/tests/structured-values.test.mjs": "4ff34db914c529e0398fe6cbd5909f0a8ecfea1443737073b6485960ffba7ff9"
+  },
+  "retainedSourceFiles": {
+    "scripts/lib/media-insertion.mjs": "c146c6510a1e7b1bb9204a568da053d61c542d244ef68b99e66451b8892165e8",
+    "scripts/tests/media-preview-content.test.mjs": "78a4b9dc4ca029b55b75ff8fddfde1abfb39bbb5a849dd22cbcc1c08745b7242",
+    "web/modules/app-media-editor.js": "2cb745f2b43f7949c8989b64b371d262291d4b3da2874035934826d20339c1be",
+    "scripts/tests/media-preview-parsing.test.mjs": "12e3f7d50116e5fe8aeb91337d9471eabd01dc0f668392651dcf925cc92d9261"
+  },
+  "browser": "browser.json",
+  "cleanup": "cleanup.json",
+  "network": "network.json",
+  "limitations": [
+    "Native archive groups require VIENTO_TEST_ARCHIVE_BINARY and were skipped; historical b.4.2 evidence remains separate.",
+    "Browser covers JSON/SVG only; YAML/YML and audio/video references are covered by HTTP and DOM tests without playback claims.",
+    "Export checks use actual HTML/Markdown production plans, source/asset bytes and snapshot validation. No additional ZIP download/extraction in this round.",
+    "Rust and the full Tauri host were not rerun."
+  ],
+  "projectDataAccess": "Synthetic projects only; daily workspaces, assets and backups neither read nor modified.",
+  "releaseActions": {
+    "versionChanged": false,
+    "committed": false,
+    "pushed": false,
+    "installed": false
+  },
+  "evidenceSha256": {
+    "before.json": "bc236842e45807821a3aa0816ea1645ddb6438d891b0c15a08a01dfd935b1cbe",
+    "before.log": "22958d532a702cf510740c26bf8cbe601bd268dd786d8700e24ab0c7abb194b8",
+    "after-new.log": "974af2307eb99eca5d71f637d091dfcc1a26b7d3ea0fd5446126da38b44c2503",
+    "application.log": "9d50758732314fb58efa38cb34ffa98749dad05b694a2369d59b4deba5302878",
+    "browser.json": "aa0b9bf9efddc15a3884446ca043d15eaa38ff52881db114f38196b9758ccc36",
+    "cleanup.json": "3b2b27caa94c310a2f7d68bffd04fb94f1ee8a7eeb38214f5064398de54ebb35",
+    "network.json": "e997d590107e5c15ac05435753c63b0f2c4c5b46fb19afb81201286a6efad389"
+  }
+}

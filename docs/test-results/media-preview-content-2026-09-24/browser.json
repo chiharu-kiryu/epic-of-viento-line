@@ -1,0 +1,123 @@
+{
+  "root": "/tmp/viento-test-h9tUPv",
+  "sourcePath": "documents/character/预览内容验证.yaml",
+  "base": "http://127.0.0.1:39473",
+  "launcherPid": 3093819,
+  "startedAt": "2026-09-24T09:07:23.368Z",
+  "assetSha256": "710b2359b35544cc83a68d41cb58cf24a71270d3a422c20546138a08dd6d13da",
+  "browser": "Codex IAB",
+  "tabId": "2",
+  "tabClosed": true,
+  "sourceFormat": "YAML with BOM/CRLF",
+  "actions": [
+    "Open synthetic document",
+    "Start source editing",
+    "Observe three nested type=code alias occurrences and alt descriptions",
+    "Edit alt and note",
+    "Observe three changed descriptions and unsaved state",
+    "Save",
+    "Return to reading",
+    "Reload",
+    "Observe saved note and three images",
+    "Close tab"
+  ],
+  "measurements": {
+    "initial": [
+      {
+        "alt": "原始立绘说明",
+        "caption": "原始立绘说明",
+        "complete": true,
+        "width": 64,
+        "height": 48
+      },
+      {
+        "alt": "原始立绘说明",
+        "caption": "原始立绘说明",
+        "complete": true,
+        "width": 64,
+        "height": 48
+      },
+      {
+        "alt": "原始立绘说明",
+        "caption": "原始立绘说明",
+        "complete": true,
+        "width": 64,
+        "height": 48
+      }
+    ],
+    "edited": [
+      {
+        "alt": "已修改的立绘说明",
+        "caption": "已修改的立绘说明",
+        "complete": true,
+        "width": 64,
+        "height": 48
+      },
+      {
+        "alt": "已修改的立绘说明",
+        "caption": "已修改的立绘说明",
+        "complete": true,
+        "width": 64,
+        "height": 48
+      },
+      {
+        "alt": "已修改的立绘说明",
+        "caption": "已修改的立绘说明",
+        "complete": true,
+        "width": 64,
+        "height": 48
+      }
+    ],
+    "reopened": [
+      {
+        "alt": "已修改的立绘说明",
+        "caption": "已修改的立绘说明",
+        "complete": true,
+        "width": 64,
+        "height": 48
+      },
+      {
+        "alt": "已修改的立绘说明",
+        "caption": "已修改的立绘说明",
+        "complete": true,
+        "width": 64,
+        "height": 48
+      },
+      {
+        "alt": "已修改的立绘说明",
+        "caption": "已修改的立绘说明",
+        "complete": true,
+        "width": 64,
+        "height": 48
+      }
+    ]
+  },
+  "independentVerification": {
+    "savedSourceExact": true,
+    "bomAndCrlfPreserved": true,
+    "assetSha256": "710b2359b35544cc83a68d41cb58cf24a71270d3a422c20546138a08dd6d13da",
+    "registryAssets": 1,
+    "registryDocuments": 1,
+    "indexAssetRefs": 1,
+    "workspaceValid": true,
+    "exports": [
+      {
+        "format": "html",
+        "occurrences": 3,
+        "assets": 1,
+        "snapshotValidated": true
+      },
+      {
+        "format": "markdown",
+        "occurrences": 3,
+        "assets": 1,
+        "snapshotValidated": true
+      }
+    ]
+  },
+  "limitations": [
+    "Real browser covers YAML and SVG only; audio/video bytes and labels are covered by HTTP and DOM regressions without playback claims.",
+    "Export checks in this run validate the production export plan; no browser download or native Tauri rerun."
+  ],
+  "verifiedAt": "2026-09-24T09:09:07.832Z"
+}

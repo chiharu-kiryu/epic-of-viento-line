@@ -1,0 +1,35 @@
+{
+  "revision": 63,
+  "verifiedAt": "2026-09-24T09:46:46.669Z",
+  "sourceFiles": 170,
+  "jsModules": 150,
+  "localImports": 499,
+  "externalImports": 392,
+  "eventBindings": 98,
+  "testDeclarations": 388,
+  "nodeSourceReferences": 181,
+  "workflows": 50,
+  "nodes": 66,
+  "edges": 173,
+  "moduleCycles": [
+    [
+      "web/modules/app-document-layout.js",
+      "web/modules/app-render.js",
+      "web/modules/app-structured.js"
+    ]
+  ],
+  "generatedImportAliases": 2,
+  "inlineScriptsParsed": 1,
+  "embeddedSnapshotMatches": true,
+  "localMarkdownLinks": 615,
+  "workflowDescriptionsChecked": 50,
+  "workflowAnchors": 50,
+  "priorRepairHistoryPreserved": true,
+  "sha256": {
+    "docs/function-network.json": "55fd563694be44a9869a3c83b496a624dd43b78d66599c5a715f154854b2c3c5",
+    "docs/function-network.html": "cd1db1e1ce250e7c374650239e961e2b16d07d43e03c8a5bf94149bd752e88ae",
+    "docs/FUNCTION_NETWORK.md": "b2ca2c8daa8ffab2af43a9a68e670c9a91a5d3edb83dff6b33717a60a4bf75fa",
+    "docs/NETWORK_BUGFIX_b.2.8.1.md": "3690f212681c8e37d9b2e409f3acb900c84fb42c746e8629ed96207dcfc73209",
+    "docs/RELEASE_b.4.3.md": "f2921ac92adfe90621241ab150a50525d5bab6e1f4f65dcd17dbfb5e44af698a"
+  }
+}

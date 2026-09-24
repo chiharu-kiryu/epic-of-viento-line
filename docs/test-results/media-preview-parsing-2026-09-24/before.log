@@ -1,0 +1,196 @@
+✖ preview parsing: json HTTP distinguishes an incomplete draft from a valid empty media result (179.749768ms)
+✖ preview parsing: yaml HTTP distinguishes an incomplete draft from a valid empty media result (145.810546ms)
+✖ preview parsing: yml HTTP distinguishes an incomplete draft from a valid empty media result (140.489974ms)
+✖ preview parsing: json keeps existing players and dirty text through real parser failures, repair, save and reload (178.846194ms)
+✖ preview parsing: yaml keeps existing players and dirty text through real parser failures, repair, save and reload (158.557964ms)
+✖ preview parsing: yml keeps existing players and dirty text through real parser failures, repair, save and reload (157.663136ms)
+✖ preview parsing: json escaped property names preview through the actual parser without literal media hints (152.346101ms)
+✖ preview parsing: yaml escaped property names preview through the actual parser without literal media hints (150.715831ms)
+✖ preview parsing: yml escaped property names preview through the actual parser without literal media hints (150.462916ms)
+✖ preview parsing: an initially invalid structured draft remains editable and recovers after correcting its syntax (145.163554ms)
+✔ preview parsing: plain text stays local and fenced examples never become draft players (144.647063ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 1
+ℹ fail 10
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1767.993345
+
+✖ failing tests:
+
+test at scripts/tests/media-preview-parsing.test.mjs:74:34
+✖ preview parsing: json HTTP distinguishes an incomplete draft from a valid empty media result (179.749768ms)
+  AssertionError [ERR_ASSERTION]: parse failure must not be reported as an empty successful preview
+  
+  200 !== 400
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:79:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 400,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-parsing.test.mjs:74:34
+✖ preview parsing: yaml HTTP distinguishes an incomplete draft from a valid empty media result (145.810546ms)
+  AssertionError [ERR_ASSERTION]: parse failure must not be reported as an empty successful preview
+  
+  200 !== 400
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:79:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 400,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-parsing.test.mjs:74:34
+✖ preview parsing: yml HTTP distinguishes an incomplete draft from a valid empty media result (140.489974ms)
+  AssertionError [ERR_ASSERTION]: parse failure must not be reported as an empty successful preview
+  
+  200 !== 400
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:79:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 400,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-parsing.test.mjs:90:34
+✖ preview parsing: json keeps existing players and dirty text through real parser failures, repair, save and reload (178.846194ms)
+  AssertionError [ERR_ASSERTION]: incomplete syntax must keep the previous player
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:97:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-parsing.test.mjs:90:34
+✖ preview parsing: yaml keeps existing players and dirty text through real parser failures, repair, save and reload (158.557964ms)
+  AssertionError [ERR_ASSERTION]: incomplete syntax must keep the previous player
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:97:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-parsing.test.mjs:90:34
+✖ preview parsing: yml keeps existing players and dirty text through real parser failures, repair, save and reload (157.663136ms)
+  AssertionError [ERR_ASSERTION]: incomplete syntax must keep the previous player
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:97:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-parsing.test.mjs:115:34
+✖ preview parsing: json escaped property names preview through the actual parser without literal media hints (152.346101ms)
+  AssertionError [ERR_ASSERTION]: the current structured draft must reach its parser
+  
+  0 !== 1
+  
+      at Object.run (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:67:12)
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:118:38)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-parsing.test.mjs:115:34
+✖ preview parsing: yaml escaped property names preview through the actual parser without literal media hints (150.715831ms)
+  AssertionError [ERR_ASSERTION]: the current structured draft must reach its parser
+  
+  0 !== 1
+  
+      at Object.run (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:67:12)
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:118:38)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-parsing.test.mjs:115:34
+✖ preview parsing: yml escaped property names preview through the actual parser without literal media hints (150.462916ms)
+  AssertionError [ERR_ASSERTION]: the current structured draft must reach its parser
+  
+  0 !== 1
+  
+      at Object.run (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:67:12)
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:118:38)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-parsing.test.mjs:124:1
+✖ preview parsing: an initially invalid structured draft remains editable and recovers after correcting its syntax (145.163554ms)
+  AssertionError [ERR_ASSERTION]: the current structured draft must reach its parser
+  
+  0 !== 1
+  
+      at Object.run (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:67:12)
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:125:73)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

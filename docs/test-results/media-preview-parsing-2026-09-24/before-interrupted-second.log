@@ -1,0 +1,76 @@
+✖ preview parsing: json HTTP distinguishes an incomplete draft from a valid empty media result (223.188261ms)
+✖ preview parsing: yaml HTTP distinguishes an incomplete draft from a valid empty media result (161.375786ms)
+✖ preview parsing: yml HTTP distinguishes an incomplete draft from a valid empty media result (146.123538ms)
+
+Interrupted while running:
+
+⚠ scripts/tests/media-preview-parsing.test.mjs (scripts/tests/media-preview-parsing.test.mjs:1:1)
+✖ scripts/tests/media-preview-parsing.test.mjs (14013.317947ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 0
+ℹ fail 3
+ℹ cancelled 1
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14011.082596
+
+✖ failing tests:
+
+test at scripts/tests/media-preview-parsing.test.mjs:74:34
+✖ preview parsing: json HTTP distinguishes an incomplete draft from a valid empty media result (223.188261ms)
+  AssertionError [ERR_ASSERTION]: parse failure must not be reported as an empty successful preview
+  
+  200 !== 400
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:79:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 400,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-parsing.test.mjs:74:34
+✖ preview parsing: yaml HTTP distinguishes an incomplete draft from a valid empty media result (161.375786ms)
+  AssertionError [ERR_ASSERTION]: parse failure must not be reported as an empty successful preview
+  
+  200 !== 400
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:79:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 400,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-parsing.test.mjs:74:34
+✖ preview parsing: yml HTTP distinguishes an incomplete draft from a valid empty media result (146.123538ms)
+  AssertionError [ERR_ASSERTION]: parse failure must not be reported as an empty successful preview
+  
+  200 !== 400
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-parsing.test.mjs:79:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 400,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-parsing.test.mjs:1:1
+✖ scripts/tests/media-preview-parsing.test.mjs (14013.317947ms)
+  'Promise resolution is still pending but the event loop has already resolved'

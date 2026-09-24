@@ -1,0 +1,19 @@
+✔ preview content: json alt descriptions match reading and export, with caption taking precedence (344.998601ms)
+✔ preview content: yaml alt descriptions match reading and export, with caption taking precedence (317.063722ms)
+✔ preview content: yml alt descriptions match reading and export, with caption taking precedence (312.975425ms)
+✔ preview content: json nested user type=code fields keep structured and inline media (310.856017ms)
+✔ preview content: yaml nested user type=code fields keep structured and inline media (321.002803ms)
+✔ preview content: yml nested user type=code fields keep structured and inline media (313.678635ms)
+✔ preview content: yaml repeated aliases retain authored occurrences, order and unique asset packaging (303.202066ms)
+✔ preview content: yml repeated aliases retain authored occurrences, order and unique asset packaging (304.97014ms)
+✔ preview content: actual editor refreshes changed alt descriptions, accessible labels and download names without changing source (152.959254ms)
+✔ preview content: parser code fences stay excluded while repeated inline references stay in source order (130.753012ms)
+✔ preview content: recursive aliases terminate and the 100 occurrence limit preserves the leading source order (169.002468ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3079.318554

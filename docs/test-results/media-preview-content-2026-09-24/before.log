@@ -1,0 +1,375 @@
+✖ preview content: json alt descriptions match reading and export, with caption taking precedence (189.867277ms)
+✖ preview content: yaml alt descriptions match reading and export, with caption taking precedence (165.997871ms)
+✖ preview content: yml alt descriptions match reading and export, with caption taking precedence (147.116329ms)
+✖ preview content: json nested user type=code fields keep structured and inline media (138.698382ms)
+✖ preview content: yaml nested user type=code fields keep structured and inline media (147.627181ms)
+✖ preview content: yml nested user type=code fields keep structured and inline media (148.182736ms)
+✖ preview content: yaml repeated aliases retain authored occurrences, order and unique asset packaging (151.150543ms)
+✖ preview content: yml repeated aliases retain authored occurrences, order and unique asset packaging (149.753822ms)
+✖ preview content: actual editor refreshes changed alt descriptions, accessible labels and download names without changing source (143.177821ms)
+✔ preview content: parser code fences stay excluded while repeated inline references stay in source order (133.202333ms)
+✖ preview content: recursive aliases terminate and the 100 occurrence limit preserves the leading source order (138.828031ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 1
+ℹ fail 10
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1757.494922
+
+✖ failing tests:
+
+test at scripts/tests/media-preview-content.test.mjs:94:34
+✖ preview content: json alt descriptions match reading and export, with caption taking precedence (189.867277ms)
+  AssertionError [ERR_ASSERTION]: draft preview must keep the same effective descriptions as the document
+  + actual - expected
+  
+    [
+      {
+  +     caption: '',
+  -     caption: '立绘说明',
+        src: 'assets/picture.svg',
+        type: 'image'
+      },
+      {
+  +     caption: '',
+  -     caption: '配音说明',
+        src: 'assets/voice.wav',
+        type: 'audio'
+      },
+      {
+        caption: '动作说明',
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-content.test.mjs:104:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ { type: 'image', src: 'assets/picture.svg', caption: '' }, { type: 'audio', src: 'assets/voice.wav', caption: '' }, { type: 'video', src: 'assets/movie.mp4', caption: '动作说明' } ],
+    expected: [ { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' }, { type: 'audio', src: 'assets/voice.wav', caption: '配音说明' }, { type: 'video', src: 'assets/movie.mp4', caption: '动作说明' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-content.test.mjs:94:34
+✖ preview content: yaml alt descriptions match reading and export, with caption taking precedence (165.997871ms)
+  AssertionError [ERR_ASSERTION]: draft preview must keep the same effective descriptions as the document
+  + actual - expected
+  
+    [
+      {
+  +     caption: '',
+  -     caption: '立绘说明',
+        src: 'assets/picture.svg',
+        type: 'image'
+      },
+      {
+  +     caption: '',
+  -     caption: '配音说明',
+        src: 'assets/voice.wav',
+        type: 'audio'
+      },
+      {
+        caption: '动作说明',
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-content.test.mjs:104:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ { type: 'image', src: 'assets/picture.svg', caption: '' }, { type: 'audio', src: 'assets/voice.wav', caption: '' }, { type: 'video', src: 'assets/movie.mp4', caption: '动作说明' } ],
+    expected: [ { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' }, { type: 'audio', src: 'assets/voice.wav', caption: '配音说明' }, { type: 'video', src: 'assets/movie.mp4', caption: '动作说明' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-content.test.mjs:94:34
+✖ preview content: yml alt descriptions match reading and export, with caption taking precedence (147.116329ms)
+  AssertionError [ERR_ASSERTION]: draft preview must keep the same effective descriptions as the document
+  + actual - expected
+  
+    [
+      {
+  +     caption: '',
+  -     caption: '立绘说明',
+        src: 'assets/picture.svg',
+        type: 'image'
+      },
+      {
+  +     caption: '',
+  -     caption: '配音说明',
+        src: 'assets/voice.wav',
+        type: 'audio'
+      },
+      {
+        caption: '动作说明',
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-content.test.mjs:104:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ { type: 'image', src: 'assets/picture.svg', caption: '' }, { type: 'audio', src: 'assets/voice.wav', caption: '' }, { type: 'video', src: 'assets/movie.mp4', caption: '动作说明' } ],
+    expected: [ { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' }, { type: 'audio', src: 'assets/voice.wav', caption: '配音说明' }, { type: 'video', src: 'assets/movie.mp4', caption: '动作说明' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-content.test.mjs:108:34
+✖ preview content: json nested user type=code fields keep structured and inline media (138.698382ms)
+  AssertionError [ERR_ASSERTION]: authored type fields are data, not parser code blocks
+  + actual - expected
+  
+  + []
+  - [
+  -   {
+  -     caption: '立绘说明',
+  -     src: 'assets/picture.svg',
+  -     type: 'image'
+  -   },
+  -   {
+  -     caption: '配音说明',
+  -     src: 'assets/voice.wav',
+  -     type: 'audio'
+  -   },
+  -   {
+  -     caption: '动作说明',
+  -     src: 'assets/movie.mp4',
+  -     type: 'video'
+  -   }
+  - ]
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-content.test.mjs:116:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' }, { type: 'audio', src: 'assets/voice.wav', caption: '配音说明' }, { type: 'video', src: 'assets/movie.mp4', caption: '动作说明' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-content.test.mjs:108:34
+✖ preview content: yaml nested user type=code fields keep structured and inline media (147.627181ms)
+  AssertionError [ERR_ASSERTION]: authored type fields are data, not parser code blocks
+  + actual - expected
+  
+  + []
+  - [
+  -   {
+  -     caption: '立绘说明',
+  -     src: 'assets/picture.svg',
+  -     type: 'image'
+  -   },
+  -   {
+  -     caption: '配音说明',
+  -     src: 'assets/voice.wav',
+  -     type: 'audio'
+  -   },
+  -   {
+  -     caption: '动作说明',
+  -     src: 'assets/movie.mp4',
+  -     type: 'video'
+  -   }
+  - ]
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-content.test.mjs:116:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' }, { type: 'audio', src: 'assets/voice.wav', caption: '配音说明' }, { type: 'video', src: 'assets/movie.mp4', caption: '动作说明' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-content.test.mjs:108:34
+✖ preview content: yml nested user type=code fields keep structured and inline media (148.182736ms)
+  AssertionError [ERR_ASSERTION]: authored type fields are data, not parser code blocks
+  + actual - expected
+  
+  + []
+  - [
+  -   {
+  -     caption: '立绘说明',
+  -     src: 'assets/picture.svg',
+  -     type: 'image'
+  -   },
+  -   {
+  -     caption: '配音说明',
+  -     src: 'assets/voice.wav',
+  -     type: 'audio'
+  -   },
+  -   {
+  -     caption: '动作说明',
+  -     src: 'assets/movie.mp4',
+  -     type: 'video'
+  -   }
+  - ]
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-content.test.mjs:116:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' }, { type: 'audio', src: 'assets/voice.wav', caption: '配音说明' }, { type: 'video', src: 'assets/movie.mp4', caption: '动作说明' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-content.test.mjs:125:42
+✖ preview content: yaml repeated aliases retain authored occurrences, order and unique asset packaging (151.150543ms)
+  AssertionError [ERR_ASSERTION]: alias reuse should not collapse repeated placements
+  + actual - expected
+  ... Skipped lines
+  
+    [
+      {
+        caption: '立绘说明',
+        src: 'assets/picture.svg',
+        type: 'image'
+  ...
+      },
+  -   {
+  -     caption: '立绘说明',
+  -     src: 'assets/picture.svg',
+  -     type: 'image'
+  -   },
+  -   {
+  -     caption: '配音说明',
+  -     src: 'assets/voice.wav',
+  -     type: 'audio'
+  -   },
+  -   {
+  -     caption: '立绘说明',
+  -     src: 'assets/picture.svg',
+  -     type: 'image'
+  -   },
+  -   {
+  -     caption: '配音说明',
+  -     src: 'assets/voice.wav',
+  -     type: 'audio'
+  -   }
+    ]
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-content.test.mjs:131:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' }, { type: 'audio', src: 'assets/voice.wav', caption: '配音说明' } ],
+    expected: [ { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' }, { type: 'audio', src: 'assets/voice.wav', caption: '配音说明' }, { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' }, { type: 'audio', src: 'assets/voice.wav', caption: '配音说明' }, { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' }, { type: 'audio', src: 'assets/voice.wav', caption: '配音说明' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-content.test.mjs:125:42
+✖ preview content: yml repeated aliases retain authored occurrences, order and unique asset packaging (149.753822ms)
+  AssertionError [ERR_ASSERTION]: alias reuse should not collapse repeated placements
+  + actual - expected
+  ... Skipped lines
+  
+    [
+      {
+        caption: '立绘说明',
+        src: 'assets/picture.svg',
+        type: 'image'
+  ...
+      },
+  -   {
+  -     caption: '立绘说明',
+  -     src: 'assets/picture.svg',
+  -     type: 'image'
+  -   },
+  -   {
+  -     caption: '配音说明',
+  -     src: 'assets/voice.wav',
+  -     type: 'audio'
+  -   },
+  -   {
+  -     caption: '立绘说明',
+  -     src: 'assets/picture.svg',
+  -     type: 'image'
+  -   },
+  -   {
+  -     caption: '配音说明',
+  -     src: 'assets/voice.wav',
+  -     type: 'audio'
+  -   }
+    ]
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-content.test.mjs:131:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' }, { type: 'audio', src: 'assets/voice.wav', caption: '配音说明' } ],
+    expected: [ { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' }, { type: 'audio', src: 'assets/voice.wav', caption: '配音说明' }, { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' }, { type: 'audio', src: 'assets/voice.wav', caption: '配音说明' }, { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' }, { type: 'audio', src: 'assets/voice.wav', caption: '配音说明' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-content.test.mjs:135:1
+✖ preview content: actual editor refreshes changed alt descriptions, accessible labels and download names without changing source (143.177821ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   '立绘说明',
+  -   '配音说明'
+  - ]
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-content.test.mjs:149:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ '立绘说明', '配音说明' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/tests/media-preview-content.test.mjs:172:1
+✖ preview content: recursive aliases terminate and the 100 occurrence limit preserves the leading source order (138.828031ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      {
+        caption: '立绘说明',
+        src: 'assets/picture.svg',
+        type: 'image'
+      },
+  -   {
+  -     caption: '立绘说明',
+  -     src: 'assets/picture.svg',
+  -     type: 'image'
+  -   }
+    ]
+  
+      at TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/media-preview-content.test.mjs:177:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' } ],
+    expected: [ { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' }, { type: 'image', src: 'assets/picture.svg', caption: '立绘说明' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

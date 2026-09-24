@@ -24,6 +24,7 @@ function fieldRow(key, value) {
 function renderValue(value) {
   if (isMediaValue(value)) return renderMedia(value);
   if (Array.isArray(value)) {
+    if (!value.length) return renderValue('[]');
     const list = document.createElement('ol');
     list.className = 'document-value-list';
     for (const item of value) {
@@ -34,6 +35,7 @@ function renderValue(value) {
     return list;
   }
   if (value && typeof value === 'object') {
+    if (!Object.keys(value).length) return renderValue('{}');
     const fields = document.createElement('dl');
     fields.className = 'document-fields';
     for (const [key, entry] of Object.entries(value)) fields.appendChild(fieldRow(key, entry));
@@ -74,6 +76,10 @@ export function renderDocumentLayout(doc) {
           card.appendChild(fields);
         }
         fields.appendChild(fieldRow(block.key, block.value));
+      } else if (block.type === 'json') {
+        // Root lists and scalars use the same typed rendering as nested fields.
+        fields = null;
+        card.appendChild(renderValue(block.value));
       } else {
         fields = null;
         const rendered = renderStructuredBlocks([block]);

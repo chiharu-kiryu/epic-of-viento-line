@@ -21,7 +21,7 @@ export function buildDocumentLayout(parsed) {
     if (!current) start();
     if (block.type === 'json' && isMediaValue(block.value)) {
       current.blocks.push(block.value);
-    } else if (block.type === 'json' && block.value && typeof block.value === 'object' && !Array.isArray(block.value)) {
+    } else if (block.type === 'json' && block.value && typeof block.value === 'object' && !Array.isArray(block.value) && Object.keys(block.value).length) {
       current.blocks.push(...Object.entries(block.value).map(([key, value]) => ({ type: 'kv', key, value })));
     } else current.blocks.push(block);
   }

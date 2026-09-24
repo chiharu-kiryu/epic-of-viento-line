@@ -1,0 +1,99 @@
+{
+  "date": "2026-09-24",
+  "version": "b.4.2",
+  "round": 44,
+  "findings": [
+    "N116",
+    "N117",
+    "N118"
+  ],
+  "priorFindingsRetained": [
+    "N114",
+    "N115"
+  ],
+  "gitBase": "03265ba0fbc3dcf8a59ceff9d25b390e3aed4c8b",
+  "node": "v24.19.0",
+  "commands": {
+    "newTests": "/home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test scripts/tests/media-preview-content.test.mjs",
+    "application": "env -u VIENTO_TEST_ARCHIVE_BINARY /home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node scripts/check-project.mjs --app-only"
+  },
+  "before": {
+    "node": "v24.19.0",
+    "startedAt": "2026-09-24T09:05:49.350Z",
+    "sourceFiles": {
+      "scripts/lib/media-insertion.mjs": "641de5186d4f6178f7dac54837271b12d3c5b5e1f6230bf21d8c688d92713f2d",
+      "scripts/tests/media-preview-content.test.mjs": "78a4b9dc4ca029b55b75ff8fddfde1abfb39bbb5a849dd22cbcc1c08745b7242"
+    },
+    "exitCode": 1,
+    "signal": null,
+    "finishedAt": "2026-09-24T09:05:51.144Z",
+    "tests": 11,
+    "pass": 1,
+    "fail": 10,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "productionBaseline": "Prior uncommitted N114–N115 worktree, not bare release HEAD"
+  },
+  "after": {
+    "tests": 11,
+    "pass": 11,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "exitCode": 0,
+    "sourceFiles": {
+      "scripts/lib/media-insertion.mjs": "c146c6510a1e7b1bb9204a568da053d61c542d244ef68b99e66451b8892165e8",
+      "scripts/tests/media-preview-content.test.mjs": "78a4b9dc4ca029b55b75ff8fddfde1abfb39bbb5a849dd22cbcc1c08745b7242",
+      "web/modules/app-media-editor.js": "2cb745f2b43f7949c8989b64b371d262291d4b3da2874035934826d20339c1be",
+      "scripts/tests/media-preview-parsing.test.mjs": "12e3f7d50116e5fe8aeb91337d9471eabd01dc0f668392651dcf925cc92d9261"
+    },
+    "staticTestDeclarations": 6
+  },
+  "application": {
+    "tests": 528,
+    "pass": 526,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 2,
+    "todo": 0,
+    "exitCode": 0,
+    "syntaxFiles": 143,
+    "versionConsistency": true,
+    "apiContract": true,
+    "nativeArchiveBinaryConfigured": false
+  },
+  "browser": "browser.json",
+  "cleanup": "cleanup.json",
+  "network": "network.json",
+  "sourceFiles": {
+    "scripts/lib/media-insertion.mjs": "c146c6510a1e7b1bb9204a568da053d61c542d244ef68b99e66451b8892165e8",
+    "scripts/tests/media-preview-content.test.mjs": "78a4b9dc4ca029b55b75ff8fddfde1abfb39bbb5a849dd22cbcc1c08745b7242",
+    "web/modules/app-media-editor.js": "2cb745f2b43f7949c8989b64b371d262291d4b3da2874035934826d20339c1be",
+    "scripts/tests/media-preview-parsing.test.mjs": "12e3f7d50116e5fe8aeb91337d9471eabd01dc0f668392651dcf925cc92d9261"
+  },
+  "limitations": [
+    "Native archive groups require VIENTO_TEST_ARCHIVE_BINARY and are skipped; b.4.2 release evidence is retained separately.",
+    "Rust, installed application and full Tauri host were not rerun or changed.",
+    "Browser measured only synthetic YAML/SVG; audio/video fixtures validate references, labels and exact bytes, not decoding or playback.",
+    "Export comparisons use production HTML/Markdown plans and snapshot checks; no new browser download/ZIP extraction in this round.",
+    "Controlled DOM exercises the real media controller/client/renderer but cannot establish browser layout or decoding behavior."
+  ],
+  "projectDataAccess": "Only synthetic temporary projects; daily workspaces, assets and backups neither read nor written.",
+  "releaseActions": {
+    "versionChanged": false,
+    "committed": false,
+    "pushed": false,
+    "installed": false
+  },
+  "evidenceSha256": {
+    "before.json": "5f1757a2f7e0641314310ae3020a7a7da60eda02773a0614a775db955231a735",
+    "before.log": "d61864f372aa20abfd4581e32cf59d06536619c23808df23d105990c9c183ae2",
+    "after-new.log": "245958f70167a0a414920bb471d005e41eb6a37b9a4e6fc4a4b6a58267da7747",
+    "application.log": "ffb14f61566aac9746ddb34397c746266d939661ddd21c742b43326beb138208",
+    "browser.json": "024c4e1fe87d6791f8a3b29eb579c4f5c6737cb4936815c4af855ef10697bdda",
+    "cleanup.json": "51f1f0424199727997f7274e9bcf4a7f10b25c13e5bc012c675a37a0a86b9a58",
+    "network.json": "3b7b95d46c23634706bd1899e73cae01947170a0442e37804f263d5137a53344"
+  }
+}

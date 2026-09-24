@@ -1,0 +1,13 @@
+{
+  "node": "v24.19.0",
+  "startedAt": "2026-09-24T09:24:55.985Z",
+  "finishedAt": "2026-09-24T09:24:57.378Z",
+  "sourceFiles": {
+    "web/modules/app-document-layout.js": "6e77358cc5d5613c824f9692c6cfc5faabd6414a52d1f8776148e2dc015ce9c9",
+    "scripts/standardize-docs/layout.mjs": "092de495ca8ebaae65b3ea51e5bfbfce15e1c55c9235bd70a63c1e6dd2b44327",
+    "scripts/lib/export-render.mjs": "55cf439f71ad851653e497654aa33771185fb829c48945b93341083ed87c1475",
+    "scripts/tests/structured-values.test.mjs": "4ff34db914c529e0398fe6cbd5909f0a8ecfea1443737073b6485960ffba7ff9"
+  },
+  "exitCode": 1,
+  "signal": null
+}

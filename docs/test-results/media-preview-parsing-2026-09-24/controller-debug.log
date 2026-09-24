@@ -1,0 +1,32 @@
+trace editor start
+trace client ready
+trace renderer ready
+trace editor harness ready
+trace update start
+trace enter start
+trace source read
+trace source received
+trace enter done
+trace preview start
+trace preview done
+trace preview start
+trace preview done
+
+Interrupted while running:
+
+⚠ scripts/tests/media-preview-parsing.test.mjs (scripts/tests/media-preview-parsing.test.mjs:1:1)
+✖ scripts/tests/media-preview-parsing.test.mjs (4943.03138ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 0
+ℹ cancelled 1
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4949.639273
+
+✖ failing tests:
+
+test at scripts/tests/media-preview-parsing.test.mjs:1:1
+✖ scripts/tests/media-preview-parsing.test.mjs (4943.03138ms)
+  'Promise resolution is still pending but the event loop has already resolved'

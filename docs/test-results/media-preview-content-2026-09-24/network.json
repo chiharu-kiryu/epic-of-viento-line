@@ -1,0 +1,39 @@
+{
+  "revision": 61,
+  "verifiedAt": "2026-09-24T09:18:55.976Z",
+  "sourceFiles": 169,
+  "jsModules": 149,
+  "localImports": 491,
+  "externalImports": 387,
+  "eventBindings": 98,
+  "testDeclarations": 384,
+  "nodeSourceReferences": 181,
+  "workflows": 50,
+  "nodes": 66,
+  "edges": 173,
+  "moduleCycles": [
+    [
+      "web/modules/app-document-layout.js",
+      "web/modules/app-render.js",
+      "web/modules/app-structured.js"
+    ]
+  ],
+  "generatedImportAliases": 2,
+  "inlineScriptsParsed": 1,
+  "embeddedSnapshotMatches": true,
+  "localMarkdownLinks": 555,
+  "workflowDescriptionsChecked": 50,
+  "workflowAnchors": 50,
+  "priorRepairHistoryPreserved": true,
+  "validationNotes": [
+    "Validator updated to check referenced config/JSON/HTML files beyond the selected code inventory.",
+    "Normalized an existing F47 prose paraphrase and preserved all workflow anchors while regenerating descriptions. No additional product change."
+  ],
+  "sha256": {
+    "docs/function-network.json": "4839ac1d86ccd3eb234332b051e9e14d6522d04c047f2518dac763a32f0741bb",
+    "docs/function-network.html": "d03395ac219c264703a9cc13c03d406707ebeacc9e928e8c98e08e1bf01a6e9d",
+    "docs/FUNCTION_NETWORK.md": "5fd6e2b3d0657934a0b24550b8e6155b7cd0007a593a4caa44dacf2955df78b5",
+    "docs/NETWORK_BUGFIX_b.2.8.1.md": "64a3d574ea8273ed927aa386f85624180e5485e4b4eb24734632825881624304",
+    "docs/MEDIA_PREVIEW_CONTENT_BUGFIX_b.4.2.md": "66babf71a9eff9e8374bd0c30ee9a3641fad79f3b25d856992d557addfa9d337"
+  }
+}

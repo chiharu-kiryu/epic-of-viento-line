@@ -1,0 +1,108 @@
+{
+  "date": "2026-09-24",
+  "version": "b.4.2 worktree",
+  "root": "/tmp/viento-test-CnNEap",
+  "baseUrl": "http://127.0.0.1:45737",
+  "sourcePath": "documents/character/预览解析验证.json",
+  "initialSourceSha256": "0d64fdd0fbc20e97f127505842b9fa56583e5ef726e9e2470c3a3ee798e75551",
+  "savedSourceSha256": "61ff3b7aa057e8d0bf142092fbc6458f316c10dd2b99ccccd05cdbfc25854382",
+  "assetSha256": "f7f968eaba779674a3ac9394b554d1ce0b7273fb6ac388e1251f168c924ebc6d",
+  "assetId": "cf2d3c4d-37b3-4cf5-bedb-b74faab3abd9",
+  "steps": [
+    "Open a synthetic JSON document containing s\\u0072c and a legacy local SVG reference; enter edit mode.",
+    "Observe automatic preview and natural image size 64x48.",
+    "Replace the draft with {, observe editable dirty text and the previous loaded image. Server metrics confirm one parser response with HTTP 400.",
+    "Replace with a valid text-only JSON object; the preview becomes hidden.",
+    "Restore escaped media syntax with changed note, observe preview, save and return to reading.",
+    "Reload the page; the saved note and media remain in the accessibility tree. Independently verify source bytes, registry, media hash, index reference and workspace."
+  ],
+  "initialImage": {
+    "complete": true,
+    "naturalWidth": 64,
+    "naturalHeight": 48
+  },
+  "invalidDraft": {
+    "value": "{",
+    "readOnly": false,
+    "imageRetained": true,
+    "naturalWidth": 64,
+    "naturalHeight": 48
+  },
+  "validRemovalHidesPreview": true,
+  "repairRestoresPreview": true,
+  "saveAndPageReloadVerified": true,
+  "bomAndCrlfPreserved": true,
+  "metrics": {
+    "startedAt": "2026-09-24T08:42:53.417Z",
+    "activeRequests": 1,
+    "totalRequests": 14,
+    "errorRequests": 1,
+    "successRequests": 13,
+    "averageResponseMs": 18.59,
+    "statusCodes": {
+      "200": 13,
+      "400": 1
+    },
+    "routes": {
+      "POST /api/rebuild": {
+        "count": 2,
+        "errorCount": 0,
+        "averageResponseMs": 119.89,
+        "lastStatusCode": 200,
+        "lastDurationMs": 118.31,
+        "lastAt": "2026-09-24T08:44:42.931Z"
+      },
+      "GET /api/capabilities": {
+        "count": 2,
+        "errorCount": 0,
+        "averageResponseMs": 0.38,
+        "lastStatusCode": 200,
+        "lastDurationMs": 0.29,
+        "lastAt": "2026-09-24T08:44:55.085Z"
+      },
+      "GET /api/doc": {
+        "count": 3,
+        "errorCount": 0,
+        "averageResponseMs": 1.3,
+        "lastStatusCode": 200,
+        "lastDurationMs": 0.83,
+        "lastAt": "2026-09-24T08:44:55.110Z"
+      },
+      "POST /api/assets/insert": {
+        "count": 5,
+        "errorCount": 1,
+        "averageResponseMs": 2.12,
+        "lastStatusCode": 200,
+        "lastDurationMs": 1.54,
+        "lastAt": "2026-09-24T08:44:43.293Z"
+      },
+      "GET /api/metrics": {
+        "count": 1,
+        "errorCount": 0,
+        "averageResponseMs": 0.57,
+        "lastStatusCode": 200,
+        "lastDurationMs": 0.57,
+        "lastAt": "2026-09-24T08:44:08.097Z"
+      },
+      "POST /api/doc": {
+        "count": 1,
+        "errorCount": 0,
+        "averageResponseMs": 4.66,
+        "lastStatusCode": 200,
+        "lastDurationMs": 4.66,
+        "lastAt": "2026-09-24T08:44:42.807Z"
+      }
+    }
+  },
+  "observations": [
+    "An optional image-dimension locator after page reload timed out although the fresh accessibility tree showed the saved note and image. Initial image decoding was measured successfully; post-reload decoding is not claimed.",
+    "The first independent checksum check used the wrong registry field; the final check correctly reads content.sha256 and passes."
+  ],
+  "limitations": [
+    "Browser smoke covers JSON and SVG; YAML/YML, audio element identity, selection and pause behavior are covered by controller/HTTP tests, not real playback.",
+    "No Tauri native window or external-device test."
+  ],
+  "tabClosed": true,
+  "serverStopped": true,
+  "fixtureRemoved": true
+}

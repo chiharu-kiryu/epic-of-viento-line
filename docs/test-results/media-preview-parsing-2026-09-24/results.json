@@ -1,0 +1,125 @@
+{
+  "date": "2026-09-24",
+  "version": "b.4.2",
+  "gitBase": "03265ba0fbc3dcf8a59ceff9d25b390e3aed4c8b",
+  "scope": "Structured draft preview errors and parser-owned media detection, with actual HTTP editor/save/reload coverage",
+  "workflows": [
+    "F18",
+    "F21",
+    "F29",
+    "F30"
+  ],
+  "bugs": [
+    "N114",
+    "N115"
+  ],
+  "before": {
+    "runtime": "Node v24.19.0",
+    "tests": 11,
+    "passed": 1,
+    "failed": 10,
+    "skipped": 0,
+    "log": "before.log",
+    "files": {
+      "scripts/lib/media-insertion.mjs": "52d1b8119557c2a8907d2a220f842e4c4111d49184f96c4d26f646f6bd53930a",
+      "web/modules/app-media-editor.js": "b9a598bdba32a719c33165b925df8f1fb6efa3f82429fa0dfe54fc17a9087320"
+    },
+    "testFileSha256": "12e3f7d50116e5fe8aeb91337d9471eabd01dc0f668392651dcf925cc92d9261",
+    "sourceState": "All final 11 cases ran before the production fix on both files matching b.4.2 HEAD. DOM identity assertions use boolean comparisons so expected failures do not print cyclic fixture objects."
+  },
+  "newCases": {
+    "runtime": "Node v24.19.0",
+    "tests": 11,
+    "passed": 11,
+    "failed": 0,
+    "skipped": 0,
+    "log": "after-new.log",
+    "exitedNormally": true
+  },
+  "application": {
+    "runtime": "Node v24.19.0",
+    "tests": 517,
+    "passed": 515,
+    "failed": 0,
+    "skipped": 2,
+    "log": "application.log",
+    "javascriptSyntaxFiles": 142,
+    "apiContractPassed": true,
+    "versionValidationPassed": true,
+    "nativeArchiveBinaryConfigured": false,
+    "skipReason": "Native archive interoperability and registry agreement require VIENTO_TEST_ARCHIVE_BINARY; b.4.2 release evidence retained."
+  },
+  "initialAttempts": {
+    "incompleteLogs": [
+      "before-interrupted.log",
+      "before-interrupted-second.log"
+    ],
+    "isolatedDiagnostic": "controller-debug.log",
+    "diagnosticTimeoutSeconds": 5,
+    "usedAsCompletedTestEvidence": false,
+    "observation": "Earlier runs were interrupted while reporting the first controller failure. A diagnostic reached both previews before being stopped at five seconds. Boolean DOM identity assertions replaced direct object comparisons; the final pre-fix and post-fix files then completed normally. No product timeout conclusion is drawn."
+  },
+  "browser": {
+    "record": "browser.json",
+    "escapedPropertyReferenceVerified": true,
+    "invalidDraftRetainsPreview": true,
+    "validRemovalClearsPreview": true,
+    "repairSaveReloadVerified": true,
+    "sourceAssetAndIndexVerified": true,
+    "fixtureRemoved": true,
+    "serverStopped": true,
+    "tabClosed": true
+  },
+  "files": {
+    "scripts/lib/media-insertion.mjs": "641de5186d4f6178f7dac54837271b12d3c5b5e1f6230bf21d8c688d92713f2d",
+    "web/modules/app-media-editor.js": "2cb745f2b43f7949c8989b64b371d262291d4b3da2874035934826d20339c1be",
+    "scripts/tests/media-preview-parsing.test.mjs": "12e3f7d50116e5fe8aeb91337d9471eabd01dc0f668392651dcf925cc92d9261"
+  },
+  "commands": {
+    "before": "/home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test scripts/tests/media-preview-parsing.test.mjs",
+    "newCases": "/home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test scripts/tests/media-preview-parsing.test.mjs",
+    "application": "env -u VIENTO_TEST_ARCHIVE_BINARY /home/chiharukiryu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node scripts/check-project.mjs --app-only"
+  },
+  "evidenceSha256": {
+    "after-new.log": "68e2ac8ba00d118f0a12caece5169e18f49a4654b3c8dbbd59a5fd6ef647527a",
+    "application.log": "76a9a768d00970b4273b59b47253bd402c45974fd9b7d0440abe6e99f62e3ebc",
+    "before-interrupted-second.log": "3b220a4f5560e8157a57025dc0cc46fe7740f5da5fc73def9e7b1514cdb975ae",
+    "before-interrupted.log": "85b516ddf7b89881109bbf97d9566931c399645ac129705c402f8a88d0dcd6bf",
+    "before.log": "977eac85aff848eb643ad2779690bbcbd30b209423be15f2d4927ae0e568102e",
+    "browser.json": "cada67fe228e615ea29f0b19af2d56ad68249e9f6f99029777a3c3e4d734f9d7",
+    "cleanup.json": "9db8f5ae296b9a6a57fc82b271bc20c0dbf62ecddefb3eb8136d183a4449a3c8",
+    "controller-debug.log": "41cf4cd5f59199e208548e821f3cff0830ea3522e9ccf74a1b5ea33d2153e11a",
+    "network.json": "a1234a92c6c9209a9a863a088793fe2db84700e301489166366e711d06d4d88c"
+  },
+  "limitations": [
+    "Audio element identity and pause checks use a DOM fixture; the WAV bytes only test source/registry/HTTP preservation, not decoding or playback.",
+    "Real browser smoke covers JSON and SVG, while YAML/YML are covered by real parser and HTTP integration tests.",
+    "Post-reload image-size inspection timed out; saved content and image were visible in the fresh accessibility tree.",
+    "No Tauri native window or Rust archive rerun."
+  ],
+  "nativeArchiveModuleTestsRerun": false,
+  "fullTauriLibraryTestsRerun": false,
+  "nativeWindowTested": false,
+  "installedApplicationUpdated": false,
+  "realWorkspaceModified": false,
+  "committed": false,
+  "cleanup": {
+    "browserFixtureRemoved": "/tmp/viento-test-CnNEap",
+    "browserServerStopped": 3042762,
+    "interruptedFixtureDirectoriesRemoved": [
+      "/tmp/viento-test-yJEZMR",
+      "/tmp/viento-test-RkBvi5",
+      "/tmp/viento-test-yux003",
+      "/tmp/viento-test-SSZGvZ",
+      "/tmp/viento-test-sBgStu"
+    ]
+  },
+  "functionNetwork": {
+    "revision": 60,
+    "sourceFingerprints": 168,
+    "nodeSources": 181,
+    "localImportStatements": 481,
+    "pageSyntaxAndEmbeddedDataVerified": true,
+    "linksAndModuleGraphVerified": true
+  }
+}
