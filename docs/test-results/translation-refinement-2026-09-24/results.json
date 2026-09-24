@@ -1,0 +1,134 @@
+{
+  "recordedAt": "2026-09-24T12:52:43.953Z",
+  "version": "b.4.3",
+  "buildVersion": "0.4.3",
+  "baseCommit": "38c7f61d072798457c939f0ae0641da1a777a8f5",
+  "scope": "Translation refinement on top of existing uncommitted trilingual support, usability and field editing changes.",
+  "catalogue": {
+    "en": 626,
+    "ja": 626,
+    "addedKeysThisRound": 63
+  },
+  "checks": {
+    "focused-final.log": {
+      "command": [
+        "node",
+        "--test",
+        "scripts/tests/document-model.test.mjs",
+        "scripts/tests/editor-dialogs.test.mjs",
+        "scripts/tests/editor-fields.test.mjs",
+        "scripts/tests/editor-language.test.mjs",
+        "scripts/tests/export-browser.test.mjs",
+        "scripts/tests/i18n-coverage.test.mjs",
+        "scripts/tests/i18n-diagnostics.test.mjs",
+        "scripts/tests/i18n.test.mjs",
+        "scripts/tests/media-recovery.test.mjs",
+        "scripts/tests/project-engine.test.mjs",
+        "scripts/tests/project-snapshot.test.mjs",
+        "scripts/tests/request-lifecycle.test.mjs"
+      ],
+      "exitCode": 0,
+      "tests": 111,
+      "pass": 111,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "application-final.log": {
+      "command": [
+        "node",
+        "scripts/check-project.mjs",
+        "--app-only"
+      ],
+      "exitCode": 0,
+      "tests": 586,
+      "pass": 584,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 2,
+      "syntaxFiles": 158
+    }
+  },
+  "browser": {
+    "isolatedWorkspace": true,
+    "localeSequence": [
+      "zh-CN",
+      "en",
+      "ja",
+      "en",
+      "ja"
+    ],
+    "observations": [
+      "A missing-template warning translates both its wrapper and reason while the authored type label 保存 {0} Ａ stays literal.",
+      "Switching the same-origin settings tab from English to Japanese updates a retained template-preview error, group name My 原文 group, duplicate HP draft and template text without saving them.",
+      "Invalid JSON stays in the source editor with its unsaved draft intact; its field-loading reason switches fully from Japanese to English.",
+      "The empty JSON object shows an object/list-specific field hint in English and Japanese.",
+      "The generated Content heading translates while the authored 内容 heading and 保存 field value remain unchanged.",
+      "Restoring the source draft to its original bytes returns the editor to the saved indicator without a write request."
+    ],
+    "responsive": {
+      "locale": "ja",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "documentWidth": 375,
+      "fieldEditor": {
+        "left": 9,
+        "right": 366,
+        "width": 357,
+        "scrollWidth": 342
+      },
+      "visibleEditingButtonsWithinViewport": true
+    },
+    "runtimeLogs": {
+      "tab8": {
+        "warnings": 0,
+        "errors": 0
+      },
+      "tab9": {
+        "warnings": 0,
+        "errors": 0
+      },
+      "note": "Intentional validation requests returned HTTP 400; neither page exposed warning/error console entries in the captured log view."
+    },
+    "cleanup": {
+      "tabsClosed": true,
+      "viewportReset": true
+    }
+  },
+  "fixtureFiles": {
+    "workspace.json": {
+      "before": "2f72e71f437d421dfcfd1b0bbd19f8a38c51d4a77f9ce4b617d43438177d947a",
+      "after": "2f72e71f437d421dfcfd1b0bbd19f8a38c51d4a77f9ce4b617d43438177d947a",
+      "unchanged": true
+    },
+    "templates/record.md": {
+      "before": "cfee5f7ff9b7b7fff3c0cefd082b1ba86a5b7019db6e5c6cff2aea1088c70023",
+      "after": "cfee5f7ff9b7b7fff3c0cefd082b1ba86a5b7019db6e5c6cff2aea1088c70023",
+      "unchanged": true
+    },
+    "documents/records/card.json": {
+      "before": "ecf40ddfbb74fd22b80616e4671d8c2408b90a84d908d8ca09194ae8a595084a",
+      "after": "ecf40ddfbb74fd22b80616e4671d8c2408b90a84d908d8ca09194ae8a595084a",
+      "unchanged": true
+    },
+    "documents/records/story.md": {
+      "before": "72089a54141219fdc7bf4c14933ab08c1c77153b34518b106a3b865cb8030be3",
+      "after": "72089a54141219fdc7bf4c14933ab08c1c77153b34518b106a3b865cb8030be3",
+      "unchanged": true
+    }
+  },
+  "limitations": [
+    "Native archive tests require VIENTO_TEST_ARCHIVE_BINARY; the two existing native groups were skipped.",
+    "No Tauri rebuild, installation, native-window retest, commit, push or release version change in this round.",
+    "Pre-existing cached layouts require a rebuild to carry the generated-heading marker.",
+    "Unknown parser and system diagnostics remain literal."
+  ],
+  "cleanup": {
+    "temporaryServerStopped": true,
+    "temporaryWorkspaceRemoved": true,
+    "browserTabsClosed": true,
+    "viewportReset": true
+  }
+}

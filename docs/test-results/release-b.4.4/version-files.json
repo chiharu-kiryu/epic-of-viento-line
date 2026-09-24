@@ -1,0 +1,15 @@
+{
+  "version": "b.4.4",
+  "buildVersion": "0.4.4",
+  "nextVersion": "b.4.5",
+  "sha256": {
+    "VERSION": "28ae3159aecc7de982b4532e96bdf359d5284e6a576de04e33f822d06376d58d",
+    "package.json": "01fd215747797917dc6ea31c6b629a739d6c8f65c59d7dd7b28fadfa62e77e8f",
+    "package-lock.json": "4f43446e5e3e2676c3ca014db0fb7b6f565134f1bc680bf00102cafc70d14209",
+    "src-tauri/Cargo.toml": "62c61dbc364db3ec3686ecebb1d21f3c72123fef489215964ef5d9d5d6e5dcd4",
+    "src-tauri/Cargo.lock": "ed08ac88e88128028fc704804dfe9369b5a34e74dfb061aef83f9b2e9f54f26d",
+    "src-tauri/tauri.conf.json": "ce08df221546f571f0368868b65b58d635087a0308b11ed3452e07aade3a9f5c",
+    "web/index.html": "35f6cdb22e3c7db2009107c5f0dfc5ffe9dafb92d89528988aa931df25c3e485",
+    "desktop/ui/index.html": "e7318edc263aef39a1f60a56e481b514dab3ab059313b93d73c97433efdcb599"
+  }
+}

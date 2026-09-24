@@ -10,11 +10,39 @@ import { buildDocumentLayout } from '../standardize-docs/layout.mjs';
 import { legacyDocumentDefaults, planLegacyDocumentModels, validateDocumentModels, attachDocumentHierarchy } from '../lib/document-model.mjs';
 import { registerWorkspace, readRegistry, updateDocumentModels } from '../lib/workspace.mjs';
 import { Element } from './editor-harness.mjs';
+import { applyLanguage, translatePage } from '../../web/i18n/index.js';
+import { renderExport } from '../lib/export-render.mjs';
+import { dialogHarness } from './dialog-harness.mjs';
 
 globalThis.location = { href: 'http://127.0.0.1/web/' };
 globalThis.document = { getElementById: () => null, createElement: (tag) => new Element(tag), createDocumentFragment: () => new Element('fragment') };
 const { renderDocumentLayout } = await import('../../web/modules/app-document-layout.js');
 const { getHeroDisplayDocs, getTabCounts, getDisplayCategory } = await import('../../web/modules/app-helpers.js');
+
+test('generated section headings translate in place and in exports while authored headings and fields stay unchanged', async t => {
+  t.after(() => applyLanguage('zh-CN'));
+  const previous = globalThis.document;
+  globalThis.document = (await dialogHarness('app-services')).document;
+  t.after(() => { globalThis.document = previous; });
+  const content = '# 作品\n\n字段：内容\n\n## 内容\n\n作者写的正文。\n';
+  const layout = buildDocumentLayout(parseSourceContent(content, 'documents/story.md'));
+  const before = JSON.stringify(layout);
+  const cards = renderDocumentLayout({ layout });
+  const generated = cards[0].querySelector('h3'), authored = cards[1].querySelector('h3');
+  assert.equal(generated.dataset.i18n, '内容'); assert.equal(authored.dataset.i18n, undefined);
+  applyLanguage('en');
+  for (const card of cards) translatePage(card);
+  assert.equal(generated.textContent, 'Content'); assert.equal(authored.textContent, '内容');
+  assert.equal(cards[0].querySelector('.document-field-label').textContent, '字段');
+  assert.equal(cards[0].querySelector('.document-value-text').textContent, '内容');
+  for (const format of ['html', 'markdown']) {
+    const rendered = renderExport([{ title: '作品', layout }], format, () => { throw new Error('No media'); }, 'en');
+    assert.match(rendered, /Content/); assert.match(rendered, /内容/); assert.match(rendered, /作者写的正文/);
+  }
+  applyLanguage('ja'); for (const card of cards) translatePage(card);
+  assert.equal(generated.textContent, '内容'); assert.equal(authored.textContent, '内容');
+  assert.equal(JSON.stringify(layout), before);
+});
 
 test('the core parser is independent of paths and game vocabulary; compatibility is explicit', () => {
   const source = '# 角色\n\n技能1：飞行\n描述：离开地面\n灵魂数量：0\n';

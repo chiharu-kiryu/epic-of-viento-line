@@ -1,4 +1,4 @@
-import { t, onLanguageChange, translateMessage } from '../i18n/index.js';
+import { t, getLanguage, onLanguageChange, translateMessage, asUiMessage } from '../i18n/index.js';
 import { API_PATHS } from '../../scripts/lib/doc-api-contract.mjs';
 import { requestExport, checkExport, releaseExport } from './app-doc-service.js';
 
@@ -109,7 +109,7 @@ export function setupExport({ getContext, setBusy }) {
       if (requestController.signal.aborted) message.textContent = t('已取消下载，可以重试。');
       else if (error.status === 410) {
         discard(); message.textContent = t('导出文件已过期，请重新导出');
-      } else message.textContent = t`下载失败：${error.message}`;
+      } else message.textContent = t`下载失败：${asUiMessage(error.message)}`;
     } finally { controller = null; setBusy(false); refresh(); }
   }
   byId('docExportBtn')?.addEventListener('click', () => {
@@ -138,7 +138,7 @@ export function setupExport({ getContext, setBusy }) {
     const requestController = new AbortController(); controller = requestController;
     setBusy(true); refresh(); message.textContent = t('正在整理正文与素材并校验文件…');
     try {
-      const prepared = await requestExport({ kind: kind(), format: format.value, path: context.path, includeChildren: byId('docExportChildren').checked }, requestController.signal);
+      const prepared = await requestExport({ kind: kind(), format: format.value, path: context.path, language: getLanguage(), includeChildren: byId('docExportChildren').checked }, requestController.signal);
       if (requestController.signal.aborted || requestSession !== session || !dialog.open) {
         void releaseExport(prepared.id).catch(() => {}); return;
       }
@@ -147,7 +147,7 @@ export function setupExport({ getContext, setBusy }) {
       if (native) save.hidden = false;
       else download.hidden = false;
     } catch (error) {
-      if (requestSession === session && dialog.open) message.textContent = requestController.signal.aborted ? t('已取消导出，原始内容保留。') : t`导出失败：${error.message}`;
+      if (requestSession === session && dialog.open) message.textContent = requestController.signal.aborted ? t('已取消导出，原始内容保留。') : t`导出失败：${asUiMessage(error.message)}`;
     } finally { controller = null; setBusy(false); refresh(); }
     if (native && job && dialog.open) await saveNative();
   });

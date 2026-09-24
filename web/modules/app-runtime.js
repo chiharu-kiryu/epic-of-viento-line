@@ -1,4 +1,5 @@
-import { t, getLanguage, onLanguageChange, translatePage, translateMessage } from '../i18n/index.js';
+import { t, getLanguage, onLanguageChange, translatePage, translateMessage, asUiMessage } from '../i18n/index.js';
+import { diagnosticMessage } from '../i18n/diagnostics.js';
 import { setupSettings } from '../i18n/settings.js';
 import {
   appState as state,
@@ -38,13 +39,15 @@ import {
   getDisplayCategory,
   toDisplayValue,
 } from './app-helpers.js';
-import { renderHeroBanner, buildCommonCards, getHeroCardsByCategory } from './app-render.js';
+import { renderHeroBanner, refreshHeroBannerLabels, buildCommonCards, getHeroCardsByCategory } from './app-render.js';
 import { renderStructuredBlocks, hasRenderableToken } from './app-structured.js';
 import { getDocTemplate, DOC_TYPE_TEMPLATE_DEFS } from './app-type-templates.js';
 import { createBlockDraft, serializeBlockDraft, serializeSourceDraft } from './app-editor-draft.js';
 import { setupMediaEditor } from './app-media-editor.js';
 import { setupExport } from './app-export.js';
 import { setupProjectSettings } from './app-project-settings.js';
+import { isComposingInput } from './app-keyboard.js';
+import { createFieldEditor } from './app-field-editor.js';
 import { API_ERRORS, API_RESPONSE, getCreatePathError, normalizeDocumentVersion } from '../../scripts/lib/doc-api-contract.mjs';
 import {
   detectEditBackendAvailability,
@@ -53,9 +56,14 @@ import {
   loadTemplateContent,
   rebuildDocIndex,
   writeDoc,
+  loadDocumentFields,
 } from './app-doc-service.js';
 
 let mediaEditorController = null;
+let fieldEditorController = null;
+let fieldDraftSourcePath = '';
+let fieldLoadToken = 0;
+let fieldLoadRequest = null;
 
 const {
   workspaceShellEl,
@@ -90,6 +98,8 @@ const {
   editSourceModeBtnEl,
   editBlockModeBtnEl,
   editBlockEditorEl,
+  editFieldModeBtnEl,
+  editFieldEditorEl,
   createTypeWrapEl,
   createTypeSelectEl,
   createPathWrapEl,
@@ -145,6 +155,7 @@ const DOC_WRITE_ERROR_DOC_NOT_FOUND = API_ERRORS.docNotFound;
 let rebuildProgressTimer = null;
 let rebuildProgressStart = 0;
 let searchDebounceTimer = null;
+let searchIsComposing = false;
 let lastSearchQuery = '';
 let listRenderToken = 0;
 let listRenderFrameId = 0;
@@ -763,6 +774,7 @@ function refreshLanguageUi() {
   }
   const doc = getActiveDoc();
   if (doc) {
+    refreshHeroBannerLabels(doc);
     const detailsOpen = metaEl?.querySelector('.document-file-details')?.open;
     renderMeta(doc);
     const details = metaEl?.querySelector('.document-file-details');
@@ -780,8 +792,9 @@ function refreshLanguageUi() {
     editor.setAttribute('aria-label', label.textContent);
   }
   if (editStatusEl) editStatusEl.textContent = translateMessage(editStatusEl.textContent);
+  fieldEditorController?.refreshLanguage();
   if (state.isCreating && editPathEl) editPathEl.textContent = `${APP_RUNTIME_TEXTS.create.sourcePrefix}${getCreateTypeLabel(state.activeCreateType)}${APP_RUNTIME_TEXTS.create.sourceTypeSuffix}${createPathInputEl.value}`;
-  else if (editPathEl) editPathEl.textContent = doc ? `${APP_RUNTIME_TEXTS.editPath.sourcePrefix}${getSourcePath(doc)}` : APP_RUNTIME_TEXTS.editPath.sourceMissing;
+  else if (editPathEl) editPathEl.textContent = doc ? `${APP_RUNTIME_TEXTS.editPath.sourcePrefix}${canonicalizeSourcePath(getSourcePath(doc))}` : APP_RUNTIME_TEXTS.editPath.sourceMissing;
   refreshEditButtons();
   updateEditUnsavedUi();
   setModeUi();
@@ -1447,7 +1460,7 @@ function isEditorWriteBusy() {
 }
 
 function isEditorBusy() {
-  return isEditorWriteBusy() || state.isLoadingSource || state.isLoadingTemplate;
+  return isEditorWriteBusy() || state.isLoadingSource || state.isLoadingTemplate || state.isLoadingFields;
 }
 
 function invalidateEditorLoads() {
@@ -1455,6 +1468,9 @@ function invalidateEditorLoads() {
   createTemplateToken += 1;
   state.isLoadingSource = false;
   state.isLoadingTemplate = false;
+  fieldLoadToken += 1;
+  fieldLoadRequest?.abort(); fieldLoadRequest = null;
+  state.isLoadingFields = false;
 }
 
 function syncEditorBusyUi() {
@@ -1467,12 +1483,14 @@ function syncEditorBusyUi() {
   }
   if (editEditorEl) editEditorEl.readOnly = busy;
   editBlockEditorEl?.querySelectorAll('textarea').forEach((editor) => { editor.readOnly = busy; });
+  fieldEditorController?.setBusy(busy);
   if (editSaveBtnEl) editSaveBtnEl.disabled = busy || !isInEditSession() || (state.isCreating && !state.isCreatePathValid);
   if (editCancelBtnEl) editCancelBtnEl.disabled = writeBusy;
   if (createPathInputEl) createPathInputEl.disabled = busy;
   if (createTypeSelectEl) createTypeSelectEl.disabled = writeBusy;
   if (editSourceModeBtnEl) editSourceModeBtnEl.disabled = busy;
   if (editBlockModeBtnEl) editBlockModeBtnEl.disabled = busy || !state.isEditing || !canUseBlockEditor(getActiveDoc());
+  if (editFieldModeBtnEl) editFieldModeBtnEl.disabled = busy || !isInEditSession();
   if (busy) {
     if (editBtnEl) editBtnEl.disabled = true;
     if (editCreateBtnEl) editCreateBtnEl.disabled = true;
@@ -1496,10 +1514,11 @@ function syncModeButtons(writeBusy = isEditorWriteBusy()) {
 function mediaDraftContext(preferredInput = null) {
   if (!isInEditSession()) return null;
   const blocks = state.editInputMode === 'blocks' && !state.isCreating;
-  const inputs = blocks ? Array.from(editBlockEditorEl.querySelectorAll('textarea')) : [editEditorEl];
+  const fields = state.editInputMode === 'fields';
+  const inputs = fields ? fieldEditorController?.textInputs() || [] : blocks ? Array.from(editBlockEditorEl.querySelectorAll('textarea')) : [editEditorEl];
   const input = inputs.includes(preferredInput) ? preferredInput : inputs[0];
   if (!input) return null;
-  return { input, start: input.selectionStart ?? input.value.length, end: input.selectionEnd ?? input.value.length,
+  return { input, field: fields, mediaReference: fields && fieldEditorController?.isMediaReference(input), start: input.selectionStart ?? input.value.length, end: input.selectionEnd ?? input.value.length,
     documentType: state.isCreating ? state.activeCreateType : getActiveDoc()?.category,
     content: getCurrentEditContent(), path: state.isCreating ? state.activeCreatePath : getSourcePath(getActiveDoc()).replace(/^docs-standard\//, '') };
 }
@@ -1507,7 +1526,8 @@ function mediaDraftContext(preferredInput = null) {
 function insertMediaText(context, text) {
   context.input.setRangeText(text, context.start, context.end, 'end');
   context.input.focus();
-  resizeBlockEditor(context.input);
+  if (context.field) fieldEditorController?.refreshValues();
+  else resizeBlockEditor(context.input);
 }
 
 function replaceMediaDraftSource(content) {
@@ -1703,6 +1723,7 @@ function setEditSessionClean(content, version = '') {
   editSessionVersion = normalizeEditSessionVersion(version);
   state.activeEditSourceVersion = editSessionVersion;
   state.editHasUnsavedChanges = false;
+  if (state.editInputMode === 'fields') fieldEditorController?.commit();
   updateEditUnsavedUi();
 }
 
@@ -1926,7 +1947,34 @@ function canUserEditDoc(doc) {
 }
 
 function getSearchQuery() {
-  return normalizeDisplayValue(searchInput.value).toLowerCase();
+  return searchIsComposing ? lastSearchQuery : normalizeDisplayValue(searchInput.value).toLowerCase();
+}
+
+function handleSearchInput(event) {
+  updateSearchClearState();
+  if (searchIsComposing || event?.isComposing) return;
+  const query = getSearchQuery();
+  if (query === lastSearchQuery) return;
+  lastSearchQuery = query;
+  clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = setTimeout(() => {
+    renderFilteredDocs('', { skipTabs: true });
+    searchDebounceTimer = null;
+  }, SEARCH_INPUT_DEBOUNCE_MS);
+}
+
+function beginSearchComposition() {
+  searchIsComposing = true;
+  clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = null;
+}
+
+function endSearchComposition() {
+  searchIsComposing = false;
+  // If a pending search was paused, schedule its committed value even when
+  // composition was cancelled and the text did not change.
+  lastSearchQuery = null;
+  handleSearchInput();
 }
 
 function formatElapsedSeconds(startAt) {
@@ -2134,6 +2182,8 @@ async function applyCreateTemplate(type = '') {
   if (!editEditorEl) {
     return false;
   }
+  fieldLoadToken += 1; fieldLoadRequest?.abort(); fieldLoadRequest = null; state.isLoadingFields = false;
+  if (state.editInputMode === 'fields') setEditInputMode('source');
   const normalizedType = normalizeCreateType(type);
   const templatePath = getCreateTemplateContentPath(normalizedType);
   const requestToken = ++createTemplateToken;
@@ -2565,10 +2615,40 @@ function resizeBlockEditors() {
   editBlockEditorEl?.querySelectorAll('.doc-block-editor-text').forEach(resizeBlockEditor);
 }
 
+async function enterFieldEditMode() {
+  if (!isInEditSession() || !isEditModeActive() || isEditorBusy()) return;
+  if (state.isCreating && !updateCreatePathValidation(true).isValid) return;
+  const sourcePath = canonicalizeSourcePath(state.isCreating ? ensureMarkdownLikeExtension(getCreateInputPath()) : getSourcePath(getActiveDoc()));
+  const content = getCurrentEditContent();
+  const documentType = state.isCreating ? state.activeCreateType : getActiveDoc()?.category;
+  const token = ++fieldLoadToken, request = new AbortController();
+  fieldLoadRequest?.abort(); fieldLoadRequest = request;
+  state.isLoadingFields = true; syncEditorBusyUi(); setEditorStatus(t('正在读取字段…'));
+  try {
+    const model = await loadDocumentFields(content, sourcePath, documentType, request.signal);
+    if (token !== fieldLoadToken || !isInEditSession()) return;
+    fieldEditorController ||= createFieldEditor({ document, element: editFieldEditorEl, changed: refreshEditSessionDirtyState, translate: t });
+    fieldEditorController.load(content, model);
+    fieldDraftSourcePath = sourcePath;
+    setEditInputMode('fields', { fieldReady: true });
+    setEditorStatus('');
+  } catch (error) {
+    if (token === fieldLoadToken) {
+      const reason = error.payload?.error ? diagnosticMessage(error.payload.userMessage, error.payload.error) : asUiMessage(error.message);
+      setEditorStatus(t`读取字段失败，草稿已保留：${reason}`);
+    }
+  } finally {
+    if (token === fieldLoadToken) {
+      fieldLoadRequest = null; state.isLoadingFields = false; refreshEditButtons();
+      if (state.editInputMode === 'fields') fieldEditorController?.focus();
+    }
+  }
+}
+
 function setEditInputMode(mode, options = {}) {
   const doc = getCurrentEditableDocForMode(options.doc);
   const previousMode = state.editInputMode || 'source';
-  const nextMode = mode === 'blocks' ? 'blocks' : 'source';
+  const nextMode = ['blocks', 'fields'].includes(mode) ? mode : 'source';
 
   if (!state.isEditing && !state.isCreating) {
     if (editStatusEl) {
@@ -2598,11 +2678,20 @@ function setEditInputMode(mode, options = {}) {
       editBlockModeBtnEl.classList.remove('doc-btn-active');
       editBlockModeBtnEl.disabled = true;
     }
+    editFieldEditorEl?.classList.add('is-hidden');
+    if (editFieldModeBtnEl) { editFieldModeBtnEl.classList.remove('doc-btn-active'); editFieldModeBtnEl.disabled = true; }
+    fieldDraftSourcePath = '';
     return;
   }
 
+  if (previousMode !== nextMode && !options.skipBlockToSourceRestore) {
+    if (previousMode === 'fields') setSourceEditorContent(fieldEditorController.content());
+    else if (previousMode === 'blocks') setSourceEditorContent(buildSourceFromBlockDrafts());
+  }
   const canUseBlock = canUseBlockEditor(doc);
-  if (nextMode === 'blocks' && canUseBlock) {
+  if (nextMode === 'fields' && fieldEditorController && (options.fieldReady || previousMode === 'fields')) {
+    state.editInputMode = 'fields';
+  } else if (nextMode === 'blocks' && canUseBlock) {
     state.editInputMode = 'blocks';
     if (previousMode !== 'blocks' || blockDraftSourcePath !== (doc?.path || '')) {
       state.editBlockDrafts = [];
@@ -2618,8 +2707,10 @@ function setEditInputMode(mode, options = {}) {
   }
 
   const isSourceMode = state.editInputMode === 'source';
+  const isBlockMode = state.editInputMode === 'blocks';
+  const isFieldMode = state.editInputMode === 'fields';
   if (editModeBarEl) {
-    editModeBarEl.classList.toggle('is-hidden', state.isCreating);
+    editModeBarEl.classList.remove('is-hidden');
   }
 
   if (editSourceModeBtnEl) {
@@ -2628,16 +2719,18 @@ function setEditInputMode(mode, options = {}) {
     editSourceModeBtnEl.disabled = false;
   }
   if (editBlockModeBtnEl) {
-    editBlockModeBtnEl.classList.toggle('doc-btn-active', !isSourceMode);
-    editBlockModeBtnEl.setAttribute('aria-pressed', String(!isSourceMode));
+    editBlockModeBtnEl.classList.toggle('doc-btn-active', isBlockMode);
+    editBlockModeBtnEl.setAttribute('aria-pressed', String(isBlockMode));
     editBlockModeBtnEl.disabled = !canUseBlock;
+  }
+  if (editFieldModeBtnEl) {
+    editFieldModeBtnEl.classList.toggle('doc-btn-active', isFieldMode);
+    editFieldModeBtnEl.setAttribute('aria-pressed', String(isFieldMode));
   }
 
   if (isSourceMode) {
     if (doc && editEditorEl) {
-      if (previousMode === 'blocks' && !options.skipBlockToSourceRestore) {
-        setSourceEditorContent(buildSourceFromBlockDrafts());
-      } else if (options.forceSourceRefresh && !state.isCreating) {
+      if (options.forceSourceRefresh && !state.isCreating) {
         fillSourcePreview(doc, getSourcePath(doc));
       }
       editEditorEl.focus();
@@ -2654,8 +2747,9 @@ function setEditInputMode(mode, options = {}) {
     editEditorEl.disabled = !isSourceMode;
   }
   if (editBlockEditorEl) {
-    editBlockEditorEl.classList.toggle('is-hidden', isSourceMode);
+    editBlockEditorEl.classList.toggle('is-hidden', !isBlockMode);
   }
+  editFieldEditorEl?.classList.toggle('is-hidden', !isFieldMode);
 
   refreshEditSessionDirtyState();
   syncEditorBusyUi();
@@ -2663,6 +2757,7 @@ function setEditInputMode(mode, options = {}) {
 }
 
 function getCurrentEditContent() {
+  if (state.editInputMode === 'fields' && fieldEditorController) return fieldEditorController.content();
   if (state.isCreating || state.editInputMode !== 'blocks') {
     return getSourceEditorContent();
   }
@@ -2684,6 +2779,9 @@ function resetDocEditorState() {
   state.editInputMode = 'source';
   state.editBlockDrafts = [];
   blockDraftSourcePath = '';
+  fieldDraftSourcePath = '';
+  fieldEditorController = null;
+  if (editFieldEditorEl) { editFieldEditorEl.classList.add('is-hidden'); editFieldEditorEl.replaceChildren(); }
   state.isCreatePathValid = true;
   state.activeEditPath = '';
   state.activeEditSource = '';
@@ -3371,7 +3469,7 @@ function setEditButtons({ isEditing, isCreating, canEdit }) {
   if (editCancelBtnEl) {
     editCancelBtnEl.hidden = !isCreateMode;
   }
-  editModeBarEl?.classList.toggle('is-hidden', !isEditorVisible || isCreateMode);
+  editModeBarEl?.classList.toggle('is-hidden', !isEditorVisible);
 
   if (editRebuildBtnEl) {
     editRebuildBtnEl.hidden = !canEdit || isEditing || isCreateMode;
@@ -3387,11 +3485,11 @@ function setEditButtons({ isEditing, isCreating, canEdit }) {
   }
 
   if (docEditorWrapEl) {
-    docEditorWrapEl.hidden = !isEditorVisible || state.editInputMode === 'blocks';
+    docEditorWrapEl.hidden = !isEditorVisible || state.editInputMode !== 'source';
   }
 
   if (editEditorEl) {
-    editEditorEl.disabled = !isEditorVisible || state.editInputMode === 'blocks';
+    editEditorEl.disabled = !isEditorVisible || state.editInputMode !== 'source';
   }
 
   if (editCreateBtnEl && isCreateMode) {
@@ -3584,9 +3682,37 @@ async function enterEditMode() {
 }
 
 function handleEditorSaveShortcut(event) {
-  if ((event.ctrlKey || event.metaKey) && ['s', 'enter'].includes(event.key.toLowerCase())) {
+  if (event.defaultPrevented || isComposingInput(event) || event.altKey || !(event.ctrlKey || event.metaKey)
+    || !isEditModeActive() || !isInEditSession()) return;
+  const key = event.key.toLowerCase();
+  if (document.querySelector?.('dialog[open]') || (saveConflictDialogEl && !saveConflictDialogEl.classList.contains('is-hidden'))) {
+    if (key === 's') event.preventDefault();
+    return;
+  }
+  const inEditor = event.target === editEditorEl || editBlockEditorEl?.contains?.(event.target)
+    || (editFieldEditorEl?.contains?.(event.target) && event.target.classList?.contains('doc-field-input'));
+  if (key !== 's' && !(key === 'enter' && inEditor)) return;
+  event.preventDefault();
+  if (!event.repeat) void saveCurrentDoc();
+}
+
+function handleCreatePathKeydown(event) {
+  if (!state.isCreating || event.defaultPrevented || isComposingInput(event) || event.key !== 'Enter') return;
+  event.preventDefault();
+  if (event.repeat) return;
+  updateCreatePathValidation(true);
+  if (state.isCreatePathValid) void saveCurrentDoc();
+}
+
+function handleWindowKeydown(event) {
+  if (event.defaultPrevented || isComposingInput(event)) return;
+  handleEditorSaveShortcut(event);
+  if (event.defaultPrevented || event.repeat || !saveConflictDialogEl || saveConflictDialogEl.classList.contains('is-hidden')) return;
+  if (['1', '2', '3'].includes(event.key)) {
     event.preventDefault();
-    void saveCurrentDoc();
+    resolveSaveConflictAction(event.key);
+  } else if (event.key === 'Escape' && typeof saveConflictResolver === 'function') {
+    resolveSaveConflictAction('cancel');
   }
 }
 
@@ -3596,6 +3722,9 @@ async function saveCurrentDoc() {
   }
   if (!editEditorEl) {
     return;
+  }
+  if (state.editInputMode === 'fields' && !fieldEditorController?.validate()) {
+    setEditorStatus(t('请先修正标记的字段，再保存。')); return;
   }
 
   state.isSaving = true;
@@ -5022,26 +5151,14 @@ async function initApp() {
   setStatusText(LIST_UI_TEXT.status.initializing);
   setListText(LIST_UI_TEXT.status.initializingList);
 
-  searchInput.addEventListener('input', () => {
-    updateSearchClearState();
-    const query = getSearchQuery();
-    if (query === lastSearchQuery) {
-      return;
-    }
-    lastSearchQuery = query;
-
-    if (searchDebounceTimer) {
-      clearTimeout(searchDebounceTimer);
-    }
-    searchDebounceTimer = setTimeout(() => {
-      renderFilteredDocs('', { skipTabs: true });
-      searchDebounceTimer = null;
-    }, SEARCH_INPUT_DEBOUNCE_MS);
-  });
+  searchInput.addEventListener('input', handleSearchInput);
+  searchInput.addEventListener('compositionstart', beginSearchComposition);
+  searchInput.addEventListener('compositionend', endSearchComposition);
 
   if (searchClearEl) {
     searchClearEl.addEventListener('click', () => {
       searchInput.value = '';
+      searchIsComposing = false;
       updateSearchClearState();
       lastSearchQuery = '';
       if (searchDebounceTimer) {
@@ -5115,11 +5232,11 @@ async function initApp() {
 
   if (editSourceModeBtnEl) {
     editSourceModeBtnEl.addEventListener('click', () => {
-      if (!state.isEditing || state.isCreating || !isEditModeActive()) {
+      if (!isInEditSession() || !isEditModeActive() || isEditorBusy()) {
         return;
       }
       const doc = getActiveDoc();
-      if (!doc) {
+      if (!doc && !state.isCreating) {
         return;
       }
       setEditInputMode('source', { doc });
@@ -5128,7 +5245,7 @@ async function initApp() {
 
   if (editBlockModeBtnEl) {
     editBlockModeBtnEl.addEventListener('click', () => {
-      if (!state.isEditing || state.isCreating || !isEditModeActive()) {
+      if (!state.isEditing || state.isCreating || !isEditModeActive() || isEditorBusy()) {
         return;
       }
       const doc = getActiveDoc();
@@ -5139,11 +5256,14 @@ async function initApp() {
     });
   }
 
+  editFieldModeBtnEl?.addEventListener('click', () => { if (state.editInputMode !== 'fields') void enterFieldEditMode(); });
+
   if (createPathInputEl) {
     createPathInputEl.addEventListener('input', () => {
       if (!state.isCreating) {
         return;
       }
+      if (state.editInputMode === 'fields' && canonicalizeSourcePath(ensureMarkdownLikeExtension(getCreateInputPath())) !== fieldDraftSourcePath) setEditInputMode('source');
       updateCreatePathValidation(true);
     });
     createPathInputEl.addEventListener('blur', () => {
@@ -5152,18 +5272,7 @@ async function initApp() {
       }
       updateCreatePathValidation(true);
     });
-    createPathInputEl.addEventListener('keydown', (event) => {
-      if (!state.isCreating) {
-        return;
-      }
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        updateCreatePathValidation(true);
-        if (state.isCreatePathValid) {
-          void saveCurrentDoc();
-        }
-      }
-    });
+    createPathInputEl.addEventListener('keydown', handleCreatePathKeydown);
   }
 
   if (editSaveBtnEl) {
@@ -5194,7 +5303,6 @@ async function initApp() {
       resizeBlockEditor(target);
       refreshEditSessionDirtyState();
     });
-    editBlockEditorEl.addEventListener('keydown', handleEditorSaveShortcut);
   }
 
   if (editCancelBtnEl) {
@@ -5268,10 +5376,6 @@ async function initApp() {
     });
   }
 
-  if (editEditorEl) {
-    editEditorEl.addEventListener('keydown', handleEditorSaveShortcut);
-  }
-
   if (typeof window !== 'undefined') {
     window.addEventListener('resize', resizeBlockEditors);
     window.addEventListener('error', (event) => {
@@ -5283,29 +5387,7 @@ async function initApp() {
       logRuntimeErrorOrMessage(APP_RUNTIME_TEXTS.runtimeContext.unhandledPromise, event?.reason);
     });
 
-    window.addEventListener('keydown', (event) => {
-      if (!saveConflictDialogEl || saveConflictDialogEl.classList.contains('is-hidden')) {
-        return;
-      }
-      if (event.key === '1') {
-        event.preventDefault();
-        resolveSaveConflictAction('1');
-        return;
-      }
-      if (event.key === '2') {
-        event.preventDefault();
-        resolveSaveConflictAction('2');
-        return;
-      }
-      if (event.key === '3') {
-        event.preventDefault();
-        resolveSaveConflictAction('3');
-        return;
-      }
-      if (event.key === 'Escape' && typeof saveConflictResolver === 'function') {
-        resolveSaveConflictAction('cancel');
-      }
-    });
+    window.addEventListener('keydown', handleWindowKeydown);
 
     window.addEventListener('beforeunload', (event) => {
       if (!state.editHasUnsavedChanges && document.getElementById('projectSettingsDialog')?.dataset.dirty !== 'true') {

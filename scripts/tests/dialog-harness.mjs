@@ -1,7 +1,9 @@
 import fs from 'node:fs/promises';
 import vm from 'node:vm';
 import { Element } from './editor-harness.mjs';
-import { t, translateMessage } from '../../web/i18n/index.js';
+import { t, getLanguage, translateMessage, uiMessage, asUiMessage } from '../../web/i18n/index.js';
+import { diagnosticMessage, translateDiagnostic } from '../../web/i18n/diagnostics.js';
+import { isComposingInput } from '../../web/modules/app-keyboard.js';
 
 // Event-capable DOM fixture for the real dialog controllers. It reads their
 // actual markup; layout and rendering remain covered by the native smoke test.
@@ -35,6 +37,7 @@ class DialogElement extends Element {
     else this[name] = ['disabled', 'checked', 'hidden', 'required', 'multiple'].includes(name) ? true : value;
   }
   getAttribute(name) {
+    if (name === 'open') return this.open ? '' : null;
     if (name === 'class') return this.className;
     if (name.startsWith('data-')) return this.dataset[name.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase())] ?? null;
     return super.getAttribute(name);
@@ -112,7 +115,7 @@ export async function dialogHarness(module, overrides = {}) {
   const runtime = vm.createContext({
     document, window, URL, AbortController, DOMException, console,
     location: { href: 'http://127.0.0.1/web/' },
-    t, translateMessage, translatePage() {}, onLanguageChange() {},
+    t, getLanguage, translateMessage, uiMessage, asUiMessage, diagnosticMessage, translateDiagnostic, isComposingInput, translatePage() {}, onLanguageChange() {},
     setTimeout: (callback) => { timers.set(++timerId, callback); return timerId; },
     clearTimeout: (id) => timers.delete(id),
     ...overrides,

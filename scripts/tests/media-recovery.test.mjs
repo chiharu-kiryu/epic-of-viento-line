@@ -15,7 +15,7 @@ const importedAsset = { id: 'abcdefab-1234-5678-90ab-abcdefabcdef', name: '新�
 const existingAsset = { ...importedAsset, id: 'abcdefab-1234-5678-90ab-abcdefabcdea', name: '旧立绘.png', kind: 'image' };
 const first = { name: importedAsset.name, size: importedAsset.size }, second = { name: '损坏.png', size: 10 };
 
-async function mediaPicker({ sourcePath = 'documents/角色.md', content = '# 角色\n\n保留正文。\n', assets = [existingAsset], services = {} } = {}) {
+async function mediaPicker({ sourcePath = 'documents/角色.md', content = '# 角色\n\n保留正文。\n', assets = [existingAsset], services = {}, field = false, mediaReference = false } = {}) {
   const uploads = [], notices = [], preparations = [];
   let busy = false, dirty = false, reads = 0;
   const ui = await dialogHarness('app-media-editor', {
@@ -35,7 +35,7 @@ async function mediaPicker({ sourcePath = 'documents/角色.md', content = '# �
   input.selectionStart = input.selectionEnd = input.value.length; input.focus();
   ui.runtime.setupMediaEditor({
     isEditable: () => true, isBusy: () => busy,
-    getContext: () => ({ input, path: sourcePath, content: input.value, start: input.selectionStart, end: input.selectionEnd, documentType: 'document' }),
+    getContext: () => ({ input, path: sourcePath, content: input.value, start: input.selectionStart, end: input.selectionEnd, documentType: 'document', field, mediaReference }),
     setBusy: value => { busy = value; input.readOnly = value; },
     insertText: (target, text) => target.input.setRangeText(text, target.start, target.end, 'end'),
     replaceSource: content => { input.value = content; },
@@ -49,6 +49,30 @@ async function mediaPicker({ sourcePath = 'documents/角色.md', content = '# �
   return { ...ui, input, original, uploads, notices, preparations, open, upload, choice,
     get busy() { return busy; }, get dirty() { return dirty; }, get reads() { return reads; } };
 }
+
+test('a structured text field inserts markup at its caret without appending root media', async () => {
+  const h = await mediaPicker({ sourcePath: 'documents/角色.json', content: '前文后文', field: true });
+  h.input.selectionStart = h.input.selectionEnd = 2;
+  await h.open(); h.choice(existingAsset.id).click(); await flushDialogs();
+  assert.equal(h.input.value, `前文${mediaMarkup(existingAsset)}后文`);
+  assert.equal(h.dirty, true); assert.equal(h.busy, false); assert.deepEqual(h.preparations, []);
+});
+
+test('a media source field filters compatible assets and replaces its reference only', async () => {
+  const h = await mediaPicker({ sourcePath: 'documents/角色.json', content: 'assets/voice.wav', field: true,
+    mediaReference: 'audio', assets: [existingAsset, importedAsset] });
+  await h.open();
+  assert.equal(h.element('docMediaKind').value, 'audio'); assert.equal(h.element('docMediaKind').disabled, true);
+  assert.equal(h.choice(existingAsset.id), undefined);
+  h.upload([{ name: existingAsset.name, size: existingAsset.size }]); await flushDialogs();
+  assert.match(h.element('docMediaMessage').textContent, /类型一致/);
+  h.upload([first, first]); await flushDialogs();
+  assert.match(h.element('docMediaMessage').textContent, /只能引用一份/);
+  assert.equal(h.uploads.length, 0); assert.equal(h.input.value, h.original); assert.equal(h.dirty, false);
+  h.choice(importedAsset.id).click(); await flushDialogs();
+  assert.equal(h.input.value, `asset:${importedAsset.id}`);
+  assert.equal(h.dirty, true); assert.deepEqual(h.preparations, []); assert.equal(h.busy, false);
+});
 
 function assertRecovered(h, asset = importedAsset) {
   assert.equal(h.busy, false, 'a secondary catalogue read must not keep the editor locked');

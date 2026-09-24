@@ -78,6 +78,7 @@ fn require_closed_editor(app: &AppHandle) -> Result<()> {
             .text(
                 "请先保存并关闭当前编辑窗口，再切换作品库",
                 "Save and close the current editor before switching libraries",
+                "ライブラリを切り替える前に、保存して現在のエディターを閉じてください",
             )
             .into());
     }
@@ -108,7 +109,7 @@ fn notify_language(app: &AppHandle, language: Language) {
         let _ = main.set_title(&format!(
             "Viento Studio {} · {}",
             release_version(),
-            language.text("作品库", "Library")
+            language.text("作品库", "Library", "ライブラリ")
         ));
     }
     let _ = app.emit_to("main", "language-changed", language);
@@ -256,7 +257,7 @@ async fn choose_workspace(app: AppHandle, window: WebviewWindow) -> Result<Optio
         rfd::AsyncFileDialog::new()
             .set_parent(&window)
             .set_directory(directory)
-            .set_title(lang.text("选择作品项目文件夹", "Choose a project folder"))
+            .set_title(lang.text("选择作品项目文件夹", "Choose a project folder", "プロジェクトフォルダーを選択"))
             .pick_folder()
     })
     .await?
@@ -281,10 +282,7 @@ async fn new_workspace(
         rfd::AsyncFileDialog::new()
             .set_parent(&window)
             .set_directory(directory)
-            .set_title(lang.text(
-                "选择新作品库的保存位置",
-                "Choose a location for the new library",
-            ))
+            .set_title(lang.text("选择新作品库的保存位置", "Choose a location for the new library", "新しいライブラリの保存先を選択"))
             .set_can_create_directories(true)
             .pick_folder()
     })
@@ -309,9 +307,9 @@ async fn restore_workspace(app: AppHandle, window: WebviewWindow) -> Result<Opti
         rfd::AsyncFileDialog::new()
             .set_parent(&parent)
             .set_directory(backups)
-            .set_title(lang.text("选择 Viento 迁移包", "Choose a Viento project archive"))
+            .set_title(lang.text("选择 Viento 迁移包", "Choose a Viento project archive", "Viento の移行用アーカイブを選択"))
             .add_filter(
-                lang.text("Viento 迁移包", "Viento project archive"),
+                lang.text("Viento 迁移包", "Viento project archive", "Viento 移行用アーカイブ"),
                 &["zip"],
             )
             .pick_file()
@@ -328,6 +326,7 @@ async fn restore_workspace(app: AppHandle, window: WebviewWindow) -> Result<Opti
             .set_title(lang.text(
                 "选择导入位置（会创建新文件夹）",
                 "Choose import location (creates a new folder)",
+                "読み込み先を選択（新しいフォルダーを作成します）",
             ))
             .set_can_create_directories(true)
             .pick_folder()
@@ -359,10 +358,11 @@ async fn backup_workspace(
             .set_title(lang.text(
                 "导出已保存的正文、模板和素材",
                 "Export saved documents, templates and media",
+                "保存済みの本文、テンプレート、素材を書き出す",
             ))
             .set_file_name(format!("{}-{}.viento.zip", manifest.name, workspace::now()))
             .add_filter(
-                lang.text("Viento 迁移包", "Viento project archive"),
+                lang.text("Viento 迁移包", "Viento project archive", "Viento 移行用アーカイブ"),
                 &["zip"],
             )
             .save_file()
@@ -438,9 +438,9 @@ async fn save_editor_export(
             rfd::AsyncFileDialog::new()
                 .set_parent(&editor)
                 .set_directory(directory)
-                .set_title(lang.text("保存导出文件", "Save exported file"))
+                .set_title(lang.text("保存导出文件", "Save exported file", "書き出したファイルを保存"))
                 .set_file_name(file_name)
-                .add_filter(lang.text("ZIP 文件", "ZIP file"), &["zip"])
+                .add_filter(lang.text("ZIP 文件", "ZIP file", "ZIP ファイル"), &["zip"])
                 .save_file()
         })
         .await?
@@ -559,22 +559,30 @@ fn confirm_close(app: &AppHandle, id: String, recovery: bool) {
     let failure_id = id.clone();
     let lang = language(app);
     let confirm_label = if recovery {
-        lang.text("关闭窗口", "Close window")
+        lang.text("关闭窗口", "Close window", "ウィンドウを閉じる")
     } else {
-        lang.text("关闭并丢弃", "Discard and close")
+        lang.text("关闭并丢弃", "Discard and close", "破棄して閉じる")
     };
     if app.run_on_main_thread(move || {
         let dialog = rfd::AsyncMessageDialog::new()
             .set_parent(&editor)
             .set_description(if recovery {
-                lang.text("无法确认编辑状态。请先取消并复制保存未保存的内容；确认已妥善保存后，再关闭编辑窗口。", "Cannot verify the editor state. Cancel and copy unsaved work somewhere safe, then close the editor when ready.")
+                lang.text(
+                    "无法确认编辑状态。请先取消并复制保存未保存的内容；确认已妥善保存后，再关闭编辑窗口。",
+                    "Cannot verify the editor state. Cancel and copy unsaved work somewhere safe, then close the editor when ready.",
+                    "編集状態を確認できません。キャンセルして未保存の内容を別の場所にコピーし、保存できたことを確認してからエディターを閉じてください。",
+                )
             } else {
-                lang.text("还有未保存的修改。关闭编辑窗口将丢弃这些修改，确定关闭？", "There are unsaved changes. Closing the editor will discard them. Close anyway?")
+                lang.text(
+                    "还有未保存的修改。关闭编辑窗口将丢弃这些修改，确定关闭？",
+                    "There are unsaved changes. Closing the editor will discard them. Close anyway?",
+                    "未保存の変更があります。変更を破棄してエディターを閉じますか？",
+                )
             })
-            .set_title(lang.text("关闭编辑窗口", "Close editor"))
+            .set_title(lang.text("关闭编辑窗口", "Close editor", "エディターを閉じる"))
             .set_buttons(rfd::MessageButtons::OkCancelCustom(
                 confirm_label.into(),
-                lang.text("继续编辑", "Keep editing").into(),
+                lang.text("继续编辑", "Keep editing", "編集を続ける").into(),
             ))
             .show();
         tauri::async_runtime::spawn(async move {
@@ -597,7 +605,8 @@ fn receive_close_state(app: &AppHandle, id: &str, busy: bool, dirty: bool) {
         if let Some(editor) = app.get_webview_window("editor") {
             let message = serde_json::json!(language(app).text(
                 "正在保存、导出或更新预览，请完成后再关闭。",
-                "Saving, exporting or updating the preview. Wait until it finishes before closing."
+                "Saving, exporting or updating the preview. Wait until it finishes before closing.",
+                "保存、書き出し、プレビューの更新が完了してから閉じてください。",
             ));
             let _ = editor.eval(&format!("window.alert({message});"));
         }
@@ -903,7 +912,7 @@ pub fn run() {
                 main.set_title(&format!(
                     "Viento Studio {} · {}",
                     release_version(),
-                    language(app.handle()).text("作品库", "Library")
+                    language(app.handle()).text("作品库", "Library", "ライブラリ")
                 ))?;
             }
             Ok(())

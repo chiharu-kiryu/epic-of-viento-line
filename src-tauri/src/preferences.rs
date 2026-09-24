@@ -9,12 +9,15 @@ pub enum Language {
     Chinese,
     #[serde(rename = "en")]
     English,
+    #[serde(rename = "ja")]
+    Japanese,
 }
 impl Language {
-    pub fn text<'a>(self, chinese: &'a str, english: &'a str) -> &'a str {
+    pub fn text<'a>(self, chinese: &'a str, english: &'a str, japanese: &'a str) -> &'a str {
         match self {
             Self::Chinese => chinese,
             Self::English => english,
+            Self::Japanese => japanese,
         }
     }
 }
@@ -60,6 +63,11 @@ mod tests {
         let saved = read(&file).unwrap();
         assert_eq!(saved.language, Language::English);
         assert_eq!(saved.other["futureOption"]["enabled"], true);
+        save_language(&file, Language::Japanese).unwrap();
+        let saved = read(&file).unwrap();
+        assert_eq!(saved.language, Language::Japanese);
+        assert_eq!(saved.other["futureOption"]["enabled"], true);
+        assert_eq!(serde_json::to_value(saved.language).unwrap(), "ja");
         save_language(&file, Language::Chinese).unwrap();
         assert_eq!(read(&file).unwrap().language, Language::Chinese);
         assert!(serde_json::from_str::<Language>("\"../en\"").is_err());

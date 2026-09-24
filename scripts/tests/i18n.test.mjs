@@ -5,6 +5,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { fixture, write, serve } from './helpers.mjs';
 import english from '../../web/i18n/en.js';
+import japanese from '../../web/i18n/ja.js';
 import { t as tr, applyLanguage, getLanguage, localize, translateMessage, onLanguageChange } from '../../web/i18n/index.js';
 
 test('language changes update retained UI references while preserving authored labels and interpolation values', (t) => {
@@ -26,17 +27,32 @@ test('language changes update retained UI references while preserving authored l
   assert.equal(tr('未登记的项目文本'), '未登记的项目文本');
   applyLanguage('en');
   assert.equal(events, 1);
+  applyLanguage('ja');
+  assert.equal(buttons.save, '保存');
+  assert.equal(messages.categories.builtin, 'シーン');
+  assert.equal(messages.categories.custom, dataLabel);
+  assert.equal(translateMessage(status), `保存先：${filename}`);
+  assert.equal(tr('未登记的项目文本'), '未登记的项目文本');
+  assert.equal(events, 2);
   stop();
   applyLanguage('unsupported');
   assert.equal(getLanguage(), 'zh-CN');
   assert.equal(buttons.save, '保存');
 });
 
-test('English catalogue preserves all message parameters', () => {
+test('English and Japanese catalogues preserve all message parameters', () => {
   const parameters = (text) => [...text.matchAll(/\{\d+\}/g)].map((entry) => entry[0]).sort();
-  for (const [source, translated] of Object.entries(english)) {
+  for (const [source, translated] of [...Object.entries(english), ...Object.entries(japanese)]) {
     assert.ok(translated.trim(), source);
     assert.deepEqual(parameters(translated), parameters(source), source);
+  }
+});
+
+test('unknown messages cannot resolve inherited object properties in either catalogue', (t) => {
+  t.after(() => applyLanguage('zh-CN'));
+  for (const locale of ['en', 'ja']) {
+    applyLanguage(locale);
+    for (const literal of ['__proto__', 'constructor', 'toString', 'hasOwnProperty']) assert.equal(tr(literal), literal);
   }
 });
 
@@ -54,6 +70,8 @@ test('desktop language preferences require the local session and stay outside th
   assert.deepEqual(await (await fetch(`${base}/__desktop/preferences`, { headers })).json(), { language: 'zh-CN' });
   await fs.writeFile(file, JSON.stringify({ language: 'en' }));
   assert.deepEqual(await (await fetch(`${base}/__desktop/preferences`, { headers })).json(), { language: 'en' });
+  await fs.writeFile(file, JSON.stringify({ language: 'ja', futureOption: true }));
+  assert.deepEqual(await (await fetch(`${base}/__desktop/preferences`, { headers })).json(), { language: 'ja' });
   for (const value of ['', null, false, 0, 'unsupported']) {
     const bytes = JSON.stringify({ language: value, futureOption: { enabled: true } });
     await fs.writeFile(file, bytes);
@@ -74,10 +92,13 @@ test('desktop language preferences require the local session and stay outside th
   assert.equal((await post(null)).status, 400);
   assert.equal((await post({ language: 'zh-CN', id: 'not-a-request-id' })).status, 400);
   assert.equal((await post({ language: 'zh-CN', id: randomUUID() })).status, 204);
+  assert.equal((await post({ language: 'ja', id: randomUUID() })).status, 204);
+  assert.equal((await post({ language: 'ja', id: randomUUID() }, { Origin: 'https://example.org' })).status, 403);
+  assert.equal((await post({ language: 'ja-JP', id: randomUUID() })).status, 400);
   // Only the desktop host acknowledges and commits a preference, not the server.
   assert.equal(JSON.parse(await fs.readFile(file, 'utf8')).language, 'en');
   assert.equal((await fetch(`${base}/__desktop/preferences`, { method: 'DELETE', headers })).status, 405);
-  for (const module of ['index.js', 'en.js', 'settings.js', 'settings.css']) {
+  for (const module of ['index.js', 'en.js', 'ja.js', 'languages.js', 'messages.js', 'settings.js', 'settings.css']) {
     const response = await fetch(`${base}/web/i18n/${module}`, { headers });
     assert.equal(response.status, 200, module);
     assert.ok(!(await response.text()).startsWith('<!doctype'), module);

@@ -1,0 +1,28 @@
+✔ an expired browser download is stopped and can be regenerated in the same dialog (18.957917ms)
+✔ browser download TypeError: network unavailable retains the package for retry (9.730716ms)
+✔ browser download Error: temporary server failure retains the package for retry (9.515989ms)
+✔ browser download TimeoutError: check timed out retains the package for retry (7.912691ms)
+✔ cancelling a browser availability check preserves the prepared package and allows retry (8.145101ms)
+✔ a late success check cannot download or alter a closed and reopened dialog (8.384605ms)
+✔ a late expired check cannot download or alter a closed and reopened dialog (7.835916ms)
+✔ closing during a repeated check does not revoke an earlier browser handoff (6.83507ms)
+✔ repeated activation checks once, locks options and translates status without changing the download name (9.275513ms)
+✔ browser check uses one HTTP byte and recovers an unavailable job against doc-site-server.mjs (303.729902ms)
+✔ browser check uses one HTTP byte and recovers an unavailable job against browse-server.mjs (244.300868ms)
+✔ a non-range or malformed probe is rejected without reading a full archive into memory (5.439005ms)
+✔ three segmented document downloads release capacity for a fourth complete export (260.038996ms)
+✔ three segmented workspace downloads release capacity for a fourth complete export (255.720995ms)
+✔ overlapping repeated and out-of-order ranges only free a slot after the final gap is filled (245.597715ms)
+✔ suffix and clamped ranges use their actual returned bounds when completing a download (260.221766ms)
+✔ partial, not-modified, unsatisfiable and HEAD responses do not claim a complete download (271.709222ms)
+✔ completed ranges belong to one export and cannot fill gaps in another export (250.19437ms)
+✔ an interrupted HTTP range does not cover its missing bytes and remains retryable (247.458527ms)
+✔ concurrent ranges can finish out of order while active readers remain protected from eviction (248.306708ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2102.7995

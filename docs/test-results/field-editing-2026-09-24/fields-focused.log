@@ -1,0 +1,39 @@
+✔ fields, blocks and source share a lossless draft; saving twice retains only intended changes and advances the lock (170.8114ms)
+✔ invalid numeric input stays editable, blocks saving and is focused without losing other field changes (92.560528ms)
+✔ a failed or cancelled field load leaves the source draft and can be retried; late replies cannot reopen a closed session (63.793631ms)
+✔ new template fields save through the normal create workflow and remain editable after registration (62.093038ms)
+✔ field keyboard save ignores IME confirmation and sends one correctly versioned write afterwards (32.909451ms)
+✔ field save conflicts retain dirty values and reloading the latest source does not restore stale field spans (56.008068ms)
+✔ grouped JSON rows retain source identities despite a different visual order (46.109198ms)
+✔ field table filters, resets, collapses and switches language without replacing inputs or authored labels (6.857606ms)
+✔ field spans follow the real text parser, preserving duplicates, empty values, prose, code and tables (6.334737ms)
+✔ field extraction respects prose allowlists and legacy multiline boundaries without inventing metadata (1.745477ms)
+✔ compound text attributes expose the same individual values as the reader while retaining signs, units and spacing (0.918459ms)
+✔ JSON field edits preserve escaped keys, precision, duplicate keys, nesting and unrelated bytes (8.423738ms)
+✔ media source fields carry their declared kind without treating unrelated source properties as assets (1.571682ms)
+✔ yaml edits retain comments and untouched scalar syntax; multiline strings cannot swallow following keys (7.968796ms)
+✔ yml edits retain comments and untouched scalar syntax; multiline strings cannot swallow following keys (2.132953ms)
+✔ multiline text edits use document line endings even when the original value was a single line (0.454641ms)
+✔ invalid structured syntax is refused; numeric editing keeps partial values available but invalid (2.052161ms)
+✔ field API parses the current unsaved draft with registered type rules and never writes files or metadata (660.116047ms)
+✔ field API requires the same authorization as other draft-processing endpoints (401.003444ms)
+✔ a structured text field inserts markup at its caret without appending root media (52.587144ms)
+✔ a media source field filters compatible assets and replaces its reference only (26.589781ms)
+✔ a catalogue failure after a partial import preserves a selectable asset and the original error (40.086185ms)
+✔ cancelling the second upload releases the editor even if catalogue refresh would never finish (35.531539ms)
+✔ a failed structured insertion retains its uploaded asset for retry without changing the draft (20.777281ms)
+✔ the stale list requested before importing cannot hide the recovered asset (40.756238ms)
+✔ recovered assets are visible despite old search, type and pagination filters (33.438852ms)
+✔ duplicate import responses refresh a cached missing asset once and retain unrelated missing assets (12.803796ms)
+✔ a failure before any successful import keeps existing filters and offers a normal retry (37.309548ms)
+✔ a partial drop import can recover without having opened or fetched the project media list (30.179952ms)
+✔ md: actual partial upload recovery, reuse, save, reopen and indexing preserve source and media bytes (900.577795ms)
+✔ json: actual partial upload recovery, reuse, save, reopen and indexing preserve source and media bytes (752.520434ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2166.203807

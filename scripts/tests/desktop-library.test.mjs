@@ -2,13 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import vm from 'node:vm';
-import english from '../../web/i18n/en.js';
+import { formatMessage } from '../../web/i18n/messages.js';
+import { supportedLanguages, isSupportedLanguage } from '../../web/i18n/languages.js';
 import { deferred } from './editor-harness.mjs';
 import { dialogHarness, flushDialogs } from './dialog-harness.mjs';
 
 const stripImports = (source) => source.replace(/^import[\s\S]*?from ['"][^'"]+['"];\n/gm, '');
 async function libraryHarness(active = true, handlers = {}) {
-  const h = await dialogHarness('../i18n/settings', { english });
+  const h = await dialogHarness('../i18n/settings', { formatMessage, supportedLanguages, isSupportedLanguage });
   const html = await fs.readFile(new URL('../../desktop/ui/index.html', import.meta.url), 'utf8');
   h.document.body.innerHTML = html.match(/<body\b[^>]*>([\s\S]*?)<script/)[1];
   const catalogue = await fs.readFile(new URL('../../web/i18n/index.js', import.meta.url), 'utf8');
@@ -111,4 +112,22 @@ test('library refreshes cannot unlock settings while a language write is pending
   assert.equal(select.disabled, false);
   assert.equal(h.document.documentElement.lang, 'en');
   assert.equal(h.element('openBtn').disabled, true);
+});
+
+test('library translates suggested names and actions but preserves names already entered', async () => {
+  const h = await libraryHarness(false);
+  h.element('createBtn').click();
+  assert.equal(h.element('workspaceName').value, '我的作品库');
+  h.events.get('language-changed')({ payload: 'ja' });
+  assert.equal(h.element('workspaceName').value, 'マイライブラリ');
+  assert.equal(h.element('createBtn').textContent, 'ライブラリを作成');
+  assert.equal(h.rows()[0][1].textContent, 'バックアップを書き出す');
+  assert.equal(h.document.title, 'Viento Studio test · ライブラリ');
+  assert.equal(h.element('createDialog').open, true);
+  h.element('workspaceName').value = '設定 / My world / 原文';
+  h.element('workspaceName').dispatch('input');
+  h.events.get('language-changed')({ payload: 'en' });
+  h.events.get('language-changed')({ payload: 'zh-CN' });
+  assert.equal(h.element('workspaceName').value, '設定 / My world / 原文');
+  assert.equal(h.calls.some(({ name }) => name === 'new_workspace'), false);
 });

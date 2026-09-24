@@ -1,4 +1,5 @@
 import { t } from '../i18n/index.js';
+import { translateDiagnostic } from '../i18n/diagnostics.js';
 import { API_PATHS, API_REQUEST_KEYS, DOC_CAPABILITIES_FIELDS } from '../../scripts/lib/doc-api-contract.mjs';
 import { fetchJsonApiRequest, fetchTextApiRequest, fetchWithTimeout, makeRequestError, safeParseJsonResponse, withCacheBust } from './app-services.js';
 import { APP_ERROR_MESSAGES, APP_REQUEST_LABELS } from './app-state.js';
@@ -468,7 +469,8 @@ export async function requestProject(action = 'read', payload) {
   const options = action === 'read' ? { cache: 'no-store' } : withAuthHeaders({
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
   });
-  return (await fetchJsonApiRequest(url, options, 120000, t('项目类型与模板'))).payload;
+  const label = t(action === 'read' ? '读取项目配置' : action === 'preview' ? '预览模板' : '保存项目配置');
+  return (await fetchJsonApiRequest(url, options, 120000, label)).payload;
 }
 
 export async function prepareDraftMedia(content, sourcePath, assetIds = [], documentType, signal) {
@@ -476,6 +478,13 @@ export async function prepareDraftMedia(content, sourcePath, assetIds = [], docu
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ content, sourcePath, assetIds, documentType }), signal,
   }), 15000, t('更新素材预览'))).payload;
+}
+
+export async function loadDocumentFields(content, sourcePath, documentType, signal) {
+  return (await fetchJsonApiRequest(API_PATHS.FIELDS, withAuthHeaders({
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content, sourcePath, documentType }), signal,
+  }), 15000, t('读取字段'))).payload;
 }
 
 export function uploadMediaFile(file, { signal, onProgress = () => {} } = {}) {
@@ -491,7 +500,7 @@ export function uploadMediaFile(file, { signal, onProgress = () => {} } = {}) {
       let payload;
       try { payload = JSON.parse(xhr.responseText); } catch { reject(new Error(t('素材服务返回了无效响应。'))); return; }
       if (xhr.status >= 200 && xhr.status < 300 && payload.ok === true) resolve(payload.data);
-      else reject(new Error(t(payload.error || '素材导入失败。')));
+      else reject(new Error(translateDiagnostic(payload.userMessage, payload.error || '素材导入失败。')));
     };
     xhr.onerror = () => reject(new Error(t('素材连接中断，请重试。')));
     xhr.ontimeout = () => reject(new Error(t('素材导入超时，请重试。')));

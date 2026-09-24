@@ -1,0 +1,95 @@
+{
+  "date": "2026-09-24",
+  "version": "b.4.3",
+  "baseCommit": "38c7f61d072798457c939f0ae0641da1a777a8f5",
+  "environment": {
+    "node": "v24.21.0",
+    "os": "linux",
+    "browser": "Codex in-app browser",
+    "isolatedFixture": true
+  },
+  "focused": {
+    "tests": 31,
+    "pass": 31,
+    "fail": 0,
+    "skipped": 0
+  },
+  "application": {
+    "tests": 581,
+    "pass": 579,
+    "fail": 0,
+    "skipped": 2,
+    "syntaxFiles": 155,
+    "apiContract": true,
+    "versionConsistency": true
+  },
+  "browser": {
+    "flows": [
+      "Markdown numeric and boolean fields saved by Ctrl+S; untouched BOM, CRLF, whitespace and story retained byte-for-byte",
+      "Chinese to Japanese switch with unsaved field values; filters and controls retained",
+      "JSON invalid number rejected; corrected value and selected audio reference saved by Ctrl+Enter",
+      "YAML numeric and multiline story edits saved with comments and following key retained",
+      "Reloaded JSON source and fields; existing audio asset reference displayed and reusable",
+      "Audio src picker restricted to audio, duplicate selection kept the document clean",
+      "Japanese to English language switch retained fields and values",
+      "Visual inspection of responsive property table and editable controls"
+    ],
+    "layouts": [
+      {
+        "language": "ja",
+        "width": 375,
+        "height": 812,
+        "documentScrollWidth": 375,
+        "clippedFieldOrEditorButtons": []
+      },
+      {
+        "language": "en",
+        "width": 680,
+        "height": 600,
+        "documentScrollWidth": 680,
+        "clippedFieldOrEditorButtons": []
+      },
+      {
+        "language": "en",
+        "width": 1280,
+        "height": 800,
+        "documentScrollWidth": 1280,
+        "clippedFieldOrEditorButtons": []
+      }
+    ],
+    "consoleWarnings": 0,
+    "consoleErrors": 0
+  },
+  "files": [
+    {
+      "path": "documents/characters/旅人.md",
+      "beforeSha256": "65261327044fc83df45ed54061c2599a01bae22a9b4b85de7258d8e69073748a",
+      "afterSha256": "6fa0dfcf75136c57623ae0ae91bf1e7444c517ae69cf63ce859d8391accfe965",
+      "exactExpectedBytes": true
+    },
+    {
+      "path": "documents/records/设置.json",
+      "beforeSha256": "e38484b60e8b7f2692d885739f1cb1027a8bd0ffd0ee1c372b18058c3c5def23",
+      "afterSha256": "a3bea6f70d9a7ffbb8950bfc6f33910738285540010bf914727ade44a47554c4",
+      "exactExpectedBytes": true
+    },
+    {
+      "path": "documents/records/設定.yaml",
+      "beforeSha256": "d39b9a9442985f3fb0cddf42230db601523ad3ba335165dd6172a7afd8d720d9",
+      "afterSha256": "ce09d50ddd5ee7554d9e629b3cde3362cde2b988d5af984f9a977c4efcf5e7f9",
+      "exactExpectedBytes": true
+    }
+  ],
+  "limits": [
+    "No Tauri build or installed-app replacement this round",
+    "Two native archive test groups skipped without VIENTO_TEST_ARCHIVE_BINARY",
+    "IME and Command shortcuts covered by controller tests, not operating-system input-method interaction",
+    "No Windows or macOS native-window verification"
+  ],
+  "cleanup": {
+    "testTabClosed": true,
+    "viewportRestored": true,
+    "isolatedServerStopped": true,
+    "temporaryFixtureRemoved": true
+  }
+}

@@ -7,6 +7,7 @@ export const API_PATHS = Object.freeze({
   REBUILD: '/api/rebuild',
   ASSETS: '/api/assets',
   MEDIA_INSERT: '/api/assets/insert',
+  FIELDS: '/api/doc/fields',
   EXPORT: '/api/export',
   PROJECT: '/api/project',
   PROJECT_PREVIEW: '/api/project/preview',

@@ -9,9 +9,10 @@ import { parserOptionsForSource } from '../standardize-docs/legacy-profile.mjs';
 import { buildDocumentLayout } from '../standardize-docs/layout.mjs';
 import { writeDocumentAtomically } from './doc-file-store.mjs';
 import { getCreatePathError } from './doc-api-contract.mjs';
+import { userMessage, userMessageText, userError } from './user-message.mjs';
 
 const hash = (content) => createHash('sha256').update(content).digest('hex');
-const fail = (message, statusCode = 400) => Object.assign(new Error(message), { statusCode, errorCode: 'project_configuration' });
+const fail = (message, statusCode = 400) => userError(message, statusCode, 'project_configuration');
 const formats = ['md', 'txt', 'json', 'yaml', 'yml'];
 const formatOf = (file = '') => path.extname(file).slice(1).toLowerCase() || 'txt';
 
@@ -39,7 +40,7 @@ export function previewProjectTemplate(manifest, { type, content, format = 'md' 
   const pathError = getCreatePathError(`${workspacePaths(manifest).documents}/${directory}document.${format}`);
   if (pathError) throw fail(pathError);
   const parsed = parseSourceContent(content, `template.${format}`, { ...type, parserOptions: type.parserOptions || {} });
-  if (parsed.parseError) throw fail(`模板解析失败：${parsed.parseError}`);
+  if (parsed.parseError) throw fail(userMessage`模板解析失败：${parsed.parseError}`);
   return { title: parsed.title, layout: buildDocumentLayout(parsed), parser: parsed.profile };
 }
 
@@ -51,10 +52,12 @@ export async function readProjectConfiguration(root) {
   // the file here can attach a newer revision to an older form during a change.
   const revision = createHash('sha256').update(JSON.stringify(manifest));
   const warnings = [];
+  const warningMessages = [];
   const entries = [];
   for (const type of types) {
     let content = projectDefinition({ ...manifest, documentTypes: [type] }).documentTypes[0].content;
     let problem = '';
+    let problemMessage;
     const format = type.template ? formatOf(type.template) : 'md';
     if (type.template) {
       revision.update(type.template);
@@ -62,18 +65,24 @@ export async function readProjectConfiguration(root) {
         const file = await resolveContainedPath(root, path.join(root, workspacePaths(manifest).templates, type.template));
         if ((await fs.stat(file)).size > 1024 * 1024) throw fail('模板超过 1 MB');
         content = await fs.readFile(file, 'utf8'); revision.update(content);
-      } catch (error) { problem = `${type.label}：${error.code === 'ENOENT' ? '模板文件缺失' : error.message}`; content = ''; revision.update(problem); }
+      } catch (error) {
+        problemMessage = userMessage`类型“${type.label}”的模板不可用：${error.code === 'ENOENT' ? userMessage('模板文件缺失') : error.payload?.userMessage || error.message}`;
+        problem = userMessageText(problemMessage); content = ''; revision.update(problem);
+      }
     }
     if (!problem) try { previewProjectTemplate(manifest, { type, content, format }); }
-    catch (error) { problem = `${type.label}：${error.message}`; }
-    if (problem) warnings.push(problem);
-    entries.push({ type, content, format, problem });
+    catch (error) { problemMessage = userMessage`类型“${type.label}”的模板不可用：${error.payload?.userMessage || error.message}`; problem = userMessageText(problemMessage); }
+    if (problem) { warnings.push(problem); warningMessages.push(problemMessage); }
+    entries.push({ type, content, format, problem, ...(problemMessage ? { problemMessage } : {}) });
   }
   const registered = await readRegistry(root);
   for (const record of registered.documents) {
-    if (!types.some((type) => type.id === record.documentType)) warnings.push(`文档类型未定义：${record.documentType} (${record.sourcePath})`);
+    if (!types.some((type) => type.id === record.documentType)) {
+      const message = userMessage`文档类型未定义：${record.documentType} (${record.sourcePath})`;
+      warnings.push(userMessageText(message)); warningMessages.push(message);
+    }
   }
-  return { workspace: projectDefinition(manifest), revision: revision.digest('hex'), entries, warnings };
+  return { workspace: projectDefinition(manifest), revision: revision.digest('hex'), entries, warnings, warningMessages };
 }
 
 export async function saveProjectTemplate(root, payload = {}) {

@@ -125,6 +125,8 @@ await setupSettings(invoke ? {
 onLanguageChange(() => {
   renderLibrary();
   status.textContent = translateMessage(status.textContent);
+  const name = byId('workspaceName');
+  if (!name.dataset.edited) name.value = t('我的作品库');
 });
 
 if (invoke) {

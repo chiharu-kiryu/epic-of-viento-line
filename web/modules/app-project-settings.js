@@ -1,7 +1,9 @@
 import { t, translatePage, onLanguageChange, translateMessage } from '../i18n/index.js';
+import { diagnosticMessage, translateDiagnostic } from '../i18n/diagnostics.js';
 import { requestProject } from './app-doc-service.js';
 import { renderDocumentLayout } from './app-document-layout.js';
 import { serializeSourceDraft } from './app-editor-draft.js';
+import { isComposingInput } from './app-keyboard.js';
 
 export function setupProjectSettings({ getContext, applied, setBusy }) {
   const dialog = document.createElement('dialog');
@@ -15,7 +17,7 @@ export function setupProjectSettings({ getContext, applied, setBusy }) {
       <div class="project-type-properties"><label><span data-i18n="类型名称"></span><input id="projectTypeLabel" maxlength="120" required></label><label><span data-i18n="类型标识"></span><input id="projectTypeId" pattern="[a-z][a-z0-9_-]{0,63}" maxlength="64" required placeholder="species"></label>
       <label><span data-i18n="默认子目录"></span><input id="projectTypeDirectory" placeholder="species"></label><label><span data-i18n="解析方式"></span><select id="projectTypeProfile"><option value="structured" data-i18n="字段与段落"></option><option value="prose" data-i18n="叙事正文"></option></select></label></div>
       <p data-i18n="类型标识创建后固定。子目录相对于项目正文目录；已有文档的位置和归属保持原样。"></p>
-      <label for="projectTemplateFormat" data-i18n="模板格式"></label><select id="projectTemplateFormat"><option value="md">Markdown</option><option value="txt">Text</option><option value="json">JSON</option><option value="yaml">YAML</option><option value="yml">YML</option></select>
+      <label for="projectTemplateFormat" data-i18n="模板格式"></label><select id="projectTemplateFormat"><option value="md">Markdown</option><option value="txt" data-i18n="纯文本"></option><option value="json">JSON</option><option value="yaml">YAML</option><option value="yml">YML</option></select>
       <label for="projectTemplateContent" data-i18n="模板正文"></label><textarea id="projectTemplateContent" rows="12" spellcheck="false"></textarea>
       <p data-i18n="标题决定默认分区；字段名自由填写。修改模板只影响之后新建的文档。"></p>
       <details><summary data-i18n="字段解析与展示规则"></summary><p data-i18n="规则作用于这个类型的所有文档。每行填写一个字段名，按名称精确匹配。"></p>
@@ -83,7 +85,7 @@ export function setupProjectSettings({ getContext, applied, setBusy }) {
     original = JSON.stringify(payload()); updateActions();
     dialog.querySelector('.project-settings-body').scrollTop = 0;
     el('projectTemplatePreviewPanel').hidden = true;
-    message.textContent = entry?.problem || '';
+    message.textContent = translateDiagnostic(entry?.problemMessage, entry?.problem || '');
   }
   function list() {
     el('projectTypeList').replaceChildren();
@@ -108,7 +110,11 @@ export function setupProjectSettings({ getContext, applied, setBusy }) {
     if (!context.editable || !context.workspace?.configurable) { window.alert(t('请在已登记项目的编辑模式下管理模板。')); return; }
     if (context.dirty || context.creating || context.busy) { window.alert(t('请先保存或结束当前文档草稿，再调整项目模板。')); return; }
     configuration = undefined; selected = ''; returnType = ''; changed = false; updateActions(); dialog.showModal();
-    await run(async () => { configuration = await requestProject(); changed = false; list(); choose(configuration.entries[0]?.type.id || ''); message.textContent = configuration.warnings.join('\n'); });
+    await run(async () => {
+      configuration = await requestProject(); changed = false; list(); choose(configuration.entries[0]?.type.id || '');
+      const warnings = configuration.warnings.map((warning, index) => diagnosticMessage(configuration.warningMessages?.[index], warning));
+      message.textContent = t(warnings.map((_, index) => `{${index}}`).join('\n'), ...warnings);
+    });
   }
   async function close() {
     if (busy || !canDiscard()) return;
@@ -133,8 +139,9 @@ export function setupProjectSettings({ getContext, applied, setBusy }) {
   dialog.addEventListener('cancel', (event) => { event.preventDefault(); if (configuration && !selected) cancelChanges(); else void close(); });
   dialog.addEventListener('keydown', (event) => {
     event.stopPropagation();
+    if (event.defaultPrevented || isComposingInput(event) || event.altKey) return;
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
-      event.preventDefault(); if (!busy && configuration) el('projectTypeForm').requestSubmit();
+      event.preventDefault(); if (!event.repeat && !busy && configuration) el('projectTypeForm').requestSubmit();
     }
   });
   el('projectTypeList').addEventListener('change', () => { if (busy || !configuration) return; if (canDiscard()) choose(el('projectTypeList').value); else el('projectTypeList').value = selected; });
@@ -149,7 +156,7 @@ export function setupProjectSettings({ getContext, applied, setBusy }) {
       const value = payload();
       configuration = await requestProject('save', value); changed = true;
       list(); choose(value.type.id); showPreview(configuration.preview);
-      message.textContent = configuration.indexWarning || t('已保存。新建文档将使用这份模板。');
+      message.textContent = configuration.indexWarning ? translateDiagnostic(configuration.indexWarningMessage, configuration.indexWarning) : t('已保存。新建文档将使用这份模板。');
     });
   });
   onLanguageChange(() => {

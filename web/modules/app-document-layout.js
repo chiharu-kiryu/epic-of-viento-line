@@ -2,6 +2,7 @@ import { renderStructuredBlocks } from './app-structured.js';
 import { isMediaValue } from '../../scripts/lib/media-format.mjs';
 import { renderMedia, renderMediaText } from './app-media-render.js';
 import { splitValueFields } from '../../scripts/lib/document-values.mjs';
+import { t } from '../i18n/index.js';
 
 export function hasDocumentLayout(doc) {
   return doc?.layout?.schemaVersion === 'viento-layout-v1' && Array.isArray(doc.layout.sections);
@@ -65,7 +66,8 @@ export function renderDocumentLayout(doc) {
     card.dataset.sectionId = section.id;
     if (section.anchor) card.id = section.anchor.replace(/^#/, '');
     const title = document.createElement('h3');
-    title.textContent = section.title;
+    if (section.titleKey === '内容') { title.dataset.i18n = '内容'; title.textContent = t('内容'); }
+    else title.textContent = section.title;
     card.appendChild(title);
     let fields = null;
     for (const block of section.blocks || []) {

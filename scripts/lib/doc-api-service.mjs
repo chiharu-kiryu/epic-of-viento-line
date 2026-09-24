@@ -14,6 +14,8 @@ import { clearHeroImageCache } from './image-index.mjs';
 import { listMediaAssets, importMediaAsset } from './media-assets.mjs';
 import { createRegisteredDocument } from './project-documents.mjs';
 import { prepareMediaInsertion } from './media-insertion.mjs';
+import { prepareDocumentFields } from './document-field-draft.mjs';
+import { userMessage, userMessageText } from './user-message.mjs';
 import { createExportService } from './export-service.mjs';
 import {
   makeCapabilitiesPayload,
@@ -329,7 +331,10 @@ function createDocumentService(options = {}) {
       reloadWorkspaceManifest();
       invalidateIndexCache();
       try { await rebuildIndex({ runStandardize: true, runBuild: true }); }
-      catch (error) { result.indexWarning = `配置已保存，索引更新失败，请重新构建：${error.message}`; }
+      catch (error) {
+        result.indexWarningMessage = userMessage`配置已保存，索引更新失败，请重新构建：${error.payload?.userMessage || error.message}`;
+        result.indexWarning = userMessageText(result.indexWarningMessage);
+      }
       return result;
     } finally { state.rebuildInProgress = false; }
   }
@@ -342,6 +347,7 @@ function createDocumentService(options = {}) {
     getMediaAssets: () => listMediaAssets(PROJECT_ROOT),
     importMediaAsset: (request, name) => importMediaAsset(PROJECT_ROOT, request, name),
     prepareMediaInsertion: (payload) => prepareMediaInsertion(PROJECT_ROOT, payload),
+    prepareDocumentFields: (payload) => prepareDocumentFields(PROJECT_ROOT, payload),
     getCapabilities,
     getRuntimeConfig,
     getDocIndex,

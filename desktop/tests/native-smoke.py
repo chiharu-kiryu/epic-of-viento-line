@@ -181,9 +181,9 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
         wait_for(lambda: script('return document.documentElement.lang === arguments[0] && !document.querySelector("#languageSelect").disabled', language))
         preference = test_root / 'config/io.viento.studio/preferences.json'
         assert json.loads(preference.read_text())['language'] == language
-        if language == 'en':
-            assert script('return document.querySelector("#settingsTitle").textContent') == 'Settings'
-            (screenshots / 'desktop-settings-en.png').write_bytes(base64.b64decode(command('GET', '/screenshot')))
+        assert script('return document.querySelector("#settingsTitle").textContent') == {'zh-CN': '设置', 'en': 'Settings', 'ja': '設定'}[language]
+        if language in ['en', 'ja']:
+            (screenshots / f'desktop-settings-{language}.png').write_bytes(base64.b64decode(command('GET', '/screenshot')))
         click('#settingsDialog button[type="submit"]')
         wait_for(lambda: not script('return document.querySelector("#settingsDialog").open'))
 
@@ -213,6 +213,21 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
         (screenshots / 'desktop-export-en.png').write_bytes(base64.b64decode(command('GET', '/screenshot')))
         click('#docExportCloseBtn')
         (screenshots / 'desktop-editor-en.png').write_bytes(base64.b64decode(command('GET', '/screenshot')))
+        switch_language('ja')
+        assert script('return document.querySelector("#modeEditBtn").textContent') == '編集'
+        assert script('return document.querySelector("#docExportBtn").textContent') == '書き出し'
+        click('#docExportBtn')
+        assert script('return document.querySelector("#docExportStartBtn").disabled')
+        assert '未保存の下書き' in script('return document.querySelector("#docExportHint").textContent')
+        (screenshots / 'desktop-export-ja.png').write_bytes(base64.b64decode(command('GET', '/screenshot')))
+        click('#docExportCloseBtn')
+        assert script('''const snapshot=window.languageDraftSnapshot;
+          return snapshot.source === document.querySelector('#docSourceEditor') && snapshot.source.value === snapshot.value
+            && snapshot.path === document.querySelector('#docCreatePathInput').value
+            && snapshot.type === document.querySelector('#docCreateTypeSelect').value
+            && snapshot.blocks.every(({node,value}) => node.isConnected && node.value === value)
+            && snapshot.dirty === document.querySelector('#docEditDirtyIndicator').classList.contains('is-unsaved');''')
+        (screenshots / 'desktop-editor-ja.png').write_bytes(base64.b64decode(command('GET', '/screenshot')))
         after = {str(file.relative_to(workspace)): hashlib.sha256(file.read_bytes()).hexdigest()
                  for file in workspace.rglob('*') if file.is_file() and '.viento' not in file.relative_to(workspace).parts}
         assert before == after, 'Language switching changed project content'
@@ -319,7 +334,7 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
         xdotool = os.environ.get('VIENTO_TEST_XDOTOOL') or shutil.which('xdotool')
         assert xdotool, 'Native close checks require xdotool or VIENTO_TEST_XDOTOOL'
         picker_env = test_display_environment()
-        title = '^(关闭编辑窗口|Close editor)$'
+        title = '^(关闭编辑窗口|Close editor|エディターを閉じる)$'
         def find_dialog():
             result = subprocess.run([xdotool, 'search', '--onlyvisible', '--name', title], env=picker_env, capture_output=True, text=True, timeout=10)
             return result.stdout.splitlines()[-1] if result.returncode == 0 and result.stdout.strip() else None
@@ -342,9 +357,15 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
         xdotool = os.environ.get('VIENTO_TEST_XDOTOOL')
         if not xdotool:
             return
+        localized = bool(os.environ.get('VIENTO_TEST_LANGUAGE'))
+        if localized:
+            switch_language('ja')
+        picker_title = '書き出したファイルを保存' if localized else '保存导出文件'
+        cancelled_message = '保存をキャンセルしました' if localized else '已取消保存'
+        saved_message = '保存先：' if localized else '已保存到 '
         picker_env = test_display_environment()
         def key(*args):
-            window_id = subprocess.check_output([xdotool, 'search', '--onlyvisible', '--name', '保存导出文件'], env=picker_env, timeout=10).decode().splitlines()[-1]
+            window_id = subprocess.check_output([xdotool, 'search', '--onlyvisible', '--name', picker_title], env=picker_env, timeout=10).decode().splitlines()[-1]
             subprocess.run([xdotool, 'windowfocus', '--sync', window_id], env=picker_env, check=True, capture_output=True, timeout=10)
             subprocess.run([xdotool, *args], env=picker_env, check=True, capture_output=True, timeout=10)
 
@@ -357,20 +378,20 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
             click('#docExportStartBtn')
             wait_for(lambda: script('return document.querySelector("#docExportCloseBtn").disabled'))
             # The GTK chooser is a native window, outside the WebDriver surface.
-            wait_for(lambda: subprocess.run([xdotool, 'search', '--onlyvisible', '--name', '保存导出文件'], env=picker_env, capture_output=True).returncode == 0)
+            wait_for(lambda: subprocess.run([xdotool, 'search', '--onlyvisible', '--name', picker_title], env=picker_env, capture_output=True).returncode == 0)
             if kind == 'document':
                 key('key', 'Escape')
-                wait_for(lambda: script('return document.querySelector("#docExportMessage").textContent.includes("已取消保存")'))
+                wait_for(lambda: script('return document.querySelector("#docExportMessage").textContent.includes(arguments[0])', cancelled_message))
                 assert not script('return document.querySelector("#docExportSaveBtn").hidden')
                 click('#docExportSaveBtn')
-                wait_for(lambda: subprocess.run([xdotool, 'search', '--onlyvisible', '--name', '保存导出文件'], env=picker_env, capture_output=True).returncode == 0)
+                wait_for(lambda: subprocess.run([xdotool, 'search', '--onlyvisible', '--name', picker_title], env=picker_env, capture_output=True).returncode == 0)
             output = test_root / output_name
             key('key', 'ctrl+l')
             key('key', 'ctrl+a')
             key('type', '--clearmodifiers', '--delay', '1', str(output))
             key('key', 'Return')
             wait_for(lambda: output.exists())
-            wait_for(lambda: script('return document.querySelector("#docExportMessage").textContent.startsWith("已保存到 ")'))
+            wait_for(lambda: script('return document.querySelector("#docExportMessage").textContent.startsWith(arguments[0])', saved_message))
             with zipfile.ZipFile(output) as archive:
                 assert archive.testzip() is None
                 descriptor = json.loads(archive.read('manifest.json'))
@@ -381,6 +402,11 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
                 if kind == 'document':
                     html = archive.read('index.html').decode()
                     assert '旅人' in html and '<video controls' in html and '<img ' in html and '<audio controls' in html
+                    if localized:
+                        assert '<html lang="ja">' in html and '元の音声をダウンロード' in html and '元の動画をダウンロード' in html
+                        assert 'ZIP ファイル全体を展開' in archive.read('README.txt').decode()
+                    for document in descriptor['documents']:
+                        assert archive.read('sources/' + document['sourcePath']) == (workspace / document['sourcePath']).read_bytes()
                 else:
                     assert descriptor['format'] == 'viento-archive'
                     restored = subprocess.run([generic_tool, 'import', str(output), str(test_root)], capture_output=True, text=True, check=True, timeout=30)
@@ -393,6 +419,9 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
                     shutil.rmtree(restored_root)
             click('#docExportCloseBtn')
         wait_for(lambda: not list((private / 'cache/exports').iterdir()))
+        if localized:
+            switch_language('zh-CN')
+            print('PASS: Japanese native save picker and export instructions; original document bytes retained', flush=True)
         print('PASS: native export dialog → cancel / retry GTK save picker → offline document with media → complete project export → native import with exact source and asset bytes → staging cleanup', flush=True)
 
     try:
@@ -420,8 +449,17 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
             assert script('return document.documentElement.lang') == 'en'
             assert script('return document.querySelector("#settingsBtn").textContent') == 'Settings'
             (screenshots / 'desktop-library-en.png').write_bytes(base64.b64decode(command('GET', '/screenshot')))
+            switch_language('ja')
+            assert script('return document.querySelector("#createBtn").textContent') == 'ライブラリを作成'
+            request('DELETE', f'/session/{session}')
+            session = None
+            session = request('POST', '/session', {'capabilities': {'alwaysMatch': capabilities}})['sessionId']
+            wait_for(lambda: script('return document.querySelectorAll(".workspace").length === 1'))
+            assert script('return document.documentElement.lang') == 'ja'
+            assert script('return document.querySelector("#settingsBtn").textContent') == '設定'
+            (screenshots / 'desktop-library-ja.png').write_bytes(base64.b64decode(command('GET', '/screenshot')))
             switch_language('zh-CN')
-            print('PASS: settings language survives a full native application restart', flush=True)
+            print('PASS: English and Japanese settings survive full native application restarts', flush=True)
         main = command('GET', '/window')
         script('window.libraryReturns=0; window.__TAURI__.event.listen("library-changed", () => window.libraryReturns++).then(() => window.libraryListenerReady=true); return true')
         wait_for(lambda: script('return window.libraryListenerReady === true'))
@@ -751,6 +789,11 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
         return_to_library()
         if os.environ.get('VIENTO_TEST_LANGUAGE'):
             assert script('return document.querySelector("#resumeBtn").textContent') == 'Resume editing'
+            switch_language('ja')
+            command('POST', '/window', dict(handle=editor))
+            wait_for(lambda: script('return document.documentElement.lang === "ja"'))
+            assert script('return document.querySelector("#docSourceEditor").value.includes("未保存草稿保留测试")')
+            command('POST', '/window', dict(handle=main))
             switch_language('zh-CN')
             command('POST', '/window', dict(handle=editor))
             wait_for(lambda: script('return document.documentElement.lang === "zh-CN"'))
@@ -764,7 +807,7 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
         return_to_library()
         wait_for(lambda: script('return !document.querySelector("#closeEditorBtn").disabled'))
         if os.environ.get('VIENTO_TEST_LANGUAGE'):
-            switch_language('en')
+            switch_language('ja')
         click('#closeEditorBtn')
         command('POST', '/window', dict(handle=editor))
         respond_to_close(True)

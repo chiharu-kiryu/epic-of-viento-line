@@ -66,6 +66,21 @@ test('an expired browser download is stopped and can be regenerated in the same 
   h.element('docExportCloseBtn').click(); assert.deepEqual(h.releases, ['prepared'], 'handed-off downloads must stay available to the browser');
 });
 
+test('an export captures the selected language and keeps it when the interface switches during preparation', async t => {
+  const h = await browser(t);
+  applyLanguage('ja');
+  h.element('docExportBtn').click(); h.element('docExportStartBtn').click();
+  assert.equal(h.requests[0].payload.language, 'ja');
+  applyLanguage('en');
+  assert.equal(h.requests[0].payload.language, 'ja');
+  h.requests[0].resolve(prepared); await flushDialogs();
+  h.element('docExportCloseBtn').click();
+  h.element('docExportBtn').click(); h.element('docExportStartBtn').click();
+  assert.equal(h.requests[1].payload.language, 'en');
+  h.requests[1].resolve({ ...prepared, id: 'second' }); await flushDialogs();
+  h.element('docExportCloseBtn').click();
+});
+
 for (const failure of [new TypeError('network unavailable'), Object.assign(new Error('temporary server failure'), { status: 500 }), Object.assign(new Error('check timed out'), { name: 'TimeoutError' })]) {
   test(`browser download ${failure.name}: ${failure.message} retains the package for retry`, async t => {
     const h = await browser(t); await h.prepare(); h.element('docExportDownload').click();
@@ -114,7 +129,10 @@ test('repeated activation checks once, locks options and translates status witho
   assert.equal(h.element('docExportCloseBtn').disabled, false); assert.match(h.element('docExportMessage').textContent, /检查/);
   applyLanguage('en'); assert.match(h.element('docExportMessage').textContent, /Checking/);
   h.checks[0].resolve(); await flushDialogs(); assert.equal(h.handoffs.length, 1);
-  assert.equal(h.handoffs[0].fileName, prepared.fileName); assert.match(h.element('docExportMessage').textContent, /Download started/);
+  assert.equal(h.handoffs[0].fileName, prepared.fileName); assert.match(h.element('docExportMessage').textContent, /Your browser is handling the download/);
+  applyLanguage('ja');
+  assert.match(h.element('docExportMessage').textContent, /ブラウザーでダウンロードを開始/);
+  assert.equal(h.handoffs[0].fileName, prepared.fileName);
   assert.equal(h.element('docExportOptions').disabled, false); assert.equal(h.document.querySelectorAll('a[download]').length, 0);
 });
 

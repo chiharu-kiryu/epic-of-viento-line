@@ -1,3 +1,4 @@
+import { userError } from './user-message.mjs';
 import fs from 'node:fs';
 import { legacyDocumentDefaults } from './document-model.mjs';
 
@@ -12,22 +13,22 @@ export function validateParserDefinition(type) {
   const options = type.parserOptions;
   if (options !== undefined) {
     if (!options || typeof options !== 'object' || Array.isArray(options)
-      || Object.keys(options).some((key) => !['allowedFieldKeys', 'multilineFieldKeys', 'boundaryFieldKeys', 'titleField'].includes(key))) throw new Error('无效的字段解析规则');
+      || Object.keys(options).some((key) => !['allowedFieldKeys', 'multilineFieldKeys', 'boundaryFieldKeys', 'titleField'].includes(key))) throw userError('无效的字段解析规则');
     for (const [key, value] of Object.entries(options)) {
       if (key === 'titleField') {
-        if (typeof value !== 'string' || !value.trim() || value.length > 120) throw new Error('标题字段无效');
+        if (typeof value !== 'string' || !value.trim() || value.length > 120) throw userError('标题字段无效');
       } else if (!Array.isArray(value) || value.length > 200 || new Set(value).size !== value.length
-        || value.some((field) => typeof field !== 'string' || !field.trim() || field.length > 120)) throw new Error('字段解析规则需要不重复的字段名称');
+        || value.some((field) => typeof field !== 'string' || !field.trim() || field.length > 120)) throw userError('字段解析规则需要不重复的字段名称');
     }
   }
   if (type.fieldGroups !== undefined) {
-    if (!Array.isArray(type.fieldGroups) || type.fieldGroups.length > 50) throw new Error('字段分组无效');
+    if (!Array.isArray(type.fieldGroups) || type.fieldGroups.length > 50) throw userError('字段分组无效');
     const fields = new Set();
     for (const group of type.fieldGroups) {
       if (!group || typeof group.title !== 'string' || !group.title.trim() || group.title.length > 120
-        || !Array.isArray(group.fields) || !group.fields.length || group.fields.length > 200) throw new Error('字段分组需要名称和字段');
+        || !Array.isArray(group.fields) || !group.fields.length || group.fields.length > 200) throw userError('字段分组需要名称和字段');
       for (const field of group.fields) {
-        if (typeof field !== 'string' || !field.trim() || field.length > 120 || fields.has(field)) throw new Error('分组字段无效或重复');
+        if (typeof field !== 'string' || !field.trim() || field.length > 120 || fields.has(field)) throw userError('分组字段无效或重复');
         fields.add(field);
       }
     }
@@ -37,7 +38,7 @@ export function validateParserDefinition(type) {
 export function validateProjectTypes(manifest) {
   const types = manifest.documentTypes;
   if (types === undefined) return;
-  if (!Array.isArray(types) || !types.length || types.length > 100) throw new Error('项目文档类型需要包含 1 至 100 个类型');
+  if (!Array.isArray(types) || !types.length || types.length > 100) throw userError('项目文档类型需要包含 1 至 100 个类型');
   const ids = new Set(), directories = new Set();
   const relative = (value) => typeof value === 'string' && value.split('/').every((part) => part && !['.', '..'].includes(part)
     && !/[<>:"\\|?*\x00-\x1f\x7f-\x9f]/.test(part) && !/[. ]$/.test(part)
@@ -47,9 +48,9 @@ export function validateProjectTypes(manifest) {
       || typeof type.label !== 'string' || !type.label.trim() || type.label.length > 120
       || typeof type.directory !== 'string' || (type.directory !== '' && !relative(type.directory))
       || !['structured', 'prose'].includes(type.parserProfile)
-      || (type.template !== undefined && (!relative(type.template) || (!/\.(md|txt|json|ya?ml)$/i.test(type.template) && !(manifest.version === 2 && !type.template.split('/').at(-1).includes('.')))))) throw new Error('项目文档类型、模板或目录配置无效');
+      || (type.template !== undefined && (!relative(type.template) || (!/\.(md|txt|json|ya?ml)$/i.test(type.template) && !(manifest.version === 2 && !type.template.split('/').at(-1).includes('.')))))) throw userError('项目文档类型、模板或目录配置无效');
     const directory = type.directory.normalize('NFC').toLowerCase();
-    if (ids.has(type.id) || directories.has(directory)) throw new Error('项目文档类型或目录重复');
+    if (ids.has(type.id) || directories.has(directory)) throw userError('项目文档类型或目录重复');
     ids.add(type.id); directories.add(directory);
     validateParserDefinition(type);
   }

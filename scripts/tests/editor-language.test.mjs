@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import vm from 'node:vm';
-import english from '../../web/i18n/en.js';
+import { formatMessage } from '../../web/i18n/messages.js';
+import { supportedLanguages, isSupportedLanguage } from '../../web/i18n/languages.js';
 import { deferred, editorHarness } from './editor-harness.mjs';
 import { dialogHarness, flushDialogs } from './dialog-harness.mjs';
 
@@ -11,7 +12,7 @@ const stripImports = (source) => source.replace(/^import[\s\S]*?from ['"][^'"]+[
 
 async function languageHarness(overrides = {}) {
   const writes = [], reads = [], errors = [];
-  const ui = await dialogHarness('../i18n/settings', { english });
+  const ui = await dialogHarness('../i18n/settings', { formatMessage, supportedLanguages, isSupportedLanguage });
   const translations = await fs.readFile(new URL('../../web/i18n/index.js', import.meta.url), 'utf8');
   const i18n = vm.runInContext(`(() => { ${stripImports(translations).replaceAll('export ', '')}\nreturn { t, localize, getLanguage, onLanguageChange, applyLanguage, translatePage, translateMessage, isLanguage, LANGUAGES }; })()`, ui.runtime);
   Object.assign(ui.runtime, i18n);
@@ -46,6 +47,17 @@ async function languageHarness(overrides = {}) {
   return { ...h, ...ui, runtime: h.runtime, source: ui.element('docSourceEditor'), writes, reads, errors, switchLanguage, begin, snapshot, i18n };
 }
 
+test('language: source location keeps the authored path instead of exposing the generated cache prefix', async () => {
+  const h = await languageHarness();
+  h.doc.sourcePath = 'docs-standard/design-data/design-rules/编辑检查.md';
+  for (const language of ['ja', 'en', 'zh-CN']) {
+    h.switchLanguage(language);
+    assert.ok(h.element('docEditPath').textContent.endsWith('design-data/design-rules/编辑检查.md'));
+    assert.ok(!h.element('docEditPath').textContent.includes('docs-standard/'));
+  }
+  assert.deepEqual(h.writes, []);
+});
+
 for (const mode of ['source', 'blocks']) test(`language: ${mode} draft, cursor and original bytes survive settings changes and save`, async () => {
   const h = await languageHarness(); await h.begin();
   if (mode === 'blocks') h.runtime.setEditInputMode('blocks');
@@ -53,7 +65,7 @@ for (const mode of ['source', 'blocks']) test(`language: ${mode} draft, cursor a
   input.value += '未保存的内容'; input.selectionStart = 2; input.selectionEnd = 5; input.scrollTop = 37; input.focus();
   h.runtime.refreshEditSessionDirtyState();
   const content = h.runtime.getCurrentEditContent();
-  for (const language of ['en', 'zh-CN', 'en']) {
+  for (const language of ['en', 'ja', 'zh-CN', 'ja', 'en']) {
     h.switchLanguage(language);
     assert.equal(h.i18n.getLanguage(), language);
     assert.equal(h.element('languageSelect').value, language);
@@ -92,15 +104,15 @@ test('language: switching during an original-source read preserves the pending r
   assert.deepEqual(h.writes, []);
 });
 
-test('language: choosing English in settings updates the editor without changing its draft or selection', async () => {
+for (const [locale, settings, save] of [['en', 'Settings', 'Save changes'], ['ja', '設定', '変更を保存']]) test(`language: choosing ${locale} in settings updates the editor without changing its draft or selection`, async () => {
   const h = await languageHarness(); await h.begin();
   h.source.value += '未保存'; h.source.selectionStart = 3; h.source.selectionEnd = 6;
   h.runtime.refreshEditSessionDirtyState(); const content = h.runtime.getCurrentEditContent();
   h.element('settingsBtn').click();
-  h.element('languageSelect').value = 'en'; h.element('languageSelect').dispatch('change');
+  h.element('languageSelect').value = locale; h.element('languageSelect').dispatch('change');
   await flushDialogs();
-  assert.equal(h.element('settingsTitle').textContent, 'Settings');
-  assert.equal(h.element('docSaveBtn').textContent, 'Save changes');
+  assert.equal(h.element('settingsTitle').textContent, settings);
+  assert.equal(h.element('docSaveBtn').textContent, save);
   assert.equal(h.element('languageSelect').disabled, false);
   assert.equal(h.runtime.getCurrentEditContent(), content);
   assert.deepEqual([h.source.selectionStart, h.source.selectionEnd], [3, 6]);

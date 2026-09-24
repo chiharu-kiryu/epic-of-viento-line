@@ -442,6 +442,23 @@ async function projectHarness(content, apply = async () => {}, save = async () =
   return { ...harness, writes, isBusy: () => busy };
 }
 
+test('IME: template shortcuts leave candidate selection and the unsaved template alone', async () => {
+  const { element, writes } = await projectHarness('# 原始模板\n');
+  element('projectTemplateContent').value = '# まだ入力中\n';
+  element('projectTypeForm').dispatch('input');
+  for (const composition of [{ isComposing: true }, { isComposing: false, keyCode: 229 }]) {
+    const event = element('projectTemplateContent').dispatch('keydown', { key: 's', ctrlKey: true, bubbles: true, ...composition });
+    await flushDialogs();
+    assert.equal(writes.length, 0);
+    assert.ok(!event.defaultPrevented);
+    assert.equal(element('projectSettingsDialog').dataset.dirty, 'true');
+  }
+  element('projectTemplateContent').dispatch('keydown', { key: 's', ctrlKey: true, bubbles: true });
+  await flushDialogs();
+  assert.equal(writes.length, 1);
+  assert.equal(writes[0].content, '# まだ入力中\n');
+});
+
 test('type settings distinguish creation from editing and retain a rejected new draft for retry or cancel', async () => {
   let attempts = 0;
   const { element, writes, isBusy } = await projectHarness('# 角色\n', async () => {}, async () => {

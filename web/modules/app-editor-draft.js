@@ -1,7 +1,7 @@
 const normalizeNewlines = (text) => text.replace(/\r\n|\r/g, '\n');
 
 // Textarea values always use LF. Keep the source's untouched lines byte-exact.
-function serializeSourceDraft(source, value) {
+function serializeSourceDraft(source, value, preferredNewline) {
   const original = source.match(/[^\r\n]*(?:\r\n|\r|\n|$)/g)?.filter(Boolean) || [];
   const edited = normalizeNewlines(value).match(/[^\n]*(?:\n|$)/g)?.filter(Boolean) || [];
   let start = 0;
@@ -9,7 +9,7 @@ function serializeSourceDraft(source, value) {
   let end = 0;
   while (end < original.length - start && end < edited.length - start
     && normalizeNewlines(original[original.length - 1 - end]) === edited[edited.length - 1 - end]) end += 1;
-  const newline = source.match(/\r\n|\r|\n/)?.[0] || '\n';
+  const newline = source.match(/\r\n|\r|\n/)?.[0] || preferredNewline || '\n';
   return original.slice(0, start).join('')
     + edited.slice(start, edited.length - end).join('').replace(/\n/g, newline)
     + original.slice(original.length - end).join('');

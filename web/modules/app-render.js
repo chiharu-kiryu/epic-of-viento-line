@@ -625,7 +625,7 @@ function renderHeroBanner(doc) {
   const fields = doc.fields || {};
   const heroImages = getHeroImagesForDisplay(doc, doc.heroSkills || []);
   const coverImage = heroImages[0] || null;
-  const categoryLabel = CATEGORY_LABELS[category] || '文档';
+  const categoryLabel = CATEGORY_LABELS[category] || t('文档');
   const attr = normalizeValue(fields['主属性'] || doc.meta?.attribute || '');
   const hasAttr = hasRenderableValue('主属性', attr);
   const tagClass = hasAttr
@@ -646,7 +646,6 @@ function renderHeroBanner(doc) {
 
   const image = document.createElement('img');
   image.loading = 'lazy';
-  image.alt = coverImage ? `${title} 图像` : `${title || categoryLabel} 封面占位图`;
   if (!coverImage) image.className = 'hero-cover-placeholder';
   applyImageFallbackChain(image, [coverImage, getHeroFallbackPath(doc)], title || categoryLabel);
   if (coverImage) {
@@ -664,8 +663,7 @@ function renderHeroBanner(doc) {
   chips.className = 'chips';
 
   const categoryTag = document.createElement('span');
-  categoryTag.className = 'hero-tag';
-  categoryTag.textContent = `分类：${categoryLabel}`;
+  categoryTag.className = 'hero-tag hero-category';
   chips.appendChild(categoryTag);
 
   const groupTag = document.createElement('span');
@@ -701,6 +699,16 @@ function renderHeroBanner(doc) {
   banner.appendChild(cover);
   banner.appendChild(info);
   bannerEl.appendChild(banner);
+  refreshHeroBannerLabels(doc);
+}
+
+function refreshHeroBannerLabels(doc) {
+  const categoryLabel = CATEGORY_LABELS[getDisplayCategory(doc)] || t('文档');
+  const title = doc.meta?.title || doc.meta?.hero || doc.title || doc.name || doc.path || categoryLabel;
+  const image = bannerEl.querySelector('img');
+  if (image) image.alt = image.classList.contains('hero-cover-placeholder') ? t`《${title}》的封面占位图` : t`《${title}》的图像`;
+  const category = bannerEl.querySelector('.hero-category');
+  if (category) category.textContent = t`分类：${categoryLabel}`;
 }
 
 function buildCommonCards(doc) {
@@ -1051,6 +1059,7 @@ export {
   readOrderedPairs,
   collectRemainingPairs,
   renderHeroBanner,
+  refreshHeroBannerLabels,
   buildCommonCards,
   renderHeroTemplate,
   renderItemTemplate,

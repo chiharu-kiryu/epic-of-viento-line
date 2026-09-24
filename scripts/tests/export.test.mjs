@@ -123,6 +123,46 @@ test('JSON and YAML typed fields export using the generic layout and media bindi
   }
 });
 
+test('concurrent Chinese, English and Japanese exports localize instructions while preserving authored bytes', async (t) => {
+  const { root, documents, owner, audio } = await project(t);
+  owner.assetBindings.push({ assetId: audio.id, role: 'theme' });
+  await writeJson(path.join(root, 'metadata/documents', `${owner.id}.json`), owner);
+  const expected = {
+    'zh-CN': { toc: '文档导航', media: '关联素材', audio: '下载原音频', video: '下载原视频', readme: '请先解压整个 ZIP 文件', markdown: '音频：主题曲' },
+    en: { toc: 'Table of contents', media: 'Linked media', audio: 'Download original audio', video: 'Download original video', readme: 'Extract the entire ZIP archive', markdown: 'Audio: 主题曲' },
+    ja: { toc: '目次', media: '関連素材', audio: '元の音声をダウンロード', video: '元の動画をダウンロード', readme: 'ZIP ファイル全体を展開', markdown: '音声：主题曲' },
+  };
+  await Promise.all(Object.entries(expected).flatMap(([language, labels]) => ['html', 'markdown'].map(async (format) => {
+    const plan = await planExport(root, { kind: 'document', format, path: `${documents}/角色.md`, language });
+    const output = path.join(root, `${language}-${format}.zip`);
+    await writeExportZip(plan, output);
+    const { files, manifest } = unzip(await fs.readFile(output));
+    const body = files.get(format === 'html' ? 'index.html' : 'document.md').toString();
+    assert.ok(body.includes(labels.media));
+    assert.ok(body.includes('星裔的背景')); assert.ok(body.includes('原有大纲与故事内容。'));
+    assert.ok(body.includes('自定义数值')); assert.ok(body.includes('灵魂'));
+    assert.ok(files.get('README.txt').toString().includes(labels.readme));
+    assert.ok(plan.fileName.startsWith('星裔-'));
+    if (format === 'html') {
+      assert.ok(body.includes(`<html lang="${language}">`));
+      assert.ok(body.includes(`aria-label="${labels.toc}"`));
+      assert.ok(body.includes(labels.audio)); assert.ok(body.includes(labels.video));
+      assert.doesNotMatch(body, /<script>|autoplay/);
+    } else assert.ok(body.includes(labels.markdown));
+    for (const { sourcePath } of manifest.documents) assert.deepEqual(files.get(`sources/${sourcePath}`), await fs.readFile(path.join(root, sourcePath)));
+    for (const asset of manifest.assets) assert.deepEqual(files.get(asset.path), await fs.readFile(path.join(root, '外置素材', asset.originalPath.slice('assets/'.length))));
+    for (const [name, bytes] of files) if (name.startsWith('metadata/')) assert.deepEqual(bytes, await fs.readFile(path.join(root, name)));
+  })));
+  for (const language of Object.keys(expected)) {
+    const plan = await planExport(root, { kind: 'workspace', language });
+    assert.ok(!plan.entries.some(({ path: name }) => /preferences|README\.txt/.test(name)));
+    assert.deepEqual(plan.archiveManifest.workspace, JSON.parse(await fs.readFile(path.join(root, 'workspace.json'))));
+  }
+  for (const language of ['ja-JP', 'fr', '__proto__', null, { id: 'ja' }]) {
+    await assert.rejects(planExport(root, { kind: 'document', format: 'html', path: `${documents}/角色.md`, language }), { statusCode: 400 });
+  }
+});
+
 test('explicit audio bindings export a player even when the source does not embed the audio', async (t) => {
   const { root, documents, owner, audio } = await project(t);
   owner.assetBindings.push({ assetId: audio.id, role: 'theme' });
@@ -404,16 +444,20 @@ test('HTTP export supports edit and browse modes, authenticated creation, binary
   const { root, documents } = await project(t);
   for (const script of ['doc-site-server.mjs', 'browse-server.mjs']) {
     const base = await serve(t, root, {}, script);
-    const created = await request(base, '/api/export', { kind: 'document', format: 'html', path: `${documents}/角色.md` });
+    const created = await request(base, '/api/export', { kind: 'document', format: 'html', path: `${documents}/角色.md`, language: 'ja' });
     assert.equal(created.status, 200, JSON.stringify(created.payload));
     const response = await fetch(`${base}/api/export?id=${created.data.id}`);
     assert.equal(response.status, 200);
     assert.match(response.headers.get('content-disposition'), /filename\*=UTF-8''/);
     assert.equal(response.headers.get('cache-control'), 'no-store');
-    assert.equal(unzip(Buffer.from(await response.arrayBuffer())).manifest.documents.length, 2);
+    const downloaded = unzip(Buffer.from(await response.arrayBuffer()));
+    assert.equal(downloaded.manifest.documents.length, 2);
+    assert.match(downloaded.files.get('index.html').toString(), /<html lang="ja">/);
+    assert.match(downloaded.files.get('README.txt').toString(), /展開/);
     assert.equal((await request(base, '/api/export', { action: 'release', id: created.data.id })).status, 200);
     assert.equal((await fetch(`${base}/api/export?id=${created.data.id}`)).status, 410);
     assert.equal((await request(base, '/api/export', { kind: 'document', format: 'pdf', path: `${documents}/角色.md` })).status, 400);
+    assert.equal((await request(base, '/api/export', { kind: 'workspace', language: 'fr' })).status, 400);
   }
   const protectedBase = await serve(t, root, { DOC_API_REQUIRE_WRITE_AUTH: '1', DOC_API_TOKEN: 'export-test-token' });
   assert.equal((await request(protectedBase, '/api/export', { kind: 'workspace' })).status, 401);

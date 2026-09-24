@@ -1,0 +1,118 @@
+{
+  "recordedAt": "2026-09-24T13:04:08.466Z",
+  "version": "b.4.4",
+  "buildVersion": "0.4.4",
+  "nextVersion": "b.4.5",
+  "baseCommit": "38c7f61d072798457c939f0ae0641da1a777a8f5",
+  "application": {
+    "tests": 634,
+    "pass": 634,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "syntaxFiles": 158,
+    "runtime": "v24.20.0",
+    "nativeArchiveEnabled": true,
+    "command": "VIENTO_TEST_ARCHIVE_BINARY=<temporary full-Tauri example binary> src-tauri/binaries/viento-node-x86_64-unknown-linux-gnu scripts/check-project.mjs --app-only",
+    "exitCode": 0,
+    "log": "application.log"
+  },
+  "native": {
+    "passed": 28,
+    "failed": 0,
+    "ignored": 1,
+    "groups": {
+      "library": {
+        "passed": 22,
+        "failed": 0,
+        "ignored": 1
+      },
+      "mediaRuntime": {
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0
+      },
+      "optimizedGlibRegression": {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0
+      }
+    },
+    "ignoredReason": "Full-size workspace migration requires VIENTO_TEST_SOURCE_ROOT; no daily workspace used.",
+    "command": "npm run desktop:test -- --locked --offline",
+    "buildSettings": {
+      "jobs": 4,
+      "devDebug": 0,
+      "testDebug": 0,
+      "incremental": false,
+      "isolatedTarget": true
+    },
+    "exitCode": 0,
+    "log": "native-tests.log",
+    "archiveBuild": {
+      "command": "cargo build --manifest-path src-tauri/Cargo.toml --example workspace-archive --locked --offline",
+      "exitCode": 0,
+      "log": "archive-build.log"
+    }
+  },
+  "resources": {
+    "command": "npm run desktop:prepare",
+    "exitCode": 0,
+    "files": 115,
+    "languageCopiesMatch": true,
+    "noAuthoredData": true,
+    "noDevelopmentOnlyAcorn": true,
+    "log": "prepare.log",
+    "proof": "resources.json"
+  },
+  "dependencies": {
+    "cargoLockedOffline": true,
+    "packages": 504,
+    "applicationVersion": "0.4.4",
+    "glib": [
+      {
+        "name": "glib",
+        "version": "0.18.5",
+        "source": null
+      }
+    ],
+    "npmVersions": {
+      "yaml": "2.9.0",
+      "yazl": "3.3.1",
+      "tauriCLI": "2.11.4",
+      "acorn": "8.18.0"
+    }
+  },
+  "catalogues": {
+    "en": 626,
+    "ja": 626
+  },
+  "developmentReports": [
+    "docs/TRILINGUAL_SUPPORT_b.4.3.md",
+    "docs/USABILITY_INPUT_b.4.3.md",
+    "docs/FIELD_EDITING_b.4.3.md",
+    "docs/TRANSLATION_REFINEMENT_b.4.3.md"
+  ],
+  "nativeContinuity": "native-continuity.json",
+  "limits": [
+    "No new native-window or browser interaction run during this release; see development reports for their exact scope.",
+    "No Windows/macOS validation or distributable installer build.",
+    "Installed application, authored works, media and backups were not modified.",
+    "Function network remains the historical b.4.3 snapshot; added field and translation paths are documented separately."
+  ],
+  "cleanup": {
+    "completed": true,
+    "scratchRemoved": true,
+    "scratchBytesRemoved": 2234326711,
+    "activeOwnedProcesses": 0,
+    "generatedDirectoriesRemoved": [
+      "src-tauri/binaries",
+      "src-tauri/gen/schemas",
+      "desktop/resources",
+      "desktop/.cache",
+      "desktop/ui/i18n"
+    ],
+    "dailyWorkspaceAndInstalledAppUntouched": true
+  },
+  "sourceFilesVerified": 349
+}

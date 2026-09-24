@@ -292,7 +292,7 @@ function isMutatingWriteRequest(pathname, method = '') {
   if (pathname === API_PATHS.EXPORT && method === API_METHODS.POST) return true;
   return pathname === API_PATHS.DOC && WRITE_METHODS.has(method)
     || pathname === API_PATHS.REBUILD && REBUILD_METHODS.has(method)
-    || [API_PATHS.ASSETS, API_PATHS.MEDIA_INSERT, API_PATHS.PROJECT, API_PATHS.PROJECT_PREVIEW].includes(pathname) && method === API_METHODS.POST;
+    || [API_PATHS.ASSETS, API_PATHS.MEDIA_INSERT, API_PATHS.FIELDS, API_PATHS.PROJECT, API_PATHS.PROJECT_PREVIEW].includes(pathname) && method === API_METHODS.POST;
 }
 
 function methodNotAllowed(response, allow = 'GET', requestId = '') {
@@ -377,6 +377,14 @@ async function handleExport(response, request, requestUrl, service, requestId = 
 async function handleMediaInsertion(response, request, service, requestId = '') {
   try {
     const data = await service.prepareMediaInsertion(await readRequestJsonBody(request));
+    sendApiResponse(response, data, requestId);
+    return 200;
+  } catch (error) { return mapServiceErrorToHttp(error, response, requestId); }
+}
+
+async function handleDocumentFields(response, request, service, requestId = '') {
+  try {
+    const data = await service.prepareDocumentFields(await readRequestJsonBody(request));
     sendApiResponse(response, data, requestId);
     return 200;
   } catch (error) { return mapServiceErrorToHttp(error, response, requestId); }
@@ -511,6 +519,9 @@ async function handleApiRequest({
     },
     [API_PATHS.MEDIA_INSERT]: {
       [API_METHODS.POST]: () => handleMediaInsertion(response, request, service, requestId),
+    },
+    [API_PATHS.FIELDS]: {
+      [API_METHODS.POST]: () => handleDocumentFields(response, request, service, requestId),
     },
     [API_PATHS.ASSETS]: {
       [API_METHODS.GET]: () => handleApiAssets(response, request, requestUrl, service, requestId),

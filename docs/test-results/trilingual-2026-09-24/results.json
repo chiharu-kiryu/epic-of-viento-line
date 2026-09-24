@@ -1,0 +1,95 @@
+{
+  "createdAt": "2026-09-24T11:08:27.159449+00:00",
+  "baseCommit": "38c7f61d072798457c939f0ae0641da1a777a8f5",
+  "version": "b.4.3",
+  "languageIds": [
+    "zh-CN",
+    "en",
+    "ja"
+  ],
+  "catalogueEntries": {
+    "en": 531,
+    "ja": 531
+  },
+  "application": {
+    "passed": 595,
+    "failed": 0,
+    "skipped": 0,
+    "nativeArchiveEnabled": true,
+    "log": "application-final.log"
+  },
+  "rustLibrary": {
+    "passed": 22,
+    "failed": 0,
+    "ignored": 1,
+    "ignoredReason": "Requires a real full-size workspace input",
+    "log": "native-tests-final.log"
+  },
+  "nativeWorkflows": {
+    "legacy": {
+      "passed": true,
+      "log": "native-legacy-final.log"
+    },
+    "generic": {
+      "passed": true,
+      "log": "native-generic-final.log"
+    }
+  },
+  "visualInspection": [
+    "library-ja.png",
+    "settings-ja.png",
+    "editor-ja.png",
+    "close-ja.png",
+    "export-ja.png"
+  ],
+  "initialFailures": [
+    {
+      "log": "application.log",
+      "case": "outdated English download message assertion",
+      "resolution": "Updated assertion to reflect new copy; final full suite passed"
+    },
+    {
+      "log": "application.log",
+      "case": "download quota test returned 409 once after a completed retry",
+      "resolution": "Not reproduced by targeted 20-test rerun or final full suite; download implementation unchanged",
+      "recheck": "export-recheck.log"
+    },
+    {
+      "log": "translation-export-tests.log",
+      "case": "export table of contents used sidebar terminology",
+      "resolution": "Added an independent table-of-contents message; final concurrent export tests passed"
+    }
+  ],
+  "unchanged": [
+    "project data",
+    "installed application",
+    "version",
+    "Git commits and remote"
+  ],
+  "scope": "Linux debug build, isolated works and display; Windows/macOS and release installers not tested",
+  "cleanup": {
+    "completed": true,
+    "ownedScratchRemoved": true,
+    "bytesRemoved": 2445660424,
+    "activeOwnedProcesses": 0,
+    "dailyWorkspaceAndInstalledAppUntouched": true
+  },
+  "evidenceSha256": {
+    "application-final.log": "cc4b4e266697cdc844efaf421afe3c694405063bd8be3459279d8c2479885f69",
+    "application.log": "e1c9715ae2a8e1f77797624fbf2fe4a97a0d5f4e14a8e722bbbad9d873de0875",
+    "archive-build.log": "f74df736b45f6ba8d2e21c822aa3cece7b2e404cf43e5ba91ca3c404d1437d53",
+    "build-final.log": "00632b3aabf0f2f9979fdcd0cfec9bd060b0f7e6644b033f446136fa214bdf1e",
+    "build-proof.json": "5c27814982cf5882f38b9c3155a526da85c702007f19963a8c83a621184ba4e9",
+    "close-ja.png": "1a9c4ccefa041a60af9a488b6791c6102ea27b4dd93aba4473ac56b7bf49cb46",
+    "editor-ja.png": "4474e2206a9e03d251a0e04678b7060724658c779dea43ff67ca17cb02b4750c",
+    "export-ja.png": "a37928c4c1d7ad9d0cd176ae5c04b8de8f7b22c099fe18c996abfdf4440a1e73",
+    "export-recheck.log": "9637961a61311e1d3a20f1e20584f21e7cb2da7ace84162f22a16dc0ca127eb0",
+    "library-ja.png": "74ada01b9aea1e6970186f58132b5b54ad711dae87ca3c5125aa7a803dc9a276",
+    "native-generic-final.log": "70f412e29b3f1bebb3127693c41803155eaa27c58fa6672b69dd0d5df85c0db6",
+    "native-legacy-final.log": "3ac7d2792743e30bbd451f5c20168be3761aca8a4b603d24b6283c784b84ead4",
+    "native-tests-final.log": "a6f82682c8c6faa4a97208e11c3150a68e69e66759d50b31893b9a7eb90c8e2e",
+    "settings-ja.png": "64a075a7ea13df0f9c7fc66c86d8653bb7117f3bb5916a00c9521516b8b22515",
+    "translation-export-tests-final.log": "6ce5f37a5f75b8448a1f80a058a81fff148a1e7901540acc18161caf55b478be",
+    "translation-export-tests.log": "2bb1f1b266487697324daf73cde27db682a2bf78ae29f33e43da40eb4d1e2b4f"
+  }
+}

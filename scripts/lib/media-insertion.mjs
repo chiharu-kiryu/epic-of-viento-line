@@ -1,3 +1,4 @@
+import { userError } from './user-message.mjs';
 import path from 'node:path';
 import { parseDocument, isMap, isSeq, isScalar } from 'yaml';
 import { readRegistry, readWorkspace } from './workspace.mjs';
@@ -5,7 +6,7 @@ import { resolveDocumentDefinition } from './project-layout.mjs';
 import { MEDIA_KINDS, isMediaValue, splitMediaText } from './media-format.mjs';
 import { parseSourceContent } from '../standardize-docs/doc-factory.mjs';
 
-const invalid = (message) => Object.assign(new Error(message), { statusCode: 400, errorCode: 'media_insertion_invalid' });
+const invalid = (message) => userError(message, 400, 'media_insertion_invalid');
 
 // Patch the source ranges instead of serializing the user's whole JSON/YAML.
 // Existing values, comments, BOM and line endings remain byte-for-byte intact.

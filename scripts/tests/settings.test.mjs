@@ -5,7 +5,8 @@ import vm from 'node:vm';
 import { randomUUID } from 'node:crypto';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
-import english from '../../web/i18n/en.js';
+import { formatMessage } from '../../web/i18n/messages.js';
+import { supportedLanguages, isSupportedLanguage } from '../../web/i18n/languages.js';
 import { LANGUAGE_STORAGE_KEY } from '../../web/i18n/index.js';
 import { deferred } from './editor-harness.mjs';
 import { dialogHarness, flushDialogs } from './dialog-harness.mjs';
@@ -15,7 +16,7 @@ async function settingsHarness(overrides = {}) {
   const errors = [];
   const storage = new Map();
   const harness = await dialogHarness('../i18n/settings', {
-    english, crypto: { randomUUID }, console: { error: (error) => errors.push(error) },
+    formatMessage, supportedLanguages, isSupportedLanguage, crypto: { randomUUID }, console: { error: (error) => errors.push(error) },
     localStorage: { getItem: (key) => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) },
     ...overrides,
   });
@@ -212,6 +213,10 @@ test('browser language follows current local storage, ignores session storage, a
   h.storage.set(LANGUAGE_STORAGE_KEY, 'en');
   storageEvent({ newValue: 'zh-CN' });
   assert.equal(h.runtime.getLanguage(), 'en', 'a delayed event must not restore a value already superseded in storage');
+  h.storage.set(LANGUAGE_STORAGE_KEY, 'ja');
+  storageEvent({ newValue: 'en' });
+  assert.equal(h.runtime.getLanguage(), 'ja');
+  assert.equal(h.element('settingsTitle').textContent, '設定');
   h.storage.clear(); storageEvent({ key: null, newValue: null });
   assert.equal(h.runtime.getLanguage(), 'zh-CN');
   area.setItem = () => { throw new Error('storage is unavailable'); };
@@ -222,4 +227,24 @@ test('browser language follows current local storage, ignores session storage, a
   h.select('en'); await flushDialogs();
   assert.equal(h.runtime.getLanguage(), 'en');
   assert.equal(h.storage.get(LANGUAGE_STORAGE_KEY), 'en');
+});
+
+test('Japanese native preference persists only after acknowledgement and a failed save can be retried', async () => {
+  const h = await nativeHarness(); await h.runtime.setupSettings();
+  h.select('ja');
+  assert.equal(h.requests[0].body.language, 'ja');
+  h.requests[0].response.resolve({ ok: true }); await flushDialogs();
+  assert.equal(h.runtime.getLanguage(), 'zh-CN', 'HTTP acceptance alone is not a committed preference');
+  h.acknowledge(h.requests[0], false); await flushDialogs();
+  assert.equal(h.runtime.getLanguage(), 'zh-CN');
+  assert.equal(h.element('languageSelect').disabled, false);
+  h.select('ja'); h.requests[1].response.resolve({ ok: true });
+  h.broadcast('ja'); h.acknowledge(h.requests[1]); await flushDialogs();
+  assert.equal(h.runtime.getLanguage(), 'ja');
+  assert.equal(h.element('settingsTitle').textContent, '設定');
+  assert.equal(h.element('settingsStatus').textContent, '言語設定を保存しました');
+  const reopened = await nativeHarness(Promise.resolve({ ok: true, json: async () => ({ language: 'ja' }) }));
+  await reopened.runtime.setupSettings();
+  assert.equal(reopened.element('languageSelect').value, 'ja');
+  assert.equal(reopened.element('settingsTitle').textContent, '設定');
 });

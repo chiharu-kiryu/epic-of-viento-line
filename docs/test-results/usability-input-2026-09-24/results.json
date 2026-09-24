@@ -1,0 +1,151 @@
+{
+  "date": "2026-09-24",
+  "baseCommit": "38c7f61d072798457c939f0ae0641da1a777a8f5",
+  "version": "b.4.3",
+  "focused": {
+    "tests": 73,
+    "pass": 73,
+    "fail": 0,
+    "skipped": 0
+  },
+  "application": {
+    "tests": 560,
+    "pass": 558,
+    "fail": 0,
+    "skipped": 2
+  },
+  "beforeFixExpectedFailures": {
+    "tests": 3,
+    "pass": 0,
+    "fail": 3,
+    "skipped": 0
+  },
+  "browser": {
+    "target": "isolated v3 fixture using current web source in Codex in-app browser",
+    "observations": [
+      "Japanese new document saved with Control+S focused on the filename field; exact path and source bytes confirmed.",
+      "Japanese sidebar search found the created document; selecting it closed the narrow-screen sidebar.",
+      "Changing from Japanese to English preserved unsaved source and canonical editable-file location.",
+      "Control+S in settings did not write the dirty underlying document or open a browser save dialog.",
+      "Block editor retained the draft; Control+Enter saved exactly the expected mixed Chinese/Japanese source and rebuilt the index.",
+      "English export reached Ready. Inspected the generated ZIP: English README, html lang=en, source bytes matched the saved file.",
+      "Closing export released its temporary ZIP.",
+      "Inspected screenshots of narrow search, editing, reading and export layouts.",
+      "Returning to source editing at 1280x800 left a 514.609375 px high editor and no clipped toolbar buttons."
+    ],
+    "layout": [
+      {
+        "stage": "before toolbar fix",
+        "locale": "ja",
+        "viewport": [
+          375,
+          812
+        ],
+        "scrollWidth": 458,
+        "clippedButtons": [
+          "閲覧",
+          "編集",
+          "プレビューを更新"
+        ]
+      },
+      {
+        "stage": "after toolbar fix",
+        "locale": "ja",
+        "viewport": [
+          375,
+          812
+        ],
+        "scrollWidth": 375,
+        "clippedButtons": []
+      },
+      {
+        "stage": "after toolbar fix",
+        "locale": "en",
+        "viewport": [
+          375,
+          812
+        ],
+        "scrollWidth": 375,
+        "clippedButtons": []
+      },
+      {
+        "stage": "after toolbar fix",
+        "locale": "en",
+        "viewport": [
+          680,
+          600
+        ],
+        "scrollWidth": 680,
+        "clippedButtons": []
+      },
+      {
+        "stage": "after toolbar fix",
+        "locale": "zh-CN",
+        "viewport": [
+          375,
+          812
+        ],
+        "scrollWidth": 375,
+        "clippedButtons": []
+      },
+      {
+        "stage": "after reading row fix",
+        "locale": "zh-CN",
+        "viewport": [
+          1280,
+          800
+        ],
+        "scrollWidth": 1280,
+        "clippedButtons": []
+      }
+    ],
+    "coverOverlap": {
+      "viewport": [
+        375,
+        812
+      ],
+      "before": {
+        "allocatedHeight": 150,
+        "actualHeight": 311,
+        "coverBottom": 677.53125,
+        "nextSectionTop": 526.53125
+      },
+      "after": {
+        "allocatedHeight": 311,
+        "actualHeight": 311,
+        "coverBottom": 677.53125,
+        "nextSectionTop": 687.53125,
+        "scrollableContentHeight": 818
+      }
+    },
+    "finalWarningAndErrorLogs": []
+  },
+  "fixtures": [
+    {
+      "path": "documents/characters/旅人.md",
+      "sha256": "1a8d9c5b0b96c549f486dc4d44a10d4d1fde2ff33657b1c4d5592f2bcc680af5",
+      "matchesExpectedBytes": true
+    },
+    {
+      "path": "documents/stories/新しい物語.md",
+      "sha256": "cb5bef27e1865a433ec484ee97dca72db4901b603df4a9907b1a721ce3d35494",
+      "matchesExpectedBytes": true
+    },
+    {
+      "path": "documents/stories/キーボード確認.md",
+      "sha256": "92c7918698e449c8f83f997a7ba2a5b1b49eca5e1dba7f8385457185135bd6ad",
+      "matchesExpectedBytes": true
+    }
+  ],
+  "translationEntries": {
+    "en": 535,
+    "ja": 535
+  },
+  "limitations": [
+    "IME isComposing and keyCode 229 were exercised in controller regression tests, not an operating-system candidate window.",
+    "Command-key behavior was tested through the controller; no macOS desktop session.",
+    "Native archive tests require VIENTO_TEST_ARCHIVE_BINARY, which was not built for this frontend round. Two groups skipped.",
+    "No new Tauri build, Windows/macOS native run, release commit, push or installation."
+  ],
+  "cleanup": "Browser tab closed and viewport override reset; isolated server and scratch directory cleaned after evidence collection."
+}

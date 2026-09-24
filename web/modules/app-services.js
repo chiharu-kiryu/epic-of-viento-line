@@ -1,5 +1,6 @@
 import { API_RESPONSE } from '../../scripts/lib/doc-api-contract.mjs';
-import { t } from '../i18n/index.js';
+import { t, uiMessage, asUiMessage } from '../i18n/index.js';
+import { diagnosticMessage } from '../i18n/diagnostics.js';
 
 export const DEFAULT_INVALID_RESPONSE_MESSAGE = '后端返回了非预期响应格式';
 
@@ -103,7 +104,7 @@ export async function fetchWithTimeout(url, options = {}, timeoutMs = 10000, tim
   } catch (error) {
     let failure = error;
     if (timedOut) {
-      failure = new Error(t`${timeoutMessage}超时（${Math.max(0.1, Math.round(timeoutMs / 100) / 10)} 秒）`, { cause: error });
+      failure = new Error(t`${asUiMessage(timeoutMessage)}超时（${Math.max(0.1, Math.round(timeoutMs / 100) / 10)} 秒）`, { cause: error });
       failure.name = 'TimeoutError';
     } else if (callerSignal?.aborted) {
       failure = callerSignal.reason;
@@ -147,7 +148,7 @@ export function extractPayloadErrorMessage(payload) {
 export function makeRequestError(response, payload, requestLabel) {
   const responseError = extractPayloadErrorMessage(payload);
   const label = requestLabel || t('请求');
-  const suffix = responseError ? `${response.status}：${responseError}` : `${response.status}`;
+  const suffix = responseError ? uiMessage('{0}：{1}', response.status, diagnosticMessage(payload?.userMessage, responseError)) : `${response.status}`;
   const headerRequestId = typeof response?.headers?.get === 'function'
     ? response.headers.get('x-request-id')
     : '';
@@ -157,7 +158,7 @@ export function makeRequestError(response, payload, requestLabel) {
   const payloadErrorCode = payload && typeof payload === 'object'
     ? payload[API_RESPONSE.errorCode]
     : '';
-  const error = new Error(t`${label}失败（${suffix}）`);
+  const error = new Error(t`${asUiMessage(label)}失败（${suffix}）`);
   error.status = response.status;
   error.payload = payload;
   error.requestId = typeof payloadRequestId === 'string' && payloadRequestId.trim()

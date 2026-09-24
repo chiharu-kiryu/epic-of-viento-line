@@ -1,12 +1,14 @@
 # Viento Studio
 
-当前版本：**b.4.3**。更新内容和版本规则见 [发布记录](docs/RELEASE_b.4.3.md)。测试版为 `b.X.Y`，X、Y 均为 0–9；`b.9.9` 后进入 `1.0.0`。
+当前版本：**b.4.4**。更新内容和版本规则见 [发布记录](docs/RELEASE_b.4.4.md)。测试版为 `b.X.Y`，X、Y 均为 0–9；`b.9.9` 后进入 `1.0.0`。
 
 Viento Studio 是通用 OC 设计 IDE；此仓库包含编辑器、转换器和桌面宿主。正文、模板、元数据、素材及作品备份保存在独立作品文件夹，具体位置可用 `npm run workspace -- paths` 查看。新项目采用 `documents / templates / metadata / assets`，类型和模板由项目定义，见 [通用项目结构](docs/GENERIC_PROJECTS.md)。
 
-作品库和编辑器均可通过 **设置 → 界面语言** 切换简体中文或 English。立即生效并记住选择，保留未保存草稿，正文与项目字段保持原文。详见 [多语言支持](docs/LANGUAGES.md)。
+作品库和编辑器均可通过 **设置 → 界面语言** 切换 **简体中文 / English / 日本語**。立即生效并记住选择，保留未保存草稿；导出说明跟随所选语言，正文与项目字段保持原文。详见 [多语言支持](docs/LANGUAGES.md)。
 
 编辑器顶部或 **设置 → 项目类型与模板** 可新增类型、编辑模板、预览解析结果和配置字段分组，保存后立即应用。完整工作流见 [项目工作流](docs/PROJECT_WORKFLOW.md)。
+
+编辑时切到 **字段编辑**，即可在分组属性表中直接修改数值、文字与开关，筛选字段、恢复单项修改，并选择已有素材。支持 Markdown / TXT / JSON / YAML，详见 [字段编辑说明](docs/FIELD_EDITING_b.4.3.md)。
 
 原作品 **Epic of Viento Line** 是独立的 [官方示范项目](docs/examples/README.md)。其正文和素材仍保存在外部作品库；应用安装包不包含作品数据。
 
@@ -69,7 +71,7 @@ Linux 默认作品目录为 `~/.local/share/io.viento.studio/workspaces/`，本�
 
 ### 架构与运维参考
 
-- 当前功能链路网络：[完整枚举与总图](docs/FUNCTION_NETWORK.md) · [离线交互图](docs/function-network.html) · [JSON 快照](docs/function-network.json)（2026-09-24，b.4.3）
+- 功能链路网络快照：[完整枚举与总图](docs/FUNCTION_NETWORK.md) · [离线交互图](docs/function-network.html) · [JSON 快照](docs/function-network.json)（2026-09-24，b.4.3；本版新增链路见发布记录与字段编辑说明）
 - 按图排查与修复：[连续修复记录](docs/NETWORK_BUGFIX_b.2.8.1.md)
 - Linux 桌面依赖安全修复：[glib 上游补丁与验证](docs/SECURITY_GLIB_b.2.9.md)
 - 系统整体架构：[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
@@ -84,7 +86,7 @@ Linux 默认作品目录为 `~/.local/share/io.viento.studio/workspaces/`，本�
 - 本机交付：`dist/current/` 保存已构建的 Linux 便携包、源码与校验记录，具体版本以交付文件名和校验记录为准；完整作品迁移包在应用数据目录的 `backups/`。
 - 构建后释放空间：`npm run clean`，仅清理可重建的桌面构建目录；交付目录和作品保留。
 - 数据目录、备份格式、三端发行与构建依赖见 [`desktop/README.md`](desktop/README.md)。
-- 最新发布见 [b.4.3 发布记录](docs/RELEASE_b.4.3.md)，本轮故障复现和验证见 [功能网络修复记录](docs/NETWORK_BUGFIX_b.2.8.1.md)。
+- 最新发布见 [b.4.4 发布记录](docs/RELEASE_b.4.4.md)，此前故障复现和验证见 [功能网络修复记录](docs/NETWORK_BUGFIX_b.2.8.1.md)。
 - 较早的排查见 [调用链故障记录](docs/CALL_PATH_BUGFIX_b.2.8.md) 与 [历史修复记录](docs/BUGFIX_0.2.1.md)。
 
 ## 文档网页化预览（HTML5）
@@ -148,8 +150,10 @@ Linux 默认作品目录为 `~/.local/share/io.viento.studio/workspaces/`，本�
 编辑器操作：
 
 - 新建时选择文档类型以加载模板；路径默认沿用同类文档的目录，切换类型后使用对应分类目录。
-- 源码和区块模式可以来回切换，区块取自当前草稿，保留代码围栏、表格、空行和缩进。
-- 两种编辑模式均支持 `Ctrl/Cmd+S` 或 `Ctrl/Cmd+Enter` 保存。文本框支持浏览器原生撤销、重做。
+- 源码、分段和字段编辑可来回切换，各模式取自当前草稿；字段编辑沿用项目解析规则与字段分组，保留未修改的正文。
+- 字段表支持搜索、只看已修改、分组折叠和单项恢复；新建文档也可在加载模板后填写字段。添加字段或调整结构时使用源码编辑。
+- 编辑期间，`Ctrl/Cmd+S` 可从正文、文件名或目录搜索框保存当前草稿；在源码、分段正文或字段值内也可用 `Ctrl/Cmd+Enter`。文本框支持浏览器原生撤销、重做。
+- 中文、日文输入法确认候选字时不会触发保存；搜索等待组词完成后再筛选。设置、素材和导出弹窗不会把保存快捷键传给底下的文档；类型模板窗口的 `Ctrl/Cmd+S` 只保存当前模板。
 - 取消编辑、切换文档或模式时，未保存的内容与新建路径都会触发确认。
 - 保存和索引重建期间暂停输入及重复提交；新建写入成功但重建失败时，可在当前文档继续编辑和重试。
 

@@ -7,3 +7,6 @@
 # Preserve upstream release bytes and unified-diff context for vendor verification.
 src-tauri/vendor/glib/** -text -whitespace
 src-tauri/vendor/*.patch -text -whitespace
+
+# Keep recorded test output byte-for-byte, including intentional whitespace.
+docs/test-results/**/*.log -text -whitespace

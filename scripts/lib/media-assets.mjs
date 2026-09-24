@@ -1,3 +1,4 @@
+import { userError } from './user-message.mjs';
 import fs from 'node:fs/promises';
 import { constants } from 'node:fs';
 import path from 'node:path';
@@ -6,7 +7,7 @@ import { readWorkspace, resolveAssetRoot, readRegistry, withRegistryLock, writeJ
 import { resolveContainedPath } from './contained-path.mjs';
 import { MEDIA_KINDS, MEDIA_MAX_BYTES, mediaKindForName } from './media-format.mjs';
 
-const reject = (statusCode, message) => Object.assign(new Error(message), { statusCode, errorCode: 'media_import_rejected' });
+const reject = (statusCode, message) => userError(message, statusCode, 'media_import_rejected');
 
 function matchesFormat(bytes, extension) {
   const ascii = bytes.toString('utf8');

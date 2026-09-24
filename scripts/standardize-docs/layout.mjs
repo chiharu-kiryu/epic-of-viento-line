@@ -7,8 +7,9 @@ export const LAYOUT_VERSION = 'viento-layout-v1';
 export function buildDocumentLayout(parsed) {
   const sections = [];
   let current = null;
-  const start = (title = '内容', level = 1, anchor = '') => {
-    current = { id: `section-${sections.length + 1}`, title, level, anchor, blocks: [] };
+  const start = (title, level = 1, anchor = '') => {
+    current = { id: `section-${sections.length + 1}`, title: title ?? '内容',
+      ...(title === undefined ? { titleKey: '内容' } : {}), level, anchor, blocks: [] };
     sections.push(current);
   };
   for (const block of parsed.blocks || []) {

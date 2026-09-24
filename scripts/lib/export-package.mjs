@@ -1,3 +1,4 @@
+import { userError, userMessage } from './user-message.mjs';
 import fs from 'node:fs/promises';
 import { constants, createWriteStream } from 'node:fs';
 import path from 'node:path';
@@ -13,6 +14,8 @@ import { collectAssetImageRefs } from './image-index.mjs';
 import { parseSourceContent } from '../standardize-docs/doc-factory.mjs';
 import { buildDocumentLayout } from '../standardize-docs/layout.mjs';
 import { renderExport } from './export-render.mjs';
+import { formatMessage } from '../../web/i18n/messages.js';
+import { isSupportedLanguage } from '../../web/i18n/languages.js';
 
 const MAX_FILES = 200000;
 const MAX_FILE_BYTES = 8 * 1024 ** 3;
@@ -20,7 +23,7 @@ const MAX_TOTAL_BYTES = 64 * 1024 ** 3;
 const json = (value) => Buffer.from(`${JSON.stringify(value, null, 2)}\n`);
 const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const signature = (stat) => [stat.dev, stat.ino, stat.size, stat.mtimeMs, stat.ctimeMs].join(':');
-export const exportError = (message, statusCode = 400) => Object.assign(new Error(message), { statusCode, errorCode: 'export_failed' });
+export const exportError = (message, statusCode = 400) => userError(message, statusCode, 'export_failed');
 export function exportFileName(name, suffix) {
   const cleaned = String(name || '作品').normalize('NFC').replace(/[<>:"/\\|?*\x00-\x1f\x7f-\x9f\uD800-\uDFFF]/gu, '_');
   const safe = Array.from(cleaned).slice(0, 70).join('').replace(/[. ]+$/g, '');
@@ -38,6 +41,9 @@ export async function planExport(root, options = {}, signal) {
   signal?.throwIfAborted();
   if (!options || !['document', 'workspace'].includes(options.kind)) throw exportError('请选择文档分享或完整项目包');
   if (options.kind === 'document' && !['markdown', 'html'].includes(options.format)) throw exportError('请选择 Markdown 或离线网页');
+  const language = options.language === undefined ? 'zh-CN' : options.language;
+  if (!isSupportedLanguage(language)) throw exportError('不支持的界面语言');
+  const t = (key, ...values) => formatMessage(language, key, ...values);
   const manifest = readWorkspace(root);
   const paths = workspacePaths(manifest);
   const registry = await readRegistry(root, { signal });
@@ -56,7 +62,7 @@ export async function planExport(root, options = {}, signal) {
   const addBuffer = (name, buffer) => entries.set(name, { path: name, buffer });
   async function addFile(base, relative, name = relative, expected = null) {
     signal?.throwIfAborted();
-    if (!portablePath(name)) throw exportError(`文件名无法跨系统导出：${name}`);
+    if (!portablePath(name)) throw exportError(userMessage`文件名无法跨系统导出：${name}`);
     let absolute, stat;
     try {
       absolute = await resolveContainedPath(base, path.join(base, relative));
@@ -65,11 +71,11 @@ export async function planExport(root, options = {}, signal) {
       signal?.throwIfAborted();
     } catch (error) {
       signal?.throwIfAborted();
-      if (error.code === 'ENOENT') throw exportError(`文件或素材缺失，无法完整导出：${relative}`);
+      if (error.code === 'ENOENT') throw exportError(userMessage`文件或素材缺失，无法完整导出：${relative}`);
       throw error;
     }
-    if (!stat.isFile()) throw exportError(`导出内容必须是实际文件：${relative}`);
-    if (stat.size > MAX_FILE_BYTES) throw exportError(`文件超过 8 GiB 限制：${relative}`);
+    if (!stat.isFile()) throw exportError(userMessage`导出内容必须是实际文件：${relative}`);
+    if (stat.size > MAX_FILE_BYTES) throw exportError(userMessage`文件超过 8 GiB 限制：${relative}`);
     const entry = { path: name, base, relative, absolute, stat, expected };
     entries.set(name, entry);
     snapshots.set(absolute, entry);
@@ -88,7 +94,7 @@ export async function planExport(root, options = {}, signal) {
         snapshotSignal?.throwIfAborted();
         const stat = await fs.stat(file);
         snapshotSignal?.throwIfAborted();
-        if (file !== entry.absolute || signature(stat) !== signature(entry.stat)) throw exportError(`导出期间文件发生变化，请保存后重试：${entry.relative}`, 409);
+        if (file !== entry.absolute || signature(stat) !== signature(entry.stat)) throw exportError(userMessage`导出期间文件发生变化，请保存后重试：${entry.relative}`, 409);
       }
       for (const { base, files } of folderSnapshots) {
         const current = await walkFiles(base, { signal: snapshotSignal });
@@ -96,7 +102,7 @@ export async function planExport(root, options = {}, signal) {
         if (JSON.stringify(current) !== JSON.stringify(files)) throw exportError('导出期间项目文件发生变化，请保存后重试', 409);
       }
       for (const file of missingPaths) {
-        if (await existing(file, snapshotSignal)) throw exportError(`导出期间项目文件发生变化，请保存后重试：${path.relative(root, file)}`, 409);
+        if (await existing(file, snapshotSignal)) throw exportError(userMessage`导出期间项目文件发生变化，请保存后重试：${path.relative(root, file)}`, 409);
       }
       snapshotSignal?.throwIfAborted();
       if (JSON.stringify(readWorkspace(root)) !== JSON.stringify(manifest)
@@ -117,19 +123,19 @@ export async function planExport(root, options = {}, signal) {
         await resolveContainedPath(folder === 'assets' ? path.dirname(base) : root, base);
         await addFolder(base, folder);
       } else if (folder === paths.documents || (folder === 'assets' && base !== path.join(root, 'assets'))) {
-        throw exportError(`项目目录不可用，无法完整导出：${folder}`);
+        throw exportError(userMessage`项目目录不可用，无法完整导出：${folder}`);
       }
     }
     if (await snapshotExists(path.join(root, 'workspace.json'))) await addFile(root, 'workspace.json');
     else addBuffer('workspace.json', json(workspace));
     if (workspace.version >= 2 && await snapshotExists(path.join(root, '.viento/workspace.json'))) await addFile(root, '.viento/workspace.json');
     for (const asset of registry.assets) {
-      if (!entries.has(`assets/${asset.location.path}`)) throw exportError(`素材缺失，无法完整导出：${asset.name}`);
+      if (!entries.has(`assets/${asset.location.path}`)) throw exportError(userMessage`素材缺失，无法完整导出：${asset.name}`);
       entries.get(`assets/${asset.location.path}`).expected = asset.content;
     }
     for (const doc of registry.documents) {
-      if (!entries.has(doc.sourcePath)) throw exportError(`登记的正文缺失：${doc.sourcePath}`);
-      for (const binding of doc.assetBindings) if (!registry.assets.some((asset) => asset.id === binding.assetId)) throw exportError(`文档引用的素材未登记：${doc.sourcePath}`);
+      if (!entries.has(doc.sourcePath)) throw exportError(userMessage`登记的正文缺失：${doc.sourcePath}`);
+      for (const binding of doc.assetBindings) if (!registry.assets.some((asset) => asset.id === binding.assetId)) throw exportError(userMessage`文档引用的素材未登记：${doc.sourcePath}`);
     }
     documentCount = registry.documents.length;
     assetCount = [...entries.keys()].filter((name) => name.startsWith('assets/')).length;
@@ -158,9 +164,9 @@ export async function planExport(root, options = {}, signal) {
     }
     function resolveMedia(src) {
       const url = mediaUrl(src);
-      if (!url) throw exportError(`素材引用无效：${src}`);
+      if (!url) throw exportError(userMessage`素材引用无效：${src}`);
       const registered = assetsByUrl.get(url);
-      if (!registered && url.startsWith('/asset-files/')) throw exportError(`素材引用未登记：${src}`);
+      if (!registered && url.startsWith('/asset-files/')) throw exportError(userMessage`素材引用未登记：${src}`);
       const relative = registered?.location.path || url.slice('/assets/'.length).split('/').map(decodeURIComponent).join('/');
       const id = registered?.id || digest(relative).slice(0, 32);
       if (!usedAssets.has(id)) usedAssets.set(id, {
@@ -174,14 +180,14 @@ export async function planExport(root, options = {}, signal) {
     let documentBytes = 0;
     for (const item of selected) {
       const entry = await addFile(root, item.sourcePath, `sources/${item.sourcePath}`);
-      if (entry.stat.size > 16 * 1024 ** 2) throw exportError(`正文过大，请使用完整项目包：${item.sourcePath}`);
+      if (entry.stat.size > 16 * 1024 ** 2) throw exportError(userMessage`正文过大，请使用完整项目包：${item.sourcePath}`);
       documentBytes += entry.stat.size;
       if (documentBytes > 64 * 1024 ** 2) throw exportError('所选正文超过 64 MB，请分开分享或使用完整项目包');
       const raw = await fs.readFile(entry.absolute, { signal }).catch(error => { signal?.throwIfAborted(); throw error; });
       signal?.throwIfAborted();
       entry.expected = { size: raw.length, sha256: digest(raw) };
       const parsed = parseSourceContent(raw.toString('utf8'), item.sourcePath, resolveDocumentDefinition(manifest, item.sourcePath, item.descriptor));
-      if (parsed.parseError) throw exportError(`正文解析失败，请修正格式后导出：${item.sourcePath}`);
+      if (parsed.parseError) throw exportError(userMessage`正文解析失败，请修正格式后导出：${item.sourcePath}`);
       // Match the reference index: declarations and legacy image paths also
       // carry assets, even when the layout has no inline player or image.
       const media = collectDocumentMedia(parsed.blocks);
@@ -198,13 +204,18 @@ export async function planExport(root, options = {}, signal) {
       if (item.descriptor.id) await addFile(root, `metadata/documents/${item.descriptor.id}.json`);
     }
     title = documents[0].title;
-    const content = renderExport(documents, options.format, resolveMedia);
+    const content = renderExport(documents, options.format, resolveMedia, language);
     addBuffer(options.format === 'html' ? 'index.html' : 'document.md', Buffer.from(content));
     for (const asset of usedAssets.values()) {
       await addFile(assetRoot, asset.relative, asset.path, asset.expected);
       if (registry.assets.some((record) => record.id === asset.id)) await addFile(root, `metadata/assets/${asset.id}.json`);
     }
-    addBuffer('README.txt', Buffer.from(`请先解压整个 ZIP 文件，再打开 ${options.format === 'html' ? 'index.html' : 'document.md'}。\nassets/ 包含引用的素材，请与正文一同保留。sources/ 保留未经改写的原始正文。\n这是阅读分享包；项目恢复请使用“完整项目包”。\n`));
+    addBuffer('README.txt', Buffer.from([
+      t('请先解压整个 ZIP 文件，再打开 {0}。', options.format === 'html' ? 'index.html' : 'document.md'),
+      t('assets/ 包含引用的素材，请与正文一同保留。sources/ 保留未经改写的原始正文。'),
+      t('这是阅读分享包；项目恢复请使用“完整项目包”。'),
+      '',
+    ].join('\n')));
     documentCount = documents.length;
     assetCount = usedAssets.size;
     archiveManifest = { format: 'viento-document-export', version: 1, exportedAt: Math.floor(Date.now() / 1000), title,
@@ -215,7 +226,7 @@ export async function planExport(root, options = {}, signal) {
   try { assertPortableFileTree(entries.keys()); } catch (error) { throw exportError(error.message); }
   if ([...entries.values()].reduce((total, entry) => total + (entry.buffer?.length ?? entry.stat.size), 0) > MAX_TOTAL_BYTES) throw exportError('导出内容超过 64 GiB 限制');
   return { entries: [...entries.values()], archiveManifest, validateSnapshot, documentCount, assetCount,
-    fileName: exportFileName(title, options.kind === 'workspace' ? '.viento.zip' : `-${options.format === 'html' ? '网页' : 'Markdown'}.zip`) };
+    fileName: exportFileName(title, options.kind === 'workspace' ? '.viento.zip' : `-${options.format === 'html' ? t('网页') : 'Markdown'}.zip`) };
 }
 
 export async function writeExportZip(plan, output, signal) {
@@ -256,7 +267,7 @@ export async function writeExportZip(plan, output, signal) {
           let reader;
           try {
             stopped.signal.throwIfAborted();
-            if (signature(await input.stat()) !== signature(entry.stat)) throw exportError(`导出期间文件发生变化：${entry.relative}`, 409);
+            if (signature(await input.stat()) !== signature(entry.stat)) throw exportError(userMessage`导出期间文件发生变化：${entry.relative}`, 409);
             stopped.signal.throwIfAborted();
             const hash = createHash('sha256');
             let size = 0;
@@ -264,7 +275,7 @@ export async function writeExportZip(plan, output, signal) {
               transform(chunk, encoding, done) { size += chunk.length; hash.update(chunk); done(null, chunk); },
               flush(done) {
                 const sha256 = hash.digest('hex');
-                if (entry.expected && (entry.expected.size !== size || entry.expected.sha256 !== sha256)) return done(exportError(`文件内容与登记不一致，请刷新登记后重试：${entry.relative}`, 409));
+                if (entry.expected && (entry.expected.size !== size || entry.expected.sha256 !== sha256)) return done(exportError(userMessage`文件内容与登记不一致，请刷新登记后重试：${entry.relative}`, 409));
                 hashes.push({ path: entry.path, size, sha256 }); done();
               },
             });

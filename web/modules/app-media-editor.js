@@ -1,4 +1,4 @@
-import { t, onLanguageChange, translateMessage } from '../i18n/index.js';
+import { t, onLanguageChange, translateMessage, asUiMessage, uiMessage } from '../i18n/index.js';
 import { MEDIA_MAX_BYTES, mediaKindForName, mediaMarkup } from '../../scripts/lib/media-format.mjs';
 import { loadMediaAssets, uploadMediaFile, prepareDraftMedia } from './app-doc-service.js';
 import { renderMedia } from './app-media-render.js';
@@ -70,7 +70,8 @@ export function setupMediaEditor(adapter) {
   }
   function renderList() {
     const query = search.value.trim().toLocaleLowerCase();
-    const filtered = assets.filter((asset) => (!kind.value || asset.kind === kind.value) && asset.name.toLocaleLowerCase().includes(query));
+    const selectedKind = context?.mediaReference || kind.value;
+    const filtered = assets.filter((asset) => (!selectedKind || asset.kind === selectedKind) && asset.name.toLocaleLowerCase().includes(query));
     list.replaceChildren();
     for (const asset of filtered.slice(0, limit)) {
       const item = document.createElement('button');
@@ -109,7 +110,7 @@ export function setupMediaEditor(adapter) {
   }
   function setBusy(busy) {
     adapter.setBusy(busy);
-    importer.disabled = busy; close.disabled = busy; search.disabled = busy; kind.disabled = busy;
+    importer.disabled = busy; close.disabled = busy; search.disabled = busy; kind.disabled = busy || !!context?.mediaReference;
     const importing = busy && !!aborter;
     picker.disabled = busy; cancel.hidden = !importing; progress.hidden = !importing; progressLabel.hidden = !importing;
     list.querySelectorAll('button').forEach((item) => { item.disabled = busy || assets.find((asset) => asset.id === item.dataset.assetId)?.status !== 'available'; });
@@ -125,7 +126,14 @@ export function setupMediaEditor(adapter) {
       }
     };
     checkDraft();
-    if (/\.(json|ya?ml)$/i.test(target.path)) {
+    if (target.field) {
+      // A field owns the insertion point; its serializer escapes structured strings.
+      if (target.mediaReference) {
+        if (selected.length !== 1) throw new Error(t('此字段只能引用一份素材。'));
+        if (selected[0].kind !== target.mediaReference) throw new Error(t('请选择与此字段类型一致的素材。'));
+        adapter.insertText({ ...target, start: 0, end: target.input.value.length }, `asset:${selected[0].id}`);
+      } else adapter.insertText(target, selected.map(mediaMarkup).join('\n'));
+    } else if (/\.(json|ya?ml)$/i.test(target.path)) {
       const result = await prepareDraftMedia(target.content, target.path, selected.map((asset) => asset.id), target.documentType, signal);
       checkDraft();
       adapter.replaceSource(result.content);
@@ -150,6 +158,11 @@ export function setupMediaEditor(adapter) {
       const text = !mediaKindForName(invalid.name) ? t`不支持 ${invalid.name} 的格式。` : t`${invalid.name} 超过 256 MB。`;
       status(text, true); adapter.status(text); return;
     }
+    if (context?.mediaReference && (files.length !== 1 || mediaKindForName(files[0].name) !== context.mediaReference)) {
+      const text = files.length !== 1 ? t('此字段只能引用一份素材。') : t('请选择与此字段类型一致的素材。');
+      status(text, true); adapter.status(text); picker.value = ''; return;
+    }
+    if (context?.mediaReference) kind.value = context.mediaReference;
     if (!dialog.open) dialog.showModal();
     ++listGeneration;
     aborter = new AbortController();
@@ -169,14 +182,15 @@ export function setupMediaEditor(adapter) {
       dialog.close();
       adapter.status(t`已插入 ${imported.length} 份素材，保存文档后生效。`);
     } catch (error) {
-      const text = `${error.name === 'AbortError' ? t('已取消导入。') : error.message}${imported.length ? t` 已导入的 ${imported.length} 份素材可从作品素材列表重新选择。` : ''}`;
+      const text = t('{0}{1}', error.name === 'AbortError' ? uiMessage('已取消导入。') : asUiMessage(error.message),
+        imported.length ? uiMessage(' 已导入的 {0} 份素材可从作品素材列表重新选择。', imported.length) : '');
       status(text, error.name !== 'AbortError'); adapter.status(text);
       if (imported.length) {
         // Upload responses already confirm registration. Recovery must not wait
         // for another catalogue request or hide these files behind old filters.
         const recovered = new Map(imported.map((asset) => [asset.id, asset]));
         assets = [...recovered.values(), ...assets.filter((asset) => !recovered.has(asset.id))];
-        search.value = ''; kind.value = ''; limit = 60;
+        search.value = ''; kind.value = context?.mediaReference || ''; limit = 60;
         renderList();
       }
     } finally { aborter = null; setBusy(false); schedulePreview(); picker.value = ''; }
@@ -201,7 +215,8 @@ export function setupMediaEditor(adapter) {
   });
   button.addEventListener('click', () => {
     if (!adapter.isEditable() || adapter.isBusy()) return;
-    context = capture(); dialog.showModal(); void refreshList();
+    context = capture(); kind.value = context?.mediaReference || ''; kind.disabled = !!context?.mediaReference;
+    dialog.showModal(); void refreshList();
   });
   importer.addEventListener('click', () => picker.click());
   picker.addEventListener('change', () => void importFiles(Array.from(picker.files || [])));

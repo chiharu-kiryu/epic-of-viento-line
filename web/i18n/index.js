@@ -1,32 +1,42 @@
-import english from './en.js';
+import { formatMessage } from './messages.js';
+import { supportedLanguages, isSupportedLanguage } from './languages.js';
 
-export const LANGUAGES = Object.freeze([
-  { id: 'zh-CN', name: '简体中文' },
-  { id: 'en', name: 'English' },
-]);
+export const LANGUAGES = supportedLanguages;
 export const LANGUAGE_STORAGE_KEY = 'viento-ui-language';
-export const isLanguage = (value) => LANGUAGES.some((item) => item.id === value);
+export const isLanguage = isSupportedLanguage;
 const listeners = new Set();
 const formattedMessages = new Map();
+const messageTag = Symbol('interface message');
 let language = 'zh-CN';
 export const getLanguage = () => language;
+
+// Explicitly nested interface text can be translated again after a language
+// change. Ordinary string arguments remain literal, including authored names.
+export function uiMessage(key, ...values) {
+  return { [messageTag]: true, key, values };
+}
+
+export function asUiMessage(text) {
+  const message = formattedMessages.get(String(text));
+  return message ? uiMessage(message.key, ...message.values) : text;
+}
 
 // Only explicit interface messages enter the catalogue. Never translate
 // arbitrary document text, metadata, paths, template labels or DOM contents.
 export function t(message, ...values) {
+  if (message?.[messageTag]) return t(message.key, ...message.values);
   const key = Array.isArray(message)
     ? message.reduce((text, part, index) => text + (index ? `{${index - 1}}` : '') + part, '')
     : message;
-  const translated = language === 'en' ? english[key] ?? key : key;
-  const result = String(translated).replace(/\{(\d+)\}/g, (match, index) => index < values.length ? String(values[index]) : match);
+  const result = formatMessage(language, key, ...values.map(value => value?.[messageTag] ? t(value) : value));
   if (formattedMessages.size > 2048) formattedMessages.delete(formattedMessages.keys().next().value);
-  formattedMessages.set(result.trim().normalize('NFKC'), { key, values });
+  formattedMessages.set(result, { key, values });
   return result;
 }
 
 // Use only for interface status fields that were previously produced by t().
 export function translateMessage(text) {
-  const message = formattedMessages.get(String(text).trim().normalize('NFKC'));
+  const message = formattedMessages.get(String(text));
   return message ? t(message.key, ...message.values) : text;
 }
 

@@ -1,0 +1,105 @@
+✔ an active editor blocks new/open/import and other projects across backup completion and language changes (36.521451ms)
+✔ a cancelled picker or failed backup permits retry while preserving the current session guard (16.189004ms)
+✔ library refreshes cannot unlock settings while a language write is pending (11.089905ms)
+✔ library translates suggested names and actions but preserves names already entered (14.622405ms)
+✔ language: source draft, cursor and original bytes survive settings changes and save (115.957354ms)
+✔ language: blocks draft, cursor and original bytes survive settings changes and save (89.199947ms)
+✔ language: switching during an original-source read preserves the pending request and opens its result (46.81949ms)
+✔ language: choosing en in settings updates the editor without changing its draft or selection (42.353495ms)
+✔ language: choosing ja in settings updates the editor without changing its draft or selection (29.910507ms)
+✔ language: built-in create options translate in place without restarting the pending template or changing its path (25.610918ms)
+✔ language: authored type labels and new draft paths are never translated (20.580538ms)
+✔ language: a pending save retains disabled mode controls and cannot be submitted twice (21.887806ms)
+✔ language: a read-only backend keeps edit mode unavailable after refresh (25.0865ms)
+✔ language: default conflict retains its draft, decision and overwrite warning (25.978336ms)
+✔ language: force conflict retains its draft, decision and overwrite warning (21.354521ms)
+✔ language: index loading remains visible with an empty catalog (19.378512ms)
+✔ language: index loading remains visible with an existing draft (21.579409ms)
+✔ language: failed index retains the error and force-retry action, then recovers after a successful retry (34.221627ms)
+✔ language: late index failures cannot replace the current loading or successful view (27.466146ms)
+✔ an expired browser download is stopped and can be regenerated in the same dialog (31.103936ms)
+✔ an export captures the selected language and keeps it when the interface switches during preparation (20.151412ms)
+✔ browser download TypeError: network unavailable retains the package for retry (24.01937ms)
+✔ browser download Error: temporary server failure retains the package for retry (17.021669ms)
+✔ browser download TimeoutError: check timed out retains the package for retry (16.387172ms)
+✔ cancelling a browser availability check preserves the prepared package and allows retry (10.562152ms)
+✔ a late success check cannot download or alter a closed and reopened dialog (10.49339ms)
+✔ a late expired check cannot download or alter a closed and reopened dialog (9.037862ms)
+✔ closing during a repeated check does not revoke an earlier browser handoff (16.257385ms)
+✔ repeated activation checks once, locks options and translates status without changing the download name (17.615398ms)
+✔ browser check uses one HTTP byte and recovers an unavailable job against doc-site-server.mjs (335.546ms)
+✔ browser check uses one HTTP byte and recovers an unavailable job against browse-server.mjs (241.110444ms)
+✔ a non-range or malformed probe is rejected without reading a full archive into memory (5.165887ms)
+✔ document exports include owned stories, exact sources and referenced external media in both formats (189.730366ms)
+✔ JSON and YAML typed fields export using the generic layout and media bindings (86.476187ms)
+✖ concurrent Chinese, English and Japanese exports localize instructions while preserving authored bytes (123.456371ms)
+✔ explicit audio bindings export a player even when the source does not embed the audio (51.954509ms)
+✔ sharing carries declared asset IDs recognized by the md reference index (222.111875ms)
+✔ sharing carries declared asset IDs recognized by the txt reference index (199.034797ms)
+✔ sharing carries declared asset IDs recognized by the json reference index (204.936333ms)
+✔ sharing carries declared asset IDs recognized by the yaml reference index (200.185917ms)
+✔ multiple attachment roles share one player per document while keeping each owned story complete (49.587747ms)
+✔ declared missing assets reject sharing, then retry succeeds after the reference is repaired (55.553645ms)
+✔ sharing retains indexed legacy image paths, relative links and unregistered local images (199.981079ms)
+✔ v2 relative image references resolve against the original document directory (198.083289ms)
+✔ v3 relative image references resolve against the original document directory (248.28308ms)
+✔ sharing preserves distinct percent and space filenames, registered identities and renamed aliases (156.162386ms)
+✔ owned stories retain nested heading levels in HTML and Markdown shares (85.991416ms)
+✔ v2 complete project packages preserve migration contract, metadata and all external media (101.235984ms)
+✔ v3 complete project packages preserve migration contract, metadata and all external media (99.601946ms)
+✔ missing assets, traversal, symlinks and changed source snapshots cannot produce a successful export (107.11611ms)
+✔ complete exports reject directory aliases and file-directory conflicts without changing project bytes (262.222398ms)
+﹣ editor and native v2/v3 archives round-trip with exact sources, metadata and external media (0.144845ms) # SKIP
+✔ HTTP export supports edit and browse modes, authenticated creation, binary download and cleanup (504.959582ms)
+✔ consecutive browser exports recycle completed downloads instead of exhausting the three-job limit (251.883713ms)
+✔ releasing or expiring an export cannot remove a file being downloaded (172.56509ms)
+✔ export range requests keep their real status in diagnostics and remain retryable (197.822756ms)
+✔ pending and interrupted exports remain protected from automatic quota eviction (128.683968ms)
+✔ export entry blocks unsaved and new drafts without changing editor state (1.691417ms)
+✔ expired and interrupted jobs release temporary disk space while retaining source files (175.070557ms)
+✔ native preferences and the shared browser/API registry accept the same language IDs (5.768804ms)
+✔ translation catalogues have identical keys, no duplicate entries and intact parameters (19.043395ms)
+✔ marked interface messages are covered in English and Japanese (155.945059ms)
+✔ language changes update retained UI references while preserving authored labels and interpolation values (1.909211ms)
+✔ English and Japanese catalogues preserve all message parameters (3.185139ms)
+✔ unknown messages cannot resolve inherited object properties in either catalogue (0.537002ms)
+✔ desktop language preferences require the local session and stay outside the project (307.788799ms)
+✔ a late initial language read cannot overwrite a newer desktop notification or touch the draft (23.906856ms)
+✔ the library subscribes before its initial language read and retains newer editor changes (11.389004ms)
+✔ a late save acknowledgement cannot undo a newer language from another desktop window (24.10358ms)
+✔ language changes also translate settings progress and saved status while preserving the pending guard (22.925318ms)
+✔ a timed out language request is aborted and a late reply cannot finish its retry (9.938946ms)
+✔ a settings timeout actually closes an unfinished HTTP request (46.326262ms)
+✔ native preference write failures leave the language unchanged and permit a successful retry (17.999158ms)
+✔ a failed initial read stays localized and clears after saving; invalid values are not a successful default (16.779388ms)
+✔ browser language follows current local storage, ignores session storage, and handles cleared settings (14.74592ms)
+✔ Japanese native preference persists only after acknowledgement and a failed save can be retried (13.123344ms)
+ℹ tests 76
+ℹ suites 0
+ℹ pass 74
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 4389.713499
+
+✖ failing tests:
+
+test at scripts/tests/export.test.mjs:126:1
+✖ concurrent Chinese, English and Japanese exports localize instructions while preserving authored bytes (123.456371ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(body.includes(`aria-label="${labels.toc}"`))
+  
+      at file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export.test.mjs:148:14
+      at async Promise.all (index 2)
+      at async TestContext.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/tests/export.test.mjs:135:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

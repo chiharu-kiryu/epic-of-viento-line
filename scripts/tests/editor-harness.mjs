@@ -3,7 +3,10 @@ import vm from 'node:vm';
 import { API_PATHS, API_ERRORS, API_RESPONSE, getCreatePathError, normalizeDocumentVersion } from '../lib/doc-api-contract.mjs';
 import { getDocTemplate, DOC_TYPE_TEMPLATE_DEFS } from '../../web/modules/app-type-templates.js';
 import { createBlockDraft, serializeBlockDraft, serializeSourceDraft } from '../../web/modules/app-editor-draft.js';
-import { t, localize, getLanguage, onLanguageChange, translatePage, translateMessage } from '../../web/i18n/index.js';
+import { t, localize, getLanguage, onLanguageChange, translatePage, translateMessage, asUiMessage } from '../../web/i18n/index.js';
+import { isComposingInput } from '../../web/modules/app-keyboard.js';
+import { diagnosticMessage } from '../../web/i18n/diagnostics.js';
+import { createFieldEditor } from '../../web/modules/app-field-editor.js';
 
 // A small DOM surface for testing the production editor controller without a browser dependency.
 export class Element {
@@ -42,6 +45,7 @@ export class Element {
   appendChild(child) { this.children.push(...(child.tagName === 'FRAGMENT' ? child.children : [child])); }
   focus() {}
   addEventListener() {}
+  contains(node) { return this === node || this.children.some(child => child.contains(node)); }
   querySelector(selector) { return this.querySelectorAll(selector)[0] || null; }
   querySelectorAll(selector) {
     return this.children.flatMap((child) => {
@@ -69,13 +73,14 @@ export async function editorHarness(overrides = {}) {
     createDocumentFragment: () => new Element('fragment'),
   };
   const context = vm.createContext({
-    URL, Set, Map, console, setTimeout, clearTimeout, setInterval, clearInterval, document,
+    URL, Set, Map, console, setTimeout, clearTimeout, setInterval, clearInterval, document, AbortController,
     location: { href: 'http://127.0.0.1/web/?mode=edit', search: '?mode=edit' },
     history: { replaceState() {} },
     localStorage: { getItem: () => null, setItem() {} },
     window: { confirm: () => false },
     API_PATHS, API_ERRORS, API_RESPONSE, getCreatePathError, normalizeDocumentVersion, getDocTemplate, DOC_TYPE_TEMPLATE_DEFS, createBlockDraft, serializeBlockDraft, serializeSourceDraft,
-    t, localize, getLanguage, onLanguageChange, translatePage, translateMessage,
+    t, localize, getLanguage, onLanguageChange, translatePage, translateMessage, asUiMessage, diagnosticMessage, isComposingInput, createFieldEditor,
+    refreshHeroBannerLabels() {},
     toDisplayValue: (value) => String(value ?? ''),
     getDisplayCategory: (doc) => doc?.category || 'other',
     getDocListButtonCacheVersion: () => 0,

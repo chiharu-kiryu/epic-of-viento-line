@@ -76,6 +76,8 @@ function blockStats(blocks) {
 
 function parseTextContent(rawText, relPath = '', options = {}) {
   const lines = rawText.replace(/^\uFEFF/, '').replace(/\r\n|\r/g, '\n').split('\n');
+  // Only draft editing needs offsets. Keep the normal index format unchanged.
+  const sourceLines = options.captureSourceRanges ? [...rawText.matchAll(/[^\r\n]*(?:\r\n|\r|\n|$)/g)].filter(match => match[0]) : [];
   const firstIndex = lines.findIndex((line) => line.trim());
   const first = lines[firstIndex] || '';
   const firstHeading = isHeaderLine(first);
@@ -166,6 +168,7 @@ function parseTextContent(rawText, relPath = '', options = {}) {
     const kv = readKv(line);
     if (kv) {
       flushParagraph();
+      const startLine = i;
       const values = kv.value ? [kv.value] : [];
       i += 1;
       while (i < lines.length && lines[i].trim()) {
@@ -176,7 +179,16 @@ function parseTextContent(rawText, relPath = '', options = {}) {
       }
       const value = values.join('\n').trim();
       pushKvField(fields, kv.key, value, sections);
-      blocks.push({ type: 'kv', key: kv.key, value });
+      const block = { type: 'kv', key: kv.key, value };
+      if (options.captureSourceRanges) {
+        const first = sourceLines[startLine], last = sourceLines[i - 1];
+        const start = first.index + first[0].search(/[:：]/) + 1;
+        const end = last.index + last[0].replace(/[\r\n]+$/, '').length;
+        const rawValue = rawText.slice(start, end);
+        const leading = rawValue.match(/^\s*/)[0].length;
+        block.sourceRange = [start + leading, Math.max(start + leading, end - rawValue.match(/\s*$/)[0].length)];
+      }
+      blocks.push(block);
       continue;
     }
     if (isListLine(line)) {

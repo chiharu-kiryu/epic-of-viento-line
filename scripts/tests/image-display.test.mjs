@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fixture, write, serve } from './helpers.mjs';
 import { registerWorkspace, readRegistry } from '../lib/workspace.mjs';
 import { Element, editorHarness } from './editor-harness.mjs';
+import { applyLanguage } from '../../web/i18n/index.js';
 
 const elements = new Map();
 globalThis.location = { href: 'http://127.0.0.1/web/', origin: 'http://127.0.0.1' };
@@ -17,12 +18,32 @@ globalThis.document = {
   createDocumentFragment: () => new Element('fragment'),
 };
 const helpers = await import('../../web/modules/app-helpers.js');
-const { renderHeroBanner } = await import('../../web/modules/app-render.js');
+const { renderHeroBanner, refreshHeroBannerLabels } = await import('../../web/modules/app-render.js');
 
 function hero(overrides = {}) {
   return { category: 'hero', path: 'hero/力量/测试角色', title: '测试角色', name: '测试角色',
     meta: {}, fields: {}, heroImages: [], heroSkills: [{ key: '技能1', name: '斩击' }], ...overrides };
 }
+
+test('cover interface labels switch language without changing authored names or replacing the image', t => {
+  t.after(() => applyLanguage('zh-CN'));
+  const doc = hero({ title: '场景と保存 {0}', name: '场景と保存 {0}' });
+  renderHeroBanner(doc);
+  // The initial render caches image ordering; changing language must leave
+  // both the authored fields and the populated render cache untouched.
+  const before = JSON.stringify(doc);
+  const banner = elements.get('heroBanner'), image = banner.querySelector('img'), source = image.src;
+  for (const [locale, alt, category] of [
+    ['en', 'Placeholder cover for 场景と保存 {0}', 'Category:'],
+    ['ja', '「场景と保存 {0}」の仮の表紙', 'カテゴリー：'],
+    ['zh-CN', '《场景と保存 {0}》的封面占位图', '分类：'],
+  ]) {
+    applyLanguage(locale); refreshHeroBannerLabels(doc);
+    assert.equal(banner.querySelector('img'), image); assert.equal(image.src, source);
+    assert.equal(image.alt, alt); assert.ok(banner.querySelector('.hero-category').textContent.startsWith(category));
+    assert.equal(JSON.stringify(doc), before);
+  }
+});
 
 async function render(surface, doc) {
   if (surface === 'cover') {

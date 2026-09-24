@@ -1,6 +1,7 @@
 import { timingSafeEqual } from 'node:crypto';
 import { readRequestJsonBody } from './doc-server.mjs';
 import fs from 'node:fs/promises';
+import { isSupportedLanguage } from '../../web/i18n/languages.js';
 
 function equalsSecret(value, expected) {
   if (typeof value !== 'string' || Buffer.byteLength(value) !== Buffer.byteLength(expected)) return false;
@@ -41,13 +42,13 @@ export function createDesktopSession(token = process.env.VIENTO_SESSION_TOKEN, {
             }
             catch (error) { if (error.code !== 'ENOENT') throw error; }
           }
-          if (!['zh-CN', 'en'].includes(language)) return reject(400, 'Invalid language preference');
+          if (!isSupportedLanguage(language)) return reject(400, 'Invalid language preference');
           res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
           res.end(JSON.stringify({ language })); return true;
         }
         if (req.method === 'POST') {
           const body = await readRequestJsonBody(req);
-          if (!body || !['zh-CN', 'en'].includes(body.language) || typeof body.id !== 'string' || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(body.id)) return reject(400, 'Invalid language preference');
+          if (!body || !isSupportedLanguage(body.language) || typeof body.id !== 'string' || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(body.id)) return reject(400, 'Invalid language preference');
           emit({ type: 'preferences', id: body.id, language: body.language });
           res.writeHead(204); res.end(); return true;
         }

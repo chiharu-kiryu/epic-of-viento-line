@@ -1,0 +1,58 @@
+{
+  "capturedAt": "2026-09-24T11:38:08.013613+00:00",
+  "baseCommit": "38c7f61d072798457c939f0ae0641da1a777a8f5",
+  "files": [
+    {
+      "path": "web/modules/app-keyboard.js",
+      "sha256": "726aa5c7b97bbff7d1550c8b47a7a9672427a6aa6e4ef40557af88c486ed0e27"
+    },
+    {
+      "path": "web/modules/app-runtime.js",
+      "sha256": "e730ed099e12dab21a975bc395156ce1d5e0ae2cc55c7c00a05ab0872cfd70ee"
+    },
+    {
+      "path": "web/modules/app-render.js",
+      "sha256": "da76d685f52d9603a0b12e39e418804fbaf8e71f80dbc993a16af0ba06328010"
+    },
+    {
+      "path": "web/modules/app-project-settings.js",
+      "sha256": "c3b4c54e4fda6c9b3fbd59c3f6baff63227e1bc3d287efb83a7d4907c855681f"
+    },
+    {
+      "path": "web/editor-layout.css",
+      "sha256": "6c52ddf9c615096be1b0002178cee3873fce4f9de7c9f223836a3f8f396c5e62"
+    },
+    {
+      "path": "web/i18n/en.js",
+      "sha256": "d5895075b742e7d0e188cd16dce653e762d1246c3ee4593b0b0dc37a5baf9572"
+    },
+    {
+      "path": "web/i18n/ja.js",
+      "sha256": "cfd8a56551024a61723f7aea1670f4dc79cd7f1c0c7ba40d8ea40ad8132b6a8b"
+    },
+    {
+      "path": "scripts/tests/editor-keyboard.test.mjs",
+      "sha256": "f904e0a9e59ab386a786116700ecee780aba5267d2757d0e8496add2565763a0"
+    },
+    {
+      "path": "scripts/tests/editor-dialogs.test.mjs",
+      "sha256": "14137acb2f8e0268039e1dd20a53d5d8d61ad708ffdb246b54f50a788d15bcce"
+    },
+    {
+      "path": "scripts/tests/editor-language.test.mjs",
+      "sha256": "ace1a14bf777fee8d51a13334ff91253bc00ce54398fd6773d4033113fd4d3d5"
+    },
+    {
+      "path": "scripts/tests/image-display.test.mjs",
+      "sha256": "8bf6ddd8984ce38fe1bf48125d6611ea125eaf7c84882a81ba20fd5fbc090736"
+    },
+    {
+      "path": "scripts/tests/editor-harness.mjs",
+      "sha256": "224382f37ca3cbe80f719105f87913296d72da866cc482d3a4f4087a410d85bc"
+    },
+    {
+      "path": "scripts/tests/dialog-harness.mjs",
+      "sha256": "a609e288277675010e3200ebfc02117800fe8d4b38c6dbc5d92e84a580ae7a83"
+    }
+  ]
+}

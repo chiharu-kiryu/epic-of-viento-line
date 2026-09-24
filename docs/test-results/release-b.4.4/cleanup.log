@@ -1,0 +1,5 @@
+
+> epic-of-viento-line@0.4.4 clean
+> node desktop/clean.mjs
+
+已清理 5 个构建目录：src-tauri/binaries, src-tauri/gen/schemas, desktop/resources, desktop/.cache, desktop/ui/i18n

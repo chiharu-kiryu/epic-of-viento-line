@@ -1,0 +1,6 @@
+{
+  "comparedTo": "docs/test-results/trilingual-2026-09-24/build-proof.json",
+  "checked": 132,
+  "changed": [],
+  "scope": "Native source and vendored dependencies; version manifests intentionally changed to 0.4.4."
+}
