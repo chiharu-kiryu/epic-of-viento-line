@@ -1,0 +1,104 @@
+{
+  "format": "viento-workflow-verification",
+  "version": 1,
+  "date": "2026-09-25",
+  "baseCommit": "ef1d703f9dcd0418cbad1326a5674729d516cda4",
+  "productVersion": "b.4.5",
+  "buildVersion": "0.4.5",
+  "published": false,
+  "sourceFingerprints": "source-fingerprints.json",
+  "fingerprintedFiles": 385,
+  "changes": [
+    "Bound complete HTTP file streams to release completed export slots without an extra EOF read.",
+    "Handle Android system bars and keyboard insets; allow the mobile writing surface to scroll.",
+    "Defer archive picker replies until Activity resume, then post to the UI thread."
+  ],
+  "application": {
+    "runtime": "bundled Node 24.20.0",
+    "javascriptSyntaxFiles": 191,
+    "tests": 648,
+    "passed": 648,
+    "failed": 0,
+    "skipped": 0,
+    "log": "../export-finish-b.4.5/application.log",
+    "focusedPassed": 58,
+    "deterministicDownloadRegressions": {
+      "beforeFailed": 2,
+      "afterPassed": 2
+    }
+  },
+  "linux": {
+    "environment": "Ubuntu 24.04 x86_64, WebKitGTK 2.52.6, tauri-driver 2.0.6, isolated debug build",
+    "flows": [
+      {
+        "name": "legacy",
+        "passed": true,
+        "milestones": 10,
+        "log": "../native-b.4.5/legacy.log"
+      },
+      {
+        "name": "generic",
+        "passed": true,
+        "milestones": 12,
+        "log": "../native-b.4.5/generic.log"
+      },
+      {
+        "name": "library",
+        "passed": true,
+        "milestones": 5,
+        "log": "../native-b.4.5/library.log"
+      },
+      {
+        "name": "generic-fields",
+        "passed": true,
+        "milestones": 17,
+        "log": "../native-b.4.5/generic-fields.log"
+      }
+    ],
+    "runtimeProof": {
+      "runtimeFilesMatched": 385,
+      "docServerSha256": "1cc77481b01923ae2807138df6c2b5ba04facd0aa8452c336500b54a9a447039",
+      "binarySha256": "0d17b1ae936cfb25af74d149bf3e1ec407717aa5b54e4a00a7fd6972a3b3b566",
+      "bundledNodeSha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+    },
+    "mediaAudioMuted": true
+  },
+  "android": {
+    "environment": "isolated Pixel 2 emulator, Android 15 API 35, WebView 124, 1080x1920",
+    "initialInstall": "released ARM64 debug APK via emulator native bridge",
+    "finalInstall": "x86_64 debug APK, install -r",
+    "finalApk": "../android-device-b.4.5/final-apk.json",
+    "keyboardAndStatusBarPassed": true,
+    "fieldKeyboardViewportHeight": {
+      "closed": 684,
+      "open": 420
+    },
+    "sourceKeyboardViewportHeight": 376,
+    "existingDocumentDraftRecovered": true,
+    "newDocumentDraftRecoveredAfterSystemBack": true,
+    "threeLanguageDraftPreservation": true,
+    "nativePickerCancelChecks": 20,
+    "duplicateImportProtected": true,
+    "corruptArchiveRetryPassed": true,
+    "updatePreservedFiles": 18,
+    "finalDesktopRoundtrip": "../android-device-b.4.5/final-desktop-roundtrip.json",
+    "roundtripFiles": 18,
+    "unchangedRoundtripFiles": 17,
+    "expectedSourceChange": "Traveler: 100 → 200, with BOM/CRLF preserved",
+    "finalDataProof": "../android-device-b.4.5/final-data-proof.json",
+    "transferStagingEmpty": true,
+    "physicalDevice": false,
+    "androidMediaDecodeTested": false
+  },
+  "notCovered": [
+    "Physical Android devices, API 26/36 and vendor variants",
+    "Chinese/Japanese composing keyboards",
+    "OS low-memory reclaim, process death during archive copy, full storage",
+    "Cloud/removable document providers and revoked URI permissions",
+    "Real large-workspace end-to-end migration",
+    "Windows/macOS native host and installer upgrade",
+    "Physical audio devices and unplug/replug",
+    "Legacy maintenance commands not rerun in this round"
+  ],
+  "cleanup": "cleanup.json"
+}

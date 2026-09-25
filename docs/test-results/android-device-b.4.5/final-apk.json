@@ -1,0 +1,13 @@
+{
+  "file": "src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk",
+  "bytes": 53190939,
+  "sha256": "a8f993879ded0892d323f24747a1a2e27f6204fbea61cf3f6810fa095b526d59",
+  "abis": [
+    "x86_64"
+  ],
+  "nativeLibraries": [
+    "lib/x86_64/libviento_studio.so"
+  ],
+  "buildLog": "build-picker-resume.log",
+  "installation": "adb install -r, Success; existing app data retained"
+}

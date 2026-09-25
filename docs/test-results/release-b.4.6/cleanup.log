@@ -1,0 +1,5 @@
+
+> epic-of-viento-line@0.4.6 clean
+> node desktop/clean.mjs
+
+已清理 18 个构建目录：src-tauri/binaries, src-tauri/gen/schemas, desktop/resources, desktop/.cache, desktop/ui/i18n, mobile/dist, src-tauri/gen/android/.gradle, src-tauri/gen/android/build, src-tauri/gen/android/app/build, src-tauri/gen/android/buildSrc/build, src-tauri/gen/android/buildSrc/.gradle, src-tauri/gen/android/app/src/main/jniLibs, src-tauri/gen/android/app/src/main/java/io/viento/studio/generated, src-tauri/gen/android/app/src/main/assets/tauri.conf.json, src-tauri/gen/android/app/proguard-tauri.pro, src-tauri/gen/android/app/tauri.build.gradle.kts, src-tauri/gen/android/app/tauri.properties, src-tauri/gen/android/tauri.settings.gradle

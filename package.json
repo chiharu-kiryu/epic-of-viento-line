@@ -31,5 +31,5 @@
     "@tauri-apps/cli": "2.11.4",
     "acorn": "8.18.0"
   },
-  "version": "0.4.5"
+  "version": "0.4.6"
 }

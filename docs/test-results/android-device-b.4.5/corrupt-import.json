@@ -1,0 +1,11 @@
+{
+  "status": "Cannot read this archive. Select a complete Viento ZIP project archive.",
+  "disabled": false,
+  "retryVisible": true,
+  "works": [
+    "Android Keyboard Test",
+    "Android Transfer Test"
+  ],
+  "action": "import",
+  "selected": "not-a-project.zip"
+}

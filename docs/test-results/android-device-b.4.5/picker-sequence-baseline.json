@@ -1,0 +1,28 @@
+[
+  {
+    "status": "Transfer cancelled.",
+    "disabled": false,
+    "retryVisible": false,
+    "works": [
+      "Android Transfer Test"
+    ],
+    "action": "export",
+    "selected": null
+  },
+  {
+    "status": "Transfer cancelled.",
+    "disabled": false,
+    "retryVisible": false,
+    "works": [
+      "Android Transfer Test"
+    ],
+    "action": "import",
+    "selected": null
+  },
+  {
+    "status": "Preparing the project archive. Choose a save location when prompted.",
+    "disabled": true,
+    "action": "export",
+    "selected": null
+  }
+]

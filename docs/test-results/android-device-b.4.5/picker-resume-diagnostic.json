@@ -1,0 +1,12 @@
+{
+  "observed": "After cancelling picker, native transfer staging was removed but the WebView remained busy with two pending callback IDs. A read-only mobile_storage list probe delivered both its own response and the previously queued cancellation.",
+  "sequence": [
+    "export cancel passed",
+    "import cancel passed",
+    "export cancel stuck for more than 8 seconds"
+  ],
+  "afterReadProbe": {
+    "status": "Transfer cancelled.",
+    "pendingCallbacks": 0
+  }
+}

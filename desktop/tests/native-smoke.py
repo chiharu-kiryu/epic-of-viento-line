@@ -7,6 +7,7 @@ Set VIENTO_TEST_SCREENSHOT_DIR explicitly to retain screenshots after the test.
 Media checks require ffmpeg with PNG, VP8, H.264, MP3, Vorbis, Opus, FLAC and AAC encoders.
 Set VIENTO_TEST_GENERIC_CREATE to the workspace-archive example executable to
 exercise new generic projects, project templates and a complete backup restore.
+Set VIENTO_TEST_FIELDS to exercise native field editing in the generic project.
 """
 import base64
 import http.client
@@ -572,6 +573,30 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
             click('#docSaveBtn')
             wait_for(lambda: script('return !document.querySelector("#workspaceShell").classList.contains("is-creating") && !document.querySelector("#docSaveBtn").disabled && !document.querySelector("#docEditDirtyIndicator").classList.contains("is-unsaved")'))
             assert species_source.read_text() == species_draft
+            species_quantity = '2'
+            if os.environ.get('VIENTO_TEST_FIELDS'):
+                before_fields = species_source.read_bytes()
+                metadata_before = {file.name: file.read_bytes() for file in (workspace / 'metadata/documents').glob('*.json')}
+                click('#docEditFieldModeBtn')
+                wait_for(lambda: script('return !!document.querySelector("#docFieldEditor .doc-field-input")'))
+                script('window.nativeField=[...document.querySelectorAll(".doc-field-row")].find(row=>row.textContent.includes("灵魂数量")).querySelector(".doc-field-input");window.nativeField.value="9";window.nativeField.dispatchEvent(new Event("input",{bubbles:true}));return true')
+                assert species_source.read_bytes() == before_fields
+                for language in ['ja', 'en', 'zh-CN']:
+                    switch_language(language)
+                    assert script('return window.nativeField.isConnected && window.nativeField.value === "9"')
+                click('#docEditSourceModeBtn')
+                assert '灵魂数量: 9' in script('return document.querySelector("#docSourceEditor").value')
+                click('#docEditFieldModeBtn')
+                wait_for(lambda: script('return [...document.querySelectorAll(".doc-field-row")].some(row=>row.textContent.includes("灵魂数量") && row.querySelector(".doc-field-input")?.value === "9")'))
+                click('#docSaveBtn')
+                expected_fields = before_fields.replace('灵魂数量: 2'.encode(), '灵魂数量: 9'.encode())
+                assert expected_fields != before_fields
+                wait_for(lambda: species_source.read_bytes() == expected_fields)
+                wait_for(lambda: script('return !document.querySelector("#docEditDirtyIndicator").classList.contains("is-unsaved") && !document.querySelector("#docSaveBtn").disabled'))
+                assert {file.name: file.read_bytes() for file in (workspace / 'metadata/documents').glob('*.json')} == metadata_before
+                (screenshots / 'desktop-native-fields.png').write_bytes(base64.b64decode(command('GET', '/screenshot')))
+                species_quantity = '9'
+                print('PASS: native field edit → three languages retain draft → source/field switch → save → exact YAML bytes and metadata retained', flush=True)
             click('#docEditBtn')
             wait_for(lambda: script('return !document.querySelector("#workspaceShell").classList.contains("is-writing")'))
             index = json.loads((private / 'cache/indexes/documents.json').read_text())
@@ -582,7 +607,7 @@ with tempfile.TemporaryDirectory(prefix='viento-native-e2e-') as directory:
             script('[...document.querySelectorAll("#categoryTabs button")].find(node => node.textContent.startsWith("种族")).click();return true')
             wait_for(lambda: script('return document.querySelectorAll("#docList button[data-path-key]").length === 1'))
             assert script('return document.querySelector("#docList button[data-path-key]").title') == '星裔'
-            assert script('return [...document.querySelectorAll(".document-field-label")].find(node => node.textContent === "灵魂数量").nextElementSibling.textContent') == '2'
+            assert script('return [...document.querySelectorAll(".document-field-label")].find(node => node.textContent === "灵魂数量").nextElementSibling.textContent') == species_quantity
             (screenshots / 'desktop-generic-species.png').write_bytes(base64.b64decode(command('GET', '/screenshot')))
             script('[...document.querySelectorAll("#categoryTabs button")].find(node => node.textContent.startsWith("全部")).click();return true')
             select_document('旅人')

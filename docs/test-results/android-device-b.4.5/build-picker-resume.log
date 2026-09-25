@@ -1,0 +1,42 @@
+
+> epic-of-viento-line@0.4.5 tauri
+> tauri android build --target x86_64 --apk --debug --ci
+
+        Info Using installed NDK: /home/chiharukiryu/Android/Sdk/ndk/28.0.13004108
+        Info Looking up installed tauri packages to check mismatched versions...
+     Running beforeBuildCommand `node mobile/prepare.mjs`
+Mobile resources prepared: b.4.5 (no Node executable or workspace data)
+[1m[92m   Compiling[0m viento-studio v0.4.5 (/home/chiharukiryu/cdev/epic-of-viento-line/src-tauri)
+[1m[92m    Finished[0m `dev` profile [unoptimized] target(s) in 4.25s
+        Info symlinking lib "/tmp/viento-chain-b45-4s_r2jaq/target/x86_64-linux-android/debug/libviento_studio.so" in jniLibs dir "/home/chiharukiryu/cdev/epic-of-viento-line/src-tauri/gen/android/app/src/main/jniLibs/x86_64"
+        Info "/tmp/viento-chain-b45-4s_r2jaq/target/x86_64-linux-android/debug/libviento_studio.so" requires shared lib "libandroid.so"
+        Info "/tmp/viento-chain-b45-4s_r2jaq/target/x86_64-linux-android/debug/libviento_studio.so" requires shared lib "libdl.so"
+        Info "/tmp/viento-chain-b45-4s_r2jaq/target/x86_64-linux-android/debug/libviento_studio.so" requires shared lib "liblog.so"
+        Info "/tmp/viento-chain-b45-4s_r2jaq/target/x86_64-linux-android/debug/libviento_studio.so" requires shared lib "libm.so"
+        Info "/tmp/viento-chain-b45-4s_r2jaq/target/x86_64-linux-android/debug/libviento_studio.so" requires shared lib "libc.so"
+        Info symlink at "/home/chiharukiryu/cdev/epic-of-viento-line/src-tauri/gen/android/app/src/main/jniLibs/x86_64/libviento_studio.so" points to "/tmp/viento-chain-b45-4s_r2jaq/target/x86_64-linux-android/debug/libviento_studio.so"
+Picked up JAVA_TOOL_OPTIONS: -Dhttps.proxyHost=localhost -Dhttps.proxyPort=7890 -Dhttp.proxyHost=localhost -Dhttp.proxyPort=7890 -Dhttp.nonProxyHosts=localhost|127.*|[::1]
+
+> epic-of-viento-line@0.4.5 tauri
+> tauri android android-studio-script --target x86_64
+
+        Info connection; remote_addr=127.0.0.1:42562 conn_id=0
+[1m[32m        Info[0m Using installed NDK: /home/chiharukiryu/Android/Sdk/ndk/28.0.13004108
+[1m[92m    Finished[0m `dev` profile [unoptimized] target(s) in 0.63s
+[1m[32m        Info[0m symlinking lib "/tmp/viento-chain-b45-4s_r2jaq/target/x86_64-linux-android/debug/libviento_studio.so" in jniLibs dir "/home/chiharukiryu/cdev/epic-of-viento-line/src-tauri/gen/android/app/src/main/jniLibs/x86_64"
+[1m[32m        Info[0m "/tmp/viento-chain-b45-4s_r2jaq/target/x86_64-linux-android/debug/libviento_studio.so" requires shared lib "libandroid.so"
+[1m[32m        Info[0m "/tmp/viento-chain-b45-4s_r2jaq/target/x86_64-linux-android/debug/libviento_studio.so" requires shared lib "libdl.so"
+[1m[32m        Info[0m "/tmp/viento-chain-b45-4s_r2jaq/target/x86_64-linux-android/debug/libviento_studio.so" requires shared lib "liblog.so"
+[1m[32m        Info[0m "/tmp/viento-chain-b45-4s_r2jaq/target/x86_64-linux-android/debug/libviento_studio.so" requires shared lib "libm.so"
+[1m[32m        Info[0m "/tmp/viento-chain-b45-4s_r2jaq/target/x86_64-linux-android/debug/libviento_studio.so" requires shared lib "libc.so"
+
+[Incubating] Problems report is available at: file:///home/chiharukiryu/cdev/epic-of-viento-line/src-tauri/gen/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+    Finished 1 APK at:
+        /home/chiharukiryu/cdev/epic-of-viento-line/src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk
+

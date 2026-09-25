@@ -134,6 +134,36 @@ for (const kind of ['document', 'workspace']) test(`three segmented ${kind} down
   `);
 });
 
+for (const kind of ['document', 'workspace']) test(`a complete ${kind} download releases capacity without waiting for an extra EOF read`, async (t) => {
+  await run(t, `
+    const options = ${JSON.stringify({ kind, format: 'html', path: 'documents/角色.md' })};
+    const [job] = await fill(options), file = service.get(job.id).file, expected = await fs.readFile(file);
+    const gate = deferred(), closed = deferred(), open = fs.open;
+    // A client may close after receiving Content-Length bytes. Hold only an
+    // extra EOF read so this ordering is reproducible without timing sleeps.
+    fs.open = async (name, ...args) => {
+      const handle = await open(name, ...args);
+      if (String(name) === file) {
+        const read = handle.read.bind(handle); let received = 0;
+        handle.read = async (...args) => {
+          if (received >= expected.length) await gate.promise;
+          const result = await read(...args); received += result.bytesRead; return result;
+        };
+      }
+      return handle;
+    };
+    const pending = begin(job, { Connection: 'close' });
+    onClose = url => { if (url.searchParams.get('testRequest') === pending.id) closed.resolve(); };
+    try {
+      const response = await pending.response; assert.equal(response.status, 200);
+      const bytes = Buffer.from(await response.arrayBuffer()); assert.deepEqual(bytes, expected); checkZip(bytes);
+      await closed.promise;
+    } finally { gate.resolve(); fs.open = open; await pending.done; onClose = null; }
+    await create(options);
+    assert.throws(() => service.get(job.id), { statusCode: 410 });
+  `);
+});
+
 test('overlapping repeated and out-of-order ranges only free a slot after the final gap is filled', async (t) => {
   await run(t, String.raw`
     const [job] = await fill(), expected = await fs.readFile(service.get(job.id).file), split = Math.floor(job.bytes / 2);

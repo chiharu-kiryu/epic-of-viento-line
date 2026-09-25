@@ -1,0 +1,10 @@
+{
+  "status": "This work already exists on this device. Existing content was not overwritten.",
+  "disabled": false,
+  "retryVisible": true,
+  "works": [
+    "Android Transfer Test"
+  ],
+  "action": "import",
+  "selected": "viento-v3.zip"
+}

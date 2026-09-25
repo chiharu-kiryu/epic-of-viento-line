@@ -1,0 +1,5 @@
+PASS: cancel name form / native creation picker; invalid name reports failure without creating files; retry remains available
+PASS: real GTK creation → empty generic editor; active session blocks create/open/import before any picker, registration or file creation
+PASS: open cancellation / invalid folder / successful open and deduplication; backup cancel / forbidden destination / retry → verified complete ZIP
+PASS: cancel both import pickers → no writes; damaged archive → rollback and records preserved; retry → auto-open restored project with byte-identical sources/templates/metadata/media
+PASS: English native folder picker and cancellation; two independent project copies remain registered; all test processes and files are isolated

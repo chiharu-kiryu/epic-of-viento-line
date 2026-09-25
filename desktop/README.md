@@ -1,6 +1,6 @@
 # Viento Studio 桌面版
 
-当前发布版本 **b.4.5**，内部安装版本 **0.4.5**；测试版 `b.X.Y` 对应 `0.X.Y`，X、Y 均为 0–9，`b.9.9` 的下一版为正式版 `1.0.0`。更新内容、历史安装包编号兼容说明与统一命名见 [发布记录与版本规则](../docs/RELEASE_b.4.5.md)。
+当前发布版本 **b.4.6**，内部安装版本 **0.4.6**；测试版 `b.X.Y` 对应 `0.X.Y`，X、Y 均为 0–9，`b.9.9` 的下一版为正式版 `1.0.0`。更新内容见 [发布记录](../docs/RELEASE_b.4.6.md)。
 
 Linux GTK/WebKit 使用仓库内的 glib 安全修复副本，构建及源码迁移需要完整保留 `src-tauri/vendor`。补丁来源、兼容原因和优化回归见 [安全修复记录](../docs/SECURITY_GLIB_b.2.9.md)。
 
@@ -20,11 +20,11 @@ Linux GTK/WebKit 使用仓库内的 glib 安全修复副本，构建及源码迁
 
 作品库最近记录位于系统应用数据目录下的 `io.viento.studio/library.json`。一次桌面会话打开一个作品库；返回首页保留编辑草稿，切换作品前需保存并关闭当前编辑窗口。
 
-详细的目录、登记命令和已实现边界见 [作品库布局](../docs/WORKSPACE_LAYOUT.md)。本机的 `dist/current/` 保存已构建的 Linux x86_64 便携包、源码归档和校验记录，具体版本以交付文件名和校验记录为准。作品迁移包保存到应用数据目录的 `backups/`；修复内容见 [故障记录](../docs/BUGFIX_0.2.1.md)。旧版程序在新包验证后删除。
+详细目录、登记命令和已实现边界见 [作品库布局](../docs/WORKSPACE_LAYOUT.md)。用户操作见 [项目工作流](../docs/PROJECT_WORKFLOW.md)，各平台已测范围见 [验证指南](../docs/TESTING.md)。`dist/` 是本机构建交付目录，不随 Git 克隆提供现成安装包。
 
 ## 开发和打包
 
-构建机需要 Node.js、Rust 稳定版及 [Tauri 系统依赖](https://v2.tauri.app/start/prerequisites/)。
+构建机建议使用 Node.js 24，并需要 Rust 稳定版及 [Tauri 系统依赖](https://v2.tauri.app/start/prerequisites/)。
 
 ```sh
 npm ci
@@ -37,9 +37,9 @@ npm run desktop:dev
 npm run desktop:build
 ```
 
-构建前会自动准备应用资源并下载官方 Node.js 二进制。运行时及许可文本的 SHA-256 固定在 `desktop/node-runtime.json`。下载支持重试，校验后的缓存位于 `desktop/.cache`；只有脚本、前端、通用格式定义与 YAML 依赖进入 `desktop/resources`，约 3 GB 的大型素材无需随每次应用升级重新分发。
+构建前会自动准备应用资源并下载官方 Node.js 二进制。运行时及许可文本的 SHA-256 固定在 `desktop/node-runtime.json`。下载支持重试，校验后的缓存位于 `desktop/.cache`；只有脚本、前端、通用格式定义与运行依赖进入 `desktop/resources`，作品正文、模板、登记与素材不进入程序包，无需随应用升级重新分发。
 
-输出位于 `src-tauri/target/release/bundle`，构建脚本将完成的安装包改为 `VERSION` 中的发布编号，例如 `Viento-Studio_b.4.5_amd64.AppImage`。Linux 可指定 `--bundles deb,appimage`，Windows 使用 `--bundles nsis`，macOS 使用 `--bundles dmg`。跨平台发行应分别在目标系统构建；仓库中的 **Build desktop installers** 工作流可手动生成三端产物，仅上传工作流构件，不自动发布版本。
+默认输出位于 `src-tauri/target/release/bundle`；设置 `CARGO_TARGET_DIR` 时位于该目录的 `release/bundle`。构建脚本将完成的安装包改为 `VERSION` 中的发布编号，例如 `Viento-Studio_b.4.6_amd64.AppImage`。Linux 可指定 `--bundles deb,appimage`，Windows 使用 `--bundles nsis`，macOS 使用 `--bundles dmg`。跨平台发行应分别在目标系统构建；仓库中的 **Build desktop installers** 工作流可手动生成三端产物，仅上传工作流构件，不自动发布版本。
 
 每次 Linux 打包前会重建生成用的 `.AppDir` 目录，避免 GTK 打包插件因旧链接残留而使第二次构建失败。Rust 编译缓存、已生成的安装包及作品库不在此清理范围内。
 
@@ -51,9 +51,11 @@ macOS 公共发行还需要开发者签名与公证，Windows 公共发行建议
 
 ## 交付与清理
 
-交付目录使用 `dist/current/`。程序便携包可以单独分发；整库迁移包是当前作品的一份完整备份，更新程序不必重新复制素材。迁移到另一台机器时，复制程序交付目录，并携带应用数据目录 `backups/` 中的作品迁移包及校验文件；分别核对 `SHA256SUMS`，再启动程序并导入 `.viento.zip`。此目录不另套一层包含全部文件的大压缩包，避免重复占用素材空间。
+程序安装包、应用源码包和作品迁移包分别交付。安装包只负责运行程序；源码包用于开发恢复；`.viento.zip` 才是可继续编辑的完整作品备份。更新程序不需要重新复制作品素材。
 
-本机保留一种 Linux 发行格式 AppImage（约 124 MB），以及应用数据目录中一份约 3.16 GB 的完整作品 ZIP；源码仓库内没有作品数据副本。源码归档仅含程序、测试、说明、构建配置与依赖锁文件，可独立重新构建；不重复包含作品、Git 对象库、依赖安装目录或生成文件。`dist/current/README.md` 提供启动、恢复和开发恢复步骤。
+可把验证过的安装包和源码归档整理到本机 `dist/current/`，Android 调试预览包可放在 `dist/android-preview/`。这些目录不是已发布文件的在线下载地址。文件名包含版本，交付时一并提供摘要与对应验证记录；换机后核验作品包，再从首页导入。新产物确认可用后再清理不需要的旧产物。
+
+源码归档只包含程序、测试、文档、构建配置与依赖锁文件，排除作品、Git 对象库、依赖安装目录、设备本机配置、密钥和生成文件。它包含 `src-tauri/vendor` 中的 Linux 依赖修复，以及受版本控制的 Android 源工程。
 
 生成源码归档（开发机需要 Python 3.9+）：
 
@@ -68,7 +70,9 @@ npm run clean -- --dry-run
 npm run clean
 ```
 
-`clean` 只删除 `src-tauri/target/`、`src-tauri/binaries/`、`src-tauri/gen/schemas/`、`desktop/resources/`、`desktop/.cache/` 和生成的 `desktop/ui/i18n/`。它检查父路径链接以及默认作品、外置素材与构建目录的重叠；作品、现用索引、迁移包、源代码、`node_modules/` 和 Git 历史均保留。执行前退出桌面应用并等待构建结束；下次桌面启动或构建会重新准备资源和编译。
+`clean` 清理固定的桌面和移动生成路径，包括默认 Rust 编译目录、Node sidecar、准备资源、`mobile/dist/`、Gradle 项目缓存、JNI 库和自动生成的 Android 配置 / Kotlin 文件；保留受版本控制的 Android 工程。完整路径清单见 [清理实现](clean.mjs)。自定义 `CARGO_TARGET_DIR`、全局 SDK / Gradle / Cargo 缓存不在清理范围内。
+
+清理前退出测试应用并等待构建结束。程序会检查父目录链接及作品 / 外置素材与目标路径重叠，保留作品、备份、应用设置、`dist/`、源代码、`node_modules/` 和 Git 历史。下次运行或构建会重新准备资源。
 
 需要在命令行操作归档时，可调用与桌面界面相同的 Rust 导入导出实现：
 
@@ -84,13 +88,13 @@ cargo run --manifest-path src-tauri/Cargo.toml --release --example workspace-arc
 
 导出和导入都会核对登记的正文、素材绑定与已有素材指纹；不能用包自身的校验和掩盖不一致的登记。路径按每层目录检查大小写、Unicode 等价写法及文件/目录冲突，冲突时保留原文件并报错。原生备份在写入前记录文件快照，发布前再次核对文件、项目清单与外置素材根。
 
-编译好 `workspace-archive` 后，可设置 `VIENTO_TEST_ARCHIVE_BINARY=/完整路径/workspace-archive` 运行 `npm run check -- --app-only`，补齐 v2/v3 包在 Node 与 Rust 间的往返验证，以及损坏登记的拒绝、失败清理和重试；未设置时这两组原生归档检查会明确跳过。全部测试样本使用临时目录。
+编译好 `workspace-archive` 后，可设置 `VIENTO_TEST_ARCHIVE_BINARY=/完整路径/workspace-archive` 运行 `npm run check -- --app-only`，补齐 v2/v3 包在 Node 与 Rust 间的往返验证，以及损坏登记的拒绝、失败清理和重试；未设置时对应原生归档检查会明确跳过。移动存储联调另需 `VIENTO_MOBILE_STORE_BIN`，完整命令见 [验证指南](../docs/TESTING.md)。全部测试样本使用临时目录。
 
 ## 验证
 
-本次升版前的 Linux 原生窗口实测过程、截图及覆盖边界见 [b.2.8.1 开发阶段桌面实测](../docs/NATIVE_WORKFLOW_TEST_b.2.8.1.md)；报告保留实测时的版本和指纹，相关修复统一收录于 b.2.9。
+最近的四组 Linux 原生流程、字段与三语、媒体播放及 Android 模拟器互通见 [b.4.5 工作树补测](../docs/WORKFLOW_VERIFICATION_b.4.5.md)，修复收录于 b.4.6。每份报告保留实测时的版本和指纹；当前发布检查及未测平台见 [验证指南](../docs/TESTING.md)。
 
-作品库首页的原生目录选择、备份和恢复另见 [作品库实测](../docs/NATIVE_LIBRARY_TEST_b.2.8.1.md)。已有编辑窗口时，新建、打开其他作品和导入入口会禁用；宿主也在显示文件选择器和写入前检查，避免先创建或恢复作品再拒绝切换。当前作品仍可继续编辑或备份已保存内容。
+较早的作品库原生目录选择、备份和恢复细节见 [作品库实测](../docs/NATIVE_LIBRARY_TEST_b.2.8.1.md)。已有编辑窗口时，新建、打开其他作品和导入入口会禁用；宿主也在显示文件选择器和写入前检查，避免先创建或恢复作品再拒绝切换。当前作品仍可继续编辑或备份已保存内容。
 
 关闭编辑器时，宿主按请求 ID 读取正文和模板的草稿、忙碌状态。读取期间暂停页面输入；有草稿时由原生窗口确认，取消后恢复编辑。状态读取超过 5 秒或界面不完整时，提供可取消的原生恢复确认；等待用户决定本身没有超时。关闭确认期间不启动其他文件操作。
 

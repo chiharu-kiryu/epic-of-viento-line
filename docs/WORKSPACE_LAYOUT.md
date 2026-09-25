@@ -1,10 +1,10 @@
 # 作品库布局与数据契约
 
-应用版本 [b.2.8](RELEASE_b.2.8.md)。新建作品使用通用 v3 结构，包含项目可配置的文档类型与模板；目录分离、元数据登记、独立索引、外置素材绑定和完整备份已经实现。v1、v2 作品库及迁移包继续按原目录读取，不自动移动数据。
+当前格式与 [b.4.6](RELEASE_b.4.6.md) 对齐。新建作品使用通用 v3 结构，包含项目可配置的文档类型与模板；目录分离、元数据登记、独立索引、外置素材绑定和完整备份已经实现。v1、v2 作品库及迁移包继续按原目录读取，不自动移动数据。
 
 ## 程序与作品
 
-程序保留 `web/`、`scripts/`、`desktop/`、`src-tauri/` 和 `schemas/`。作品独立保存在系统应用数据目录的 `io.viento.studio/workspaces/`，完整备份放在同级 `backups/`；开发时读取应用配置目录中的 `viento.config.json`，不在源码仓库保存本机选择。详见 [本机数据目录](LOCAL_DATA_STORAGE.md)。`VIENTO_WORKSPACE_ROOT` 可以指定其他作品，`VIENTO_APP_ROOT` 可以指定程序位置。
+程序保留 `web/`、`engine/`、`scripts/`、`desktop/`、`mobile/`、`src-tauri/` 和 `schemas/`。作品独立保存在系统应用数据目录的 `io.viento.studio/workspaces/`，完整备份放在同级 `backups/`；开发时读取应用配置目录中的 `viento.config.json`，不在源码仓库保存本机选择。详见 [本机数据目录](LOCAL_DATA_STORAGE.md)。`VIENTO_WORKSPACE_ROOT` 可以指定其他作品，`VIENTO_APP_ROOT` 可以指定程序位置。
 
 应用安装资源包含代码、通用格式定义、界面资源和运行环境，不包含本作品的正文、模板、素材登记或素材原文件。桌面版新建空白作品，已有资料通过打开作品文件夹或完整迁移包导入。
 
@@ -21,7 +21,7 @@
 ├── assets/                        默认素材存储，可另行绑定外置目录
 │   ├── images/
 │   ├── videos/
-│   ├── media/                    编辑器新导入的 images/ 和 videos/
+│   ├── media/                    编辑器新导入的 images/、videos/ 和 audio/
 │   └── …                         保留既有分类；按实际类型扩展
 └── .viento/
     ├── workspace.json             旧版兼容标记，阻止旧程序漏备份元数据
@@ -38,7 +38,7 @@
 
 以上为新建 v3 项目。旧 v1、v2 项目的正文、模板目录仍是 `design-data/`、`data-template/`，内部层级保留。新建项目提供六个通用类型和模板，不预置作品内容，详见 [通用项目配置](GENERIC_PROJECTS.md)。
 
-整理时临时保留的 `.viento/cache/legacy-import/` 已在完整恢复验证后删除。原始文件哈希清单继续用于回查；程序交付在 `dist/current/`，整库迁移包在应用数据目录 `backups/`，详见 [迁移记录](STRUCTURE_MIGRATION.md)。
+旧作品整理的文件校验与缓存回收见 [历史迁移记录](STRUCTURE_MIGRATION.md)。新环境不需要重复执行旧作品的搬迁；按清单打开作品或导入完整包即可。
 
 v1 清单位于 `.viento/workspace.json`；登记升级到 v2 后会写入根目录公共清单，将旧清单的原始字节保留到 `.viento/legacy/`，并在原位置写入旧版拒绝标记。当前程序以公共清单为准；公共清单丢失时不会把标记误当成作品身份。旧版 0.1.0 会拒绝打开带标记的 v2 作品，避免继续生成缺少元数据的旧式备份。
 

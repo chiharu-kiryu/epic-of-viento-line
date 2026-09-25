@@ -1,0 +1,32 @@
+{
+  "version": "b.4.6",
+  "files": [
+    ".github/CONTRIBUTING.md",
+    "README.md",
+    "desktop/README.md",
+    "docs/ARCHITECTURE.md",
+    "docs/AUDIO_RESOURCES.md",
+    "docs/EXPORT.md",
+    "docs/FIELD_EDITING.md",
+    "docs/FIELD_EDITING_b.4.3.md",
+    "docs/FUNCTION_NETWORK.md",
+    "docs/GENERIC_PROJECTS.md",
+    "docs/LANGUAGES.md",
+    "docs/LOCAL_DATA_STORAGE.md",
+    "docs/PROJECT_WORKFLOW.md",
+    "docs/README.md",
+    "docs/RELEASE_b.4.6.md",
+    "docs/TESTING.md",
+    "docs/WORKFLOW_VERIFICATION_b.4.5.md",
+    "docs/WORKSPACE_LAYOUT.md",
+    "docs/examples/README.md",
+    "mobile/README.md",
+    "scripts/README.md"
+  ],
+  "checkedLocalLinks": 657,
+  "missingLinks": [],
+  "balancedFences": true,
+  "parsedJsonFiles": 49,
+  "criticalFixSourceHashesUnchanged": true,
+  "codePathsVerifiedAgainstCurrentSource": true
+}

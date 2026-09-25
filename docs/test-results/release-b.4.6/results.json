@@ -1,0 +1,97 @@
+{
+  "recordedAt": "2026-09-25T03:38:22.714392+00:00",
+  "version": "b.4.6",
+  "buildVersion": "0.4.6",
+  "nextVersion": "b.4.7",
+  "baseCommit": "ef1d703f9dcd0418cbad1326a5674729d516cda4",
+  "application": {
+    "tests": 648,
+    "passed": 648,
+    "failed": 0,
+    "skipped": 0,
+    "syntaxFiles": 191,
+    "runtime": "v24.20.0",
+    "nativeArchiveEnabled": true,
+    "nativeMobileStorageEnabled": true,
+    "exitCode": 0,
+    "log": "application.log"
+  },
+  "native": {
+    "passed": 42,
+    "failed": 0,
+    "ignored": 1,
+    "groups": [
+      {
+        "passed": 36,
+        "failed": 0,
+        "ignored": 1
+      },
+      {
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      }
+    ],
+    "cargoLockedOffline": true,
+    "log": "native-tests-confirmed.log",
+    "buildLog": "native-build-confirmed.log",
+    "status": "native-status.json",
+    "ignoredReason": "Full-size migration requires VIENTO_TEST_SOURCE_ROOT; no daily workspace used."
+  },
+  "resources": {
+    "desktopFiles": 136,
+    "desktopRuntimeFiles": 385,
+    "desktopTranslationFiles": 8,
+    "mobileFiles": 137,
+    "staticMobileModuleReferences": 365,
+    "proof": "resources.json"
+  },
+  "android": {
+    "file": "dist/android-preview/Viento-Studio_b.4.6_android-arm64-debug.apk",
+    "version": "b.4.6",
+    "buildVersion": "0.4.6",
+    "versionCode": 4006,
+    "bytes": 30362852,
+    "sha256": "f0c26b1b205ecd7c7f8ae490546db084bdbb837168157161e50b54aa387413be",
+    "abi": "arm64-v8a",
+    "minSdk": 26,
+    "targetSdk": 36,
+    "nativeLibraryMatchesBuild": true,
+    "archiveTransferPluginInDex": true,
+    "mainActivityInDex": true,
+    "broadStoragePermissions": false,
+    "signing": "debug",
+    "physicalDeviceTested": false,
+    "releaseApkDeviceInteractionRerun": false
+  },
+  "developmentReport": "../../WORKFLOW_VERIFICATION_b.4.5.md",
+  "sourceContinuity": "source-continuity.json",
+  "documentation": {
+    "guide": "../../README.md",
+    "checks": "documentation.json"
+  },
+  "limits": [
+    "Linux native workflows and Android API 35 emulator interaction were verified on the pre-version-bump worktree; all three fix source hashes match.",
+    "The b.4.6 APK was built and inspected but not installed on a device in this release step.",
+    "No b.4.6 desktop installer, Windows/macOS native UI or physical Android device verification was performed.",
+    "Android media access/insertion/playback, project template settings and document sharing remain unimplemented.",
+    "Large workspaces, low-memory process reclamation, additional IMEs and third-party Android document providers need further testing."
+  ],
+  "cleanup": {
+    "generatedTargetsRemoved": 18,
+    "scratchRemoved": true,
+    "allocatedBytesRemoved": 3136888832,
+    "apparentBytesRemoved": 3110793216,
+    "proof": "cleanup.json"
+  }
+}

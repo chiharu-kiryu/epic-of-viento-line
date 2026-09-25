@@ -172,6 +172,7 @@ test('media responses identify their format and support bounded seeking without 
   const contents = Buffer.from('0123456789');
   const cases = [['clip.mp4', 'video/mp4'], ['sound.ogg', 'audio/ogg'], ['sound.opus', 'audio/ogg'], ['sound.oga', 'audio/ogg'], ['sound.m4a', 'audio/mp4'], ['sound.aac', 'audio/aac'], ['font.woff2', 'font/woff2'], ['icon.svg', 'image/svg+xml']];
   for (const [name] of cases) await write(root, 'assets/' + name, contents);
+  await write(root, 'assets/empty.mp4', '');
   const base = await serve(t, root);
   for (const [name, mime] of cases) {
     const response = await fetch(base + '/assets/' + name);
@@ -195,6 +196,12 @@ test('media responses identify their format and support bounded seeking without 
   assert.equal(head.status, 200);
   assert.equal(head.headers.get('content-length'), '10');
   assert.equal(await head.text(), '');
+  for (const options of [{}, { method: 'HEAD' }, { headers: { Range: 'bytes=0-' } }]) {
+    const empty = await fetch(base + '/assets/empty.mp4', options);
+    assert.equal(empty.status, options.headers ? 416 : 200);
+    assert.equal(empty.headers.get('content-length'), '0');
+    assert.equal(await empty.text(), '');
+  }
 });
 
 for (const external of [false, true])

@@ -1,0 +1,38 @@
+✖ complete body with a delayed EOF read stays reclaimable after the client closes (465.231769ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 526.513346
+
+✖ failing tests:
+
+test at ../../../../tmp/viento-chain-b45-4s_r2jaq/downloads-diagnostic.test.mjs:247:2
+✖ complete body with a delayed EOF read stays reclaimable after the client closes (465.231769ms)
+  Error: /home/chiharukiryu/.local/share/nodejs/node-v24.21.0-linux-x64/bin/node failed with exit code 1. node:internal/modules/run_main:107
+      triggerUncaughtException(
+      ^
+  
+  AssertionError [ERR_ASSERTION]: {"body":{"ok":false,"error":"请先下载或关闭已有导出，再继续","userMessage":{"key":"请先下载或关闭已有导出，再继续","values":[]},"errorCode":"export_failed"},"history":[{"method":"POST","url":"/api/export","status":200,"ended":true,"finished":false,"destroyed":false},{"method":"POST","url":"/api/export","status":200,"ended":true,"finished":false,"destroyed":false},{"method":"POST","url":"/api/export","status":200,"ended":true,"finished":false,"destroyed":false},{"method":"GET","url":"/api/export?id=f952b21b-1e99-4117-bb7c-485ea5b567df&testRequest=1","status":200,"ended":false,"finished":false,"destroyed":true},{"method":"POST","url":"/api/export","status":409,"ended":true,"finished":false,"destroyed":false}],"jobs":[{"id":"f952b21b-1e99-4117-bb7c-485ea5b567df","readers":0,"downloaded":false,"released":false},{"id":"b310e055-a2c7-4ee2-b2b6-9050e1fb4407","readers":0,"downloaded":false,"released":false},{"id":"3d55c27c-e1b2-4911-ae7c-de6af0880312","readers":0,"downloaded":false,"released":false}]}
+  
+  409 !== 200
+  
+      at create (file:///tmp/viento-test-kP5cmo/[eval1]:29:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async file:///tmp/viento-test-kP5cmo/[eval1]:100:7 {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 409,
+    expected: 200,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+  
+  Node.js v24.21.0
+      at ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+      at ChildProcess.emit (node:events:514:28)
+      at maybeClose (node:internal/child_process:1141:16)
+      at ChildProcess._handle.onexit (node:internal/child_process:306:5)

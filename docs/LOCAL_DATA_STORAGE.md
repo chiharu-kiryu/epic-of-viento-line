@@ -1,55 +1,63 @@
 # 本机数据目录
 
-2026-09-24 的[磁盘清理记录](DISK_OPTIMIZATION_2026-09-24.md)补充了网页响应缓存的范围及素材 `no-store` 策略。应用数据中的 `WebKitCache/` 是可再生成的响应副本；`workspaces/`、`backups/`、`localstorage/` 与其他浏览器存储不能一起当作缓存删除。
+作品、备份和应用偏好与程序分开保存。下文描述当前桌面 / 浏览器的默认位置；Android 使用应用私有目录，见末节。旧作品的实际搬迁与字节校验记录保存在 [结构迁移记录](STRUCTURE_MIGRATION.md)，不作为新安装必须执行的步骤。
 
-2026-09-09，b.2.8。正文、模板、元数据、素材和完整作品备份已从源码仓库移动到系统应用数据目录。本机路径配置留在应用配置目录，源码和安装包都不保存日常作品。
+## 桌面路径
 
-## 路径
-
-Linux 默认布局（支持绝对路径的 `XDG_CONFIG_HOME`、`XDG_DATA_HOME`）：
+Linux 默认布局支持绝对路径的 `XDG_CONFIG_HOME`、`XDG_DATA_HOME`：
 
 ```text
 ~/.config/io.viento.studio/
-└── viento.config.json                 开发命令默认打开的作品
+├── viento.config.json             开发命令默认作品选择
+└── preferences.json               桌面界面语言
 
 ~/.local/share/io.viento.studio/
-├── library.json                       桌面最近作品记录
-├── workspaces/
-│   └── epic-of-viento-line/            原作品完整目录
+├── library.json                   最近作品记录
+├── workspaces/                    新建和打开作品的默认位置
+│   └── <作品>/
 │       ├── workspace.json
-│       ├── design-data/
-│       ├── data-template/
+│       ├── documents/             旧作品可使用 design-data/
+│       ├── templates/             旧作品可使用 data-template/
 │       ├── metadata/
 │       ├── assets/
-│       └── .viento/                    缓存及必要的兼容标记
-├── backups/
-│   ├── epic-of-viento-line.viento.zip   唯一保留的完整迁移包
-│   └── SHA256SUMS
-└── audits/workspace-relocation.json    本机搬迁校验记录
+│       └── .viento/               兼容标记、本机绑定、锁和 cache/
+└── backups/                       迁移包默认位置
 ```
 
-macOS 的配置与数据均位于 `~/Library/Application Support/io.viento.studio/`；Windows 使用 `%APPDATA%/io.viento.studio/`。Node 路径解析与 Tauri 的 `app_config_dir`、`app_data_dir` 保持一致。
+macOS 配置与数据均位于 `~/Library/Application Support/io.viento.studio/`；Windows 使用 `%APPDATA%/io.viento.studio/`。路径解析与 Tauri 的应用配置 / 数据目录对应。作品和备份仍可选择其他磁盘，外置素材通过作品本机绑定定位。
 
-运行 `npm run workspace -- paths` 查看当前实际路径。桌面打开、新建与导入作品的文件选择器默认进入应用的 `workspaces/`，导入和导出备份默认进入 `backups/`；仍可选择其他磁盘或外置作品。
+运行 `npm run workspace -- paths` 查看当前路径。新环境不附带旧作品、迁移包、校验清单或本机选择；在作品库新建、打开文件夹，或导入完整包后再使用编辑器。
 
-## 启动与切换
+## 开发命令选择作品
 
-当前本机配置已指向移动后的作品，`npm start -- --no-open`、`npm run rebuild` 和 `npm run check` 沿用原命令。桌面最近记录也已更新，无需重新导入同一份数据。
-
-选择其他默认作品时，编辑上面的本机 `viento.config.json`：
+在本机 `viento.config.json` 中填写：
 
 ```json
 { "version": 1, "workspace": "/完整路径/作品库" }
 ```
 
-临时切换可用 `VIENTO_WORKSPACE_ROOT=/完整路径/作品库 npm start -- --no-open`。选择顺序为显式环境变量、当前工作目录中的作品、旧源码包的显式选择文件、本机配置、桌面最近可用作品；未配置时使用应用数据目录下的 `workspaces/default`，不回退到程序目录保存数据。显式指定的位置失效时不会静默切换到其他作品。
+也可只为当前命令选择作品：
 
-新源码包不包含 `viento.config.json` 或 `workspaces/`。在未安装日常作品的机器上，执行 `npm ci`、`npm run check -- --app-only` 即可检查程序和临时样例测试，CI 使用同一流程。`npm run check` 另检查当前作品的转换结果与模板，需要先配置作品并运行 `npm run rebuild`。
+```sh
+VIENTO_WORKSPACE_ROOT=/完整路径/作品库 npm start -- --no-open
+```
 
-## 完整性与迁移
+选择顺序为显式环境变量、当前工作目录中的作品、旧源码包的显式选择文件、本机配置、最近可用作品。未配置时定位到应用数据目录的 `workspaces/default`，不回退到程序目录保存数据；这不等于已经创建了可编辑作品。显式指定的位置失效时不会静默切换其他作品。
 
-本次在同一文件系统内移动整个作品目录及现有 ZIP，未重新复制大型素材。迁移后，4,095 个作品文件、3,161,480,502 字节与原迁移包逐文件 SHA-256 一致。兼容标记、元数据 ID、原文、大纲和素材均保留；ZIP 的 SHA-256 仍为 `6c6d8133e31137700fccf90cdc27a3965b1eeb3458535b36fe95b23f98d55971`。
+`npm run rebuild` 与 `npm run check` 使用所选作品。仅验证程序时使用 `npm run check -- --app-only`，无需本机作品，也不需要示范素材。
 
-源码仓库的 `dist/current/` 只保存程序、源码、使用说明和验证记录。完整迁移时另外携带上述 `backups/` 中的 ZIP 与 `SHA256SUMS`；在目标机器核验后，从桌面首页导入。也可以退出编辑器后移动整个作品目录，再更新本机选择与桌面最近记录。无需在源码仓库创建指向素材的目录链接。
+## 备份、迁移与清理
 
-`npm run clean` 继续只清理固定的构建输出，同时保护本机配置、应用数据、已选作品与外置素材。Git 历史保留原样；当前文件树不再包含作品及素材备份。最终程序、测试与交付校验见 `dist/current/verification.json`。
+- 完整 `.viento.zip` 包包含清单、正文、模板、元数据及素材，外置素材也会收进包；缓存、本机绑定及应用偏好不进入包。导出前先保存草稿，详见 [导出](EXPORT.md)。
+- 直接移动文件夹前关闭编辑窗口，移动后从桌面首页重新打开。外置素材需重新绑定，或使用完整包一并迁移。
+- `.viento/cache/` 可退出应用后清理并重建；不能把整个 `.viento/` 当缓存删除，兼容标记、本机绑定、恢复意图与迁移记录各有用途。
+- 应用数据中的 `WebKitCache/` 是可再生成的响应副本；`workspaces/`、`backups/`、`localstorage/` 与其他浏览器存储不能一起删除。网页缓存范围见 [磁盘优化记录](DISK_OPTIMIZATION_2026-09-24.md)。
+- `npm run clean` 只清理项目中列明的可重建产物，保护作品、外置素材和应用数据；先用 `-- --dry-run` 查看。它不清理 Git 历史、`dist/` 或任意外部编译目录。
+
+作品包与安装包各自独立，可在不复制整份素材的情况下更新程序。当前源码树不保存日常作品；仓库历史中仍保留早期作品记录。
+
+## Android
+
+作品保存在 `app_data_dir()/workspaces/`，应用负责选择和读写，前端仅使用作品 UUID 及逻辑路径。导入先暂存校验，再发布到私有作品库；同一作品不覆盖。当前没有桌面式任意文件夹长期绑定入口。
+
+恢复草稿和语言偏好位于 WebView 本机存储，不进入项目包。覆盖安装已验证保留数据；卸载或清除应用数据会移除私有作品与恢复副本。迁移应通过作品库的系统文件选择器导出完整包，容量与设备限制见 [Android 说明](../mobile/README.md)。

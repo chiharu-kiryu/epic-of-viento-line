@@ -1,0 +1,7 @@
+{
+  "installation": "adb install -r, Success",
+  "apk": "src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk",
+  "sha256": "633d353028b381b934dcfd1f7cf2b62d9372d714c89f3c66dbb59058868a7cba",
+  "abi": "x86_64",
+  "allWorkspaceFilesPreserved": 18
+}

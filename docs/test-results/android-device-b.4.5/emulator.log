@@ -1,0 +1,103 @@
+INFO         | Android emulator version 35.3.11.0 (build_id 12836668) (CL:N/A)
+INFO         | Graphics backend: gfxstream
+INFO         | Found systemPath /home/chiharukiryu/Android/Sdk/system-images/android-35/google_apis_playstore/x86_64/
+INFO         | Checking system compatibility:
+INFO         |   Checking: hasSufficientDiskSpace
+INFO         |      Ok: Disk space requirements to run avd: `viento-b45-test` are met.
+INFO         |   Checking: hasSufficientHwGpu
+INFO         |      Ok: Hardware GPU requirements to run avd: `viento-b45-test` are passed.
+INFO         |   Checking: hasSufficientSystem
+INFO         |      Ok: System requirements to run avd: `viento-b45-test` are met.
+INFO         | Storing crashdata in: /tmp/android-chiharukiryu/emu-crash-35.3.11.db, detection is enabled for process: 353333
+library_mode swiftshader_indirect gpu mode swiftshader_indirect
+INFO         | Initializing hardware OpenGLES emulation support
+I0925 10:24:51.839816  353333 opengles.cpp:285] android_startOpenglesRenderer: gpu info
+I0925 10:24:51.840048  353333 opengles.cpp:286] 
+INFO         | Not raising nofile soft limit from 1048576.
+INFO         | HealthMonitor disabled.
+INFO         | initIcdPaths: ICD set to 'swiftshader', using Swiftshader ICD
+INFO         | Setting ICD filenames for the loader = /home/chiharukiryu/Android/Sdk/emulator/qemu/linux-x86_64/lib64/vulkan/vk_swiftshader_icd.json:/home/chiharukiryu/Android/Sdk/emulator/lib64/vulkan/vk_swiftshader_icd.json
+INFO         | SharedLibrary::open for [/home/chiharukiryu/Android/Sdk/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so]
+
+INFO         | SharedLibrary::open for [/home/chiharukiryu/Android/Sdk/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so]: not found in map, open for the first time
+
+INFO         | SharedLibrary::open for [/home/chiharukiryu/Android/Sdk/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so] (posix): begin
+
+INFO         | SharedLibrary::open for [/home/chiharukiryu/Android/Sdk/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so] (posix,linux): call dlopen on [/home/chiharukiryu/Android/Sdk/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so]
+
+INFO         | SharedLibrary::open for [/home/chiharukiryu/Android/Sdk/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so] failed (posix). dlerror: []
+
+INFO         | SharedLibrary::open for [/home/chiharukiryu/Android/Sdk/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so.1]
+
+INFO         | SharedLibrary::open for [/home/chiharukiryu/Android/Sdk/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so.1]: not found in map, open for the first time
+
+INFO         | SharedLibrary::open for [/home/chiharukiryu/Android/Sdk/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so.1] (posix): begin
+
+INFO         | SharedLibrary::open for [/home/chiharukiryu/Android/Sdk/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so.1] (posix,linux): call dlopen on [/home/chiharukiryu/Android/Sdk/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so.1]
+
+INFO         | SharedLibrary::open for [/home/chiharukiryu/Android/Sdk/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so.1] failed (posix). dlerror: []
+
+INFO         | SharedLibrary::open for [/home/chiharukiryu/Android/Sdk/emulator/lib64/vulkan/libvulkan.so]
+
+INFO         | SharedLibrary::open for [/home/chiharukiryu/Android/Sdk/emulator/lib64/vulkan/libvulkan.so]: not found in map, open for the first time
+
+INFO         | SharedLibrary::open for [/home/chiharukiryu/Android/Sdk/emulator/lib64/vulkan/libvulkan.so] (posix): begin
+
+INFO         | SharedLibrary::open for [/home/chiharukiryu/Android/Sdk/emulator/lib64/vulkan/libvulkan.so] (posix,linux): call dlopen on [/home/chiharukiryu/Android/Sdk/emulator/lib64/vulkan/libvulkan.so]
+
+INFO         | Added library: /home/chiharukiryu/Android/Sdk/emulator/lib64/vulkan/libvulkan.so
+INFO         | Selecting Vulkan device: SwiftShader Device (Subzero), Version: 1.3.0
+INFO         | Supports id properties, got a vulkan device UUID
+INFO         | SharedLibrary::open for [libGLESv2.so]: not found in map, open for the first time
+
+INFO         | SharedLibrary::open for [libGLESv2.so] (posix): begin
+
+INFO         | SharedLibrary::open for [libGLESv2.so] (posix,linux): call dlopen on [libGLESv2.so]
+
+INFO         | SharedLibrary::open for [libEGL.so]: not found in map, open for the first time
+
+INFO         | SharedLibrary::open for [libEGL.so] (posix): begin
+
+INFO         | SharedLibrary::open for [libEGL.so] (posix,linux): call dlopen on [libEGL.so]
+
+INFO         | SharedLibrary::open for [libX11]
+
+INFO         | SharedLibrary::open for [libX11]: not found in map, open for the first time
+
+INFO         | SharedLibrary::open for [libX11] (posix): begin
+
+INFO         | SharedLibrary::open for [libX11] (posix,linux): call dlopen on [libX11.so]
+
+INFO         | Initializing VkEmulation features:
+INFO         |     glInteropSupported: false
+INFO         |     useDeferredCommands: true
+INFO         |     createResourceWithRequirements: true
+INFO         |     useVulkanComposition: false
+INFO         |     useVulkanNativeSwapchain: false
+INFO         |     enable guestRenderDoc: false
+INFO         |     ASTC LDR emulation mode: 2
+INFO         |     enable ETC2 emulation: true
+INFO         |     enable Ycbcr emulation: false
+INFO         |     guestVulkanOnly: false
+INFO         |     useDedicatedAllocations: false
+INFO         | Graphics Adapter Vendor Google (Google Inc.)
+INFO         | Graphics Adapter Android Emulator OpenGL ES Translator (Google SwiftShader)
+INFO         | Graphics API Version OpenGL ES 3.0 (OpenGL ES 3.0 SwiftShader 4.0.0.1)
+INFO         | Graphics API Extensions GL_OES_EGL_sync GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_depth24 GL_OES_depth32 GL_OES_element_index_uint GL_OES_texture_float GL_OES_texture_float_linear GL_OES_compressed_paletted_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth_texture GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_packed_depth_stencil GL_OES_vertex_half_float GL_OES_standard_derivatives GL_OES_texture_npot GL_OES_rgb8_rgba8 GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_texture_format_BGRA8888 GL_APPLE_texture_format_BGRA8888 
+INFO         | Graphics Device Extensions N/A
+[omitted emulator ADB public key]
+INFO         | Monitoring duration of emulator setup.
+INFO         | Setting display: 0 configuration to: 1080x1920, dpi: 420x420 
+INFO         | setDisplayActiveConfig 0
+USER_INFO    | Emulator is performing a full startup. This may take upto two minutes, or more.
+INFO         | OpenGL Vendor=[Google (Google Inc.)]
+INFO         | OpenGL Renderer=[Android Emulator OpenGL ES Translator (Google SwiftShader)]
+INFO         | OpenGL Version=[OpenGL ES 3.0 (OpenGL ES 3.0 SwiftShader 4.0.0.1)]
+INFO         | Activated packet streamer for bluetooth emulation
+INFO         | Boot completed in 34508 ms
+INFO         | Increasing screen off timeout, logcat buffer size to 2M.
+INFO         | Wait for emulator (pid 353333) 20 seconds to shutdown gracefully before kill;you can set environment variable ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL(in seconds) to change the default value (20 seconds)
+
+WARNING      | Not saving state: RAM not mapped as shared
+ERROR        | stop: Not implemented
+WARNING      | Emulator client has not yet been configured.. Call configure me first!

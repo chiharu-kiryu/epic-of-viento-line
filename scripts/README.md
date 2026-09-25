@@ -1,116 +1,59 @@
-# scripts 目录说明
+# 脚本与本地服务
 
-脚本按启动编排、文档转换、文件服务和作品数据管理分层。应用目录与作品目录独立，默认作品由应用配置目录的 `viento.config.json` 指定；位置可用 `npm run workspace -- paths` 查看，详见 [本机数据目录](../docs/LOCAL_DATA_STORAGE.md)。
+脚本负责桌面 / 浏览器的本机文件适配、转换与索引、HTTP 服务和作品维护。解析、布局与字段修改的共用实现位于 [engine/](../engine/README.md)，Android 使用独立原生存储桥，不启动这些 Node 服务。
 
-## 目录结构
+## 启动
 
-- `adapters/`
-  - `node-document-storage.mjs`：将实际文件定位、快照、原子写入和文档登记接入 `engine/document-store.mjs`。通用解析与草稿编辑实现位于仓库的 `engine/`；本目录中的原有入口继续兼容转发。
+使用 Node.js 24，先执行 `npm ci`。网页入口需要已有作品，可先在桌面首页新建，再用本机配置或环境变量选择：
 
-- `ops/`
-  - `site.mjs`：统一启动入口（浏览/编辑模式、参数解析、启动子进程）
-  - `rebuild.mjs`：封装标准化+索引构建流程的重建任务
+```sh
+npm run workspace -- paths
+VIENTO_WORKSPACE_ROOT=/完整路径/作品库 npm start -- --no-open
+```
 
-- `lib/`
-  - `paths.mjs`：分别定位程序、作品、外置素材与缓存目录
-  - `workspace.mjs`：作品清单、文档/素材登记、内容指纹、目录绑定与独立索引
-  - `process.mjs`：运行外部命令、打开浏览器、命令探测的通用工具
-  - `doc-api-service.mjs`：新增服务层（文档查询/编辑/重建能力、索引缓存、重建并发控制）
-  - `doc-file-store.mjs`：同一文档的读写串行控制、内容与版本快照、原子写入和独占新建
-  - `category.mjs`：文档分类/用途推断、字段归类等纯逻辑（可被多个脚本共享）
-  - `static-index.mjs`：标准化文档索引构建核心逻辑（数据提取、分类、图片归集），供静态索引脚本复用
-  - `doc-server.mjs`：编辑服务器通用能力（安全路径、API payload 解析、索引构建、文件读写辅助、路径规范化）
-  - `doc-server-routes.mjs`：API 路由分发与实现（`/api/index`、`/api/doc`、`/api/rebuild`、`/api/capabilities`、`/api/health`、`/api/metrics`）
-  - `doc-api-metrics.mjs`：API 请求级监控（请求数、成功率、平均耗时、路由维度快照）
-  - `doc-server-static-routes.mjs`：静态资源路由（favicon、静态文件、SPA 回退）
-  - `doc-api-contract.mjs`：API 入口、方法、参数与响应字段约定
-  - `site-options.mjs`：启动命令行参数解析和帮助文案
-  - `site-launcher.mjs`：站点启动/重建流程编排（重建任务、启动静态服务或编辑服务器）
-  - `rebuild-workflow.mjs`：重建流程与执行器（标准化 + 静态索引构建）
+`npm start` 启动编辑服务，`npm run browse -- --no-open` 启动只读浏览；默认地址为 `http://127.0.0.1:4173/web/`，以启动日志为准。支持 `--port`、`--no-open`、`--no-build`、`--no-standardize`；后两项分别跳过索引构建和正文标准化，只有已有对应缓存时才使用。
 
-- 业务脚本
-  - `standardize-docs.mjs`：原始文档标准化
-  - `reorder-source-metadata-fields.mjs`：扫描识别手动新增/改动源文件，并可直接写回原元数据文件
-  - `build-static-doc-site.mjs`：静态索引构建入口（读取作品标准化缓存，生成 `.viento/cache/indexes/` 下的文档、素材与引用索引）
-  - `doc-site-server.mjs`：编辑模式 API + 文件服务
-  - `browse-server.mjs`：只读文件服务，同样支持程序/作品分离
-  - `workspace.mjs`：登记、校验与绑定素材目录的命令入口
+Shell 入口 `scripts/start-doc-site.sh --mode edit|browse` 及旧的 `start-doc-site-edit.sh`、`start-doc-site-live.sh` 是兼容代理；实际编排在 `scripts/ops/site.mjs`。Node 命令适合跨平台开发。作品选择规则见 [本机数据目录](../docs/LOCAL_DATA_STORAGE.md)。
 
-元数据字段修复示例：
+## 职责
 
-- 扫描单个文件并回写：`node scripts/reorder-source-metadata-fields.mjs --write design-data/design-item/xxx.md`
-- 按类型扫描并回写：`node scripts/reorder-source-metadata-fields.mjs --write --type item --path design-data/design-item`
-- 扫描目录：`node scripts/reorder-source-metadata-fields.mjs --path design-data/design-item --path design-data/design-units`
-- 扫描默认全量并包含手动路径：`node scripts/reorder-source-metadata-fields.mjs --all --path /abs/path/to/newfile.md`
+| 入口 / 模块 | 职责 |
+| --- | --- |
+| `ops/site.mjs`、`lib/site-launcher.mjs` | 模式、参数、预检、重建和启动 |
+| `ops/rebuild.mjs`、`lib/rebuild-workflow.mjs` | 标准化与索引任务编排 |
+| `standardize-docs.mjs`、`build-static-doc-site.mjs` | 读取项目定义和源文，生成派生缓存及文档 / 素材 / 引用索引 |
+| `desktop-server.mjs` | 桌面宿主启动的服务及原生桥交接 |
+| `doc-site-server.mjs`、`browse-server.mjs` | 编辑和只读 HTTP 服务 |
+| `adapters/node-document-storage.mjs` | 共用存储流程的实际文件适配 |
+| `lib/doc-file-store.mjs`、`lib/doc-api-service.mjs` | 文件事务、版本快照、原子保存、登记和重建协调 |
+| `lib/doc-server-routes.mjs`、`lib/doc-server-static-routes.mjs` | API 与静态资源路由 |
+| `lib/project-service.mjs`、`lib/project-definition.mjs` | 项目类型、模板、预览和定义应用 |
+| `lib/workspace.mjs`、`workspace.mjs` | 登记、校验、外置素材绑定与维护 CLI |
+| `lib/export-package.mjs`、`lib/export-service.mjs` | 流式文档 / 完整项目包、任务及临时文件 |
+| `lib/doc-api-metrics.mjs` | `/api/health`、`/api/metrics` 的诊断指标 |
 
-## 使用入口
+启动前执行 `lib/verify-doc-api-contract.mjs`，核对共享契约、前后端入口和请求组装；失败时中止启动。完整数据流见 [架构说明](../docs/ARCHITECTURE.md)。
 
-- `./scripts/start-doc-site.sh`：推荐入口
-  - 浏览模式：`./scripts/start-doc-site.sh --mode browse --no-open`
-  - 编辑模式：`./scripts/start-doc-site.sh --mode edit --no-open`
+## 转换与作品维护
 
-兼容入口：
-- `./scripts/start-doc-site-edit.sh --no-open`
-- `./scripts/start-doc-site-live.sh --no-open`
+```sh
+npm run rebuild
+npm run check
+npm run workspace -- check-project --root /完整路径/作品库
+```
 
-## 说明
+前两条使用当前选择的作品：重建只更新 `.viento/cache/` 内的派生文件；完整检查还校验该作品的模板和索引。只开发程序时改用 `npm run check -- --app-only`，测试自己创建临时样例。
 
-`start-doc-site.sh` 仅作为薄层代理，真正的参数解析和流程在 `scripts/ops/site.mjs`，
-便于后续把 shell 逻辑逐步迁移到 JS，减少重复和分散。
+`workspace` 的写入命令应针对明确选择的作品使用：`register` 增量登记文件，`bind-assets` 更新本机素材绑定；`migrate-documents` 和 `apply-definition` 默认只预览，添加 `--write` 才应用。类型与模板契约及示例见 [项目工作流](../docs/PROJECT_WORKFLOW.md)。
 
-启动前会执行 API 契约预检（`scripts/lib/verify-doc-api-contract.mjs`），用于快速校验：
+通用转换按项目的解析规则处理 Markdown、文本、JSON、YAML，保留结构化数值、布尔、数组和对象；格式错误保留原文并报告，不猜测修复。旧作品兼容规则只有在相应类型需要时应用。源文、稳定 ID、登记和素材均是权威数据；索引中的解析结果不是需要另行维护的正文副本。
 
-- API 常量与约定字段是否完整（`/scripts/lib/doc-api-contract.mjs`）
-- 后端路由是否使用约定常量（`/scripts/lib/doc-server-routes.mjs`）
-- 前端状态和运行入口是否仍引用服务层，以及请求组装是否遵循契约（`web/modules/app-state.js`、`web/modules/app-runtime.js`、`web/modules/app-doc-service.js`）
+`standardize-docs.mjs --output <目录>` 只更新指定派生目录及其过期文档，要求与正文分离，并排除输出参与扫描。标准化记录使用完整逻辑源路径的摘要命名，支持不同扩展名的同名文档。
 
-若预检失败，启动将直接中止，避免边改边跑导致的前后端约定不一致。
+`reorder-source-metadata-fields.mjs` 是旧文本的专用维护工具：默认扫描，`--write` 才改写；只支持无后缀、`.md`、`.txt`，保留 BOM、换行和标题 / 代码围栏边界，不对 JSON / YAML 逐行排序。通用项目日常编辑不需要运行该工具。
 
-- 服务架构全图和链路说明可见：`docs/ARCHITECTURE.md`
+## 测试与记录
 
-### API 监控与健康能力
+`npm test` 执行回归，`npm run check -- --app-only` 另检查语法、版本和 API 契约。启用真实 Rust 归档与移动存储的方式，以及 Linux 原生 / Android 设备的区别，统一见 [验证指南](../docs/TESTING.md)。
 
-- 新增内部诊断接口：
-  - `/api/health`：返回服务健康状态、重建状态、运行时配置与请求统计快照
-  - `/api/metrics`：返回接口请求的运行时指标（请求数、错误、状态码分布、路由级耗时）
-
-- `doc-api-service.mjs` 会在每次请求开始/结束时记录监控指标，并在 `getDiagnosticSnapshot()` 中同时返回 `requestMetrics`。
-
-### 回归检查与输出目录
-
-先运行 `npm run rebuild` 生成当前作品缓存，再运行 `node scripts/check-project.mjs` 执行完整检查；`node --test scripts/tests/*.test.mjs` 只执行回归测试。
-测试在系统临时目录创建独立数据，完成后自动清理。
-
-`editor-draft.test.mjs` 验证区块编辑的原文往返与局部修改；`editor-runtime.test.mjs`
-通过轻量 DOM 环境验证实际编辑器控制器的草稿保护、读取顺序、保存互斥和新建恢复流程。
-浏览器中的新建、源码/区块保存、快捷键和索引刷新另作交互验证。
-
-编辑器测试模拟浏览器 textarea 将换行统一为 LF 的行为，验证保存时保留原文件的 BOM、CRLF 和末尾空格，
-并覆盖新建文件在重建后获得正式索引标识时保持编辑状态。未保存草稿在取消文档切换、退出编辑和切换浏览模式时均应保留。
-
-2026-09-09 的临时项目浏览器验证覆盖：源码与区块连续修改、Ctrl+S / Ctrl+Enter 保存、重新打开、
-模板类型切换、同名创建拒绝覆盖、中文标点路径、新建后继续编辑、空文档、JSON、CRLF 原文保真、
-保存冲突时保留草稿/载入最新，以及索引构建失败后继续编辑并再次保存。每次成功保存均核对源文件与重建索引。
-原生未保存确认框会阻塞当前浏览器自动化工具，其保留/放弃分支由控制器测试验证，未计为完整浏览器验证。
-
-`standardize-docs.mjs --output <目录>` 只更新指定目录并清理其中的过期文档，不删除默认目录。
-输出目录必须与项目源目录分离，扫描来源时会排除该输出，避免重复构建将产物再次当作源文档。
-
-模板校验过滤隐藏文件，并使用前端模板定义中的字段别名检查覆盖范围。
-正文对话不作为背景故事元数据；尚未使用的可选模板字段仅作信息提示，未知的结构化字段和错误映射仍使严格检查失败。
-
-### 元数据转换与预览
-
-首次运行先执行 `npm ci`。JSON/YAML 保留数值、布尔值、数组和嵌套对象；YAML 使用 `yaml` 解析库，
-引号中的 `#`、网址片段和多行文本不会被当作注释截断。格式错误会保留原文、标记解析失败，并使严格校验失败。
-
-文本转换区分标题、代码围栏、表格、正文和元数据。英雄技能的内部参数保留在所属技能中；背景故事只把
-`正文`、`内容`、`剧情`、`正文内容` 和 `_header` 作为显式字段，其余台词按正文显示。
-表格保留空单元格与列对齐，正文保留重复段落；预览只隐藏已经在卡片中显示的字段。
-索引中的源路径保留真实扩展名，空源文件保持为空。同名但扩展名不同的源文件若会写入同一标准化路径，构建会报错。
-
-`reorder-source-metadata-fields.mjs` 只排序无扩展名、`.md`、`.txt` 文本，保留 BOM、换行格式和末尾换行，
-不会跨 Markdown 标题或代码围栏移动字段。JSON/YAML 不进行逐行排序，错误的类型参数会直接终止。
-
-`parser.test.mjs`、`metadata-conversion.test.mjs`、`structured-render.test.mjs` 覆盖解析、索引、API 读写与重建、
-字段排序和实际预览函数；编辑器的源码/区块往返检查仍由 `editor-draft.test.mjs` 和 `editor-runtime.test.mjs` 执行。
+编辑器测试覆盖草稿保护、模式往返、保存冲突、异步请求、重建失败及 BOM / CRLF / 空格保留；原生交互由独立流程验证，不能把轻量 DOM 测试当作真实系统窗口测试。最新 Linux 四组和 Android 模拟器证据见 [链路补测](../docs/WORKFLOW_VERIFICATION_b.4.5.md)。

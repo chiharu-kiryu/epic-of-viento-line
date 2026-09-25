@@ -21,6 +21,20 @@
 .mobile-host .doc-edit-panel { padding-bottom: env(safe-area-inset-bottom); }
 .mobile-draft-notice { position: sticky; top: 0; z-index: 100; padding: 12px 18px; margin: 0; color: #ecf9f3; background: #1b3f37; }
 .mobile-draft-notice[hidden] { display: none; }
+/* Let the whole writing surface scroll when the keyboard reduces the viewport.
+   Desktop's fixed toolbar stack can otherwise leave no room for the input. */
+.mobile-host .page-shell.is-writing { height: auto; min-height: 100dvh; }
+.mobile-host .is-writing .topbar,
+.mobile-host:has(.is-writing) .mobile-draft-notice { position: static; }
+.mobile-host .is-writing .layout { flex: none; }
+.mobile-host .is-writing .right,
+.mobile-host .is-writing .content-frame { height: auto; overflow: visible; }
+.mobile-host .is-writing .doc-editor-surface { flex: none; min-height: 240px; overflow: visible; }
+.mobile-host .is-writing .doc-field-editor,
+.mobile-host .is-writing .doc-block-editor { overflow: visible; }
+.mobile-host .is-writing .doc-field-toolbar { position: static; }
+.mobile-host .is-writing .doc-editor { height: max(240px, 50dvh); }
+.mobile-host .is-writing .left { max-height: calc(100dvh - 24px); }
 @media (max-width: 560px) {
   .mobile-host button { min-height: 44px; }
   .mobile-host input, .mobile-host textarea, .mobile-host select { font-size: 16px; }

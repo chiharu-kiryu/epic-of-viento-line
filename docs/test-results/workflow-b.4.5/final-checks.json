@@ -1,0 +1,11 @@
+{
+  "diffCheck": "passed",
+  "sourceFingerprintsVerified": 385,
+  "reportFileLinksVerified": 26,
+  "evidenceJsonParsed": true,
+  "releaseVersion": "b.4.5",
+  "buildVersion": "0.4.5",
+  "committed": false,
+  "pushed": false,
+  "allTestBuildAndAvdTargetsAbsent": true
+}

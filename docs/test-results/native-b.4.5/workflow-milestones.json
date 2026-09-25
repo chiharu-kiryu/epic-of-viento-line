@@ -1,0 +1,70 @@
+[
+  {
+    "name": "legacy",
+    "passes": [
+      "配音样例.wav plays and seeks",
+      "配音样例.mp3 plays and seeks",
+      "配音样例.ogg plays and seeks",
+      "配音样例.opus plays and seeks",
+      "配音样例.flac plays and seeks",
+      "配音样例.m4a plays and seeks",
+      "配音样例.aac plays and seeks",
+      "WAV / MP3 / Ogg / Opus / FLAC / M4A / AAC playback, pause and seeking; audio filter, original download and stable-ID reuse",
+      "media picker → PNG / WebM / MP4 import → unsaved draft preview → native playback + seeking → responsive editor → reuse + paste + block drop → stable IDs → save → reopen + inline media",
+      "native library → authenticated editor → request recovery + link isolation → encoded SVG + range request → native access denied → universal fields + separate attributes + narrow card → character-owned background → edit background + save + search + return → edit → block/source conversion → save → cancel discard → library → cancel close → discard confirmed → engine shutdown"
+    ],
+    "log": "legacy.log"
+  },
+  {
+    "name": "generic",
+    "passes": [
+      "配音样例.wav plays and seeks",
+      "配音样例.mp3 plays and seeks",
+      "配音样例.ogg plays and seeks",
+      "配音样例.opus plays and seeks",
+      "配音样例.flac plays and seeks",
+      "配音样例.m4a plays and seeks",
+      "配音样例.aac plays and seeks",
+      "WAV / MP3 / Ogg / Opus / FLAC / M4A / AAC playback, pause and seeking; audio filter, original download and stable-ID reuse",
+      "cancel new type / Escape / back / type switch → retain or discard drafts → restore selection → translated controls → narrow layout → unchanged project bytes",
+      "project template editor → typed preview → live save → add a type → unchanged authored content / metadata",
+      "native export dialog → cancel / retry GTK save picker → offline document with media → complete project export → native import with exact source and asset bytes → staging cleanup",
+      "native v3 creation → empty generic project → project-owned types → character background + PNG / WebM / MP4 → custom YAML template + chosen folder + saved type → reopen → full backup and byte-identical restore"
+    ],
+    "log": "generic.log"
+  },
+  {
+    "name": "library",
+    "passes": [
+      "cancel name form / native creation picker; invalid name reports failure without creating files; retry remains available",
+      "real GTK creation → empty generic editor; active session blocks create/open/import before any picker, registration or file creation",
+      "open cancellation / invalid folder / successful open and deduplication; backup cancel / forbidden destination / retry → verified complete ZIP",
+      "cancel both import pickers → no writes; damaged archive → rollback and records preserved; retry → auto-open restored project with byte-identical sources/templates/metadata/media",
+      "English native folder picker and cancellation; two independent project copies remain registered; all test processes and files are isolated"
+    ],
+    "log": "library.log"
+  },
+  {
+    "name": "generic-fields",
+    "passes": [
+      "English and Japanese settings survive full native application restarts",
+      "a new editor origin loads the language saved by the library",
+      "配音样例.wav plays and seeks",
+      "配音样例.mp3 plays and seeks",
+      "配音样例.ogg plays and seeks",
+      "配音样例.opus plays and seeks",
+      "配音样例.flac plays and seeks",
+      "配音样例.m4a plays and seeks",
+      "配音样例.aac plays and seeks",
+      "WAV / MP3 / Ogg / Opus / FLAC / M4A / AAC playback, pause and seeking; audio filter, original download and stable-ID reuse",
+      "cancel new type / Escape / back / type switch → retain or discard drafts → restore selection → translated controls → narrow layout → unchanged project bytes",
+      "project template editor → typed preview → live save → add a type → unchanged authored content / metadata",
+      "language switch preserves source / block DOM, drafts, paths and project bytes; export guard is translated",
+      "native field edit → three languages retain draft → source/field switch → save → exact YAML bytes and metadata retained",
+      "Japanese native save picker and export instructions; original document bytes retained",
+      "native export dialog → cancel / retry GTK save picker → offline document with media → complete project export → native import with exact source and asset bytes → staging cleanup",
+      "native v3 creation → empty generic project → project-owned types → character background + PNG / WebM / MP4 → custom YAML template + chosen folder + saved type → reopen → full backup and byte-identical restore"
+    ],
+    "log": "generic-fields.log"
+  }
+]

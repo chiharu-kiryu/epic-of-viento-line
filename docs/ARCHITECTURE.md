@@ -1,234 +1,106 @@
-# Viento Studio 架构说明
+# 系统架构
 
-> 更新时间：2026-09-24
+本文描述 **b.4.6** 的模块职责与数据流。Viento Studio 由共用编辑器和引擎、桌面 / 浏览器适配、Android 适配组成；作品类型、模板与字段规则来自项目清单。
 
-功能入口、业务上下游、接口和数据落点的最新盘点见 [功能链路网络](FUNCTION_NETWORK.md)（2026-09-23 当前工作树），可用 [离线交互图](function-network.html) 筛选查看。
+[文档中心](README.md) · [验证状态](TESTING.md) · [引擎接口](../engine/README.md)
 
-作品与程序已分离，作品及备份位于系统应用数据目录，本机默认作品由应用配置目录的 `viento.config.json` 指定，见 [本机数据目录](LOCAL_DATA_STORAGE.md)。新项目的 `documents/`、`templates/`、`assets/` 和 `metadata/` 均相对于作品根目录（旧作品使用 `design-data/`、`data-template/`）；生成数据实际位于作品的 `.viento/cache/`。下文 `docs-standard/...` 和 `web/data/index.json` 仍作为兼容访问路径，由服务映射到缓存，不代表仓库根目录还有这些文件。
+## 模块边界
 
-当前目录与元数据/迁移契约以 [作品库布局](WORKSPACE_LAYOUT.md) 为准，桌面宿主见 [桌面版说明](../desktop/README.md)。浏览模式已改用 Node.js 只读服务，同样支持程序与作品分离。
+| 目录 | 职责 |
+| --- | --- |
+| `web/` | 阅读与编辑界面、草稿控制器、素材和导出交互、三语词典 |
+| `engine/` | 解析、布局、字段修改、素材引用、文档模型与存储流程；不读取本机配置，不依赖 Node、HTTP 或 Tauri |
+| `scripts/adapters/` | Node 文件存储适配：定位、快照、串行写入与登记 |
+| `scripts/lib/`、`scripts/ops/` | 本机服务、转换与索引、素材登记、导出、本机配置及启动编排 |
+| `desktop/` | 作品库首页、运行环境准备、源码打包、清理和 Linux 原生测试 |
+| `mobile/` | Android 作品库、请求桥、即时索引、恢复草稿与移动布局 |
+| `src-tauri/src/` | 原生作品库和归档、窗口与进程生命周期、移动存储及迁移命令 |
+| `src-tauri/gen/android/` | 受版本控制的 Android 源工程、窗口边界与系统文档选择插件 |
+| `schemas/` | 项目清单、文档类型与登记的格式定义 |
 
-## 1. 系统定位
-
-Viento Studio 是通用 OC 设计引擎。应用代码、项目定义、作品内容与派生缓存各自独立。
-
-- 项目配置：`workspace.json` 的类型、解析规则和字段分组；`templates/` 的起始正文。
-- 权威内容：项目正文、稳定 ID 元数据与素材；新项目使用 v3 目录，旧项目兼容 v2。
-- 派生数据：`.viento/cache/` 内的标准文档、索引、引用图；可完整重建。
-- 展示与分享：统一 `viento-layout-v1` 布局供编辑器和导出消费。
-
-`engine/project.mjs` 统一解析文档类型，桌面 `project-layout.mjs` 装载默认配置并转发；`project-service.mjs` 提供模板预览和原子配置保存。模板按内容指纹先落盘，再切换清单；过期修改通过配置版本阻止覆盖。原作品的具体规则在其项目清单中声明，轻量示范定义见 `docs/examples/`，不会装入桌面运行包。
-
-可移植引擎位于 `engine/`，解析、布局、字段编辑、素材引用和文档保存冲突流程不读取本机配置。平台通过文档存储接口提供实际读写；桌面服务接入 Node 适配器，Android 预览宿主通过 Tauri IPC 接入应用私有目录中的 Rust 存储。移动端复用编辑器和解析引擎，索引在 WebView 内即时生成；完整项目包复用桌面归档校验，经 Android 系统文件选择器迁移，素材访问界面仍待接入。接口约定见 [引擎说明](../engine/README.md) 和 [移动端说明](../mobile/README.md)。
-
-正文编辑使用读取时的内容指纹作为版本条件；保留文件时间的外部修改仍会触发冲突。失败的覆盖或读取不会更新草稿基线，详见 [保存冲突与接口兼容性](SAVE_CONFLICT_BUGFIX_b.2.9.md)。
-
----
-
-## 2. 目录职责总览
-
-```text
-.
-├─ web/                   # 前端资源与运行时页面
-├─ engine/                # 无宿主依赖的共享引擎
-├─ scripts/               # 管道、服务、校验、启动编排
-├─ desktop/               # 桌面首页、运行资源准备、原生测试
-├─ src-tauri/             # 桌面宿主与完整迁移
-├─ schemas/               # 通用数据格式
-└─ README.md
-```
-
-作品数据树位于应用数据目录的 `workspaces/<作品>/`，保留 `workspace.json`、`design-data/`、`data-template/`、`metadata/`、`assets/` 与 `.viento/cache/`。`scripts/lib/app-storage.mjs` 负责本机配置和默认作品解析，`paths.mjs` 分别导出程序、作品及缓存路径。
-
-### scripts 目录层级
-
-- `scripts/adapters/*`
-  - `node-document-storage.mjs`：文件解析、快照读取、原子写入和新文档登记的桌面适配。
-- `scripts/ops/*`
-  - 启动入口和工作流编排。
-  - `ops/site.mjs` 负责解析启动参数并调用启动服务。
-  - `ops/rebuild.mjs` 统一导出重建能力。
-- `scripts/lib/*`
-  - 公共服务、路由、分类、扫描、构建、校验、运行时路径与日志指标。
-  - `doc-api-contract.mjs` 转发共享契约，桌面能力响应在此注入运行环境版本。
-  - `doc-api-service.mjs` / `doc-server-*.mjs` 负责文档服务层。
-  - `standardize-docs/*` 负责标准化解析/分类/输出流水线。
-  - `rebuild-workflow.mjs` 统一 orchestration（标准化 + 静态索引构建）。
-- `scripts/lib/scan-files.mjs`
-  - 文件扫描基础能力：递归列举可处理文件。
-- `scripts/standardize-docs/*`
-  - 调用 `engine/` 的文本/JSON/YAML 解析
-  - source 分类与元信息提取
-  - 标准化 JSON 输出与写入规则
-  - `parser.mjs`、`legacy-profile.mjs`、`layout.mjs` 是旧入口转发，实现在 `engine/`
-- `scripts/normalize-*.mjs`
-  - 特化清洗脚本：英雄/单位/建筑/物品等文本规范化重排（可选写回）
-
-### 前端
-
-- `web/app.js`：应用入口
-- `web/modules/app-state.js`：状态、常量、API 路径常量入口
-- `web/modules/app-runtime.js`：渲染主循环、列表/详情/编辑状态机
-- `web/modules/app-editor-draft.js` / `app-field-draft.js`：转发引擎的区块与字段草稿序列化实现
-- `web/modules/app-doc-service.js`：与后端 API 的交互
-- `web/modules/app-services.js`：请求工具（超时、错误、JSON 解析）
-
----
-
-## 3. 运行模式
-
-### 浏览模式（默认）
-
-- 启动：`./scripts/start-doc-site.sh --mode browse`
-- 行为：
-  1. 可选重建标准化产物与索引
-  2. 启动只读文件服务（Node.js）
-  3. 仅读取 `web/data/index.json` 与 `docs-standard` 渲染展示
-
-### 编辑模式
-
-- 启动：`./scripts/start-doc-site.sh --mode edit`
-- 行为：
-  1. 可选重建标准化产物与索引
-  2. 启动 `doc-site-server`
-  3. 提供 `/api/*` 读写源文件、`/api/rebuild` 重建、`/api/capabilities` 能力探测
-
----
-
-## 4. 数据流
-
-### 4.1 标准化管道
-
-1. 启动/重建时：读取 `design-data/` 原文路径。
-2. `standardize-docs` 通过 `sources -> parser -> doc-factory -> catalog` 输出标准文档。
-3. 标准文档写入 `docs-standard/`。
-4. `build-static-doc-site` 构建 `web/data/index.json`。
-5. 前端加载索引进行列表与详情渲染。
-
-### 4.2 编辑写回闭环
-
-1. 前端 `/api/doc?path=...` 读取源文件内容。
-2. 用户编辑保存。
-3. `engine/document-store.mjs` 在存储适配器提供的串行事务中校验版本；桌面适配器继续用临时文件和原子替换保存正文，并发新建使用独占创建，旧版本保存返回 409。
-4. 触发重建可更新 `docs-standard/` 与 `web/data/index.json`。
-
-文档由 `metadata/documents/<UUID>.json` 登记身份、解析配置和归属关系。角色背景用 `part-of` 关联角色，索引解析 ID 关系后生成嵌套目录与档案内导航；独立故事章节保持独立条目。多个角色可关联同一份背景。全量与局部重建均保留关系，详见 [OC 文档模型](OC_DOCUMENT_MODEL.md)。
-
-编辑器的源码/区块切换共享当前草稿，不从展示索引反向生成文本。保存及重建期间禁止重复提交和编辑状态切换；源码与模板读取使用请求序号，防止迟到响应覆盖另一会话。新建路径也参与未保存判断，新建写入成功后即转为已有文件，重建失败仍可继续编辑。
-
-### 4.3 可编辑路径边界
-
-- 允许写路径：`design-data/` 与 `docs-standard/design-data/`。
-- `safePathFromQuery / resolveEditableFilePath / isAllowedEditPath` 负责防路径穿越。
-
----
-
-## 5. API 与契约
-
-核心契约定义集中在：
-- [scripts/lib/doc-api-contract.mjs](../scripts/lib/doc-api-contract.mjs)
-
-关键端点：
-- `/api/capabilities`
-- `/api/health`
-- `/api/metrics`
-- `/api/index`
-- `/api/doc`
-- `/api/rebuild`
-
-契约执行：启动前会做预检，异常时停止启动。
-- 预检文件：`scripts/lib/verify-doc-api-contract.mjs`
-
----
-
-## 6. 关键能力矩阵（模块职责）
-
-| 能力 | 模块 | 备注 |
-|---|---|---|
-| 启动模式解析 | `scripts/lib/site-options.mjs` | CLI 参数与帮助 |
-| 启动编排 | `scripts/lib/site-launcher.mjs` | 编辑/浏览分支、标准化与静态启动 |
-| 重建编排 | `scripts/lib/rebuild-workflow.mjs` | 统一调用标准化与静态构建 |
-| 标准化 | `scripts/standardize-docs/*` | 解析、分类、标准对象生成 |
-| 索引构建 | `scripts/lib/static-index.mjs` | 从标准文档构建页面索引 |
-| 编辑服务 | `scripts/lib/doc-api-service.mjs` + `scripts/lib/doc-server-*` | 读写与重建 API |
-| 前端渲染 | `web/modules/app-runtime.js` | 页面渲染、编辑状态机 |
-| 前端网络 | `web/modules/app-services.js` / `app-doc-service.js` | 网络请求、错误与重试上下文 |
-| 验证与健康 | `scripts/validate-standard-docs.mjs`, `validate-data-template-alignment.mjs`, 指标 | 数据质量与模板一致性 |
-
----
-
-## 7. 当前可维护性诊断（现状）
-
-- 结构已形成“来源-标准化-索引-渲染-服务”四层链路，重构方向正确。
-- 前后端契约约束较强，降低了接口断裂风险。
-- 运行时职责虽清晰，但有一定“工具脚本重复逻辑”倾向（normalize 系列）可逐步抽象。
-
----
-
-## 8. 重构优先级（建议）
-
-### P0（建议优先）
-1. 文档源扫描白名单统一：将所有标准化与修复脚本的扫描规则统一到共享配置（避免路径一致性偏差）。
-2. 统一重建错误模型：把标准化失败、索引失败、模板缺失失败分类并返回统一结构。
-3. 前端错误面板结构化：将当前全局错误聚合输出为可追踪链（服务URL/attempts/状态码）。
-
-### P1
-4. 将 `start-doc-site-edit.sh`、`start-doc-site-live.sh` 迁移到 `scripts/ops/site.mjs` 参数入口，减少 shell 入口冗余。
-5. 把“可写字段/排序”类型脚本统一为 `scripts/normalize-cli.mjs` 插件化子命令。
-6. 为 `DOC/重建/索引` 提供单元测试级别的回归样例（至少三类文档+一条错误路径）。
-
-### P2
-7. 增加“文件级变更追踪日志”（写回时间、操作者、版本快照）。
-8. 优化 `docs-standard` 与源文件版本映射（便于回滚和差异比对）。
-9. 在 `validate-standard-docs` 中补充字段分组一致性检查（按 `inferPurposeGroup` 与 template 期望字段）。
-
----
-
-## 9. 近期可执行任务清单
-
-- [ ] 将新增脚本（如 `reorder-source-metadata-fields.mjs`）加入统一工具文档索引
-- [ ] 增加 `scripts/ops/site.mjs` 的参数帮助中显示全部 `--help` 子命令说明
-- [ ] 为 `/api/health` 加入重建队列长度（当前有进行中态）
-- [ ] 补齐系统级架构图到可视文档（SVG/PlantUML 任选其一）
-
-## 10. 系统结构图
+原有解析入口保留兼容转发；核心实现集中在 `engine/`，不能反向依赖宿主入口。YAML 解析依赖随应用离线提供。
 
 ```mermaid
-flowchart LR
-    User[用户浏览器\n(web/app.js)] -->|请求索引/详情| Frontend(前端渲染与状态层)
-    Frontend -->|静态读取| IndexFile[(web/data/index.json)]
-    Frontend -->|编辑读写接口| API[doc-site-server\n/doc-api-service]
-
-    API -->|读写| SourceData[design-data\n源文件]
-    API -->|校验| FSGuard[路径与版本守卫]
-    API -->|执行| Rebuild[rebuild-workflow]
-
-    Rebuild --> Std[standardize-docs]
-    Std --> DocStd[docs-standard]
-    DocStd --> IndexBuilder[static-index]
-    IndexBuilder --> IndexFile
-
-    SourceData --> Std
-    scripts[启动脚本/ops/lib]
-    scripts --> Rebuild
-    scripts --> SiteLauncher[site-launcher]
-    SiteLauncher --> API
-    SiteLauncher --> StaticServer[只读文件服务\n(Node.js)]
-    StaticServer --> Frontend
+flowchart TB
+  D[桌面作品库 · Tauri] --> N[内置 Node · 本机 HTTP 服务]
+  B[本地浏览器] --> N
+  N --> W[共用 web 编辑器]
+  A[Android 作品库 · Tauri] --> M[mobile 请求桥与即时索引]
+  M --> W
+  W --> E[engine · 解析 / 布局 / 字段 / 保存流程]
+  N --> E
+  M --> E
+  N --> F[Node 文件适配与索引缓存]
+  M --> R[Rust 私有存储]
+  F --> P[独立作品目录]
+  R --> Q[Android 应用私有作品目录]
+  D --> Z[Rust 完整项目归档]
+  R --> Z
+  Z --> X[标准 .viento.zip]
 ```
 
-## 11. 前端渲染与错误处理链路（建议实现）
+图中的共用编辑器通过当前宿主的请求接口工作；Android 的接口适配在 WebView 内完成，不启动 Node 或本机 HTTP 服务。
 
-- 前端统一入口：所有异步调用通过 `web/modules/app-services.js` 封装，形成统一的 request wrapper。
-- 错误标准化：服务端 `/api/*` 返回固定 `{ ok: boolean, data?, error?, requestId? }`，前端按 `error.code / status` 分类提示。
-- 视图层降级：主视图优先读 `web/data/index.json`，API 调用失败时显示离线/重试提示，不阻塞基础列表加载。
-- 编辑态安全：`/api/doc` 先做 schema 验证，再做路径校验，失败原因返回 `400/403/409`，并在前端展示具体字段（路径/版本/原因）。
-- 重建异步化：`/api/rebuild` 返回任务快照 `queued / running / finished / failed`，前端轮询 `metrics/health` 显示处理状态，避免阻塞主线程。
-- 可观测增强：`/api/health` 建议加入重建中排队长度、近 5 分钟错误率、当前重建耗时分位数，前端错误面板可直接消费。
+## 项目数据是唯一来源
 
-## 12. 参考入口
+新建 v3 项目的 `workspace.json` 声明正文、模板、元数据、素材目录及文档类型；默认目录为 `documents/`、`templates/`、`metadata/`、`assets/`。旧 v1 / v2 桌面作品原位兼容，不因更新程序改名或重排源文件。
 
-- 源数据：`design-data/README.md`
-- 构建脚本：`scripts/README.md`
-- 运行入口：`scripts/start-doc-site.sh`
-- API 契约：`scripts/lib/doc-api-contract.mjs`
+- 文档和素材用稳定 UUID 登记。路径用于定位，名称用于展示；背景故事用 `part-of` 归属档案，共享故事可有多个归属。
+- 模板提供新文档的起始正文。类型解析规则和字段分组控制解释与展示，不把模板重写进旧文档，也不执行模板脚本。
+- 正文中的项目路径使用 `/` 分隔的相对逻辑路径，素材可用 `asset:<UUID>` 引用；本机绝对路径和 Android `content://` 句柄不写入作品正文。
+- 桌面标准化文件、索引与临时导出集中在 `.viento/cache/`，属于派生数据。Android 索引按当前文件即时生成。
+- `.viento/local.json` 记录本机外置素材绑定，不进入迁移包。应用偏好、最近作品与恢复草稿也不等同于作品备份。
+
+格式详情见 [通用项目](GENERIC_PROJECTS.md)、[文档模型](OC_DOCUMENT_MODEL.md) 和 [作品库布局](WORKSPACE_LAYOUT.md)。
+
+## 桌面与浏览器链路
+
+Tauri 作品库启动随附 Node 和 `scripts/desktop-server.mjs`，处理服务绑定本机随机端口，使用每次启动独立的会话凭据、Cookie 和来源检查。编辑 WebView 不直接取得原生文件或 Shell 权限；桌面保存通过受校验的桥交给宿主。普通浏览器由 `scripts/ops/site.mjs` 启动同一服务，浏览模式不开放正文及项目配置写入。
+
+```text
+作品清单 + 源文件 + 登记
+    → standardize-docs → 通用解析与布局
+    → build-static-doc-site → .viento/cache/indexes/
+    → data/index.json → 文档列表与阅读器
+
+编辑草稿 → 文档接口 → engine/document-store
+    → Node 文件适配 → 版本检查 / 原子写入 / 新建登记
+    → 标准化与索引刷新 → 当前编辑器
+```
+
+可编辑目录由已验证的项目配置决定，不固定为旧作品的 `design-data/`。编辑器读取的 `data/index.json` 是索引资源入口；服务另提供 `/api/index`，两者不应在调用说明中混为同一请求。
+
+接口契约集中在 `engine/document-contract.mjs`，旧 `scripts/lib/doc-api-contract.mjs` 保留转发。路由、文档服务、文件存储、项目设置、素材和导出分别处理各自职责。`/api/health` 和 `/api/metrics` 用于诊断，启动及检查时执行契约校验。
+
+保存正文和刷新索引是两个步骤。正文写入成功后即使刷新失败，也保留保存结果并允许重试；版本冲突保留当前草稿，不能把旧内容静默覆盖到新版本上。源码、分段和字段表共享同一份草稿，字段修改只回写对应的值片段。
+
+桌面返回作品库可保留本次编辑窗口的草稿；关闭时检查未保存状态。它不提供与 Android 相同的进程退出后草稿恢复保证。引擎退出及索引子进程回收完成后才释放作品会话锁，详见 [桌面宿主](../desktop/README.md)。
+
+## Android 链路
+
+```text
+mobile 作品库 → 作品 UUID
+    → mobile/platform.mjs → 共用编辑器与 engine
+    → Tauri mobile_storage → Rust 存储锁与路径校验
+    → app_data_dir()/workspaces/<作品>/
+```
+
+原生命令只接受作品 ID 和逻辑源路径，不接受任意磁盘目录。保存核对 SHA-256 修订号，使用同目录临时文件和原子替换。新建文档先持久化正文及登记的创建意图，进程中断后按同一身份恢复；已有不同内容的文件不会被覆盖。
+
+WebView 本机存储按作品保存草稿及原始修订号；恢复后继续进行冲突检查。恢复副本不进入项目包，卸载或清除应用数据会失去私有作品和草稿。
+
+原生窗口处理系统栏、刘海与软键盘边界，并通知 WebView 已消费的边界，避免遮挡或重复留白；编辑页面使用整页滚动。迁移选择器返回后，插件等待 Activity 恢复再在主线程交付结果，避免取消回执滞留。
+
+当前已接入编辑、语言设置和完整迁移。媒体访问与插入、项目类型配置、文档分享导出仍未接入；不能根据共用引擎存在这些接口就宣称移动端已经支持。设备和容量边界见 [Android 说明](../mobile/README.md)。
+
+## 分享与完整迁移
+
+桌面 / 浏览器分享链路为：选择文档与附属内容 → 通用布局 → HTML / Markdown → 收集稳定引用及绑定素材 → 流式 ZIP → 下载或原生保存。完整项目包包含清单、模板、正文、全部登记和素材，排除本机绑定及缓存。
+
+桌面原生作品库使用 Rust 归档；编辑器完整导出使用 Node 实现，两者通过往返测试对齐。Android 复用 Rust 归档，增加移动容量限制和系统文档选择适配；外部 URI 只用于传输，导入先暂存校验再发布到私有作品库，同一作品拒绝覆盖。
+
+归档检查包内摘要，也核对正文和素材登记、关系、路径冲突与导出期间的源文件变化。文件成功写完后才替换正式备份；失败撤回本次恢复目录。下载完成按实际成功响应判断，未完成的包保留重试机会。详见 [导出契约](EXPORT.md)。
+
+## 检查与追踪
+
+当前覆盖、命令及剩余验证见 [验证指南](TESTING.md)。[功能网络及交互图](FUNCTION_NETWORK.md) 是 b.4.3 的桌面历史快照，保留原来的枚举和证据；本文与 Android 说明补充其后的架构变化。历史记录中的“未验证”只描述记录当时的状态。

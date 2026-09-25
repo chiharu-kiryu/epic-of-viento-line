@@ -1,0 +1,17 @@
+PASS: English and Japanese settings survive full native application restarts
+PASS: a new editor origin loads the language saved by the library
+PASS: 配音样例.wav plays and seeks
+PASS: 配音样例.mp3 plays and seeks
+PASS: 配音样例.ogg plays and seeks
+PASS: 配音样例.opus plays and seeks
+PASS: 配音样例.flac plays and seeks
+PASS: 配音样例.m4a plays and seeks
+PASS: 配音样例.aac plays and seeks
+PASS: WAV / MP3 / Ogg / Opus / FLAC / M4A / AAC playback, pause and seeking; audio filter, original download and stable-ID reuse
+PASS: cancel new type / Escape / back / type switch → retain or discard drafts → restore selection → translated controls → narrow layout → unchanged project bytes
+PASS: project template editor → typed preview → live save → add a type → unchanged authored content / metadata
+PASS: language switch preserves source / block DOM, drafts, paths and project bytes; export guard is translated
+PASS: native field edit → three languages retain draft → source/field switch → save → exact YAML bytes and metadata retained
+PASS: Japanese native save picker and export instructions; original document bytes retained
+PASS: native export dialog → cancel / retry GTK save picker → offline document with media → complete project export → native import with exact source and asset bytes → staging cleanup
+PASS: native v3 creation → empty generic project → project-owned types → character background + PNG / WebM / MP4 → custom YAML template + chosen folder + saved type → reopen → full backup and byte-identical restore

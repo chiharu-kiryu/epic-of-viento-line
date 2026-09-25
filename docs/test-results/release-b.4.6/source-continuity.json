@@ -1,0 +1,39 @@
+{
+  "previous": "../workflow-b.4.5/source-fingerprints.json",
+  "comparedFiles": 385,
+  "unchangedFiles": 380,
+  "criticalFixes": {
+    "scripts/lib/doc-server.mjs": "1cc77481b01923ae2807138df6c2b5ba04facd0aa8452c336500b54a9a447039",
+    "mobile/mobile.css": "8bc24e347290590aeb823a1256314025e325814ddfec8bd8beafe906539ebb47",
+    "src-tauri/gen/android/app/src/main/AndroidManifest.xml": "21947b9058afc7813c04ecf36d8d0b68de380dd51a4b55fde9f41ba2cc2ce861",
+    "src-tauri/gen/android/app/src/main/java/io/viento/studio/MainActivity.kt": "165262af132b133a4db3202861298554085476dddf0d17f1f7920a2c0784e9bf",
+    "src-tauri/gen/android/app/src/main/java/io/viento/studio/ArchiveTransferPlugin.kt": "309b6dea7b8085b935673f160e7ba3d7c37deb855f177df673c4a62fafba0a0e"
+  },
+  "changes": [
+    {
+      "file": "desktop/ui/index.html",
+      "previous": "230c0fd597d572aa92bae047f6e8c87d265b7deb29c12cc56cc2caeea8440fc4",
+      "current": "0e3b611b42525a714a50436adffc52383cbd39e0098aa3737dca882c98a8e387"
+    },
+    {
+      "file": "src-tauri/Cargo.lock",
+      "previous": "1ff038892fd312edcc808b7f1913adf7a8348d2d6d4dac34798ff8d4df2203a5",
+      "current": "47e985e1863131c34b1c4dec2419bd8eae054b5953a30b664244595300c3d823"
+    },
+    {
+      "file": "src-tauri/Cargo.toml",
+      "previous": "0ec0e60cea8848e9a4b08f42aca569e453aa39e4e17343a7e709a49088b8ad7b",
+      "current": "19383643bf1f81a6a1fc6ff56b6dd3b0fe02c4bd17c8a12f5db4da4a4fea6771"
+    },
+    {
+      "file": "src-tauri/tauri.conf.json",
+      "previous": "a37bef0d1f34fefa52f687202ecc9f18bdb6d27c3c0bd63af9261f9bf5a8b910",
+      "current": "6a32da80d70afc53ad41d591e338923870b6d83f1bdfaf1ea461dfde2273f816"
+    },
+    {
+      "file": "web/index.html",
+      "previous": "fe82f9c450b60170ff4306b80b172d35cf0911e145b862f2b77b85583b8929af",
+      "current": "461696a9d6b6e2feda2a78cfca4d7dcd834e89d225122c07c7df4b6b6b1de8eb"
+    }
+  ]
+}

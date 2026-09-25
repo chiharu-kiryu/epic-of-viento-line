@@ -2,6 +2,8 @@
 
 此页枚举 **2026-09-24、b.4.3 工作树**的实际功能入口、业务步骤、接口和数据落点，包含[四十六轮排查与验证](NETWORK_BUGFIX_b.2.8.1.md)。此为修订 64，补齐[当前桌面版及功能图交互实测](NATIVE_WORKFLOW_TEST_b.4.3.md)，应用代码与发布提交 `2bc3db43` 一致。JSON 保留此前修复与发布证据；最初基线为 `51d522cb919c20b15815b129bd62e859af9a97a0`。
 
+后续 b.4.5 的下载名额修复、当前 Linux 原生回归及 Android 模拟器实测见[功能链路补测与修复](WORKFLOW_VERIFICATION_b.4.5.md)。修复收录于 [b.4.6](RELEASE_b.4.6.md)；当前跨平台结构与待测事项见 [架构](ARCHITECTURE.md) 和 [验证指南](TESTING.md)。此页及交互图继续保留上述历史快照。
+
 - [离线交互浏览器](function-network.html)：筛选业务链路，点击节点查看上下游，查询真实模块导入及接口。下载后双击即可使用，不访问外网。
 - [机器可读快照](function-network.json)：完整节点、边、源码引用、模块导入、事件绑定、路由、命令和扫描文件指纹。
 - [总图 Mermaid 源文件](function-network.mmd)：可在支持 Mermaid 的工具中继续编辑。

@@ -1,0 +1,18 @@
+{
+  "file": "dist/android-preview/Viento-Studio_b.4.6_android-arm64-debug.apk",
+  "version": "b.4.6",
+  "buildVersion": "0.4.6",
+  "versionCode": 4006,
+  "bytes": 30362852,
+  "sha256": "f0c26b1b205ecd7c7f8ae490546db084bdbb837168157161e50b54aa387413be",
+  "abi": "arm64-v8a",
+  "minSdk": 26,
+  "targetSdk": 36,
+  "nativeLibraryMatchesBuild": true,
+  "archiveTransferPluginInDex": true,
+  "mainActivityInDex": true,
+  "broadStoragePermissions": false,
+  "signing": "debug",
+  "physicalDeviceTested": false,
+  "releaseApkDeviceInteractionRerun": false
+}

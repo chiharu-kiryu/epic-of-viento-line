@@ -498,9 +498,13 @@ async function sendFile(filePath, response, request = null) {
       response.setHeader('Content-Range', `bytes ${range.start}-${range.end}/${stats.size}`);
       response.setHeader('Content-Length', String(range.end - range.start + 1));
     }
-    if (isHead) { response.end(); return; }
+    if (isHead || stats.size === 0) { response.end(); return; }
     try {
-      await pipeline(handle.createReadStream({ autoClose: false, ...(range || {}) }), response);
+      // The client can finish after Content-Length bytes without waiting for
+      // another disk read to discover EOF. Bound full responses as well as
+      // ranges so that close cannot leave a complete export marked unfinished.
+      await pipeline(handle.createReadStream({ autoClose: false, start: range?.start ?? 0,
+        end: range?.end ?? stats.size - 1 }), response);
     } catch (error) {
       // A disconnect or a read failure after streaming began cannot be replaced
       // with a JSON body. End this response while keeping the service alive.

@@ -1,0 +1,66 @@
+✖ a complete document download releases capacity without waiting for an extra EOF read (229.552324ms)
+✖ a complete workspace download releases capacity without waiting for an extra EOF read (233.423573ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 523.03646
+
+✖ failing tests:
+
+test at scripts/tests/export-downloads.test.mjs:137:47
+✖ a complete document download releases capacity without waiting for an extra EOF read (229.552324ms)
+  Error: /home/chiharukiryu/.local/share/nodejs/node-v24.21.0-linux-x64/bin/node failed with exit code 1. node:internal/modules/run_main:107
+      triggerUncaughtException(
+      ^
+  
+  AssertionError [ERR_ASSERTION]: {"ok":false,"error":"请先下载或关闭已有导出，再继续","userMessage":{"key":"请先下载或关闭已有导出，再继续","values":[]},"errorCode":"export_failed"}
+  
+  409 !== 200
+  
+      at create (file:///tmp/viento-test-1AkhpK/[eval1]:29:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async file:///tmp/viento-test-1AkhpK/[eval1]:106:5 {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 409,
+    expected: 200,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+  
+  Node.js v24.21.0
+      at ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+      at ChildProcess.emit (node:events:514:28)
+      at maybeClose (node:internal/child_process:1141:16)
+      at ChildProcess._handle.onexit (node:internal/child_process:306:5)
+
+test at scripts/tests/export-downloads.test.mjs:137:47
+✖ a complete workspace download releases capacity without waiting for an extra EOF read (233.423573ms)
+  Error: /home/chiharukiryu/.local/share/nodejs/node-v24.21.0-linux-x64/bin/node failed with exit code 1. node:internal/modules/run_main:107
+      triggerUncaughtException(
+      ^
+  
+  AssertionError [ERR_ASSERTION]: {"ok":false,"error":"请先下载或关闭已有导出，再继续","userMessage":{"key":"请先下载或关闭已有导出，再继续","values":[]},"errorCode":"export_failed"}
+  
+  409 !== 200
+  
+      at create (file:///tmp/viento-test-EvH440/[eval1]:29:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async file:///tmp/viento-test-EvH440/[eval1]:106:5 {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 409,
+    expected: 200,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+  
+  Node.js v24.21.0
+      at ChildProcess.<anonymous> (file:///home/chiharukiryu/cdev/epic-of-viento-line/scripts/lib/process.mjs:61:16)
+      at ChildProcess.emit (node:events:514:28)
+      at maybeClose (node:internal/child_process:1141:16)
+      at ChildProcess._handle.onexit (node:internal/child_process:306:5)

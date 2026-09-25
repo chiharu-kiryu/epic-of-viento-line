@@ -1,0 +1,8 @@
+{
+  "apk": "dist/android-preview/Viento-Studio_b.4.5_android-arm64-debug.apk",
+  "sha256": "dfe4dbca34190d274ddf323f4c149e252c50ca697959f08e44e522dfc13cd661",
+  "serial": "emulator-5584",
+  "api": 35,
+  "abi": "x86_64,arm64-v8a",
+  "armNativeBridge": true
+}

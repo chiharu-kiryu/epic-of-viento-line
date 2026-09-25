@@ -1,0 +1,30 @@
+[
+  {
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "src-tauri/Cargo.toml",
+      "--locked",
+      "--offline"
+    ],
+    "exitCode": 0,
+    "seconds": 6.97
+  },
+  {
+    "command": [
+      "cargo",
+      "build",
+      "--manifest-path",
+      "src-tauri/Cargo.toml",
+      "--locked",
+      "--offline",
+      "--example",
+      "workspace-archive",
+      "--example",
+      "mobile-storage"
+    ],
+    "exitCode": 0,
+    "seconds": 5.29
+  }
+]

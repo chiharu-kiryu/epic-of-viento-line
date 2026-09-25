@@ -2,8 +2,13 @@ package io.viento.studio
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.provider.DocumentsContract
 import androidx.activity.result.ActivityResult
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import app.tauri.annotation.ActivityCallback
 import app.tauri.annotation.Command
 import app.tauri.annotation.InvokeArg
@@ -38,10 +43,32 @@ class ArchiveTransferPlugin(private val activity: Activity) : Plugin(activity) {
     }
 
     private fun finish(invoke: Invoke, error: String? = null, cancelled: Boolean = false) {
-        busy.set(false)
         val result = JSObject().put("cancelled", cancelled)
         if (error != null) result.put("error", error)
-        invoke.resolve(result)
+        activity.runOnUiThread {
+            val lifecycle = (activity as LifecycleOwner).lifecycle
+            val deliver = {
+                // Activity results arrive before onResume. Let the WebView and
+                // native event loop resume before returning the IPC response.
+                Handler(Looper.getMainLooper()).post {
+                    busy.set(false)
+                    invoke.resolve(result)
+                }
+            }
+            if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
+                || lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                deliver()
+            } else {
+                lifecycle.addObserver(object : LifecycleEventObserver {
+                    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+                        if (event == Lifecycle.Event.ON_RESUME || event == Lifecycle.Event.ON_DESTROY) {
+                            source.lifecycle.removeObserver(this)
+                            deliver()
+                        }
+                    }
+                })
+            }
+        }
     }
 
     private fun choose(invoke: Invoke, exporting: Boolean) {
