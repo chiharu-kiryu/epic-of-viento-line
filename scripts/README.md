@@ -4,6 +4,9 @@
 
 ## 目录结构
 
+- `adapters/`
+  - `node-document-storage.mjs`：将实际文件定位、快照、原子写入和文档登记接入 `engine/document-store.mjs`。通用解析与草稿编辑实现位于仓库的 `engine/`；本目录中的原有入口继续兼容转发。
+
 - `ops/`
   - `site.mjs`：统一启动入口（浏览/编辑模式、参数解析、启动子进程）
   - `rebuild.mjs`：封装标准化+索引构建流程的重建任务

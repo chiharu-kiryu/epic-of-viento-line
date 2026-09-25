@@ -416,7 +416,7 @@ fn has_model_text(value: &str) -> bool {
     })
 }
 
-fn validate_document_models(records: &[serde_json::Value]) -> Result<()> {
+pub(crate) fn validate_document_models(records: &[serde_json::Value]) -> Result<()> {
     let by_id: BTreeMap<_, _> = records
         .iter()
         .enumerate()

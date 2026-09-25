@@ -1,0 +1,7 @@
+{
+  "roundTrip": "Android native storage → desktop archive → desktop restore",
+  "filesCompared": 9,
+  "sourceBytesEqual": true,
+  "stableIdsPreserved": true,
+  "archiveSha256": "306a8005568b6a45a7267e8fe5f21690937eacb965b0f62a9d04321ffd486ffa"
+}

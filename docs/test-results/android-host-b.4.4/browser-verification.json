@@ -1,0 +1,24 @@
+{
+  "transport": "Browser HTTP test bridge to real Rust mobile storage",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "newWorkAndDocument": true,
+  "fieldEdits": [
+    "100→175 saved",
+    "222 restored after closing page, saved and reopened"
+  ],
+  "storyUnchanged": true,
+  "lostNativeReplyRecoveredAsSaved": true,
+  "registeredDocumentCount": 2,
+  "duplicateSources": false,
+  "pendingCreationIntents": 0,
+  "languages": [
+    "zh-CN",
+    "en",
+    "ja"
+  ],
+  "consoleErrors": 0,
+  "deviceTested": false
+}

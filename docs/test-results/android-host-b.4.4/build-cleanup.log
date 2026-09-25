@@ -1,0 +1,11 @@
+✔ build cleanup preserves source, releases and every workspace state file (29.121713ms)
+✔ build cleanup does not follow symlinks into other data (9.184881ms)
+✔ build cleanup refuses a configured workspace or asset store inside generated directories (4.243713ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 98.86416

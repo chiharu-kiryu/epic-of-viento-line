@@ -1,0 +1,20 @@
+{
+  "viewport": {
+    "height": 844,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  "console": [],
+  "checked": [
+    "import visible in library",
+    "duplicate rejected without overwrite",
+    "character field 100 → 175 saved",
+    "story remains a child of character",
+    "archive exported after editing",
+    "English and Japanese immediate switch",
+    "corrupt archive Japanese error",
+    "retry invokes picker again",
+    "cancel returns usable controls"
+  ],
+  "systemPicker": "substituted by explicit test fixture; Android native picker not device-tested"
+}

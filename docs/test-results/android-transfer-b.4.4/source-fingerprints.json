@@ -1,0 +1,19 @@
+{
+  "src-tauri/src/lib.rs": "895e72d93535ddead16d8d78cf87a6be3304c2ba6042f0324ba15940256be6ae",
+  "src-tauri/src/mobile_host.rs": "46f267f8cee565341c5f67f21afe7ca89b854e01e1746305a40de469fe734181",
+  "src-tauri/src/mobile_storage.rs": "3becdcf91c0de15f49111503a98e7d2e9d0a37cbf85f04005cff2064f0050fec",
+  "src-tauri/src/mobile_archive.rs": "793586b7e5a11301e1b8a096b66d2ae3931710d8508d486d7ad3628604b842a1",
+  "src-tauri/src/mobile_transfer.rs": "f407ced01f4c77d927163c737b73ad6d5bea2e7d27aa0e16a5dc3c4f1978be84",
+  "src-tauri/src/workspace.rs": "46b13b7eec0e1ad3b33b7958b2f543b34c27daf252d4a5473907ea4e69ace31b",
+  "src-tauri/tauri.android.conf.json": "2029a0ae0b4167485542079a4acaf9d19c8c76be2f7a7fca66a0d08ca7904027",
+  "src-tauri/gen/android/app/src/main/java/io/viento/studio/ArchiveTransferPlugin.kt": "bf8ff48ab202e7707c9c65f26c42a2e5d59faac865c90003f741caf1f94e5742",
+  "src-tauri/gen/android/app/proguard-rules.pro": "13dff2fb2e639fdde9e4716e685f81629e192b990206c3174a64e60132bd0e14",
+  "mobile/index.html": "57323c1d919a941d1c0c2ef254438e5a8f6c36b85b7f3c7929ff667692760c77",
+  "mobile/library.js": "8a41e2466d376f88916e7185db3bb0399f79e527adc18e3f54a936cd416edb2a",
+  "mobile/mobile.css": "908739799370425a986697236f89bf3d8b706a71766e04ad31a4294d2ded4962",
+  "mobile/platform.mjs": "f59104a0f3ec39564d22342ad6d979d10854a78a44213e2926f23806dd723325",
+  "mobile/editor.js": "c4a7b6346acaa346d836b7b3f555c4d7a468d6e28d92528419083985005d8d0f",
+  "mobile/prepare.mjs": "89f643a8906c898a0f9a9e03d0c0298bd6d7609d2575a3d716ece8a4fd3a344e",
+  "web/i18n/en.js": "c97e6a09a48815fea91de88aee259e20cfcc4ac518ec3657fa1fa23ee3b2b166",
+  "web/i18n/ja.js": "a1985c3591331c3b3bc444204e85b25c4a76a44ee9a5f30d22c3fdc0b5709613"
+}

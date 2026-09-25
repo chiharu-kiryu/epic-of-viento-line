@@ -7,6 +7,8 @@ const SKIP_DIRS = new Set([
   'node_modules',
   '.tmp',
   'tmp',
+  'engine',
+  'mobile',
   'web',
   'data-template',
   'templates',

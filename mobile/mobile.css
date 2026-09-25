@@ -1,0 +1,29 @@
+:root { color-scheme: dark; }
+.mobile-library { margin: 0; background: #0b1523; color: #e5edf5; font: 16px/1.6 system-ui, sans-serif; }
+.mobile-library header { display: flex; align-items: center; justify-content: space-between; padding: max(20px, env(safe-area-inset-top)) 20px 20px; border-bottom: 1px solid #294357; }
+.mobile-library header h1 { margin: 0; font-size: 24px; }
+.mobile-library header span, .mobile-library .muted { color: #9db4c8; font-size: 14px; }
+.mobile-library main { padding: 20px; max-width: 760px; margin: auto; }
+.mobile-library h2 { margin-top: 0; }
+.mobile-library button, .mobile-library input { border: 1px solid #34536b; background: #132b3d; color: inherit; padding: 12px 16px; border-radius: 10px; font: inherit; min-height: 48px; }
+.mobile-library input { background: #091321; width: 100%; min-width: 0; box-sizing: border-box; }
+.mobile-library button:disabled { opacity: .55; }
+.create-row { display: flex; gap: 10px; margin-top: 8px; }
+.create-row button { flex-shrink: 0; background: #82d6b8; color: #09201b; }
+.mobile-works { display: grid; gap: 12px; }
+.mobile-work-row { display: flex; gap: 8px; }
+.mobile-work { text-align: start; overflow-wrap: anywhere; min-width: 0; flex: 1; }
+.mobile-work-export { flex-shrink: 0; font-size: 14px !important; }
+/* Unavailable operations have no interactive entry in this preview host. */
+.mobile-host #docExportBtn, .mobile-host #docMediaInsertBtn, .mobile-host #projectSettingsBtn { display: none !important; }
+.mobile-host .topbar { padding-top: env(safe-area-inset-top); }
+.mobile-host .page-shell { min-height: 100dvh; }
+.mobile-host .doc-edit-panel { padding-bottom: env(safe-area-inset-bottom); }
+.mobile-draft-notice { position: sticky; top: 0; z-index: 100; padding: 12px 18px; margin: 0; color: #ecf9f3; background: #1b3f37; }
+.mobile-draft-notice[hidden] { display: none; }
+@media (max-width: 560px) {
+  .mobile-host button { min-height: 44px; }
+  .mobile-host input, .mobile-host textarea, .mobile-host select { font-size: 16px; }
+  .mobile-host .topbar-inner { gap: 8px; }
+  .mobile-library .create-row { flex-direction: column; }
+}

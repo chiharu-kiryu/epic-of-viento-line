@@ -40,7 +40,13 @@ test('browser module graph is served as JavaScript; server-only modules stay pri
     }
   }
   assert.ok(visited.has('/scripts/lib/doc-api-contract.mjs'));
+  for (const module of ['document-contract', 'source-draft', 'field-changes', 'media-format', 'document-values']) {
+    assert.ok(visited.has(`/engine/${module}.mjs`), module);
+  }
   assert.equal((await fetch(`${base}/scripts/lib/doc-api-service.mjs`)).status, 404);
+  assert.equal((await fetch(`${base}/scripts/adapters/node-document-storage.mjs`)).status, 404);
+  assert.equal((await fetch(`${base}/engine/missing.mjs`)).status, 404);
+  assert.equal((await fetch(`${base}/engine/README.md`)).status, 404);
   assert.equal((await request(base, '/api/health')).status, 200);
   assert.equal((await request(base, '/api/doc?path=../README.md')).status, 400);
 });

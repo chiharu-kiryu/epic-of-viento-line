@@ -6,7 +6,14 @@ import { appStoragePaths, readWorkspaceSelector } from '../scripts/lib/app-stora
 // Only application build output belongs here. Never add dist/, workspaces/,
 // .viento/, Git history or arbitrary user-supplied paths to this list.
 const generated = ['src-tauri/target', 'src-tauri/binaries', 'src-tauri/gen/schemas',
-  'desktop/resources', 'desktop/.cache', 'desktop/ui/i18n'];
+  'desktop/resources', 'desktop/.cache', 'desktop/ui/i18n', 'mobile/dist',
+  'src-tauri/gen/android/.gradle', 'src-tauri/gen/android/.kotlin', 'src-tauri/gen/android/build',
+  'src-tauri/gen/android/app/build', 'src-tauri/gen/android/buildSrc/build', 'src-tauri/gen/android/buildSrc/.gradle',
+  'src-tauri/gen/android/app/src/main/jniLibs', 'src-tauri/gen/android/.tauri',
+  'src-tauri/gen/android/app/src/main/java/io/viento/studio/generated',
+  'src-tauri/gen/android/app/src/main/assets/tauri.conf.json', 'src-tauri/gen/android/app/proguard-tauri.pro',
+  'src-tauri/gen/android/app/tauri.build.gradle.kts', 'src-tauri/gen/android/app/tauri.properties',
+  'src-tauri/gen/android/tauri.settings.gradle'];
 const root = fileURLToPath(new URL('../', import.meta.url));
 
 export async function cleanBuilds(appRoot, { dryRun = false, storage = appStoragePaths() } = {}) {

@@ -1,0 +1,42 @@
+Browser tab: 13, Title: "Viento Studio · OC Design Workspace", URL: "http://127.0.0.1:42855/editor.html?mode=edit&workspace=02c8efdf-90ff-43eb-a285-d8c3d2c20d54".
+1 AXWebArea Viento Studio · OC Design Workspace, URL: 127.0.0.1:42855/editor.html?mode=edit&workspace=02c8efdf-90ff-43eb-a285-d8c3d2c20d54
+	2 container workspaceShell
+		3 container
+			4 button Library
+			19 button (collapsed) Description: Show document sidebar, ID: docSidebarToggleBtn, Secondary Actions: Expand
+			6 heading Viento Studio, Value: 1, ID: siteTitle
+				7 text Viento Studio
+			9 text b.4.4
+			15 container Description: Workspace mode, ID: modeSwitch
+				16 button Settings, ID: settingsBtn
+				17 checkbox Browse, Value: 0, ID: modeBrowseBtn
+				18 checkbox Edit, Value: 1, ID: modeEditBtn
+		20 container
+			21 text 旅人
+			22 container docEditPanel
+				23 container Description: Editing method, ID: docEditModeBar
+					24 checkbox Source, Value: 0, ID: docEditSourceModeBtn
+					25 checkbox Blocks, Value: 0, ID: docEditBlockModeBtn
+					26 checkbox Fields, Value: 1, ID: docEditFieldModeBtn
+				27 container docEditActions
+					28 button Return to reading, ID: docEditBtn
+					29 button Save changes, Help: Save changes（Ctrl / ⌘ + S）, ID: docSaveBtn
+				30 text Source file: documents/characters/旅人.md
+				33 container Description: Fields, ID: docFieldEditor
+					34 container
+						35 search text field (settable) Filter by field name or value
+						36 checkbox (settable, integer) Description: Modified only, Value: 0
+						37 text Modified only Showing 1 of 1 fields
+					38 text Edit the values, then save to apply. Other document content stays as written.
+					39 container
+						40 button (expanded) Field, Secondary Actions: Collapse
+							41 text Field
+						42 text 生命 Number
+						43 text field (settable) Description: 生命, Value: 222, ID: docFieldValue-0
+						44 button (disabled) Description: Reset field: 生命, Help: Reset this field to its original value
+				32 container docEditDirtyIndicator
+					45 text ●
+					46 text Saved
+				47 text Characters: 16 · Lines: 5
+
+The focused UI element is 43 text field (settable) Description: 生命, Value: 222, ID: docFieldValue-0

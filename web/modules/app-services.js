@@ -4,6 +4,14 @@ import { diagnosticMessage } from '../i18n/diagnostics.js';
 
 export const DEFAULT_INVALID_RESPONSE_MESSAGE = '后端返回了非预期响应格式';
 
+// The desktop uses HTTP. Packaged mobile hosts install an IPC-backed transport
+// before initializing the editor; no global fetch interception is necessary.
+let resourceTransport = null;
+export function configureRequestTransport(transport) {
+  if (transport !== null && typeof transport !== 'function') throw new TypeError('Invalid resource transport');
+  resourceTransport = transport;
+}
+
 function parseStatusCode(status = null) {
   if (typeof status === 'number' && Number.isInteger(status) && status >= 100 && status <= 999) {
     return status;
@@ -94,7 +102,7 @@ export async function fetchWithTimeout(url, options = {}, timeoutMs = 10000, tim
   const timer = setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
 
   try {
-    const response = await fetch(url, {
+    const response = await (resourceTransport || fetch)(url, {
       ...options,
       signal: controller.signal,
     });

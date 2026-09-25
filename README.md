@@ -1,6 +1,6 @@
 # Viento Studio
 
-当前版本：**b.4.4**。更新内容和版本规则见 [发布记录](docs/RELEASE_b.4.4.md)。测试版为 `b.X.Y`，X、Y 均为 0–9；`b.9.9` 后进入 `1.0.0`。
+当前版本：**b.4.5**。更新内容和版本规则见 [发布记录](docs/RELEASE_b.4.5.md)。测试版为 `b.X.Y`，X、Y 均为 0–9；`b.9.9` 后进入 `1.0.0`。
 
 Viento Studio 是通用 OC 设计 IDE；此仓库包含编辑器、转换器和桌面宿主。正文、模板、元数据、素材及作品备份保存在独立作品文件夹，具体位置可用 `npm run workspace -- paths` 查看。新项目采用 `documents / templates / metadata / assets`，类型和模板由项目定义，见 [通用项目结构](docs/GENERIC_PROJECTS.md)。
 
@@ -39,9 +39,11 @@ npm run desktop:dev
 
 ```text
 web/                  编辑器界面
-scripts/              服务、转换器、登记与校验工具
-src-tauri/            桌面宿主及完整备份迁移
+engine/               可移植解析、布局、字段编辑与文档存储流程
+scripts/              桌面文件适配、服务、转换管道、登记与校验工具
+src-tauri/            桌面和移动宿主及完整备份迁移
 desktop/             桌面首页、运行环境准备、原生测试
+mobile/               Android 作品库、编辑器入口及原生存储桥接
 schemas/              通用文件格式定义
 docs/                 架构、数据格式与迁移记录
 ```
@@ -75,6 +77,8 @@ Linux 默认作品目录为 `~/.local/share/io.viento.studio/workspaces/`，本�
 - 按图排查与修复：[连续修复记录](docs/NETWORK_BUGFIX_b.2.8.1.md)
 - Linux 桌面依赖安全修复：[glib 上游补丁与验证](docs/SECURITY_GLIB_b.2.9.md)
 - 系统整体架构：[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- 跨平台引擎与存储接口：[`engine/README.md`](engine/README.md)；[Android 基础拆分及验证](docs/ANDROID_FOUNDATION_b.4.4.md)
+- Android 预览版：[`mobile/README.md`](mobile/README.md)；[本机编辑工作流](docs/ANDROID_HOST_b.4.4.md)；[项目包迁移验证](docs/ANDROID_TRANSFER_b.4.4.md)
 - 脚本职责说明：[`scripts/README.md`](scripts/README.md)
 
 ## Tauri 桌面版
@@ -84,9 +88,9 @@ Linux 默认作品目录为 `~/.local/share/io.viento.studio/workspaces/`，本�
 - 开发运行：`npm ci` 后执行 `npm run desktop:dev`。
 - 构建安装包：`npm run desktop:build`。
 - 本机交付：`dist/current/` 保存已构建的 Linux 便携包、源码与校验记录，具体版本以交付文件名和校验记录为准；完整作品迁移包在应用数据目录的 `backups/`。
-- 构建后释放空间：`npm run clean`，仅清理可重建的桌面构建目录；交付目录和作品保留。
+- 构建后释放空间：`npm run clean`，仅清理可重建的桌面和移动端构建目录；交付目录和作品保留。
 - 数据目录、备份格式、三端发行与构建依赖见 [`desktop/README.md`](desktop/README.md)。
-- 最新发布见 [b.4.4 发布记录](docs/RELEASE_b.4.4.md)，此前故障复现和验证见 [功能网络修复记录](docs/NETWORK_BUGFIX_b.2.8.1.md)。
+- 最新发布见 [b.4.5 发布记录](docs/RELEASE_b.4.5.md)，此前故障复现和验证见 [功能网络修复记录](docs/NETWORK_BUGFIX_b.2.8.1.md)。
 - 较早的排查见 [调用链故障记录](docs/CALL_PATH_BUGFIX_b.2.8.md) 与 [历史修复记录](docs/BUGFIX_0.2.1.md)。
 
 ## 文档网页化预览（HTML5）

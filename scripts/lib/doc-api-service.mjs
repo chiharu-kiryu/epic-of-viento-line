@@ -1,18 +1,14 @@
-import path from 'node:path';
 import {
-  safePathFromQuery,
-  normalizeLockVersion,
+  EDIT_ROOT_PREFIXES,
   normalizeStandardizeSourceFilter,
-  isAllowedEditPath,
   resolveEditableFilePath,
   buildEditableDocIndex,
 } from './doc-server.mjs';
-import { trimName, PROJECT_ROOT, DOCUMENTS_PATH, reloadWorkspaceManifest } from './paths.mjs';
+import { PROJECT_ROOT, DOCUMENTS_PATH, reloadWorkspaceManifest } from './paths.mjs';
 import { readProjectConfiguration, previewProjectTemplate, saveProjectTemplate } from './project-service.mjs';
 import { rebuildIndex } from './rebuild-workflow.mjs';
 import { clearHeroImageCache } from './image-index.mjs';
 import { listMediaAssets, importMediaAsset } from './media-assets.mjs';
-import { createRegisteredDocument } from './project-documents.mjs';
 import { prepareMediaInsertion } from './media-insertion.mjs';
 import { prepareDocumentFields } from './document-field-draft.mjs';
 import { userMessage, userMessageText } from './user-message.mjs';
@@ -20,14 +16,13 @@ import { createExportService } from './export-service.mjs';
 import {
   makeCapabilitiesPayload,
   API_ERRORS,
-  API_RESPONSE_DEFAULTS,
   normalizeRebuildRequest,
-  normalizeDocWriteRequest,
-  getCreatePathError,
   normalizeRequestId,
 } from './doc-api-contract.mjs';
 import { createApiMetrics } from './doc-api-metrics.mjs';
-import { withDocumentTransaction, documentContentVersion, readDocumentSnapshot, writeDocumentAtomically } from './doc-file-store.mjs';
+import { createDocumentStore } from '../../engine/document-store.mjs';
+import { createError } from '../../engine/service-error.mjs';
+import { createNodeDocumentStorage } from '../adapters/node-document-storage.mjs';
 
 const DEFAULT_INDEX_CACHE_TTL_MS = 5000;
 let requestSequence = 0;
@@ -35,14 +30,6 @@ let requestSequence = 0;
 function createRequestId() {
   requestSequence += 1;
   return normalizeRequestId(`${Date.now()}-${requestSequence}`);
-}
-
-function createError(statusCode, message, extra = {}, errorCode = '') {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  error.payload = extra;
-  error.errorCode = typeof errorCode === 'string' && errorCode ? errorCode : '';
-  return error;
 }
 
 function getDefaultIndexCacheTtl(rawTtl) {
@@ -68,6 +55,11 @@ function createDocumentService(options = {}) {
   let indexBuildInFlight = null;
   let indexGeneration = 0;
   const requestMetrics = options.requestMetrics || createApiMetrics();
+  const { getDocByPath, writeDoc } = createDocumentStore({
+    storage: createNodeDocumentStorage({ root: PROJECT_ROOT, resolvePath: resolveEditableFilePath }),
+    editablePrefixes: EDIT_ROOT_PREFIXES,
+    onWrite: invalidateIndexCache,
+  });
 
   async function getCapabilities() {
     return makeCapabilitiesPayload(state.editablePrefixes, state.backstoryMergeMode);
@@ -179,108 +171,6 @@ function createDocumentService(options = {}) {
       statusCodes: {},
       routes: {},
     };
-  }
-
-  async function getDocByPath(rawPath = '') {
-    const filePath = safePathFromQuery(rawPath);
-    if (!filePath || !isAllowedEditPath(filePath)) {
-      throw createError(400, API_ERRORS.badPath, {}, API_ERRORS.badPath);
-    }
-
-    return withDocumentTransaction(filePath, async () => {
-      const resolved = await resolveEditableFilePath(filePath);
-      if (!resolved) {
-        throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
-      }
-      const { content, stats, version } = await readDocumentSnapshot(resolved.absolutePath);
-      const extension = path.extname(resolved.relativePath).replace('.', '') || 'txt';
-      return {
-        path: resolved.relativePath,
-        type: extension,
-        title: trimName(path.basename(resolved.relativePath)),
-        content,
-        lastModified: stats.mtime.toISOString(),
-        version,
-      };
-    });
-  }
-
-  async function writeDoc(rawPayload = {}) {
-    const normalized = normalizeDocWriteRequest(rawPayload);
-    if (!normalized.path) {
-      throw createError(400, API_ERRORS.missingPath, {}, API_ERRORS.missingPath);
-    }
-
-    const filePath = safePathFromQuery(normalized.path);
-    if (!filePath || !isAllowedEditPath(filePath)) {
-      throw createError(400, API_ERRORS.badPath, {}, API_ERRORS.badPath);
-    }
-
-    if (typeof normalized.content !== 'string') {
-      throw createError(400, API_ERRORS.missingContent, {}, API_ERRORS.missingContent);
-    }
-
-    const createMode = normalized.create === true;
-    const pathError = createMode && getCreatePathError(filePath);
-    if (pathError) throw createError(400, pathError, {}, API_ERRORS.badPath);
-    const forceOverwrite = normalized.force === true;
-    const expectedVersion = normalizeLockVersion(normalized.expectedVersion);
-    return withDocumentTransaction(filePath, async () => {
-      const resolved = await resolveEditableFilePath(filePath, { allowCreate: createMode });
-      if (!resolved) {
-        throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
-      }
-
-      if (!createMode && !resolved.exists) {
-        throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
-      }
-      if (createMode && resolved.exists) {
-        throw createError(409, API_ERRORS.alreadyExists, {}, API_ERRORS.alreadyExists);
-      }
-      if (!createMode && !expectedVersion && !forceOverwrite) {
-        throw createError(409, API_ERRORS.missingExpectedVersion, {}, API_ERRORS.missingExpectedVersion);
-      }
-
-      let previousStats = null;
-      if (!createMode) {
-        try {
-          const { stats, version: currentVersion } = await readDocumentSnapshot(resolved.absolutePath);
-          previousStats = stats;
-          if (!forceOverwrite && currentVersion !== expectedVersion) {
-            throw createError(409, API_ERRORS.conflict, {
-              currentVersion,
-              lastModified: stats.mtime.toISOString(),
-            }, API_ERRORS.conflict);
-          }
-        } catch (error) {
-          if (error?.statusCode) {
-            throw error;
-          }
-          if (error?.code === 'ENOENT') {
-            throw createError(404, API_ERRORS.docNotFound, {}, API_ERRORS.docNotFound);
-          }
-          throw createError(500, 'failed to check version', {}, API_RESPONSE_DEFAULTS.internalErrorPrefix);
-        }
-      }
-
-      try {
-        const writeSource = () => writeDocumentAtomically(resolved.absolutePath, normalized.content, { create: createMode, previousStats });
-        const stats = createMode ? await createRegisteredDocument(PROJECT_ROOT, resolved.relativePath, normalized.documentType, writeSource) : await writeSource();
-        invalidateIndexCache();
-        return {
-          ok: true,
-          path: resolved.relativePath,
-          lastModified: stats.mtime.toISOString(),
-          version: documentContentVersion(normalized.content),
-        };
-      } catch (error) {
-        if (error.statusCode) throw error;
-        if (createMode && error.code === 'EEXIST') {
-          throw createError(409, API_ERRORS.alreadyExists, {}, API_ERRORS.alreadyExists);
-        }
-        throw createError(500, 'failed to save', {}, API_RESPONSE_DEFAULTS.internalErrorPrefix);
-      }
-    });
   }
 
   async function runRebuild(rawPayload = {}) {

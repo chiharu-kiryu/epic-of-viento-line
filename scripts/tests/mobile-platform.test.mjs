@@ -1,0 +1,62 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createMobilePlatform } from '../../mobile/platform.mjs';
+import { configureRequestTransport, fetchJsonApiRequest } from '../../web/modules/app-services.js';
+import { createDocumentFieldDraft, serializeFieldDraft } from '../../engine/index.mjs';
+import { nativeMobileLibrary } from './mobile-native-harness.mjs';
+import { deferred } from './editor-harness.mjs';
+
+const binary = process.env.VIENTO_MOBILE_STORE_BIN;
+test('mobile platform uses native private storage for create / parse / field edit / save / reopen', { skip: !binary && 'Set VIENTO_MOBILE_STORE_BIN to the mobile-storage example' }, async (t) => {
+  const library = await nativeMobileLibrary(binary); t.after(() => library.close());
+  const call = (action, args = {}) => library.invoke('mobile_storage', { action, ...args });
+  const work = await call('create', { payload: { name: '手机作品' } });
+  const platform = createMobilePlatform({ invoke: library.invoke, workspaceId: work.id });
+  const json = async (url, body) => {
+    const response = await platform.request(url, body ? { method: 'POST', body: JSON.stringify(body) } : {});
+    return { status: response.status, body: await response.json() };
+  };
+  const original = '\uFEFF# 旅人\r\n生命：100\r\n\r\n故事不变。\r\n';
+  const sourcePath = 'documents/characters/旅人.md';
+  assert.equal((await json('/api/capabilities')).body.capabilities.media, false);
+  assert.equal((await json('/api/doc', { path: sourcePath, content: original, create: true, documentType: 'character' })).status, 200);
+  const first = (await json('/api/doc?path=' + encodeURIComponent(sourcePath))).body;
+  assert.equal(first.content, original);
+  const index = await platform.index();
+  assert.equal(index.count, 1); assert.equal(index.docs[0].documentType, 'character');
+  assert.equal(index.docs[0].fields['生命'], '100');
+  assert.equal(index.docs[0].title, '旅人');
+  assert.equal(index.workspace.paths.documents, 'documents');
+  const fields = (await json('/api/doc/fields', { content: original, sourcePath })).body;
+  assert.deepEqual(fields, createDocumentFieldDraft(original, sourcePath, { documentType: 'character', parserProfile: 'structured' }));
+  const entry = fields.fields.find((field) => field.key === '生命');
+  assert.ok(entry);
+  const changed = serializeFieldDraft(original, fields, fields.fields.map((field) => field === entry ? '175' : field.value));
+  assert.equal(changed, original.replace('100', '175'));
+  const saved = await json('/api/doc', { path: sourcePath, content: changed, expectedVersion: first.version });
+  assert.equal(saved.status, 200);
+  const stale = await json('/api/doc', { path: sourcePath, content: 'old', expectedVersion: first.version });
+  assert.equal(stale.status, 409);
+  const reopened = await createMobilePlatform({ invoke: library.invoke, workspaceId: work.id }).index();
+  assert.equal(reopened.docs[0].raw, changed); assert.equal(reopened.docs[0].id, index.docs[0].id);
+  assert.equal((await json('/api/doc', { path: 'documents/characters/旅人.MD', content: 'duplicate', create: true })).status, 409);
+  assert.equal((await json('/api/doc?path=metadata/documents/secret.json')).status, 400);
+  assert.equal((await json('/api/assets')).status, 501);
+  const response = await platform.request('/templates/character.md');
+  assert.equal(response.status, 200); assert.match(await response.text(), /角色/);
+  const emptyWork = await call('create', { payload: { name: '另一个作品' } });
+  assert.equal((await createMobilePlatform({ invoke: library.invoke, workspaceId: emptyWork.id }).index()).count, 0);
+});
+
+test('native requests can be cancelled or timed out without hanging the shared client', async (t) => {
+  let calls = 0;
+  const pending = deferred();
+  const platform = createMobilePlatform({ invoke: () => { calls++; return pending.promise; }, workspaceId: 'test' });
+  configureRequestTransport(platform.request); t.after(() => configureRequestTransport(null));
+  const cancelled = new AbortController(); cancelled.abort();
+  await assert.rejects(platform.request('/api/doc', { signal: cancelled.signal }), { name: 'AbortError' });
+  assert.equal(calls, 0);
+  await assert.rejects(fetchJsonApiRequest('/api/capabilities', {}, 30, '读取内容'), { name: 'TimeoutError' });
+  assert.equal(calls, 1);
+  pending.resolve({ manifest: {}, documents: [], defaults: {} });
+});

@@ -1,0 +1,12 @@
+▶ desktop ZIP → mobile index/edit → desktop restore preserves v2/v3 identities, stories and media
+  ✔ v2 round trip (100.961311ms)
+  ✔ v3 round trip (84.161718ms)
+✔ desktop ZIP → mobile index/edit → desktop restore preserves v2/v3 identities, stories and media (186.220375ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 278.255918

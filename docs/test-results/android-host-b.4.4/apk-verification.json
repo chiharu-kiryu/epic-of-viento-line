@@ -1,0 +1,14 @@
+{
+  "artifact": "dist/android-preview/Viento-Studio_b.4.4_android-arm64-debug.apk",
+  "bytes": 49473318,
+  "sha256": "893db0837dfa845611e5348ca9d732c4581796c96bd8f721b373ef725292171c",
+  "nativeLibraries": [
+    "lib/arm64-v8a/libviento_studio.so"
+  ],
+  "signatureVerified": true,
+  "nodeSidecarIncluded": false,
+  "workspaceFilesIncluded": false,
+  "deviceTested": false,
+  "nativeMatchesFinalBuild": true,
+  "creationRecoveryIncluded": true
+}

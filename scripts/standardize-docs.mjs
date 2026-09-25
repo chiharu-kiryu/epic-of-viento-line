@@ -32,7 +32,7 @@ async function validateOutput(outputRoot) {
   const cache = await realLocation(path.join(PROJECT_ROOT, '.viento/cache'));
   const insideCache = output !== cache && within(cache, output);
   const privateRoot = await realLocation(path.join(PROJECT_ROOT, '.viento'));
-  const sourceRoots = ['.git', 'documents', 'templates', 'design-data', 'data-template', 'assets', 'scripts', 'web', 'docs',
+  const sourceRoots = ['.git', 'documents', 'templates', 'design-data', 'data-template', 'assets', 'engine', 'mobile', 'scripts', 'web', 'docs',
     'metadata', 'workspaces', 'schemas', 'desktop', 'src-tauri'];
   const protectedRoots = [await realLocation(ASSET_ROOT)];
   for (const base of new Set([PROJECT_ROOT, APPLICATION_ROOT])) {

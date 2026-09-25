@@ -1,0 +1,16 @@
+✔ three segmented document downloads release capacity for a fourth complete export (247.822148ms)
+✔ three segmented workspace downloads release capacity for a fourth complete export (257.869067ms)
+✔ overlapping repeated and out-of-order ranges only free a slot after the final gap is filled (242.21814ms)
+✔ suffix and clamped ranges use their actual returned bounds when completing a download (263.57711ms)
+✔ partial, not-modified, unsatisfiable and HEAD responses do not claim a complete download (244.700652ms)
+✔ completed ranges belong to one export and cannot fill gaps in another export (243.607365ms)
+✔ an interrupted HTTP range does not cover its missing bytes and remains retryable (243.035678ms)
+✔ concurrent ranges can finish out of order while active readers remain protected from eviction (239.871864ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2042.830232

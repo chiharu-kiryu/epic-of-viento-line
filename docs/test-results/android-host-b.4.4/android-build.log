@@ -1,0 +1,43 @@
+
+> epic-of-viento-line@0.4.4 android:build
+> tauri android build --target aarch64 --apk --debug --ci
+
+        Info Using installed NDK: <ANDROID_HOME>/ndk/28.0.13004108
+        Info Looking up installed tauri packages to check mismatched versions...
+     Running beforeBuildCommand `node mobile/prepare.mjs`
+Mobile resources prepared: b.4.4 (no Node executable or workspace data)
+   Compiling viento-studio v0.4.4 (<project>/src-tauri)
+    Finished `dev` profile [unoptimized] target(s) in 2.97s
+        Info symlinking lib "<test-temporary-directory>/target/aarch64-linux-android/debug/libviento_studio.so" in jniLibs dir "<project>/src-tauri/gen/android/app/src/main/jniLibs/arm64-v8a"
+        Info "<test-temporary-directory>/target/aarch64-linux-android/debug/libviento_studio.so" requires shared lib "libandroid.so"
+        Info "<test-temporary-directory>/target/aarch64-linux-android/debug/libviento_studio.so" requires shared lib "libdl.so"
+        Info "<test-temporary-directory>/target/aarch64-linux-android/debug/libviento_studio.so" requires shared lib "liblog.so"
+        Info "<test-temporary-directory>/target/aarch64-linux-android/debug/libviento_studio.so" requires shared lib "libm.so"
+        Info "<test-temporary-directory>/target/aarch64-linux-android/debug/libviento_studio.so" requires shared lib "libc.so"
+        Info symlink at "<project>/src-tauri/gen/android/app/src/main/jniLibs/arm64-v8a/libviento_studio.so" points to "<test-temporary-directory>/target/aarch64-linux-android/debug/libviento_studio.so"
+JVM network settings: inherited local development proxy.
+        Info connection; remote_addr=127.0.0.1:44950 conn_id=0
+
+> epic-of-viento-line@0.4.4 tauri
+> tauri android android-studio-script --target aarch64
+
+        Info Using installed NDK: <ANDROID_HOME>/ndk/28.0.13004108
+   Compiling viento-studio v0.4.4 (<project>/src-tauri)
+    Finished `dev` profile [unoptimized] target(s) in 2.89s
+        Info symlinking lib "<test-temporary-directory>/target/aarch64-linux-android/debug/libviento_studio.so" in jniLibs dir "<project>/src-tauri/gen/android/app/src/main/jniLibs/arm64-v8a"
+        Info "<test-temporary-directory>/target/aarch64-linux-android/debug/libviento_studio.so" requires shared lib "libandroid.so"
+        Info "<test-temporary-directory>/target/aarch64-linux-android/debug/libviento_studio.so" requires shared lib "libdl.so"
+        Info "<test-temporary-directory>/target/aarch64-linux-android/debug/libviento_studio.so" requires shared lib "liblog.so"
+        Info "<test-temporary-directory>/target/aarch64-linux-android/debug/libviento_studio.so" requires shared lib "libm.so"
+        Info "<test-temporary-directory>/target/aarch64-linux-android/debug/libviento_studio.so" requires shared lib "libc.so"
+
+[Incubating] Problems report is available at: file://<project>/src-tauri/gen/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+    Finished 1 APK at:
+        <project>/src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk
+

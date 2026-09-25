@@ -58,6 +58,7 @@ function isSafeStaticAssetPath(pathname) {
     || pathname === '/scripts/lib/doc-api-contract.mjs'
     || pathname === '/scripts/lib/media-format.mjs'
     || pathname === '/scripts/lib/document-values.mjs'
+    || /^\/engine\/[a-z0-9-]+\.mjs$/.test(pathname)
     || pathname.startsWith('/assets/')
     || pathname.startsWith('/asset-files/')
     || pathname.startsWith('/web/')
@@ -165,7 +166,7 @@ async function handleProjectFileRequest({ response, pathname, projectRoot, reque
     return true;
   } catch {
     const normalizedPath = decodedPath || pathname;
-    if (isWebAssetPath(normalizedPath) || isManagedAssetPath(normalizedPath)) {
+    if (isWebAssetPath(normalizedPath) || normalizedPath.startsWith('/engine/') || isManagedAssetPath(normalizedPath)) {
       await sendStaticJsonError(response, 404, 'Not found', 'not_found');
       return true;
     }

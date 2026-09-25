@@ -35,3 +35,8 @@ mono_crash.*.json
 # resource
 assets/
 desktop/ui/i18n/
+mobile/.dist-*/
+src-tauri/gen/android/.kotlin/
+src-tauri/gen/android/app/src/main/jniLibs/
+src-tauri/gen/android/app/tauri.properties
+src-tauri/gen/android/app/tauri.build.gradle.kts

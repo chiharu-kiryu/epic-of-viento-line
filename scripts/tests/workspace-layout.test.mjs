@@ -68,6 +68,12 @@ test('separate application/workspace roots support editing, external media, offl
   const applicationIndex = await fs.readFile(path.join(app, 'web/data/index.json'), 'utf8');
   assert.equal(JSON.parse(applicationIndex).count, 0);
   const base = await serve(t, app, { VIENTO_APP_ROOT: app, VIENTO_WORKSPACE_ROOT: root });
+  // Application code must come from the installation, even if a project has
+  // a same-named directory. In particular the shared frontend wrappers import it.
+  await write(root, 'engine/document-values.mjs', 'throw new Error("workspace shadow");');
+  const sharedModule = await fetch(base + '/engine/document-values.mjs');
+  assert.equal(sharedModule.status, 200);
+  assert.equal(await sharedModule.text(), await fs.readFile(path.join(app, 'engine/document-values.mjs'), 'utf8'));
   const canonical = await request(base, `/api/doc?path=${encodeURIComponent(sourcePath)}`);
   assert.equal(canonical.status, 200);
   const saved = await request(base, '/api/doc', { path: sourcePath, content: original + '保存成功\r\n', expectedVersion: canonical.data.version });
@@ -290,7 +296,7 @@ test('custom standardization output cannot prune application files or an externa
   const alias = path.join(parent, 'output-alias');
   await fs.symlink(external, alias, process.platform === 'win32' ? 'junction' : 'dir');
   const env = { ...process.env, VIENTO_APP_ROOT: app, VIENTO_WORKSPACE_ROOT: root };
-  for (const output of [external, path.join(app, 'scripts'), alias]) {
+  for (const output of [external, path.join(app, 'scripts'), path.join(app, 'engine'), alias]) {
     await assert.rejects(runCommand(process.execPath, [path.join(app, 'scripts/standardize-docs.mjs'), '--output', output], { env }), /separate from project sources/);
     assert.equal(await fs.readFile(path.join(external, 'asset-notes.md'), 'utf8'), '必须保留的素材说明');
     assert.deepEqual(await fs.readFile(path.join(app, 'scripts/README.md')), appReadme);

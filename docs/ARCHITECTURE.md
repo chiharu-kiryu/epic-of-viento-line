@@ -1,6 +1,6 @@
 # Viento Studio 架构说明
 
-> 更新时间：2026-09-23
+> 更新时间：2026-09-24
 
 功能入口、业务上下游、接口和数据落点的最新盘点见 [功能链路网络](FUNCTION_NETWORK.md)（2026-09-23 当前工作树），可用 [离线交互图](function-network.html) 筛选查看。
 
@@ -17,7 +17,9 @@ Viento Studio 是通用 OC 设计引擎。应用代码、项目定义、作品�
 - 派生数据：`.viento/cache/` 内的标准文档、索引、引用图；可完整重建。
 - 展示与分享：统一 `viento-layout-v1` 布局供编辑器和导出消费。
 
-`project-layout.mjs` 统一解析文档类型，`project-service.mjs` 提供模板预览和原子配置保存。模板按内容指纹先落盘，再切换清单；过期修改通过配置版本阻止覆盖。原作品的具体规则在其项目清单中声明，轻量示范定义见 `docs/examples/`，不会装入桌面运行包。
+`engine/project.mjs` 统一解析文档类型，桌面 `project-layout.mjs` 装载默认配置并转发；`project-service.mjs` 提供模板预览和原子配置保存。模板按内容指纹先落盘，再切换清单；过期修改通过配置版本阻止覆盖。原作品的具体规则在其项目清单中声明，轻量示范定义见 `docs/examples/`，不会装入桌面运行包。
+
+可移植引擎位于 `engine/`，解析、布局、字段编辑、素材引用和文档保存冲突流程不读取本机配置。平台通过文档存储接口提供实际读写；桌面服务接入 Node 适配器，Android 预览宿主通过 Tauri IPC 接入应用私有目录中的 Rust 存储。移动端复用编辑器和解析引擎，索引在 WebView 内即时生成；完整项目包复用桌面归档校验，经 Android 系统文件选择器迁移，素材访问界面仍待接入。接口约定见 [引擎说明](../engine/README.md) 和 [移动端说明](../mobile/README.md)。
 
 正文编辑使用读取时的内容指纹作为版本条件；保留文件时间的外部修改仍会触发冲突。失败的覆盖或读取不会更新草稿基线，详见 [保存冲突与接口兼容性](SAVE_CONFLICT_BUGFIX_b.2.9.md)。
 
@@ -28,6 +30,7 @@ Viento Studio 是通用 OC 设计引擎。应用代码、项目定义、作品�
 ```text
 .
 ├─ web/                   # 前端资源与运行时页面
+├─ engine/                # 无宿主依赖的共享引擎
 ├─ scripts/               # 管道、服务、校验、启动编排
 ├─ desktop/               # 桌面首页、运行资源准备、原生测试
 ├─ src-tauri/             # 桌面宿主与完整迁移
@@ -39,24 +42,25 @@ Viento Studio 是通用 OC 设计引擎。应用代码、项目定义、作品�
 
 ### scripts 目录层级
 
+- `scripts/adapters/*`
+  - `node-document-storage.mjs`：文件解析、快照读取、原子写入和新文档登记的桌面适配。
 - `scripts/ops/*`
   - 启动入口和工作流编排。
   - `ops/site.mjs` 负责解析启动参数并调用启动服务。
   - `ops/rebuild.mjs` 统一导出重建能力。
 - `scripts/lib/*`
   - 公共服务、路由、分类、扫描、构建、校验、运行时路径与日志指标。
-  - `doc-api-contract.mjs` 是前后端 API 协议锚点。
+  - `doc-api-contract.mjs` 转发共享契约，桌面能力响应在此注入运行环境版本。
   - `doc-api-service.mjs` / `doc-server-*.mjs` 负责文档服务层。
   - `standardize-docs/*` 负责标准化解析/分类/输出流水线。
   - `rebuild-workflow.mjs` 统一 orchestration（标准化 + 静态索引构建）。
 - `scripts/lib/scan-files.mjs`
   - 文件扫描基础能力：递归列举可处理文件。
 - `scripts/standardize-docs/*`
-  - 文本/JSON/YAML 解析
+  - 调用 `engine/` 的文本/JSON/YAML 解析
   - source 分类与元信息提取
   - 标准化 JSON 输出与写入规则
-  - `parser.mjs` 通用解析，`legacy-profile.mjs` 负责旧格式兼容
-  - `layout.mjs` 从原文章节、字段和内容块生成统一布局；类型不限定字段
+  - `parser.mjs`、`legacy-profile.mjs`、`layout.mjs` 是旧入口转发，实现在 `engine/`
 - `scripts/normalize-*.mjs`
   - 特化清洗脚本：英雄/单位/建筑/物品等文本规范化重排（可选写回）
 
@@ -65,7 +69,7 @@ Viento Studio 是通用 OC 设计引擎。应用代码、项目定义、作品�
 - `web/app.js`：应用入口
 - `web/modules/app-state.js`：状态、常量、API 路径常量入口
 - `web/modules/app-runtime.js`：渲染主循环、列表/详情/编辑状态机
-- `web/modules/app-editor-draft.js`：从当前源码拆分编辑区块，保留原文格式并按修改区块写回
+- `web/modules/app-editor-draft.js` / `app-field-draft.js`：转发引擎的区块与字段草稿序列化实现
 - `web/modules/app-doc-service.js`：与后端 API 的交互
 - `web/modules/app-services.js`：请求工具（超时、错误、JSON 解析）
 
@@ -105,7 +109,7 @@ Viento Studio 是通用 OC 设计引擎。应用代码、项目定义、作品�
 
 1. 前端 `/api/doc?path=...` 读取源文件内容。
 2. 用户编辑保存。
-3. 后端在同一文档的串行事务中校验版本，再通过临时文件和原子替换写回 `design-data/`；并发新建使用独占创建，旧版本保存返回 409。
+3. `engine/document-store.mjs` 在存储适配器提供的串行事务中校验版本；桌面适配器继续用临时文件和原子替换保存正文，并发新建使用独占创建，旧版本保存返回 409。
 4. 触发重建可更新 `docs-standard/` 与 `web/data/index.json`。
 
 文档由 `metadata/documents/<UUID>.json` 登记身份、解析配置和归属关系。角色背景用 `part-of` 关联角色，索引解析 ID 关系后生成嵌套目录与档案内导航；独立故事章节保持独立条目。多个角色可关联同一份背景。全量与局部重建均保留关系，详见 [OC 文档模型](OC_DOCUMENT_MODEL.md)。

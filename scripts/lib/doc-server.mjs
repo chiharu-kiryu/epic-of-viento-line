@@ -1,3 +1,4 @@
+import { normalizeSourcePath as safePathFromQuery } from '../../engine/source-path.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
@@ -87,53 +88,6 @@ function resolvePort(argv = process.argv.slice(2)) {
   }
 
   return 4173;
-}
-
-function sanitizePathPrefix(normalizedPath) {
-  const normalized = normalizedPath.replace(/^\.\//, '');
-  if (!normalized) {
-    return '';
-  }
-  if (normalized.startsWith('.')) {
-    return '';
-  }
-  return normalized;
-}
-
-function safePathFromQuery(rawPath) {
-  if (!rawPath) {
-    return '';
-  }
-  if (rawPath.includes('\\') || rawPath.includes('\0')) {
-    return '';
-  }
-  if (/^[A-Za-z]:\//.test(rawPath) || path.isAbsolute(rawPath)) {
-    return '';
-  }
-
-  const normalized = toPosix(rawPath.replace(/\\/g, '/'));
-  const segments = normalized.split('/').filter((segment) => segment.length > 0);
-
-  if (!segments.length) {
-    return '';
-  }
-
-  const filteredSegments = [];
-  for (const segment of segments) {
-    if (segment === '.' || segment === '') {
-      continue;
-    }
-    if (segment === '..') {
-      return '';
-    }
-    filteredSegments.push(segment);
-  }
-
-  if (!filteredSegments.length) {
-    return '';
-  }
-
-  return sanitizePathPrefix(filteredSegments.join('/'));
 }
 
 function normalizeLockVersion(rawVersion) {
@@ -615,13 +569,14 @@ function getProjectFilePath(relativePath) {
   if (sanitizedPath === 'data/references.json') return path.join(CACHE_ROOT, 'indexes/references.json');
   if (sanitizedPath.startsWith('assets/') || sanitizedPath.startsWith('asset-files/')) return resolveAssetRequest(PROJECT_ROOT, sanitizedPath);
   if (sanitizedPath.startsWith('web/')) return path.resolve(WEB_ROOT, sanitizedPath.slice(4));
+  if (sanitizedPath.startsWith('engine/')) return path.resolve(APPLICATION_ROOT, 'engine', sanitizedPath.slice(7));
   if (sanitizedPath.startsWith('scripts/')) return path.resolve(SCRIPT_ROOT, sanitizedPath.slice(8));
   if (sanitizedPath.startsWith('docs-standard/')) return path.resolve(STANDARD_ROOT, sanitizedPath.slice(14));
   return path.resolve(PROJECT_ROOT_REAL, sanitizedPath);
 }
 
 async function resolveProjectFilePath(requestPath) {
-  const applicationResource = /^\/(?:web|scripts)\//.test(requestPath)
+  const applicationResource = /^\/(?:web|scripts|engine)\//.test(requestPath)
     && requestPath !== '/web/data/index.json';
   let root = applicationResource ? APPLICATION_ROOT : PROJECT_ROOT;
   if (/^\/(?:assets|asset-files)\//.test(requestPath)) {

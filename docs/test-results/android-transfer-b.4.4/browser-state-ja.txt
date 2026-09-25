@@ -1,0 +1,23 @@
+Browser tab: 15, Title: "Viento Studio", URL: "http://127.0.0.1:44245/".
+1 AXWebArea Viento Studio, URL: 127.0.0.1:44245/
+	2 container
+		3 heading Viento Studio, Value: 1
+			4 text Viento Studio
+		5 text b.4.4
+		6 button 設定, ID: settingsBtn
+	7 container
+		8 heading この端末の作品, Value: 2
+			9 text この端末の作品
+		10 text モバイルプレビュー版：作品の作成、本文とフィールドの編集、編集中の下書きの自動保存に対応しています。 プロジェクトパッケージをスマートフォンとデスクトップ間で移行できます。素材管理とテンプレート設定は対応中です。
+		11 button プロジェクトをインポート, ID: importWorkspace
+		12 text パッケージには保存済みの本文、テンプレート、メタデータ、素材が含まれます。編集中の下書きは、作品を開いて保存してからエクスポートしてください。
+		13 container createWorkspace
+			14 text 作品名
+			15 text field (settable) 作品名, ID: workspaceName
+			16 button 作品を作成
+		17 text 移行をキャンセルしました。
+		18 container workspaces
+			19 button 手机迁移测试
+			20 button 「手机迁移测试」のプロジェクトパッケージをエクスポート
+
+The focused UI element is 6 button 設定, ID: settingsBtn

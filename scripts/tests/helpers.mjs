@@ -12,7 +12,7 @@ const PROJECT_ROOT = fileURLToPath(new URL('../../', import.meta.url));
 export async function fixture(t) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'viento-test-'));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
-  for (const name of ['scripts', 'web']) {
+  for (const name of ['engine', 'scripts', 'web']) {
     await fs.cp(path.join(PROJECT_ROOT, name), path.join(root, name), {
       recursive: true,
       filter: (source) => !path.basename(source).startsWith('.')

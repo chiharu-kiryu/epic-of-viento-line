@@ -1,0 +1,24 @@
+✔ portable engine has no dependency back into Node adapters, frontend or native host (48.648291ms)
+✔ portable engine workflows execute without Node globals using the browser YAML distribution (80.206439ms)
+✔ logical source names retain POSIX extension semantics independent of the host OS (0.635474ms)
+✔ registration preserves raw bytes and stable IDs; indexing never accepts changed content as the original (38.645334ms)
+✔ separate application/workspace roots support editing, external media, offline metadata and legacy/ID URLs (624.403138ms)
+✔ reference indexes include image, video and audio paths in every source format, including renamed aliases (221.978727ms)
+✔ reference indexes exclude fenced code examples while retaining bare IDs and explicit attachments (200.265696ms)
+✔ v1 registration retains workspace identity and the old manifest; unsupported versions do not mutate sources (13.828009ms)
+✔ ambiguous registry identities and unsafe paths fail before replacing existing metadata (14.391512ms)
+✔ registration refuses symlinked metadata directories without writing outside the workspace (1.712098ms)
+✔ read-only preview serves a separate workspace and refuses write requests (282.971456ms)
+✔ registration keeps a live lock and recovers a lock whose owner no longer exists (12.025967ms)
+✔ reusing a renamed asset alias cannot write a conflicting registry (12.515915ms)
+✔ automatic workspace names and manifests stay compatible with the native importer (8.230031ms)
+✔ image references support any asset folder and encoded filenames (174.579211ms)
+✔ custom standardization output cannot prune application files or an external asset store (319.054657ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2000.53372

@@ -12,15 +12,28 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parent.parent
 INPUTS = [".gitattributes", ".gitignore", ".github", "LICENSE", "README.md", "VERSION", "favicon.ico",
-          "package.json", "package-lock.json", "web", "scripts",
+          "package.json", "package-lock.json", "engine", "web", "scripts", "mobile",
           "desktop", "src-tauri", "schemas", "docs"]
 GENERATED = {"src-tauri/target", "src-tauri/binaries", "src-tauri/gen/schemas",
-             "desktop/resources", "desktop/.cache", "desktop/ui/i18n", "web/data"}
+             "desktop/resources", "desktop/.cache", "desktop/ui/i18n", "web/data", "mobile/dist",
+             "src-tauri/gen/android/.gradle", "src-tauri/gen/android/.kotlin", "src-tauri/gen/android/.tauri",
+             "src-tauri/gen/android/build", "src-tauri/gen/android/app/build", "src-tauri/gen/android/buildSrc/build",
+             "src-tauri/gen/android/buildSrc/.gradle", "src-tauri/gen/android/.idea",
+             "src-tauri/gen/android/app/src/main/jniLibs", "src-tauri/gen/android/local.properties",
+             "src-tauri/gen/android/app/tauri.properties", "src-tauri/gen/android/app/tauri.build.gradle.kts",
+             "src-tauri/gen/android/app/proguard-tauri.pro", "src-tauri/gen/android/app/src/main/assets/tauri.conf.json",
+             "src-tauri/gen/android/app/src/main/java/io/viento/studio/generated",
+             "src-tauri/gen/android/tauri.settings.gradle", "src-tauri/gen/android/key.properties",
+             "src-tauri/gen/android/keystore.properties"}
 
 
 def source_files(directory):
     relative = directory.relative_to(ROOT).as_posix()
-    if (relative in GENERATED or directory.name.startswith(("._", ".resources-"))
+    if relative.startswith("src-tauri/gen/android/") and (
+            directory.name in {".gradle", ".kotlin", ".idea", ".tauri", ".cxx", ".externalNativeBuild", "build", "captures"}
+            or directory.suffix.lower() in {".jks", ".keystore", ".p12"}):
+        return
+    if (relative in GENERATED or directory.name.startswith(("._", ".resources-", ".dist-"))
             or directory.name in {"__pycache__", ".DS_Store"} or directory.suffix == ".pyc"):
         return
     if directory.is_symlink():

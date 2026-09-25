@@ -64,7 +64,7 @@ async function prepareResources() {
   const output = path.join(desktop, 'resources');
   const stage = await fs.mkdtemp(path.join(desktop, '.resources-'));
   try {
-    for (const name of ['scripts', 'web', 'schemas']) {
+    for (const name of ['engine', 'scripts', 'web', 'schemas']) {
       await fs.cp(path.join(root, name), path.join(stage, name), {
         recursive: true,
         filter: (source) => !path.basename(source).startsWith('.')

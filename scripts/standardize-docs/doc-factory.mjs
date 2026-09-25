@@ -2,25 +2,9 @@ import path from 'node:path';
 import { SCHEMA_VERSION } from './config.mjs';
 import { inferCategory, inferPurposeGroup } from './utils.mjs';
 import { toPosix, trimName } from '../lib/paths.mjs';
-import { parseJsonContent, parseTextContent, parseYamlContent } from './parser.mjs';
-import { parserOptionsForSource } from './legacy-profile.mjs';
+import { parseSourceContent } from '../../engine/parse.mjs';
 import { buildDocumentLayout } from './layout.mjs';
 import { buildStandardOutputPath } from '../lib/standard-cache.mjs';
-
-function parseSourceContent(rawText, relPath, descriptor = {}) {
-  const ext = path.extname(relPath).toLowerCase();
-  let parsed;
-  if (ext === '.json') {
-    parsed = parseJsonContent(rawText, relPath);
-  } else if (ext === '.yml' || ext === '.yaml') {
-    parsed = parseYamlContent(rawText, relPath);
-  } else parsed = parseTextContent(rawText, relPath, parserOptionsForSource(relPath, descriptor));
-  const key = descriptor.parserOptions?.titleField;
-  const title = key && Object.hasOwn(parsed.fields, key) ? parsed.fields[key] : undefined;
-  if (['string', 'number', 'boolean'].includes(typeof title) && String(title).trim()) parsed.title = String(title);
-  if (descriptor.fieldGroups?.length) parsed.fieldGroups = descriptor.fieldGroups;
-  return parsed;
-}
 
 function toSafeString(value, fallback = '') {
   if (typeof value === 'string') {

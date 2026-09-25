@@ -205,6 +205,7 @@ const cachedListGroups = {
 };
 let cachedGroupedDocs = new WeakMap();
 let editSessionBaselineContent = '';
+let draftObserver = null;
 let renderedContentDocPath = '';
 let renderedContentSignature = '';
 const docByPathCache = new Map();
@@ -1756,6 +1757,66 @@ function updateEditUnsavedUi() {
     const characters = Array.from(content.replace(/\s/g, '')).length;
     const lines = content ? content.split(/\r\n|\r|\n/).length : 0;
     editMetricsEl.textContent = inSession ? t`${characters.toLocaleString(getLanguage())} 字 · ${lines} 行` : '';
+  }
+  if (draftObserver) draftObserver(captureEditorDraft());
+}
+
+function captureEditorDraft() {
+  if (!isInEditSession() || (!state.isCreating && !state.editHasUnsavedChanges)) return null;
+  return { format: 'viento-editor-draft', version: 1, creating: state.isCreating,
+    path: state.isCreating ? getCreateInputPath() : canonicalizeSourcePath(state.activeEditSource),
+    documentType: state.activeCreateType, content: getCurrentEditDraftContent(),
+    baselineContent: editSessionBaselineContent, baselinePath: editSessionBaselinePath,
+    expectedVersion: editSessionVersion };
+}
+
+async function restoreEditorDraft(draft) {
+  if (!draft || draft.format !== 'viento-editor-draft' || draft.version !== 1 || typeof draft.creating !== 'boolean'
+    || !['path', 'content', 'baselineContent', 'baselinePath', 'expectedVersion'].every((key) => typeof draft[key] === 'string')
+    || (!draft.creating && !isEditableSourcePath(draft.path)) || isInEditSession() || isEditorBusy() || !hasEditableBackend()) return false;
+  const observer = draftObserver;
+  draftObserver = null;
+  let restored = false;
+  try {
+    setMode('edit');
+    if (draft.creating) {
+      // A native create may have committed just before the app closed and lost
+      // its reply. Reopen that exact document instead of creating a duplicate.
+      const committed = getDocBySourcePath(draft.path);
+      if (committed) {
+        selectDoc(committed.path);
+        await enterEditMode();
+        if (state.isEditing && getCurrentEditContent() === draft.content) {
+          restored = true;
+          return true;
+        }
+        if (state.isEditing) exitEditMode({ skipUnsavedConfirm: true });
+      }
+      // A partially typed filename is still a recoverable draft. The normal
+      // create-path validation keeps saving disabled until it is corrected.
+      if (!getCreateTypeDisplayList().includes(draft.documentType)) return false;
+      await enterCreateMode();
+      await setCreateTypeState(draft.documentType, { loadTemplate: false });
+      setCreatePath(draft.path);
+    } else {
+      const doc = getDocBySourcePath(draft.path);
+      if (!doc) return false;
+      selectDoc(doc.path);
+      await enterEditMode();
+      if (!state.isEditing || canonicalizeSourcePath(state.activeEditSource) !== draft.path) return false;
+    }
+    // Retain the original revision. A file changed while the app was closed
+    // must still enter the normal conflict flow when this draft is saved.
+    setEditSessionClean(draft.baselineContent, draft.expectedVersion);
+    editSessionBaselinePath = draft.baselinePath;
+    setSourceEditorContent(draft.content);
+    refreshEditSessionDirtyState();
+    updateCreatePathValidation();
+    restored = true;
+    return true;
+  } finally {
+    draftObserver = observer;
+    if (restored && observer) observer(captureEditorDraft());
   }
 }
 
@@ -5117,15 +5178,15 @@ async function loadData(preferredPath = '', options = {}) {
   }
 }
 
-async function initApp() {
-  await setupSettings();
-  setupProjectSettings({
+async function initApp(options = {}) {
+  await setupSettings(options.settings);
+  if (options.features?.project !== false) setupProjectSettings({
     getContext: () => ({ workspace: state.workspace, editable: isEditModeActive(), dirty: state.editHasUnsavedChanges, creating: state.isCreating, busy: isEditorBusy() }),
     setBusy: (busy) => { state.isConfiguringProject = busy; refreshEditButtons(); },
     applied: async () => { createTemplateCache.clear(); createTemplateLoadErrorCache.clear(); await loadData(state.activePath, { forceCacheBust: true, throwOnError: true }); },
   });
   onLanguageChange(refreshLanguageUi);
-  setupExport({
+  if (options.features?.export !== false) setupExport({
     getContext: () => ({
       path: getSourcePath(getActiveDoc()).replace(/^docs-standard\//, ''),
       title: getActiveDoc()?.title || getActiveDoc()?.name || '',
@@ -5133,7 +5194,7 @@ async function initApp() {
     }),
     setBusy: (busy) => { state.isExporting = busy; refreshEditButtons(); },
   });
-  mediaEditorController = setupMediaEditor({
+  mediaEditorController = options.features?.media === false ? null : setupMediaEditor({
     isEditable: () => isInEditSession() && isEditModeActive(),
     isBusy: isEditorBusy,
     getContext: mediaDraftContext,
@@ -5415,6 +5476,8 @@ async function initApp() {
     }
     console.error('[doc-site] initApp failed', error);
   }
+  draftObserver = options.onDraftChange || null;
+  return { captureDraft: captureEditorDraft, restoreDraft: restoreEditorDraft, isBusy: isEditorBusy };
 }
 
 export { initApp };

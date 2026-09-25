@@ -19,7 +19,7 @@ test('custom output preserves the default catalog, prunes its own stale files an
   const result = JSON.parse(await fs.readFile(path.join(root, 'generated', buildStandardOutputPath('design-data/design-rules/example.txt')), 'utf8'));
   assert.equal(result.source.path, 'design-data/design-rules/example.txt');
   await assert.rejects(fs.access(path.join(root, 'generated/generated')));
-  for (const output of ['.', 'design-data', 'scripts/generated', '.viento', '.viento/cache', 'desktop', 'src-tauri']) {
+  for (const output of ['.', 'design-data', 'engine', 'engine/generated', 'scripts/generated', '.viento', '.viento/cache', 'desktop', 'src-tauri']) {
     await assert.rejects(node(root, ['scripts/standardize-docs.mjs', '--output', output]), /separate from project sources/);
   }
   assert.equal(await fs.readFile(path.join(root, 'design-data/design-rules/example.txt'), 'utf8'), '测试规则\n力量：1');

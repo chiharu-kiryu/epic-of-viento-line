@@ -48,10 +48,10 @@ test('translation catalogues have identical keys, no duplicate entries and intac
 async function sourceFiles(directory) {
   const files = [];
   for (const entry of await fs.readdir(new URL(directory, root), { withFileTypes: true })) {
-    if (entry.name === 'i18n' || entry.name === 'data') continue;
+    if (entry.name === 'i18n' || entry.name === 'data' || entry.name === 'dist' || entry.name.startsWith('.')) continue;
     const name = path.posix.join(directory, entry.name);
     if (entry.isDirectory()) files.push(...await sourceFiles(`${name}/`));
-    else if (/\.(js|html)$/.test(name)) files.push(name);
+    else if (/\.(m?js|html)$/.test(name)) files.push(name);
   }
   return files;
 }
@@ -67,7 +67,7 @@ test('marked interface messages are covered in English and Japanese', async () =
     else if (node?.type === 'MemberExpression') leaves(node.object, file);
     else if (node?.type === 'LogicalExpression') { leaves(node.left, file); leaves(node.right, file); }
   };
-  const files = [...await sourceFiles('web/'), ...await sourceFiles('desktop/ui/'), 'web/i18n/settings.js',
+  const files = [...await sourceFiles('engine/'), ...await sourceFiles('web/'), ...await sourceFiles('mobile/'), ...await sourceFiles('desktop/ui/'), 'web/i18n/settings.js',
     'scripts/lib/export-render.mjs', 'scripts/lib/export-package.mjs', 'scripts/lib/export-service.mjs',
     'scripts/lib/project-layout.mjs', 'scripts/lib/project-service.mjs', 'scripts/lib/doc-api-service.mjs',
     'scripts/lib/media-assets.mjs', 'scripts/lib/media-insertion.mjs', 'scripts/lib/document-field-draft.mjs'];
@@ -76,12 +76,16 @@ test('marked interface messages are covered in English and Japanese', async () =
     for (const match of text.matchAll(/data-i18n(?:-title|-placeholder|-aria-label)?=(["'])(.*?)\1/g)) add(match[2], file);
     if (!/\.m?js$/.test(file)) continue;
     walk(syntax(text), (node) => {
-      if (node.type === 'CallExpression' && ['t', 'localize', 'uiMessage', 'userMessage', 'userError', 'exportError', 'fail', 'invalid', 'reject'].includes(node.callee.name)) leaves(node.arguments[node.callee.name === 'reject' ? 1 : 0], file);
+      if (node.type === 'CallExpression' && ['t', 'localize', 'uiMessage', 'userMessage', 'userError', 'exportError', 'fail', 'invalid', 'reject', 'notify'].includes(node.callee.name)) leaves(node.arguments[node.callee.name === 'reject' ? 1 : 0], file);
       if (node.type === 'TaggedTemplateExpression' && ['t', 'userMessage'].includes(node.tag.name)) {
         add(node.quasi.quasis.map((part, index) => `${index ? `{${index - 1}}` : ''}${part.value.cooked}`).join(''), file);
       }
       if (node.type === 'AssignmentExpression' && /^i18n(?:Title|Placeholder|AriaLabel)?$/.test(node.left?.property?.name || '')) leaves(node.right, file);
     });
+  }
+  for (const file of ['mobile_storage.rs', 'mobile_archive.rs', 'mobile_transfer.rs']) {
+    const native = await fs.readFile(new URL(`src-tauri/src/${file}`, root), 'utf8');
+    for (const match of native.matchAll(/error\(\s*\d+,\s*"([^"\n]+)"/g)) add(match[1], file);
   }
   const missing = [...messages].filter(([key]) => !Object.hasOwn(english, key) || !Object.hasOwn(japanese, key));
   assert.deepEqual(missing, [], 'Add each marked message to both translation catalogues');

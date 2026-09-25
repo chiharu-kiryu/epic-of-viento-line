@@ -1,0 +1,74 @@
+Browser tab: 14, Title: "Viento Studio · OC Design Workspace", URL: "http://127.0.0.1:42855/editor.html?mode=edit&workspace=02c8efdf-90ff-43eb-a285-d8c3d2c20d54".
+0 AXWebArea Viento Studio · OC Design Workspace, URL: 127.0.0.1:42855/editor.html?mode=edit&workspace=02c8efdf-90ff-43eb-a285-d8c3d2c20d54
+	1 container
+		2 text Your previous edits have been restored.
+		3 container workspaceShell
+			4 container
+				5 button Library
+				6 button (expanded) Description: Hide document sidebar, Help: Hide sidebar to focus on writing, ID: docSidebarToggleBtn, Secondary Actions: Collapse
+					7 text Hide sidebar
+				8 text V
+				9 heading Viento Studio, Value: 1, ID: siteTitle
+					10 text Viento Studio
+				11 text b.4.4
+				12 container Description: Workspace mode, ID: modeSwitch
+					13 button Settings, ID: settingsBtn
+					14 checkbox Browse, Value: 0, ID: modeBrowseBtn
+					15 checkbox Edit, Value: 1, ID: modeEditBtn
+			16 container
+				17 container Description: Document sidebar, ID: docSidebar
+					18 container
+						19 text field (settable) searchInput
+						20 button Description: Clear search, ID: searchClear
+					21 tab group Description: Document categories, ID: categoryTabs
+						22 tab (selected, settable, boolean) ALL（2）, Value: 1
+						23 tab (selectable, settable, boolean) 档案（0）, Value: 0
+						24 tab (selectable, settable, boolean) 角色（2）, Value: 0
+						25 tab (selectable, settable, boolean) 故事（0）, Value: 0
+						26 tab (selectable, settable, boolean) 地点（0）, Value: 0
+						27 tab (selectable, settable, boolean) 组织（0）, Value: 0
+						28 tab (selectable, settable, boolean) 设定（0）, Value: 0
+					29 text Showing 2 of 2 documents (Generated 9/24/2026, 10:54:07 PM)
+					30 container
+						31 button (expanded) CATEGORY 角色（2） COLLAPSE, Secondary Actions: Collapse
+							32 text CATEGORY 角色（2）
+							33 text COLLAPSE
+						34 button (expanded) 角色（2） COLLAPSE, Secondary Actions: Collapse
+							35 text 角色（2）
+							36 text COLLAPSE
+						37 button 回执中断 角色 · 角色 ✎ Editable, Help: 回执中断
+							38 text 回执中断
+							39 text 角色 · 角色
+							40 container
+								41 text ✎ Editable
+						42 button 旅人 角色 · 角色 ✎ Editable, Help: 旅人
+							43 text 旅人
+							44 text 角色 · 角色
+							45 container
+								46 text ✎ Editable
+				47 container
+					48 text 回执中断
+					49 container docEditPanel
+						50 container Description: Editing method, ID: docEditModeBar
+							51 checkbox Source, Value: 1, ID: docEditSourceModeBtn
+							52 checkbox Blocks, Value: 0, ID: docEditBlockModeBtn
+							53 checkbox Fields, Value: 0, ID: docEditFieldModeBtn
+						54 container docEditActions
+							55 button Return to reading, ID: docEditBtn
+							56 button Save changes, Help: Save changes（Ctrl / ⌘ + S）, ID: docSaveBtn
+						57 text Source file: documents/characters/回执中断.md
+						58 text entry area (settable) Description: Document source, ID: docSourceEditor, Value: # 回执中断
+生命：321
+
+只创建一次。
+
+						59 container docEditDirtyIndicator
+							60 text ●
+							61 text Saved
+						62 text Characters: 17 · Lines: 5
+						63 text Ctrl / ⌘  +  S Save
+
+The focused UI element is 58 text entry area (settable) Description: Document source, ID: docSourceEditor, Value: # 回执中断
+生命：321
+
+只创建一次。

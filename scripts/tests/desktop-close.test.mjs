@@ -8,7 +8,7 @@ import { randomUUID } from 'node:crypto';
 import { dialogHarness } from './dialog-harness.mjs';
 import { createDesktopSession } from '../lib/desktop-session.mjs';
 
-const nativeSource = await fs.readFile(new URL('../../src-tauri/src/lib.rs', import.meta.url), 'utf8');
+const nativeSource = await fs.readFile(new URL('../../src-tauri/src/desktop_host.rs', import.meta.url), 'utf8');
 const closeScript = nativeSource.match(/const CLOSE_SCRIPT: &str = r#"([\s\S]*?)"#;/)[1];
 
 async function closeHarness() {

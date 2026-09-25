@@ -9,8 +9,9 @@ import { verifyReleaseVersions } from '../desktop/version.mjs';
 async function main() {
   const release = await verifyReleaseVersions();
   console.log(`版本一致性检查通过：${release.version}（构建 ${release.buildVersion}）`);
-  const files = (await Promise.all(['scripts', 'web'].map((root) => collectFiles(root, {
+  const files = (await Promise.all(['engine', 'scripts', 'web', 'mobile'].map((root) => collectFiles(root, {
     relativeBase: root,
+    excludedRoots: ['mobile/dist'],
     isAccepted: (name) => /\.(?:mjs|js)$/.test(name),
   })))).flat();
   let cursor = 0;

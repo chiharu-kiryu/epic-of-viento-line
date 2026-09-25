@@ -1,0 +1,23 @@
+Browser tab: 15, Title: "Viento Studio", URL: "http://127.0.0.1:44245/".
+1 AXWebArea Viento Studio, URL: 127.0.0.1:44245/
+	2 container
+		3 heading Viento Studio, Value: 1
+			4 text Viento Studio
+		5 text b.4.4
+		6 button Settings, ID: settingsBtn
+	7 container
+		8 heading Works on this device, Value: 2
+			9 text Works on this device
+		10 text Mobile preview: create works, edit text and fields, and automatically retain editing drafts. Move project archives between your phone and desktop. Media management and template settings are still being added.
+		11 button Import project archive, ID: importWorkspace
+		12 text Archives include saved documents, templates, metadata and media. Open the work and save any editing draft before exporting.
+		13 container createWorkspace
+			14 text Work name
+			15 text field (settable) Work name, ID: workspaceName
+			16 button New work
+		17 text Transfer cancelled.
+		18 container workspaces
+			19 button 手机迁移测试
+			20 button Export the project archive for “手机迁移测试”
+
+The focused UI element is 6 button Settings, ID: settingsBtn

@@ -6,12 +6,17 @@
     "node": ">=18.19"
   },
   "scripts": {
+    "tauri": "tauri",
     "test": "node --test scripts/tests/*.test.mjs",
     "check": "node scripts/check-project.mjs",
     "desktop:prepare": "node desktop/prepare.mjs",
     "desktop:dev": "tauri dev",
     "desktop:build": "node desktop/build.mjs",
     "desktop:test": "cargo test --manifest-path src-tauri/Cargo.toml",
+    "mobile:prepare": "node mobile/prepare.mjs",
+    "android:init": "tauri android init --ci --skip-targets-install",
+    "android:dev": "tauri android dev",
+    "android:build": "tauri android build --target aarch64 --apk",
     "clean": "node desktop/clean.mjs",
     "start": "node scripts/ops/site.mjs --mode edit",
     "browse": "node scripts/ops/site.mjs --mode browse",
@@ -26,5 +31,5 @@
     "@tauri-apps/cli": "2.11.4",
     "acorn": "8.18.0"
   },
-  "version": "0.4.4"
+  "version": "0.4.5"
 }

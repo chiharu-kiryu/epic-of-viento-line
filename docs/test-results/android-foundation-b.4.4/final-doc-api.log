@@ -1,0 +1,20 @@
+✔ capability discovery includes the live project configuration and preview routes (193.813705ms)
+✔ browser module graph is served as JavaScript; server-only modules stay private (194.771766ms)
+✔ same-version concurrent edits accept one writer, including source-path aliases (202.520649ms)
+✔ concurrent creation is exclusive and a rejected write does not block subsequent saves (152.722545ms)
+✔ preserving the modification time cannot hide an external edit from the save conflict check (147.3972ms)
+✔ atomic saves preserve permissions and advance modification times on coarse clocks (41.076449ms)
+✔ static resources do not consume the API rate limit or leak active request counts (148.669826ms)
+✔ mutable workspace files revalidate and If-None-Match takes precedence over dates (143.194873ms)
+✔ media responses identify their format and support bounded seeking without downloading the whole file (154.585914ms)
+✔ local media avoids persistent HTTP copies with internal storage (182.686018ms)
+✔ local media avoids persistent HTTP copies with external storage (215.81059ms)
+✔ an unreadable asset cannot terminate the editing service (134.740682ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1976.66394
